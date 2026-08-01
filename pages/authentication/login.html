@@ -1,1 +1,115 @@
-<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AUB Digital Academy</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Core Design System -->
+    <link href="../../css/base/variables.css" rel="stylesheet">
+    <link href="../../css/base/reset.css" rel="stylesheet">
+    <link href="../../css/base/typography.css" rel="stylesheet">
+    <link href="../../css/base/global.css" rel="stylesheet">
+    
+    <!-- Components -->
+    <link href="../../css/components/button.css" rel="stylesheet">
+    <link href="../../css/components/input.css" rel="stylesheet">
+    
+    <!-- Layout & Page CSS -->
+    <link href="../../css/layouts/authentication.css" rel="stylesheet">
+    <link href="../../css/pages/login.css" rel="stylesheet">
+</head>
+<body>
+
+    <main class="auth-layout">
+        
+        <!-- Left Panel: Branding -->
+        <section class="auth-panel-brand">
+            <div class="auth-decor"></div>
+            <div class="auth-brand-content">
+                <!-- Replace with actual logo later -->
+                <div class="mb-5 d-flex align-items-center gap-2">
+                    <div class="bg-surface rounded p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+                    </div>
+                    <span class="fs-4 fw-bold">AUB Digital</span>
+                </div>
+            </div>
+            
+            <div class="auth-brand-content mt-auto">
+                <h1 class="display-5 fw-bold">Welcome to AUB Digital Academy</h1>
+                <p class="mt-3">A modern digital learning platform designed for students, teachers, and administrators to excel.</p>
+            </div>
+        </section>
+
+        <!-- Right Panel: Form -->
+        <section class="auth-panel-form">
+            <div class="auth-form-wrapper fade-up">
+                
+                <div class="auth-form-header">
+                    <h2>Sign In</h2>
+                    <p>Enter your credentials to access your account.</p>
+                </div>
+
+                <!-- Replace with actual Google icon later -->
+                <button class="google-btn mb-4" type="button">
+                    <i class="bi bi-google text-danger"></i>
+                    Continue with Google
+                </button>
+
+                <div class="auth-divider">or sign in with email</div>
+
+                <form action="login-success.html" method="GET">
+                    
+                    <div class="mb-3">
+                        <label for="loginId" class="form-label">University ID or Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-surface border-end-0 text-muted">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="loginId" placeholder="e.g. 10293847" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label for="password" class="form-label mb-0">Password</label>
+                            <a href="forgot-password.html" class="text-sm fw-medium text-accent">Forgot password?</a>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text bg-surface border-end-0 text-muted">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0 border-end-0 px-0" id="password" placeholder="Enter your password" required>
+                            <button class="btn border border-start-0 text-muted" type="button" id="togglePassword">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label text-sm text-secondary" for="rememberMe">
+                            Remember me for 30 days
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-4">
+                        Sign In
+                    </button>
+                    
+                </form>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script src="../../js/pages/login.js"></script>
+</body>
+</html>

@@ -1,1 +1,96 @@
-/* authentication.css */
+/**
+ * authentication.css
+ * Layout structure for all authentication pages
+ */
+
+.auth-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--aub-background);
+}
+
+/* Left Panel - Branding (45%) */
+.auth-panel-brand {
+    flex: 0 0 45%;
+    max-width: 45%;
+    background-color: var(--aub-primary);
+    position: relative;
+    display: none; /* Hidden on mobile */
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-6) var(--space-5);
+    color: var(--aub-surface);
+    overflow: hidden;
+}
+
+@media (min-width: 992px) {
+    .auth-panel-brand {
+        display: flex;
+    }
+}
+
+.auth-brand-content {
+    position: relative;
+    z-index: 2;
+}
+
+.auth-brand-content h1 {
+    color: var(--aub-surface);
+    margin-bottom: var(--space-2);
+}
+
+.auth-brand-content p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-lg);
+    max-width: 80%;
+}
+
+/* Decorative elements for Left Panel */
+.auth-decor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: radial-gradient(circle at 20% 50%, var(--aub-accent) 0%, transparent 50%);
+}
+
+/* Right Panel - Form (55%) */
+.auth-panel-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    background-color: var(--aub-surface);
+}
+
+.auth-form-wrapper {
+    width: 100%;
+    max-width: 440px;
+    padding: var(--space-4);
+    background: var(--aub-surface);
+}
+
+.auth-form-header {
+    margin-bottom: var(--space-4);
+}
+
+.auth-form-header h2 {
+    font-size: var(--text-3xl);
+    letter-spacing: -0.02em;
+    color: var(--aub-primary);
+    margin-bottom: var(--space-1);
+}
+
+.auth-form-header p {
+    color: var(--aub-text-secondary);
+}
+
+.auth-logo {
+    height: 48px;
+    margin-bottom: var(--space-4);
+}

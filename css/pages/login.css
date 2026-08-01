@@ -1,1 +1,84 @@
-/* login.css */
+/**
+ * login.css
+ * Specific styles for the login flow
+ */
+
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--aub-surface);
+    border: 1px solid var(--aub-border);
+    border-radius: var(--radius-md);
+    color: var(--aub-text-primary);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.google-btn:hover {
+    background-color: var(--aub-background);
+    border-color: var(--aub-text-muted);
+}
+
+.google-btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: var(--space-4) 0;
+    color: var(--aub-text-muted);
+    font-size: var(--text-sm);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--aub-border);
+}
+
+.auth-divider::before {
+    margin-right: .5em;
+}
+
+.auth-divider::after {
+    margin-left: .5em;
+}
+
+/* Micro animations */
+.fade-up {
+    animation: fadeUp var(--transition-base) forwards;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.success-pulse {
+    animation: successPulse 2s infinite;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
