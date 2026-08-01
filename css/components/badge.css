@@ -1,1 +1,30 @@
-/* badge.css */
+/**
+ * badge.css
+ * Status indicators
+ */
+
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--aub-surface);
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: var(--radius-sm);
+}
+
+.badge-primary { background-color: var(--aub-primary); }
+.badge-secondary { background-color: var(--aub-secondary); }
+.badge-success { background-color: var(--aub-success); }
+.badge-danger { background-color: var(--aub-danger); }
+.badge-warning { background-color: var(--aub-warning); color: var(--aub-text-primary); }
+.badge-info { background-color: var(--aub-info); }
+
+/* Soft Badges */
+.badge-soft-primary { background-color: rgba(11, 31, 77, 0.1); color: var(--aub-primary); }
+.badge-soft-success { background-color: rgba(34, 197, 94, 0.1); color: var(--aub-success); }
+.badge-soft-danger { background-color: rgba(239, 68, 68, 0.1); color: var(--aub-danger); }
+.badge-soft-warning { background-color: rgba(245, 158, 11, 0.1); color: #B45309; }

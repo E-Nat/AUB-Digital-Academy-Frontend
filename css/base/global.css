@@ -1,1 +1,46 @@
-/* global.css */
+/**
+ * global.css
+ * Global utility classes and layout foundations
+ */
+
+body {
+    background-color: var(--aub-background);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Custom Text Colors */
+.text-primary { color: var(--aub-primary) !important; }
+.text-secondary { color: var(--aub-secondary) !important; }
+.text-accent { color: var(--aub-accent) !important; }
+
+/* Custom Backgrounds */
+.bg-primary { background-color: var(--aub-primary) !important; }
+.bg-secondary { background-color: var(--aub-secondary) !important; }
+.bg-accent { background-color: var(--aub-accent) !important; }
+.bg-surface { background-color: var(--aub-surface) !important; }
+
+/* Focus Utilities */
+.focus-ring-primary:focus {
+    box-shadow: 0 0 0 0.25rem rgba(11, 31, 77, 0.25) !important;
+}
+
+/* Layout Utilities */
+.container-max {
+    max-width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn var(--transition-base) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,1 +1,32 @@
-/* toast.css */
+/**
+ * toast.css
+ */
+
+.toast-container {
+    position: fixed;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: var(--z-toast);
+}
+
+.toast {
+    background-color: var(--aub-surface);
+    border: 1px solid var(--aub-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-2);
+}
+
+.toast-header {
+    background-color: var(--aub-surface);
+    border-bottom: 1px solid var(--aub-border);
+    border-top-left-radius: calc(var(--radius-md) - 1px);
+    border-top-right-radius: calc(var(--radius-md) - 1px);
+    color: var(--aub-text-primary);
+    font-weight: 600;
+}
+
+.toast-body {
+    padding: var(--space-2);
+    color: var(--aub-text-secondary);
+}

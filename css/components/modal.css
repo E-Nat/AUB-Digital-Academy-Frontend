@@ -1,1 +1,35 @@
-/* modal.css */
+/**
+ * modal.css
+ */
+
+.modal-content {
+    background-color: var(--aub-surface);
+    border: 1px solid var(--aub-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--aub-border);
+    padding: var(--space-3);
+    border-top-left-radius: calc(var(--radius-xl) - 1px);
+    border-top-right-radius: calc(var(--radius-xl) - 1px);
+}
+
+.modal-title {
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    color: var(--aub-text-primary);
+}
+
+.modal-body {
+    padding: var(--space-3);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--aub-border);
+    padding: var(--space-3);
+    background-color: var(--aub-background);
+    border-bottom-left-radius: calc(var(--radius-xl) - 1px);
+    border-bottom-right-radius: calc(var(--radius-xl) - 1px);
+}

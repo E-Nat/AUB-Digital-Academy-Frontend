@@ -1,1 +1,60 @@
-/* typography.css */
+/**
+ * typography.css
+ * Typography System for AUB Digital Academy
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+body {
+    font-family: var(--font-primary);
+    color: var(--aub-text-primary);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings use Poppins for a more premium/academic feel, or Inter if preferred. 
+   Using Poppins for headings based on SaaS/Edu standard. */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--font-secondary);
+    color: var(--aub-text-primary);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: var(--space-2);
+}
+
+h1, .h1 { font-size: var(--text-4xl); font-weight: 700; letter-spacing: -0.02em; }
+h2, .h2 { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.01em; }
+h3, .h3 { font-size: var(--text-2xl); }
+h4, .h4 { font-size: var(--text-xl); }
+h5, .h5 { font-size: var(--text-lg); }
+h6, .h6 { font-size: var(--text-base); }
+
+/* Body Text */
+p {
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+    color: var(--aub-text-secondary);
+}
+
+.text-sm { font-size: var(--text-sm); }
+.text-xs { font-size: var(--text-xs); }
+.text-muted { color: var(--aub-text-muted) !important; }
+
+/* Links */
+a {
+    color: var(--aub-accent);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--aub-primary);
+}
+
+/* Bold/Medium */
+.fw-medium { font-weight: 500; }
+.fw-semibold { font-weight: 600; }
+.fw-bold { font-weight: 700; }
