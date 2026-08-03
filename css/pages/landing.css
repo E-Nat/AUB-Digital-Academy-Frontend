@@ -5,19 +5,51 @@
 
 /* Hero Section */
 .hero-section {
-    padding: 100px 0 60px 0;
-    background-color: var(--aub-surface);
     position: relative;
+    padding-top: calc(76px + var(--space-6));
+    padding-bottom: var(--space-6);
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
     overflow: hidden;
+    background-color: #050914; /* Deep space navy */
 }
 
-.hero-content h1 {
-    font-size: 3.5rem;
+/* 3D Canvas Container */
+.hero-3d-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Aurora Gradient Background */
+.hero-aurora-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15), transparent 50%);
+    filter: blur(60px);
+    z-index: 0;
+    animation: breathe 10s ease-in-out infinite alternate;
+}
+
+@keyframes breathe {
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+.hero-content {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
     line-height: 1.1;
-    font-weight: 700;
+    margin-bottom: var(--space-3);
     letter-spacing: -0.02em;
-    color: var(--aub-primary);
-    margin-bottom: 1.5rem;
 }
 
 .hero-content .text-accent-highlight {

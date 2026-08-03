@@ -4,35 +4,40 @@
  */
 
 /* =========================================
-   Navbar (Header) - Desktop First
+   Navbar (Header) - Eterna Cloud Floating Pill
    ========================================= */
 .navbar {
-    background-color: #ffffff;
-    height: 76px;
-    border-bottom: 1px solid transparent;
+    background-color: transparent;
+    padding-top: 24px;
+    padding-bottom: 24px;
     z-index: var(--z-sticky);
-    position: sticky;
+    position: fixed;
+    width: 100%;
     top: 0;
-    transition: background-color 250ms ease-in-out, box-shadow 250ms ease-in-out, border-color 250ms ease-in-out;
+    transition: all 300ms ease-in-out;
 }
 
 .navbar-scrolled {
-    background-color: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    border-color: #E5E7EB;
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
 
-/* Container */
+/* Container becomes the pill */
 .navbar .container-max {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 100px; /* Pill shape */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: 76px;
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 40px;
+    transition: all 300ms ease-in-out;
 }
 
 /* Logo (Left) */
@@ -154,8 +159,12 @@
 
 /* Mobile (< 768px) */
 @media (max-width: 767px) {
+    .navbar {
+        padding-top: 16px;
+    }
     .navbar .container-max {
         padding: 0 20px;
+        border-radius: 20px;
     }
     .navbar-nav {
         display: none !important;
@@ -170,15 +179,16 @@
     /* Full-screen slide-out menu */
     .mobile-menu {
         position: fixed;
-        top: 76px;
+        top: 0;
         left: 0;
         width: 100%;
-        height: calc(100vh - 76px);
-        background-color: #ffffff;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
         z-index: calc(var(--z-sticky) - 1);
         display: flex;
         flex-direction: column;
-        padding: 24px;
+        padding: 120px 24px 24px 24px;
         transform: translateX(100%);
         transition: transform 300ms ease-in-out;
         box-shadow: inset 0 1px 0 #E5E7EB;
