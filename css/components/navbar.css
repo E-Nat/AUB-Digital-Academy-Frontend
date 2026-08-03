@@ -212,6 +212,11 @@
         transform: translateX(0);
     }
     
+    .mobile-menu .navbar-nav {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
     .mobile-menu .nav-item {
         height: auto;
         padding: 16px 0;
