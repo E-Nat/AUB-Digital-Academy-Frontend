@@ -24,11 +24,11 @@
 
 /* Container becomes the pill */
 .navbar .container-max {
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(5, 9, 20, 0.6);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 100px; /* Pill shape */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -75,9 +75,9 @@
 
 .nav-link {
     font-family: var(--font-primary);
-    font-weight: 600;
+    font-weight: 500;
     font-size: 0.95rem;
-    color: #4B5563; /* Gray text for inactive links based on screenshot */
+    color: rgba(255, 255, 255, 0.8); /* Light text for inactive links */
     text-decoration: none;
     transition: color 250ms ease-in-out;
     padding: 0;
@@ -87,7 +87,7 @@
 
 /* Hover & Active States */
 .nav-link:hover, .nav-link.active {
-    color: var(--aub-primary);
+    color: #ffffff;
 }
 
 .nav-indicator {

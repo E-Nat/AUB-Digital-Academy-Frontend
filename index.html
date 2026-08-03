@@ -39,10 +39,10 @@
             
             <!-- Logo (Left) -->
             <a class="navbar-brand" href="#">
-                <span class="fw-bold" style="font-size: 1.75rem; color: var(--aub-primary); letter-spacing: -0.03em; line-height: 1;">AUB</span>
-                <div style="width: 2px; height: 32px; background-color: var(--aub-secondary); margin: 0 4px;"></div>
+                <span class="fw-bold text-white" style="font-size: 1.75rem; letter-spacing: -0.03em; line-height: 1;">AUB</span>
+                <div style="width: 2px; height: 32px; background-color: var(--aub-secondary); margin: 0 8px;"></div>
                 <div class="d-flex flex-column justify-content-center">
-                    <span class="fw-bold lh-1" style="font-size: 1.1rem; color: var(--aub-primary); letter-spacing: 0.05em;">DIGITAL</span>
+                    <span class="fw-bold lh-1 text-white" style="font-size: 1.1rem; letter-spacing: 0.05em;">DIGITAL</span>
                     <span class="fw-medium lh-1 mt-1" style="font-size: 0.7rem; color: var(--aub-secondary); letter-spacing: 0.2em;">ACADEMY</span>
                 </div>
             </a>
@@ -73,7 +73,7 @@
             
             <!-- Actions (Right) -->
             <div class="navbar-actions">
-                <a href="pages/authentication/login.html" class="btn btn-primary d-flex align-items-center gap-2 px-4">
+                <a href="pages/authentication/login.html" class="btn btn-outline-light text-white d-flex align-items-center gap-2 px-4" style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);">
                     <i class="bi bi-person"></i>
                     Sign In
                 </a>
@@ -126,66 +126,122 @@
         <div class="hero-aurora-bg"></div>
 
         <div class="container-max position-relative z-1">
-            <div class="row align-items-center justify-content-center text-center">
-                <div class="col-lg-8 py-5">
+            <div class="row align-items-center">
+                
+                <!-- Left Side Content -->
+                <div class="col-lg-6 py-5 pe-lg-5">
                     <div class="reveal-up">
-                        <span class="badge badge-soft-secondary rounded-pill mb-4 px-3 py-2 text-sm d-inline-flex align-items-center gap-2" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                        <span class="badge badge-soft-secondary rounded-pill mb-4 px-4 py-2 text-sm d-inline-flex align-items-center gap-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
                             <i class="bi bi-star-fill text-secondary"></i> AUB DIGITAL EXCELLENCE
                         </span>
                     </div>
                     
                     <h1 class="hero-content text-white reveal-up delay-100 mb-4" style="text-shadow: 0 4px 20px rgba(0,0,0,0.5);">
                         Shape Your Future with <br>
-                        <span class="text-accent-highlight" style="color: #60a5fa !important;">Digital Excellence</span>
+                        <span class="text-accent-highlight" style="color: #60a5fa !important;">Digital</span> <span class="text-secondary">Excellence</span>
                     </h1>
                     
-                    <p class="hero-subtitle text-white opacity-75 reveal-up delay-200 mb-5 mx-auto" style="max-width: 600px;">
+                    <p class="hero-subtitle text-white opacity-75 reveal-up delay-200 mb-5" style="max-width: 500px;">
                         A world-class education platform designed for AUB students to master the skills of tomorrow with industry-leading curricula and expert mentorship.
                     </p>
                     
-                    <div class="reveal-up delay-300 d-flex justify-content-center gap-3">
-                        <a href="#programs" class="btn btn-primary btn-lg rounded-pill px-5 d-inline-flex align-items-center gap-2 shadow-lg">
+                    <div class="reveal-up delay-300 d-flex gap-3">
+                        <a href="#programs" class="btn btn-primary btn-lg rounded-pill px-5 d-inline-flex align-items-center gap-2 shadow-lg" style="background: #3b82f6; border: none;">
                             Explore Programs <i class="bi bi-arrow-right"></i>
                         </a>
-                        <a href="#courses" class="btn btn-outline-light btn-lg rounded-pill px-5 d-inline-flex align-items-center gap-2" style="border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
-                            View Courses
+                        <a href="#courses" class="btn btn-outline-light btn-lg rounded-pill px-5 d-inline-flex align-items-center gap-2" style="border-color: rgba(255,255,255,0.1); background: transparent;">
+                            Learn More
                         </a>
                     </div>
                 </div>
+
+                <!-- Right Side Image & Floating Cards -->
+                <div class="col-lg-6 position-relative mt-5 mt-lg-0">
+                    <div class="hero-image-glow-container reveal-up delay-400">
+                        <img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1200" alt="AUB Building" class="hero-building-img rounded-4 shadow-2xl w-100">
+                        
+                        <!-- Floating Card 1: 98% -->
+                        <div class="floating-glass-card delay-500 card-left">
+                            <div class="icon-glow-bg blue">
+                                <i class="bi bi-mortarboard-fill text-white fs-4"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h4 class="mb-0 text-white fw-bold">98%</h4>
+                                <small class="text-white opacity-75">Student<br>Satisfaction</small>
+                            </div>
+                        </div>
+
+                        <!-- Floating Card 2: 5,000+ -->
+                        <div class="floating-glass-card delay-600 card-right">
+                            <div class="icon-glow-bg gold">
+                                <i class="bi bi-people-fill text-white fs-4"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h4 class="mb-0 text-white fw-bold">5,000+</h4>
+                                <small class="text-white opacity-75">Active<br>Students</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
 
-    <!-- Metric Bar -->
-    <div class="metric-bar reveal-up">
+    <!-- Metrics Bar (Dark Glass Container) -->
+    <div class="metrics-bar-wrapper position-relative z-1 mb-5" style="margin-top: -60px;">
         <div class="container-max">
-            <div class="row">
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <div class="metric-item">
-                        <i class="bi bi-globe2 text-primary fs-3"></i>
-                        <div>
-                            <h6 class="mb-0 fw-bold">Global Accreditation</h6>
-                            <small class="text-muted">Industry Standards</small>
+            <div class="metrics-glass-container">
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-4 text-center">
+                    
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow blue-glow mx-auto mb-3"><i class="bi bi-globe2"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Global<br>Accreditation</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Recognized academic<br>standards worldwide.</small>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <div class="metric-item">
-                        <i class="bi bi-people text-primary fs-3"></i>
-                        <div>
-                            <h6 class="mb-0 fw-bold">Expert Mentors</h6>
-                            <small class="text-muted">Leading Practitioners</small>
+
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow gold-glow mx-auto mb-3"><i class="bi bi-person-badge"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Expert<br>Faculty</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Learn from experienced<br>lecturers.</small>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="metric-item">
-                        <i class="bi bi-rocket-takeoff text-primary fs-3"></i>
-                        <div>
-                            <h6 class="mb-0 fw-bold">Fast-Track Careers</h6>
-                            <small class="text-muted">Accelerated Growth</small>
+
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow blue-glow mx-auto mb-3"><i class="bi bi-laptop"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Modern<br>Learning</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Technology-enhanced<br>education.</small>
                         </div>
                     </div>
+
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow gold-glow mx-auto mb-3"><i class="bi bi-headset"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Student<br>Support</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Dedicated guidance<br>and support.</small>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow blue-glow mx-auto mb-3"><i class="bi bi-graph-up-arrow"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Career<br>Development</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Build in-demand skills<br>for success.</small>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="metric-glass-item">
+                            <div class="metric-icon-glow gold-glow mx-auto mb-3"><i class="bi bi-trophy"></i></div>
+                            <h6 class="text-white fw-bold mb-1">Academic<br>Excellence</h6>
+                            <small class="text-white opacity-50 d-none d-md-block" style="font-size: 0.7rem;">Committed to delivering<br>high-quality education.</small>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
