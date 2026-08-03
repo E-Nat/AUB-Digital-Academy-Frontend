@@ -7,11 +7,11 @@
     /* =========================================
        Brand Colors
        ========================================= */
-    --aub-primary: #0B1F4D;
-    --aub-primary-hover: #1E3A8A;
+    --aub-primary: #0F2B5B; /* Navy */
+    --aub-primary-hover: #153A7A;
     
-    --aub-secondary: #D4A017;
-    --aub-secondary-hover: #B8860B;
+    --aub-secondary: #F4B400; /* Gold */
+    --aub-secondary-hover: #DDA300;
     
     --aub-accent: #3B82F6;
     
