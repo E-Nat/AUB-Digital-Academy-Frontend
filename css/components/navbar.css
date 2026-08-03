@@ -52,6 +52,13 @@
     flex-shrink: 0;
 }
 
+.navbar-brand img {
+    height: 48px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
 /* Navigation (Center) */
 .navbar-nav {
     display: flex !important;
