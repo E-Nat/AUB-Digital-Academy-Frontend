@@ -55,8 +55,9 @@
 .navbar-brand img {
     height: 60px;
     width: auto;
-    max-width: 100%;
     object-fit: contain;
+    transform: scale(1.8);
+    transform-origin: left center;
 }
 
 /* Navigation (Center) */
