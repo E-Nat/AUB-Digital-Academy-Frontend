@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUB Digital Academy - Premium 3D Background</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050914; /* Deep space navy background */
+            font-family: sans-serif;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* Subtle moving aurora gradient behind the canvas to give depth */
+        .aurora-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15), transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.15), transparent 50%);
+            filter: blur(60px);
+            z-index: 0;
+            animation: breathe 10s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathe {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+    </style>
+    <!-- Import map for Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+
+    <div class="aurora-bg"></div>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        // 1. Setup Scene, Camera, Renderer
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        // Fog for depth fading
+        scene.fog = new THREE.FogExp2(0x050914, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 15;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        container.appendChild(renderer.domElement);
+
+        // 2. Setup Post-Processing (Bloom for glowing)
+        const renderScene = new RenderPass(scene, camera);
+        
+        // Resolution, strength, radius, threshold
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.2;
+        bloomPass.strength = 1.2; // Glowing effect
+        bloomPass.radius = 0.5;
+
+        const composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // 3. Materials
+        // Realistic Glass Material for the central orb and cubes
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0.1,
+            roughness: 0.05,
+            transmission: 1.0, // glass effect
+            thickness: 2.0,
+            ior: 1.5,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.1,
+            side: THREE.DoubleSide
+        });
+
+        // 4. Create Geometries
+        // Central Orb
+        const sphereGeo = new THREE.SphereGeometry(3, 64, 64);
+        const centralOrb = new THREE.Mesh(sphereGeo, glassMaterial);
+        scene.add(centralOrb);
+
+        // Floating Cubes & Icosahedrons
+        const shapes = [];
+        const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+        const icoGeo = new THREE.IcosahedronGeometry(0.8, 0);
+        
+        const shapeGroup = new THREE.Group();
+        scene.add(shapeGroup);
+
+        for(let i = 0; i < 20; i++) {
+            const isBox = Math.random() > 0.5;
+            const mesh = new THREE.Mesh(isBox ? boxGeo : icoGeo, glassMaterial);
+            
+            // Random positions in a spherical radius around the center
+            const radius = 5 + Math.random() * 10;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(Math.random() * 2 - 1);
+            
+            mesh.position.x = radius * Math.sin(phi) * Math.cos(theta);
+            mesh.position.y = radius * Math.sin(phi) * Math.sin(theta);
+            mesh.position.z = radius * Math.cos(phi);
+            
+            // Random rotation
+            mesh.rotation.x = Math.random() * Math.PI;
+            mesh.rotation.y = Math.random() * Math.PI;
+            
+            // Random scale
+            const scale = 0.5 + Math.random() * 1.5;
+            mesh.scale.set(scale, scale, scale);
+            
+            // Store original position for floating animation
+            mesh.userData = {
+                originPosition: mesh.position.clone(),
+                speed: 0.001 + Math.random() * 0.002,
+                offset: Math.random() * Math.PI * 2,
+                rotationSpeed: {
+                    x: (Math.random() - 0.5) * 0.01,
+                    y: (Math.random() - 0.5) * 0.01,
+                    z: (Math.random() - 0.5) * 0.01
+                }
+            };
+            
+            shapeGroup.add(mesh);
+            shapes.push(mesh);
+        }
+
+        // 5. Connection Lines
+        // Connect nearby shapes with thin glowing lines
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x3b82f6, 
+            transparent: true, 
+            opacity: 0.3 
+        });
+        
+        // We will update lines dynamically in the render loop
+
+        // 6. Particles (Sparkling dust)
+        const particlesGeo = new THREE.BufferGeometry();
+        const particlesCount = 800;
+        const posArray = new Float32Array(particlesCount * 3);
+        
+        for(let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 40;
+        }
+        
+        particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const particlesMat = new THREE.PointsMaterial({
+            size: 0.05,
+            color: 0x60a5fa,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const particleSystem = new THREE.Points(particlesGeo, particlesMat);
+        scene.add(particleSystem);
+
+        // 7. Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+
+        // Cyan light
+        const light1 = new THREE.PointLight(0x06b6d4, 100, 50);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+
+        // Purple/Blue light
+        const light2 = new THREE.PointLight(0x8b5cf6, 100, 50);
+        light2.position.set(-5, -5, 5);
+        scene.add(light2);
+
+        // Subtly illuminate the center
+        const centerLight = new THREE.PointLight(0x3b82f6, 50, 15);
+        scene.add(centerLight);
+
+        // 8. Interactivity (Mouse Parallax)
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX) * 0.005;
+            mouseY = (event.clientY - windowHalfY) * 0.005;
+        });
+
+        // 9. Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            // Parallax Camera easing
+            targetX = mouseX * 2;
+            targetY = mouseY * 2;
+            camera.position.x += (targetX - camera.position.x) * 0.02;
+            camera.position.y += (-targetY - camera.position.y) * 0.02;
+            camera.lookAt(scene.position);
+
+            // Rotate central orb
+            centralOrb.rotation.y += 0.002;
+            centralOrb.rotation.x += 0.001;
+
+            // Breathing Bloom
+            bloomPass.strength = 1.0 + Math.sin(elapsedTime * 1.5) * 0.3;
+
+            // Rotate group of shapes slowly
+            shapeGroup.rotation.y = elapsedTime * 0.05;
+            shapeGroup.rotation.z = Math.sin(elapsedTime * 0.05) * 0.1;
+
+            // Animate individual shapes
+            shapes.forEach(shape => {
+                const ud = shape.userData;
+                // Floating offset
+                shape.position.y = ud.originPosition.y + Math.sin(elapsedTime * 2 + ud.offset) * 0.5;
+                // Rotation
+                shape.rotation.x += ud.rotationSpeed.x;
+                shape.rotation.y += ud.rotationSpeed.y;
+                shape.rotation.z += ud.rotationSpeed.z;
+            });
+
+            // Animate Lights
+            light1.position.x = Math.sin(elapsedTime * 0.5) * 10;
+            light1.position.z = Math.cos(elapsedTime * 0.5) * 10;
+            
+            light2.position.x = Math.sin(elapsedTime * 0.3 + Math.PI) * 10;
+            light2.position.y = Math.cos(elapsedTime * 0.3 + Math.PI) * 10;
+
+            // Animate Particles
+            particleSystem.rotation.y = elapsedTime * 0.02;
+            particleSystem.rotation.x = Math.sin(elapsedTime * 0.01) * 0.1;
+
+            // Render via Composer
+            composer.render();
+        }
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start Animation
+        animate();
+    </script>
+</body>
+</html>
