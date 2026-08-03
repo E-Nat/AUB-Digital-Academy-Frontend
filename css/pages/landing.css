@@ -287,8 +287,8 @@
 
 .programs-dark-header {
     background-color: #050914; /* Match hero dark space */
-    padding-top: 100px;
-    padding-bottom: 80px; /* Space for wave */
+    padding-top: 40px;
+    padding-bottom: 160px; /* Increased space for wave so pills don't overlap */
     position: relative;
     color: white;
 }
