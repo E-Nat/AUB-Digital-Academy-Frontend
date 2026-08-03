@@ -24,6 +24,10 @@
     box-shadow: 0 0 0 4px rgba(11, 31, 77, 0.15); /* Primary color shadow */
 }
 
+.btn:active {
+    transform: scale(0.98);
+}
+
 .btn:disabled, .btn.disabled {
     opacity: 0.65;
     pointer-events: none;
@@ -41,11 +45,8 @@
     background-color: var(--aub-primary-hover);
     border-color: var(--aub-primary-hover);
     color: var(--aub-surface);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-primary:active {
-    transform: translateY(1px);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 /* Secondary Button */
@@ -59,7 +60,8 @@
     background-color: var(--aub-secondary-hover);
     border-color: var(--aub-secondary-hover);
     color: var(--aub-surface);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 /* Outline Button (Tertiary/Subtle) */
@@ -72,6 +74,7 @@
 .btn-outline:hover {
     background-color: var(--aub-background);
     border-color: var(--aub-text-muted);
+    transform: translateY(-2px);
 }
 
 /* Danger Button */

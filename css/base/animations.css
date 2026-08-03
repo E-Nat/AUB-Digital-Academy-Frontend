@@ -1,0 +1,72 @@
+/**
+ * animations.css
+ * Core animation utilities for scroll reveal and micro-interactions
+ */
+
+/* =========================================
+   Scroll Reveal Classes
+   ========================================= */
+.reveal-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 400ms ease-in-out, transform 400ms ease-in-out;
+}
+
+.reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+
+/* Image Fade In */
+.img-reveal {
+    opacity: 0;
+    transform: scale(0.98);
+    transition: opacity 600ms ease-in-out, transform 600ms ease-in-out;
+}
+
+.img-reveal.is-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* =========================================
+   Skeleton Loaders
+   ========================================= */
+.skeleton {
+    background: #e2e8f0;
+    background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+    border-radius: 5px;
+    background-size: 200% 100%;
+    animation: 1.5s shine linear infinite;
+}
+
+@keyframes shine {
+    to {
+        background-position-x: -200%;
+    }
+}
+
+/* =========================================
+   Accessibility
+   ========================================= */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .reveal-up, .img-reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}

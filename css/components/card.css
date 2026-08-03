@@ -67,11 +67,66 @@
 }
 
 /* Interactive Card Variant */
+.card-hoverable {
+    cursor: pointer;
+    transition: transform 300ms ease-in-out, box-shadow 300ms ease-in-out, border-color 300ms ease-in-out;
+}
+
 .card-hoverable:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
 }
 
-.card-hoverable {
-    cursor: pointer;
+/* Specific Card: Programs */
+.card-program {
+    text-align: center;
+    border: 1px solid var(--aub-border);
+}
+.card-program .icon-wrapper {
+    transition: transform 300ms ease-in-out;
+}
+.card-program:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--aub-primary);
+}
+.card-program:hover .icon-wrapper {
+    transform: scale(1.05);
+}
+
+/* Specific Card: Courses */
+.card-course {
+    overflow: hidden;
+}
+.card-course .course-img {
+    transition: transform 400ms ease-in-out;
+}
+.card-course .bi-arrow-right {
+    transition: transform 300ms ease-in-out;
+}
+.card-course:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+.card-course:hover .course-img {
+    transform: scale(1.03);
+}
+.card-course:hover .bi-arrow-right {
+    transform: translateX(4px);
+}
+
+/* Specific Card: Features */
+.card-feature {
+    background-color: var(--aub-surface);
+    transition: background-color 300ms ease-in-out, transform 300ms ease-in-out, box-shadow 300ms ease-in-out;
+}
+.card-feature .icon-wrapper {
+    transition: transform 300ms ease-in-out;
+}
+.card-feature:hover {
+    background-color: #f8fafc; /* light background transition */
+    box-shadow: var(--shadow-md);
+}
+.card-feature:hover .icon-wrapper {
+    transform: rotate(4deg);
 }

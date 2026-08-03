@@ -5,18 +5,31 @@
 
 .navbar {
     background-color: var(--aub-surface);
+    padding: var(--space-3) var(--space-3);
+    border-bottom: 1px solid transparent;
+    z-index: var(--z-sticky);
+    position: sticky;
+    top: 0;
+    transition: background-color 300ms ease-in-out, box-shadow 300ms ease-in-out, padding 300ms ease-in-out, border-color 300ms ease-in-out;
+}
+
+.navbar-scrolled {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     box-shadow: var(--shadow-sm);
     padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--aub-border);
-    z-index: var(--z-sticky);
+    border-color: var(--aub-border);
 }
 
 .navbar-brand {
     font-family: var(--font-secondary);
     font-weight: 700;
     color: var(--aub-primary);
-    font-size: var(--text-xl);
+    font-size: var(--text-2xl);
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .sidebar {

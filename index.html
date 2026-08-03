@@ -1,8 +1,512 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>AUB Digital Academy</title>
-    <script>window.location.href='pages/authentication/login.html';</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUB Digital Academy - Shape Your Future</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Core Design System -->
+    <link href="css/base/variables.css" rel="stylesheet">
+    <link href="css/base/reset.css" rel="stylesheet">
+    <link href="css/base/typography.css" rel="stylesheet">
+    <link href="css/base/global.css" rel="stylesheet">
+    <link href="css/base/animations.css" rel="stylesheet">
+    
+    <!-- Components -->
+    <link href="css/components/button.css" rel="stylesheet">
+    <link href="css/components/card.css" rel="stylesheet">
+    <link href="css/components/badge.css" rel="stylesheet">
+    <link href="css/components/navbar.css" rel="stylesheet">
+    
+    <!-- Layout & Page CSS -->
+    <link href="css/pages/landing.css" rel="stylesheet">
 </head>
-<body></body>
+<body class="bg-background">
+
+    <!-- Sticky Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-max">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-mortarboard-fill text-primary"></i>
+                <div>
+                    <span class="d-block lh-1 text-primary">AUB</span>
+                    <span class="d-block text-secondary" style="font-size: 0.6em; letter-spacing: 0.05em;">DIGITAL ACADEMY</span>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto gap-4 fw-medium text-primary">
+                    <li class="nav-item">
+                        <a class="nav-link text-primary position-relative" href="#">
+                            Home
+                            <span class="position-absolute bottom-0 start-50 translate-middle-x bg-secondary" style="height: 2px; width: 20px; border-radius: 2px;"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="#programs">Programs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="#courses">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary" href="#about">About Us</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center">
+                    <a href="pages/authentication/login.html" class="btn btn-primary d-flex align-items-center gap-2 px-4 rounded-pill">
+                        <i class="bi bi-person"></i>
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container-max">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
+                    <div class="reveal-up">
+                        <span class="badge badge-soft-primary rounded-pill mb-4 px-3 py-2 text-sm d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-star"></i> AUB DIGITAL EXCELLENCE
+                        </span>
+                    </div>
+                    
+                    <h1 class="hero-content reveal-up delay-100">
+                        Shape Your Future with <br>
+                        <span class="text-accent-highlight">Digital Excellence</span>
+                    </h1>
+                    
+                    <p class="hero-subtitle reveal-up delay-200">
+                        A world-class education platform designed for AUB students to master the skills of tomorrow with industry-leading curricula and expert mentorship.
+                    </p>
+                    
+                    <div class="reveal-up delay-300">
+                        <a href="#programs" class="btn btn-primary btn-lg rounded-pill px-5 d-inline-flex align-items-center gap-2">
+                            Explore Programs <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="hero-image-wrapper reveal-up delay-400">
+                        <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1200" alt="AUB University Campus" class="img-reveal is-visible skeleton">
+                        
+                        <!-- Floating Badge -->
+                        <div class="floating-badge reveal-up delay-500" style="bottom: 40px; left: -30px;">
+                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-graph-up-arrow fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-primary">98% Success Rate</h6>
+                                <small class="text-muted">Industry Placements</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metric Bar -->
+    <div class="metric-bar reveal-up">
+        <div class="container-max">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="metric-item">
+                        <i class="bi bi-globe2 text-primary fs-3"></i>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Global Accreditation</h6>
+                            <small class="text-muted">Industry Standards</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="metric-item">
+                        <i class="bi bi-people text-primary fs-3"></i>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Expert Mentors</h6>
+                            <small class="text-muted">Leading Practitioners</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="metric-item">
+                        <i class="bi bi-rocket-takeoff text-primary fs-3"></i>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Fast-Track Careers</h6>
+                            <small class="text-muted">Accelerated Growth</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Programs Section -->
+    <section id="programs" class="section-padding">
+        <div class="container-max">
+            <div class="section-header reveal-up">
+                <span class="section-label">Our Programs</span>
+                <h2 class="section-title fw-bold">Undergraduate Programs</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">
+                    Choose from our specialized academic tracks designed to equip you with the technical expertise and leadership skills required in the modern digital economy.
+                </p>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <!-- Program Card 1 -->
+                <div class="col-md-6 col-lg-3 reveal-up delay-100">
+                    <div class="card card-body card-hoverable card-program h-100 py-5 px-4 bg-surface border-0 rounded-4 shadow-sm">
+                        <div class="icon-wrapper mx-auto mb-4 bg-primary bg-opacity-10 text-primary rounded p-3 d-inline-block">
+                            <i class="bi bi-code-slash fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Computer Engineering</h4>
+                        <p class="text-secondary fw-medium text-sm mb-4">Bachelor Degree</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <span class="text-muted text-sm"><i class="bi bi-clock me-1"></i> 4 Years</span>
+                            <i class="bi bi-arrow-right text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Program Card 2 -->
+                <div class="col-md-6 col-lg-3 reveal-up delay-200">
+                    <div class="card card-body card-hoverable card-program h-100 py-5 px-4 bg-surface border-0 rounded-4 shadow-sm">
+                        <div class="icon-wrapper mx-auto mb-4 bg-success bg-opacity-10 text-success rounded p-3 d-inline-block">
+                            <i class="bi bi-briefcase fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Banking & Finance</h4>
+                        <p class="text-secondary fw-medium text-sm mb-4">Bachelor Degree</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <span class="text-muted text-sm"><i class="bi bi-clock me-1"></i> 4 Years</span>
+                            <i class="bi bi-arrow-right text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program Card 3 -->
+                <div class="col-md-6 col-lg-3 reveal-up delay-300">
+                    <div class="card card-body card-hoverable card-program h-100 py-5 px-4 bg-surface border-0 rounded-4 shadow-sm">
+                        <div class="icon-wrapper mx-auto mb-4 bg-secondary bg-opacity-10 text-secondary rounded p-3 d-inline-block">
+                            <i class="bi bi-bar-chart fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Business Administration</h4>
+                        <p class="text-secondary fw-medium text-sm mb-4">Bachelor Degree</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <span class="text-muted text-sm"><i class="bi bi-clock me-1"></i> 4 Years</span>
+                            <i class="bi bi-arrow-right text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Program Card 4 -->
+                <div class="col-md-6 col-lg-3 reveal-up delay-400">
+                    <div class="card card-body card-hoverable card-program h-100 py-5 px-4 bg-surface border-0 rounded-4 shadow-sm">
+                        <div class="icon-wrapper mx-auto mb-4 bg-info bg-opacity-10 text-info rounded p-3 d-inline-block">
+                            <i class="bi bi-braces fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-2">Information Technology</h4>
+                        <p class="text-secondary fw-medium text-sm mb-4">Bachelor Degree</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                            <span class="text-muted text-sm"><i class="bi bi-clock me-1"></i> 4 Years</span>
+                            <i class="bi bi-arrow-right text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center reveal-up delay-500">
+                <a href="#" class="btn btn-outline rounded-pill px-4">View All Programs <i class="bi bi-arrow-right ms-2"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section-padding bg-surface">
+        <div class="container-max">
+            <div class="row g-4 align-items-center justify-content-center">
+                <!-- Feature 1 -->
+                <div class="col-lg-4 col-md-6 reveal-up delay-100">
+                    <div class="card card-body card-feature card-hoverable border-0 p-5 rounded-4 bg-background h-100">
+                        <div class="icon-wrapper bg-primary text-surface rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 56px; height: 56px;">
+                            <i class="bi bi-award fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-primary mb-3">Quality Education</h4>
+                        <p class="text-muted">Our curriculum is developed by industry experts and academic leaders to ensure every course meets the highest standards of global excellence.</p>
+                    </div>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="col-lg-4 col-md-6 reveal-up delay-200" style="transform: translateY(20px);">
+                    <div class="card card-body card-feature card-hoverable border-0 p-5 rounded-4 bg-background h-100">
+                        <div class="icon-wrapper bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 56px; height: 56px;">
+                            <i class="bi bi-people fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-primary mb-3">Diverse Programs</h4>
+                        <p class="text-muted">From Computer Science to Business Management, find the path that fits your passion and career goals.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="col-lg-4 col-md-6 reveal-up delay-300">
+                    <div class="card card-body card-feature card-hoverable border-0 p-5 rounded-4 bg-background h-100">
+                        <div class="icon-wrapper bg-info bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mb-4" style="width: 56px; height: 56px;">
+                            <i class="bi bi-graph-up fs-4"></i>
+                        </div>
+                        <h4 class="fw-bold text-primary mb-3">Build Your Future</h4>
+                        <p class="text-muted">Gain practical skills and recognized credentials that prepare you for real-world challenges.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="section-padding">
+        <div class="container-max">
+            <div class="d-flex justify-content-between align-items-end mb-5 reveal-up">
+                <div>
+                    <span class="section-label">Explore Courses</span>
+                    <h2 class="section-title fw-bold m-0">Explore Our Specialized Courses</h2>
+                    <p class="text-muted mt-2">Gain practical, job-ready skills through our hands-on short courses taught by industry leaders.</p>
+                </div>
+                <a href="#" class="text-primary fw-medium text-decoration-none d-none d-md-flex align-items-center hover-primary">
+                    Browse all courses <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <!-- Course 1 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-100">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="Web Development">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-warning mb-3">DEVELOPMENT</span>
+                            <h5 class="fw-bold text-primary mb-2">Web Development</h5>
+                            <p class="text-muted text-sm mb-4">Build modern websites and web applications.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 2 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-200">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="UI/UX Design">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-success mb-3">DESIGN</span>
+                            <h5 class="fw-bold text-primary mb-2">UI/UX Design</h5>
+                            <p class="text-muted text-sm mb-4">Design user-centered digital experiences and interfaces.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 3 (Dark Theme Highlight) -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-300">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-lg rounded-4 bg-primary text-surface" style="transform: scale(1.02);">
+                        <div class="card-body p-5 d-flex flex-column justify-content-center h-100">
+                            <div class="icon-wrapper mb-4">
+                                <i class="bi bi-shield-check fs-2 text-surface opacity-75"></i>
+                            </div>
+                            <span class="text-secondary text-xs fw-bold tracking-wide mb-2 uppercase">SECURITY</span>
+                            <h4 class="fw-bold mb-3">Cyber Security</h4>
+                            <p class="text-surface opacity-75 text-sm mb-5">Protect digital assets and infrastructure against evolving global threats.</p>
+                            <a href="#" class="btn btn-outline border-secondary text-secondary hover-bg-secondary hover-text-primary rounded-pill w-100 mt-auto">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 4 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-400">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="Data Science">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-primary mb-3">DATA</span>
+                            <h5 class="fw-bold text-primary mb-2">Data Science</h5>
+                            <p class="text-muted text-sm mb-4">Analyze complex datasets and generate actionable business insights.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Mobile only browse link -->
+            <div class="text-center mt-4 d-md-none reveal-up delay-500">
+                <a href="#" class="btn btn-outline rounded-pill px-4 w-100">Browse all courses</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section-padding bg-background">
+        <div class="container-max bg-surface rounded-4 p-5 shadow-sm">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 reveal-up">
+                    <h2 class="fw-bold text-primary mb-4">About AUB Digital Academy</h2>
+                    <p class="text-muted mb-5">AUB Digital Academy provides modern digital education designed to prepare students with practical skills, innovation, and industry knowledge. We bridge the gap between traditional academia and the rapidly evolving tech landscape.</p>
+                    
+                    <div class="row g-4">
+                        <div class="col-sm-6 reveal-up delay-100">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-lightbulb text-primary fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold text-primary mb-1">Innovation First</h6>
+                                    <p class="text-muted text-sm m-0">We embrace new ideas and technologies to stay ahead.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 reveal-up delay-200">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-people-fill text-primary fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold text-primary mb-1">Community Driven</h6>
+                                    <p class="text-muted text-sm m-0">We support a diverse and inclusive community of learners.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 reveal-up delay-300">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-journal-check text-primary fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold text-primary mb-1">Academic Excellence</h6>
+                                    <p class="text-muted text-sm m-0">We strive for the highest standards in education and global accreditation.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 reveal-up delay-400">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-building-check text-primary fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold text-primary mb-1">Industry Relevance</h6>
+                                    <p class="text-muted text-sm m-0">Our programs are aligned with real-world industry needs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 reveal-up delay-500">
+                    <div class="position-relative rounded-4 overflow-hidden shadow skeleton" style="aspect-ratio: 16/9;">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800" class="w-100 h-100 object-fit-cover img-reveal" alt="Students collaborating">
+                        <button class="btn btn-secondary rounded-circle position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center hover-scale" style="width: 64px; height: 64px; border: 4px solid rgba(255,255,255,0.3);">
+                            <i class="bi bi-play-fill fs-3 ms-1 text-surface"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="container-max">
+            <div class="row g-5 border-bottom border-secondary border-opacity-25 pb-5 mb-5">
+                <div class="col-lg-4 pe-lg-5 reveal-up">
+                    <a class="navbar-brand text-surface d-flex align-items-center gap-2 mb-4" href="#">
+                        <i class="bi bi-mortarboard-fill text-surface fs-3"></i>
+                        <div>
+                            <span class="d-block lh-1 text-surface fw-bold fs-4">AUB</span>
+                            <span class="d-block text-secondary fw-bold" style="font-size: 0.6em; letter-spacing: 0.05em;">DIGITAL ACADEMY</span>
+                        </div>
+                    </a>
+                    <p class="text-surface opacity-75 text-sm mb-4">Empowering the next generation of digital leaders through world-class education.</p>
+                    <div class="social-icons d-flex gap-2">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-linkedin"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-6 reveal-up delay-100">
+                    <h6 class="text-surface fw-bold mb-4">Quick Links</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 text-sm">
+                        <li><a href="#" class="text-decoration-none">Home</a></li>
+                        <li><a href="#programs" class="text-decoration-none">Programs</a></li>
+                        <li><a href="#courses" class="text-decoration-none">Courses</a></li>
+                        <li><a href="#about" class="text-decoration-none">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-6 reveal-up delay-200">
+                    <h6 class="text-surface fw-bold mb-4">Resources</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 text-sm">
+                        <li><a href="#" class="text-decoration-none">Academic Calendar</a></li>
+                        <li><a href="#" class="text-decoration-none">Student Portal</a></li>
+                        <li><a href="#" class="text-decoration-none">Help Center</a></li>
+                        <li><a href="#" class="text-decoration-none">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-6 reveal-up delay-300">
+                    <h6 class="text-surface fw-bold mb-4">Support</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 text-sm">
+                        <li><a href="#" class="text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="#" class="text-decoration-none">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-2 col-6 reveal-up delay-400">
+                    <h6 class="text-surface fw-bold mb-4">Contact Us</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-3 text-sm opacity-75">
+                        <li class="d-flex gap-2"><i class="bi bi-geo-alt"></i> 27 Street 2004, Phnom Penh, Kingdom of Cambodia</li>
+                        <li class="d-flex gap-2"><i class="bi bi-envelope"></i> info@aub.edu.kh</li>
+                        <li class="d-flex gap-2"><i class="bi bi-telephone"></i> +855 23 999 111</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="text-center text-surface opacity-50 text-sm reveal-up delay-500">
+                &copy; 2024 AUB Digital Academy. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & Custom Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/components/animations.js"></script>
+
+    <!-- Initialize images -->
+    <script>
+        // Simulate image loading to remove skeletons
+        document.querySelectorAll('img.img-reveal').forEach(img => {
+            if (img.complete) {
+                img.classList.add('is-visible');
+                img.closest('.skeleton')?.classList.remove('skeleton');
+            } else {
+                img.addEventListener('load', function() {
+                    this.classList.add('is-visible');
+                    this.closest('.skeleton')?.classList.remove('skeleton');
+                });
+            }
+        });
+    </script>
+</body>
 </html>
