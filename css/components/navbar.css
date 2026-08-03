@@ -163,6 +163,9 @@
         transform: scale(0.9);
         transform-origin: left center;
     }
+    .navbar-brand img {
+        height: 48px;
+    }
 }
 
 /* Mobile (< 768px) */
@@ -182,6 +185,9 @@
     }
     .navbar-toggler {
         display: block;
+    }
+    .navbar-brand img {
+        height: 40px;
     }
     
     /* Full-screen slide-out menu */
