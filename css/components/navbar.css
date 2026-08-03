@@ -4,35 +4,35 @@
  */
 
 /* =========================================
-   Navbar (Header)
+   Navbar (Header) - Desktop First
    ========================================= */
 .navbar {
-    background-color: var(--aub-surface);
-    height: 80px;
-    padding: 0 var(--space-4);
-    border-bottom: 1px solid #E5E7EB;
+    background-color: #ffffff;
+    height: 76px;
+    border-bottom: 1px solid transparent;
     z-index: var(--z-sticky);
     position: sticky;
     top: 0;
     transition: background-color 250ms ease-in-out, box-shadow 250ms ease-in-out, border-color 250ms ease-in-out;
-    display: flex;
-    align-items: center;
 }
 
 .navbar-scrolled {
     background-color: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    border-color: transparent;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border-color: #E5E7EB;
 }
 
-/* Container for Flex Layout */
-.navbar > .container-max {
+/* Container */
+.navbar .container-max {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     width: 100%;
     height: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px;
 }
 
 /* Logo (Left) */
@@ -44,25 +44,26 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    flex: 1; /* Pushes center nav */
+    flex-shrink: 0;
 }
 
-/* Nav Menu (Center) */
+/* Navigation (Center) */
 .navbar-nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 40px; /* Spacing between items */
+    gap: 48px;
     margin: 0;
     padding: 0;
     list-style: none;
+    flex: 1;
 }
 
 .nav-item {
     position: relative;
     display: flex;
     align-items: center;
-    height: 80px;
+    height: 76px;
 }
 
 .nav-link {
@@ -72,6 +73,7 @@
     text-decoration: none;
     transition: color 250ms ease-in-out;
     padding: 0;
+    white-space: nowrap;
 }
 
 /* Hover & Active States */
@@ -85,7 +87,7 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: var(--aub-secondary); /* Gold */
+    background-color: var(--aub-secondary);
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 250ms ease-in-out;
@@ -97,25 +99,24 @@
     transform: scaleX(1);
 }
 
-/* Sign In Area (Right) */
+/* Sign In (Right) */
 .navbar-actions {
-    flex: 1;
+    flex-shrink: 0;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
 }
 
 .navbar-actions .btn {
     transition: all 250ms ease-in-out;
-    border-radius: var(--radius-pill); /* Keeping rounded corners */
+    border-radius: var(--radius-pill);
 }
 
 .navbar-actions .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Soft shadow */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Mobile Toggle Button */
+/* Mobile Toggle */
 .navbar-toggler {
     display: none;
     background: transparent;
@@ -124,7 +125,7 @@
     color: var(--aub-primary);
     cursor: pointer;
     padding: 8px;
-    min-height: 44px; /* Touch friendly */
+    min-height: 44px;
     min-width: 44px;
 }
 
@@ -132,46 +133,47 @@
    Responsive Adjustments
    ========================================= */
 
-/* Desktop (>= 1200px) handled by default above */
-
 /* Tablet (768px - 1199px) */
-@media (min-width: 768px) and (max-width: 1199px) {
-    .navbar-nav {
-        gap: 24px; /* Reduce spacing */
+@media (max-width: 1199px) and (min-width: 768px) {
+    .navbar .container-max {
+        padding: 0 32px;
     }
-    
+    .navbar-nav {
+        gap: 32px;
+    }
     .navbar-brand {
-        transform: scale(0.9); /* Reduce logo size by 10% */
+        transform: scale(0.9);
         transform-origin: left center;
     }
 }
 
 /* Mobile (< 768px) */
 @media (max-width: 767px) {
+    .navbar .container-max {
+        padding: 0 20px;
+    }
     .navbar-nav {
-        display: none; /* Hide default nav */
+        display: none !important;
     }
-    
     .navbar-actions {
-        display: none; /* Hide button in default header if space is tight, move to menu */
+        display: none !important;
     }
-    
     .navbar-toggler {
-        display: block; /* Show hamburger */
+        display: block;
     }
     
     /* Full-screen slide-out menu */
     .mobile-menu {
         position: fixed;
-        top: 80px; /* Below header */
+        top: 76px;
         left: 0;
         width: 100%;
-        height: calc(100vh - 80px);
-        background-color: var(--aub-surface);
+        height: calc(100vh - 76px);
+        background-color: #ffffff;
         z-index: calc(var(--z-sticky) - 1);
         display: flex;
         flex-direction: column;
-        padding: var(--space-4);
+        padding: 24px;
         transform: translateX(100%);
         transition: transform 300ms ease-in-out;
         box-shadow: inset 0 1px 0 #E5E7EB;
@@ -191,6 +193,7 @@
         font-size: 1.125rem;
         width: 100%;
         padding: 8px 0;
+        white-space: normal;
     }
     
     .mobile-menu .nav-indicator {
@@ -199,10 +202,10 @@
     }
     
     .mobile-menu .navbar-actions {
-        display: flex;
+        display: flex !important;
         margin-top: auto;
         justify-content: stretch;
-        padding-top: var(--space-4);
+        padding-top: 24px;
     }
     
     .mobile-menu .navbar-actions .btn {
