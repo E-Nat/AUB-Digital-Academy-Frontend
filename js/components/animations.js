@@ -66,8 +66,46 @@ document.addEventListener("DOMContentLoaded", function() {
             link.addEventListener('click', () => {
                 mobileMenu.classList.remove('is-open');
                 const icon = mobileMenuToggle.querySelector('i');
-                icon.classList.replace('bi-x-lg', 'bi-list');
+                if(icon) icon.classList.replace('bi-x-lg', 'bi-list');
             });
         });
     }
+
+    // 4. ScrollSpy for Navigation Links
+    const sections = document.querySelectorAll('section');
+    const navItems = document.querySelectorAll('.navbar-nav .nav-item');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            // Activate section when it's in the top 3rd of the viewport
+            if (window.scrollY >= (sectionTop - 300)) {
+                if (section.classList.contains('hero-section')) {
+                    current = 'home';
+                } else {
+                    current = section.getAttribute('id');
+                }
+            }
+        });
+
+        // Force home if at the very top
+        if (window.scrollY < 100) {
+            current = 'home';
+        }
+
+        navItems.forEach(li => {
+            li.classList.remove('active');
+            const a = li.querySelector('a');
+            if (a) {
+                const href = a.getAttribute('href');
+                if (href === '#' && current === 'home') {
+                    li.classList.add('active');
+                } else if (current && href === `#${current}`) {
+                    li.classList.add('active');
+                }
+            }
+        });
+    });
 });
