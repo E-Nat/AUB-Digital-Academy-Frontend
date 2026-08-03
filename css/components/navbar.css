@@ -68,12 +68,14 @@
 
 .nav-link {
     font-family: var(--font-primary);
-    font-weight: 500;
-    color: var(--aub-text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #4B5563; /* Gray text for inactive links based on screenshot */
     text-decoration: none;
     transition: color 250ms ease-in-out;
     padding: 0;
     white-space: nowrap;
+    position: relative; /* Ensure indicator positions correctly */
 }
 
 /* Hover & Active States */
@@ -108,7 +110,8 @@
 
 .navbar-actions .btn {
     transition: all 250ms ease-in-out;
-    border-radius: var(--radius-pill);
+    border-radius: 8px; /* Matched to the screenshot */
+    font-weight: 600;
 }
 
 .navbar-actions .btn:hover {
