@@ -7,8 +7,8 @@
 .hero-section {
     position: relative;
     padding-top: calc(76px + var(--space-6));
-    padding-bottom: calc(var(--space-6) + 140px);
-    min-height: 100vh;
+    padding-bottom: calc(var(--space-6) + 40px);
+    min-height: 90vh;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -686,3 +686,25 @@
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+
+
+/* Hero Particles */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.6), 0 0 20px rgba(96, 165, 250, 0.4);
+    animation: floatParticle 8s infinite ease-in-out alternate;
+}
+.particle.p1 { width: 6px; height: 6px; bottom: 80px; left: 10%; animation-duration: 9s; }
+.particle.p2 { width: 8px; height: 8px; bottom: 120px; left: 25%; animation-duration: 11s; animation-delay: 1s; background: rgba(244, 180, 0, 0.4); box-shadow: 0 0 10px rgba(244, 180, 0, 0.6); }
+.particle.p3 { width: 4px; height: 4px; bottom: 60px; left: 45%; animation-duration: 7s; animation-delay: 2s; }
+.particle.p4 { width: 7px; height: 7px; bottom: 150px; left: 70%; animation-duration: 12s; animation-delay: 0.5s; background: rgba(244, 180, 0, 0.4); box-shadow: 0 0 10px rgba(244, 180, 0, 0.6); }
+.particle.p5 { width: 5px; height: 5px; bottom: 90px; left: 85%; animation-duration: 8s; animation-delay: 3s; }
+.particle.p6 { width: 9px; height: 9px; bottom: 40px; left: 95%; animation-duration: 10s; animation-delay: 1.5s; }
+
+@keyframes floatParticle {
+    0% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { transform: translateY(-40px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-20px) scale(0.8); opacity: 0.5; }
+}
