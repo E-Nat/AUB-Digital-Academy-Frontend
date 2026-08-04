@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let prevTranslate = 0;
     let animationID;
     let autoPlayInterval;
+    let dragThresholdExceeded = false;
     const gap = 24;
 
     // Responsive items per view
@@ -175,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function touchStart(event) {
+        dragThresholdExceeded = false;
         isDragging = true;
         startPos = getPositionX(event);
         track.classList.add('is-dragging');
@@ -186,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isDragging) {
             const currentPosition = getPositionX(event);
             currentTranslate = prevTranslate + currentPosition - startPos;
+            if (Math.abs(currentPosition - startPos) > 10) dragThresholdExceeded = true;
         }
     }
 
@@ -209,3 +212,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isDragging) requestAnimationFrame(animation);
     }
 });
+

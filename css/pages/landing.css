@@ -392,7 +392,7 @@
 }
 
 .card-program-refined:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
 }
 
@@ -500,3 +500,55 @@
 .theme-orange .card-icon-square { color: #ea580c; }
 .theme-orange .btn-program-primary { background: #ea580c; }
 .theme-orange .tag-pill { background: rgba(249,115,22,0.1); color: #ea580c; }
+
+
+.card-arrow-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--aub-primary);
+    opacity: 0;
+    transform: translate(-10px, 10px);
+    transition: all 0.35s ease;
+    z-index: 3;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-program-refined:hover .card-arrow-icon {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+.click-to-explore {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.35s ease;
+    color: var(--aub-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: auto;
+}
+
+.card-program-refined:hover .click-to-explore {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Remove old btn if it exists in the CSS file */
+
+
+.theme-blue .card-program-refined:hover { border-color: #2563eb; }
+.theme-cyan .card-program-refined:hover { border-color: #0891b2; }
+.theme-green .card-program-refined:hover { border-color: #16a34a; }
+.theme-purple .card-program-refined:hover { border-color: #9333ea; }
+.theme-gold .card-program-refined:hover { border-color: #d97706; }
+.theme-orange .card-program-refined:hover { border-color: #ea580c; }
