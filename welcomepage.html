@@ -31,6 +31,7 @@
         }
     }
     </script>
+<link rel="stylesheet" href="css/components/carousel.css">
 </head>
 <body class="bg-background">
 
@@ -246,29 +247,19 @@
                     </div>
                 </div>
             </div>
-            <div class="container-max text-center position-relative z-1">
+                        <div class="container-max text-center position-relative z-1">
                 <span class="section-label text-secondary mb-3 d-flex align-items-center justify-content-center gap-2" style="letter-spacing: 0.15em;">
                     <span style="width: 24px; height: 1px; background: var(--aub-secondary);"></span>
-                    OUR PROGRAMS
+                    FEATURED PROGRAMS
                     <span style="width: 24px; height: 1px; background: var(--aub-secondary);"></span>
                 </span>
-                <h2 class="fw-bold display-5 text-white mb-3">Undergraduate Programs</h2>
+                <h2 class="fw-bold display-5 text-white mb-3">Explore Our Featured Programs</h2>
                 <p class="text-white opacity-75 mx-auto mb-4" style="max-width: 650px;">
-                    Choose from our specialized academic tracks designed to equip you with the technical expertise and leadership skills required in the modern digital economy.
+                    Discover AUB's most popular academic programs and begin your learning journey.
                 </p>
-                
-                <!-- Filter Pills -->
-                <div class="filter-pill-container">
-                    <a href="#" class="filter-pill active">All Programs</a>
-                    <a href="#" class="filter-pill">Engineering</a>
-                    <a href="#" class="filter-pill">Business</a>
-                    <a href="#" class="filter-pill">Technology</a>
-                    <a href="#" class="filter-pill">Finance</a>
-                </div>
             </div>
             
             <!-- SVG Wave Divider -->
-            <!-- SVG Wave Divider (Perfectly Smooth) -->
             <div class="wave-divider">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
                     <path d="M0,60 C480,130 960,-10 1440,60 L1440,120 L0,120 Z" class="shape-fill"></path>
@@ -276,17 +267,17 @@
             </div>
         </div>
 
-        <!-- Program Cards -->
-        <div class="container-max" style="margin-top: 20px; padding-bottom: 100px;">
-            <div class="row g-4">
+        <!-- Carousel -->
+        <div class="featured-carousel-wrapper container-max">
+            <div class="featured-carousel-track">
                 
-                <!-- Card 1: Computer Engineering -->
-                <div class="col-md-6 col-lg-3 reveal-up delay-100 theme-blue">
+                <!-- Card 1: Computer Science & Engineering -->
+                <div class="carousel-slide theme-blue">
                     <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
                         <div class="card-icon-circle">
                             <i class="bi bi-laptop"></i>
                         </div>
-                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Computer<br>Engineering</h4>
+                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Computer Science &<br>Engineering</h4>
                         <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
                         <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
                             Build the foundation of tomorrow's technology with strong skills in software, AI, databases, and computer systems.
@@ -298,59 +289,13 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
                             <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
-                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card 2: Banking & Finance -->
-                <div class="col-md-6 col-lg-3 reveal-up delay-200 theme-green">
-                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
-                        <div class="card-icon-circle">
-                            <i class="bi bi-bank"></i>
-                        </div>
-                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Banking &<br>Finance</h4>
-                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
-                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
-                            Gain in-depth knowledge of financial systems, investment analysis, and modern banking operations.
-                        </p>
-                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
-                            <span class="tag-pill">Finance</span>
-                            <span class="tag-pill">Investment</span>
-                            <span class="tag-pill">Banking</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
-                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
-                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Business Administration -->
-                <div class="col-md-6 col-lg-3 reveal-up delay-300 theme-gold">
-                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
-                        <div class="card-icon-circle">
-                            <i class="bi bi-briefcase"></i>
-                        </div>
-                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Business<br>Administration</h4>
-                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
-                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
-                            Develop leadership, management, and entrepreneurial skills to succeed in today's dynamic business world.
-                        </p>
-                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
-                            <span class="tag-pill">Management</span>
-                            <span class="tag-pill">Leadership</span>
-                            <span class="tag-pill">Marketing</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
-                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
-                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 4: Information Technology -->
-                <div class="col-md-6 col-lg-3 reveal-up delay-400 theme-cyan">
+                <!-- Card 2: Information Technology -->
+                <div class="carousel-slide theme-cyan">
                     <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
                         <div class="card-icon-circle">
                             <i class="bi bi-braces"></i>
@@ -367,11 +312,113 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
                             <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
-                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
                         </div>
                     </div>
                 </div>
 
+                <!-- Card 3: Finance & Banking -->
+                <div class="carousel-slide theme-green">
+                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+                        <div class="card-icon-circle">
+                            <i class="bi bi-bank"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Finance &<br>Banking</h4>
+                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
+                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
+                            Gain in-depth knowledge of financial systems, investment analysis, and modern banking operations.
+                        </p>
+                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+                            <span class="tag-pill">Finance</span>
+                            <span class="tag-pill">Investment</span>
+                            <span class="tag-pill">Banking</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
+                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Accounting -->
+                <div class="carousel-slide theme-blue">
+                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+                        <div class="card-icon-circle">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Accounting<br>&nbsp;</h4>
+                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
+                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
+                            Master the language of business with comprehensive training in financial reporting and auditing.
+                        </p>
+                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+                            <span class="tag-pill">Audit</span>
+                            <span class="tag-pill">Tax</span>
+                            <span class="tag-pill">Reporting</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
+                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Business Administration -->
+                <div class="carousel-slide theme-gold">
+                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+                        <div class="card-icon-circle">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Business<br>Administration</h4>
+                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
+                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
+                            Develop leadership, management, and entrepreneurial skills to succeed in today's dynamic business world.
+                        </p>
+                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+                            <span class="tag-pill">Management</span>
+                            <span class="tag-pill">Leadership</span>
+                            <span class="tag-pill">Strategy</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
+                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6: Marketing -->
+                <div class="carousel-slide theme-cyan">
+                    <div class="card-program-refined text-center" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+                        <div class="card-icon-circle">
+                            <i class="bi bi-megaphone"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="color: var(--aub-primary);">Marketing<br>&nbsp;</h4>
+                        <p class="fw-medium text-sm mb-4" style="color: #d97706;">Bachelor Degree</p>
+                        <p class="text-muted text-sm mb-4" style="line-height: 1.6;">
+                            Learn to understand consumer behavior, brand management, and digital marketing strategies.
+                        </p>
+                        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
+                            <span class="tag-pill">Digital</span>
+                            <span class="tag-pill">Branding</span>
+                            <span class="tag-pill">Strategy</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top w-100">
+                            <span class="text-muted text-sm fw-medium"><i class="bi bi-clock me-1 opacity-75"></i> 4 Years</span>
+                            <a href="#" class="program-learn-more text-dark fw-bold text-decoration-none text-sm">Explore Program <i class="bi bi-arrow-right ms-1"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Controls -->
+            <div class="carousel-controls">
+                <button class="carousel-btn prev" aria-label="Previous Program"><i class="bi bi-chevron-left"></i></button>
+                <ul class="carousel-indicators"></ul>
+                <button class="carousel-btn next" aria-label="Next Program"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="#" class="btn btn-outline border-secondary text-secondary hover-bg-secondary hover-text-primary px-5 py-3 rounded-pill fw-bold">View All Programs <i class="bi bi-arrow-right ms-2"></i></a>
             </div>
         </div>
     </section>
@@ -658,5 +705,7 @@
             }
         });
     </script>
+<script src="js/components/carousel.js"></script>
 </body>
 </html>
+
