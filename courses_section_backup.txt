@@ -1,0 +1,92 @@
+<section id="courses" class="section-padding">
+        <div class="container-max">
+            <div class="d-flex justify-content-between align-items-end mb-5 reveal-up">
+                <div>
+                    <span class="section-label">Explore Courses</span>
+                    <h2 class="section-title fw-bold m-0">Explore Our Specialized Courses</h2>
+                    <p class="text-muted mt-2">Gain practical, job-ready skills through our hands-on short courses taught by industry leaders.</p>
+                </div>
+                <a href="#" class="text-primary fw-medium text-decoration-none d-none d-md-flex align-items-center hover-primary">
+                    Browse all courses <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                <!-- Course 1 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-100">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="Web Development">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-warning mb-3">DEVELOPMENT</span>
+                            <h5 class="fw-bold text-primary mb-2">Web Development</h5>
+                            <p class="text-muted text-sm mb-4">Build modern websites and web applications.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 2 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-200">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="UI/UX Design">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-success mb-3">DESIGN</span>
+                            <h5 class="fw-bold text-primary mb-2">UI/UX Design</h5>
+                            <p class="text-muted text-sm mb-4">Design user-centered digital experiences and interfaces.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 3 (Dark Theme Highlight) -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-300">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-lg rounded-4 bg-primary text-surface" style="transform: scale(1.02);">
+                        <div class="card-body p-5 d-flex flex-column justify-content-center h-100">
+                            <div class="icon-wrapper mb-4">
+                                <i class="bi bi-shield-check fs-2 text-surface opacity-75"></i>
+                            </div>
+                            <span class="text-secondary text-xs fw-bold tracking-wide mb-2 uppercase">SECURITY</span>
+                            <h4 class="fw-bold mb-3">Cyber Security</h4>
+                            <p class="text-surface opacity-75 text-sm mb-5">Protect digital assets and infrastructure against evolving global threats.</p>
+                            <a href="#" class="btn btn-outline border-secondary text-secondary hover-bg-secondary hover-text-primary rounded-pill w-100 mt-auto">
+                                Learn More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 4 -->
+                <div class="col-lg-3 col-md-6 reveal-up delay-400">
+                    <div class="card card-course card-hoverable h-100 border-0 shadow-sm rounded-4 bg-surface">
+                        <div class="overflow-hidden skeleton" style="height: 180px;">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600" class="course-img w-100 h-100 object-fit-cover img-reveal" alt="Data Science">
+                        </div>
+                        <div class="card-body p-4">
+                            <span class="badge badge-soft-primary mb-3">DATA</span>
+                            <h5 class="fw-bold text-primary mb-2">Data Science</h5>
+                            <p class="text-muted text-sm mb-4">Analyze complex datasets and generate actionable business insights.</p>
+                            <a href="#" class="fw-medium text-primary text-decoration-none mt-auto d-flex align-items-center">
+                                Learn More <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Mobile only browse link -->
+            <div class="text-center mt-4 d-md-none reveal-up delay-500">
+                <a href="#" class="btn btn-outline rounded-pill px-4 w-100">Browse all courses</a>
+            </div>
+        </div>
+    </section>
+
+    
