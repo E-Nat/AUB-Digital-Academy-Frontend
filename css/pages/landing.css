@@ -7,8 +7,8 @@
 .hero-section {
     position: relative;
     padding-top: calc(76px + var(--space-6));
-    padding-bottom: var(--space-6);
-    min-height: 90vh;
+    padding-bottom: calc(var(--space-6) + 140px);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -685,3 +685,4 @@
 .course-item {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
+
