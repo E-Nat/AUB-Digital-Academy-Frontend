@@ -8,7 +8,7 @@ export function initHero3D(containerId) {
     if (!container) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050914, 0.03);
+    scene.fog = new THREE.FogExp2(0x07111F, 0.04);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 15;
@@ -17,106 +17,99 @@ export function initHero3D(containerId) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.0;
     container.appendChild(renderer.domElement);
 
     const renderScene = new RenderPass(scene, camera);
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-    bloomPass.threshold = 0.2;
-    bloomPass.strength = 1.2;
-    bloomPass.radius = 0.5;
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.9);
+    bloomPass.threshold = 0.3;
+    bloomPass.strength = 0.8; // Softer bloom
+    bloomPass.radius = 0.8;
 
     const composer = new EffectComposer(renderer);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
-    const glassMaterial = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        metalness: 0.1,
-        roughness: 0.05,
-        transmission: 1.0,
-        thickness: 2.0,
-        ior: 1.5,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1,
-        side: THREE.DoubleSide
+    // Subtle ambient lighting
+    const ambientLight = new THREE.AmbientLight(0x0F2B5B, 1.5);
+    scene.add(ambientLight);
+
+    // Warm Gold accent light
+    const light1 = new THREE.PointLight(0xF4B400, 50, 40);
+    light1.position.set(8, 5, 5);
+    scene.add(light1);
+
+    // Deep Blue accent light
+    const light2 = new THREE.PointLight(0x0F2B5B, 80, 50);
+    light2.position.set(-8, -5, 5);
+    scene.add(light2);
+
+    // Central soft light
+    const centerLight = new THREE.PointLight(0x1F4A9E, 40, 20);
+    scene.add(centerLight);
+
+    // Connection Lines (Network)
+    const lineMaterial = new THREE.LineBasicMaterial({
+        color: 0x1F4A9E,
+        transparent: true,
+        opacity: 0.15
     });
 
-    const sphereGeo = new THREE.SphereGeometry(3, 64, 64);
-    const centralOrb = new THREE.Mesh(sphereGeo, glassMaterial);
-    scene.add(centralOrb);
-
-    const shapes = [];
-    const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-    const icoGeo = new THREE.IcosahedronGeometry(0.8, 0);
+    const networkGroup = new THREE.Group();
+    scene.add(networkGroup);
     
-    const shapeGroup = new THREE.Group();
-    scene.add(shapeGroup);
-
-    for(let i = 0; i < 20; i++) {
-        const isBox = Math.random() > 0.5;
-        const mesh = new THREE.Mesh(isBox ? boxGeo : icoGeo, glassMaterial);
+    // Create subtle geometric outlines
+    for(let i=0; i<3; i++) {
+        const icoGeo = new THREE.IcosahedronGeometry(6 + (i * 2), 1);
+        const edges = new THREE.EdgesGeometry(icoGeo);
+        const line = new THREE.LineSegments(edges, lineMaterial);
+        line.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
         
-        const radius = 5 + Math.random() * 10;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos(Math.random() * 2 - 1);
-        
-        mesh.position.x = radius * Math.sin(phi) * Math.cos(theta);
-        mesh.position.y = radius * Math.sin(phi) * Math.sin(theta);
-        mesh.position.z = radius * Math.cos(phi);
-        
-        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
-        
-        const scale = 0.5 + Math.random() * 1.5;
-        mesh.scale.set(scale, scale, scale);
-        
-        mesh.userData = {
-            originPosition: mesh.position.clone(),
-            offset: Math.random() * Math.PI * 2,
-            rotationSpeed: {
-                x: (Math.random() - 0.5) * 0.01,
-                y: (Math.random() - 0.5) * 0.01,
-                z: (Math.random() - 0.5) * 0.01
-            }
+        line.userData = {
+            rotSpeedX: (Math.random() - 0.5) * 0.002,
+            rotSpeedY: (Math.random() - 0.5) * 0.002
         };
-        
-        shapeGroup.add(mesh);
-        shapes.push(mesh);
+        networkGroup.add(line);
     }
 
+    // Floating Particles
     const particlesGeo = new THREE.BufferGeometry();
-    const particlesCount = 800;
+    const particlesCount = 400; // Reduced count
     const posArray = new Float32Array(particlesCount * 3);
     
     for(let i = 0; i < particlesCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 40;
+        posArray[i] = (Math.random() - 0.5) * 50;
     }
     
     particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     const particlesMat = new THREE.PointsMaterial({
-        size: 0.05,
-        color: 0x60a5fa,
+        size: 0.06,
+        color: 0x60A5FA, // Soft light blue
         transparent: true,
-        opacity: 0.8,
+        opacity: 0.5,
         blending: THREE.AdditiveBlending
     });
     
     const particleSystem = new THREE.Points(particlesGeo, particlesMat);
     scene.add(particleSystem);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-    scene.add(ambientLight);
-
-    const light1 = new THREE.PointLight(0x06b6d4, 100, 50);
-    light1.position.set(5, 5, 5);
-    scene.add(light1);
-
-    const light2 = new THREE.PointLight(0x8b5cf6, 100, 50);
-    light2.position.set(-5, -5, 5);
-    scene.add(light2);
-
-    const centerLight = new THREE.PointLight(0x3b82f6, 50, 15);
-    scene.add(centerLight);
+    // Gold accent particles
+    const goldParticlesGeo = new THREE.BufferGeometry();
+    const goldParticlesCount = 50;
+    const goldPosArray = new Float32Array(goldParticlesCount * 3);
+    for(let i = 0; i < goldParticlesCount * 3; i++) {
+        goldPosArray[i] = (Math.random() - 0.5) * 30;
+    }
+    goldParticlesGeo.setAttribute('position', new THREE.BufferAttribute(goldPosArray, 3));
+    const goldParticlesMat = new THREE.PointsMaterial({
+        size: 0.1,
+        color: 0xF4B400, // Gold
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+    });
+    const goldParticleSystem = new THREE.Points(goldParticlesGeo, goldParticlesMat);
+    scene.add(goldParticleSystem);
 
     let mouseX = 0;
     let mouseY = 0;
@@ -127,8 +120,8 @@ export function initHero3D(containerId) {
     const windowHalfY = window.innerHeight / 2;
 
     document.addEventListener('mousemove', (event) => {
-        mouseX = (event.clientX - windowHalfX) * 0.005;
-        mouseY = (event.clientY - windowHalfY) * 0.005;
+        mouseX = (event.clientX - windowHalfX) * 0.003; // Slower parallax
+        mouseY = (event.clientY - windowHalfY) * 0.003;
     });
 
     const clock = new THREE.Clock();
@@ -139,34 +132,28 @@ export function initHero3D(containerId) {
 
         targetX = mouseX * 2;
         targetY = mouseY * 2;
-        camera.position.x += (targetX - camera.position.x) * 0.02;
-        camera.position.y += (-targetY - camera.position.y) * 0.02;
+        camera.position.x += (targetX - camera.position.x) * 0.01;
+        camera.position.y += (-targetY - camera.position.y) * 0.01;
         camera.lookAt(scene.position);
 
-        centralOrb.rotation.y += 0.002;
-        centralOrb.rotation.x += 0.001;
-
-        bloomPass.strength = 1.0 + Math.sin(elapsedTime * 1.5) * 0.3;
-
-        shapeGroup.rotation.y = elapsedTime * 0.05;
-        shapeGroup.rotation.z = Math.sin(elapsedTime * 0.05) * 0.1;
-
-        shapes.forEach(shape => {
-            const ud = shape.userData;
-            shape.position.y = ud.originPosition.y + Math.sin(elapsedTime * 2 + ud.offset) * 0.5;
-            shape.rotation.x += ud.rotationSpeed.x;
-            shape.rotation.y += ud.rotationSpeed.y;
-            shape.rotation.z += ud.rotationSpeed.z;
+        // Slow rotation for network lines
+        networkGroup.children.forEach(line => {
+            line.rotation.x += line.userData.rotSpeedX;
+            line.rotation.y += line.userData.rotSpeedY;
         });
 
-        light1.position.x = Math.sin(elapsedTime * 0.5) * 10;
-        light1.position.z = Math.cos(elapsedTime * 0.5) * 10;
+        // Very slow ambient light movement
+        light1.position.x = Math.sin(elapsedTime * 0.2) * 12;
+        light1.position.z = Math.cos(elapsedTime * 0.2) * 12;
         
-        light2.position.x = Math.sin(elapsedTime * 0.3 + Math.PI) * 10;
-        light2.position.y = Math.cos(elapsedTime * 0.3 + Math.PI) * 10;
+        light2.position.x = Math.sin(elapsedTime * 0.15 + Math.PI) * 12;
+        light2.position.y = Math.cos(elapsedTime * 0.15 + Math.PI) * 12;
 
-        particleSystem.rotation.y = elapsedTime * 0.02;
-        particleSystem.rotation.x = Math.sin(elapsedTime * 0.01) * 0.1;
+        particleSystem.rotation.y = elapsedTime * 0.005; // Very slow
+        particleSystem.rotation.x = Math.sin(elapsedTime * 0.005) * 0.05;
+
+        goldParticleSystem.rotation.y = -elapsedTime * 0.008;
+        goldParticleSystem.rotation.z = Math.sin(elapsedTime * 0.008) * 0.05;
 
         composer.render();
     }
