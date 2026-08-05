@@ -6,8 +6,8 @@
 /* Hero Section */
 .hero-section {
     position: relative;
-    padding-top: calc(76px + var(--space-6));
-    padding-bottom: calc(var(--space-6) + 40px);
+    padding-top: 76px;
+    padding-bottom: 160px;
     min-height: 90vh;
     display: flex;
     align-items: center;
@@ -788,18 +788,28 @@ body {
 section {
     scroll-snap-align: start;
     scroll-snap-stop: always;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    /* Vertically center content */
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+/* Keep Hero perfectly intact */
+.hero-section {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 
 .landing-footer {
     scroll-snap-align: end;
 }
 
-/* Make sure Hero doesn't break flex layout due to padding */
-.hero-section {
-    padding-top: calc(76px + var(--space-4)) !important;
-    padding-bottom: var(--space-4) !important;
-}
+
+
+
+
