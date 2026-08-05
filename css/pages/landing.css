@@ -7,7 +7,7 @@
 .hero-section {
     position: relative;
     padding-top: 76px;
-    padding-bottom: 160px;
+    padding-bottom: 80px;
     min-height: 90vh;
     display: flex;
     align-items: center;
@@ -808,6 +808,7 @@ section {
 .landing-footer {
     scroll-snap-align: end;
 }
+
 
 
 
