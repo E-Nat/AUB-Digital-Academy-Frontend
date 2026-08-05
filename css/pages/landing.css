@@ -772,3 +772,34 @@
     transform: scale(1.03);
     background-color: rgba(255,255,255,0.15) !important;
 }
+
+
+/* CSS Scroll Snap Setup */
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.landing-footer {
+    scroll-snap-align: end;
+}
+
+/* Make sure Hero doesn't break flex layout due to padding */
+.hero-section {
+    padding-top: calc(76px + var(--space-4)) !important;
+    padding-bottom: var(--space-4) !important;
+}

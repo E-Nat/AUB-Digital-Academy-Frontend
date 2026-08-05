@@ -11,17 +11,15 @@ document.addEventListener("DOMContentLoaded", function() {
         rootMargin: "0px 0px -50px 0px"
     };
 
-    const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+        const revealOnScroll = new IntersectionObserver(function(entries, observer) {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-                return;
+            if (entry.isIntersecting) {
+                // Add is-visible class to trigger animation when entering viewport
+                entry.target.classList.add('is-visible');
+            } else {
+                // Remove class when leaving viewport so it replays next time
+                entry.target.classList.remove('is-visible');
             }
-            
-            // Add is-visible class to trigger animation
-            entry.target.classList.add('is-visible');
-            
-            // Unobserve after animating once
-            observer.unobserve(entry.target);
         });
     }, revealOptions);
 
@@ -144,3 +142,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
