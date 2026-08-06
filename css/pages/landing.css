@@ -250,7 +250,7 @@
 .feature-showcase-section {
     position: relative;
     overflow: hidden;
-    background-color: #0B1220 !important;
+    background: radial-gradient(circle at center, #1e293b 0%, #020617 100%) !important;
 }
 
 @keyframes floatGraphic {
@@ -634,9 +634,11 @@
 
 /* Premium Course Card */
 .card-course-premium {
-    border-radius: 20px !important;
-    border: 1px solid #E5E7EB !important;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-radius: 32px !important;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
     overflow: hidden;
 }
 
@@ -822,4 +824,19 @@ section {
 
 
 
+
+
+.hover-scale {
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.hover-scale:hover {
+    transform: translate(-50%, -50%) scale(1.15) !important;
+}
+.glass-play-btn {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
 
