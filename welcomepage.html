@@ -180,7 +180,7 @@
         </div>
 
         <!-- Wave Divider -->
-        <div class="wave-divider" style="position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 0;">
+        <div class="wave-divider" style="position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 999; pointer-events: none;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none" style="display: block; width: 100%; height: 80px;">
                 <path d="M0,60 C480,130 960,-10 1440,60 L1440,120 L0,120 Z" fill="#FFFFFF"></path>
             </svg>
@@ -189,7 +189,38 @@
 
             <!-- Featured Programs Section (Carousel) -->
     <section id="programs" style="background-color: #FFFFFF;">
-        <div class="container-max text-center position-relative z-1 mb-5 pt-4">
+        <!-- Category Marquee -->
+        <div class="category-marquee-container">
+            <div class="marquee-track mb-3">
+                <div class="marquee-pill"><i class="bi bi-laptop"></i> Information Technology</div>
+                <div class="marquee-pill"><i class="bi bi-briefcase"></i> Business Administration</div>
+                <div class="marquee-pill"><i class="bi bi-bank"></i> Finance & Banking</div>
+                <div class="marquee-pill"><i class="bi bi-megaphone"></i> Marketing</div>
+                <div class="marquee-pill"><i class="bi bi-calculator"></i> Accounting</div>
+                <div class="marquee-pill"><i class="bi bi-laptop"></i> Information Technology</div>
+                <div class="marquee-pill"><i class="bi bi-briefcase"></i> Business Administration</div>
+                <div class="marquee-pill"><i class="bi bi-bank"></i> Finance & Banking</div>
+                <div class="marquee-pill"><i class="bi bi-megaphone"></i> Marketing</div>
+                <div class="marquee-pill"><i class="bi bi-calculator"></i> Accounting</div>
+            </div><br>
+            <div class="marquee-track reverse">
+                <div class="marquee-pill"><i class="bi bi-code-slash"></i> Computer Science</div>
+                <div class="marquee-pill"><i class="bi bi-graph-up-arrow"></i> Career Development</div>
+                <div class="marquee-pill"><i class="bi bi-gear"></i> Engineering</div>
+                <div class="marquee-pill"><i class="bi bi-globe"></i> International Business</div>
+                <div class="marquee-pill"><i class="bi bi-bar-chart"></i> Economics</div>
+                <div class="marquee-pill"><i class="bi bi-book"></i> Law</div>
+                <div class="marquee-pill"><i class="bi bi-translate"></i> Languages</div>
+                <div class="marquee-pill"><i class="bi bi-code-slash"></i> Computer Science</div>
+                <div class="marquee-pill"><i class="bi bi-graph-up-arrow"></i> Career Development</div>
+                <div class="marquee-pill"><i class="bi bi-gear"></i> Engineering</div>
+                <div class="marquee-pill"><i class="bi bi-globe"></i> International Business</div>
+                <div class="marquee-pill"><i class="bi bi-bar-chart"></i> Economics</div>
+                <div class="marquee-pill"><i class="bi bi-book"></i> Law</div>
+                <div class="marquee-pill"><i class="bi bi-translate"></i> Languages</div>
+            </div>
+        </div>
+        <div class="container-max text-center position-relative z-1 mb-5 pt-4" style="margin-top: 140px;">
             <span class="section-label text-secondary mb-3 d-flex align-items-center justify-content-center gap-2" style="letter-spacing: 0.15em;">
                 <span style="width: 24px; height: 1px; background: var(--aub-secondary);"></span>
                 FEATURED PROGRAMS
@@ -819,6 +850,9 @@
 <script src="js/components/carousel.js"></script>
 </body>
 </html>
+
+
+
 
 
 
