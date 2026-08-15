@@ -1,5 +1,6 @@
 /* ==========================================
    ADMIN LAYOUT CSS - AUB DIGITAL ACADEMY
+   Refined Professional & Compact Scale
    ========================================== */
 
 :root {
@@ -21,6 +22,7 @@ body.admin-body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+    font-size: 14px;
 }
 
 .admin-wrapper {
@@ -29,9 +31,9 @@ body.admin-body {
     width: 100%;
 }
 
-/* --- SIDEBAR --- */
+/* --- 1. SIDEBAR (More compact & professional) --- */
 .admin-sidebar {
-    width: 270px;
+    width: 240px; /* Reduced from 270px */
     background-color: var(--admin-sidebar-bg);
     color: #FFFFFF;
     display: flex;
@@ -41,29 +43,39 @@ body.admin-body {
     top: 0;
     height: 100vh;
     z-index: 100;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.06);
 }
 
 .admin-sidebar-brand {
-    padding: 24px 20px;
+    padding: 16px 18px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.admin-sidebar-brand img {
-    height: 38px;
-    width: auto;
+.admin-brand-icon {
+    width: 32px;
+    height: 32px;
+    background-color: var(--admin-primary) !important;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-brand-icon i {
+    font-size: 1.1rem;
+    color: #FFFFFF;
 }
 
 .admin-brand-text {
-    line-height: 1.1;
+    line-height: 1.15;
 }
 
 .admin-brand-text .title {
     font-weight: 800;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     letter-spacing: 0.02em;
     color: #FFFFFF;
 }
@@ -71,15 +83,15 @@ body.admin-body {
 .admin-brand-text .subtitle {
     font-size: 0.65rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: #F59E0B;
 }
 
 .admin-sidebar-menu {
-    padding: 24px 16px;
+    padding: 14px 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px; /* Reduced vertical spacing between menu items */
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -87,18 +99,21 @@ body.admin-body {
 .admin-nav-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 18px;
+    gap: 12px;
+    padding: 9px 14px; /* Compact padding */
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-weight: 500;
-    font-size: 0.95rem;
-    border-radius: 12px;
-    transition: all 0.2s ease;
+    font-size: 15px; /* Scaled to 15px */
+    border-radius: 10px;
+    transition: all 0.18s ease;
 }
 
 .admin-nav-item i {
-    font-size: 1.2rem;
+    font-size: 20px; /* Scaled to 20px */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .admin-nav-item:hover {
@@ -110,48 +125,15 @@ body.admin-body {
     color: #FFFFFF;
     background-color: var(--admin-sidebar-active);
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
 }
 
 .admin-sidebar-footer {
-    padding: 20px 16px;
+    padding: 14px 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.admin-user-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px;
-    border-radius: 10px;
-}
-
-.admin-user-card img {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.admin-user-info {
-    line-height: 1.2;
-    overflow: hidden;
-}
-
-.admin-user-info .name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #FFFFFF;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.admin-user-info .role {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
+    gap: 6px;
 }
 
 .admin-logout-btn {
@@ -163,9 +145,10 @@ body.admin-body {
     border: none;
     padding: 8px 12px;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
 }
 
 .admin-logout-btn:hover {
@@ -173,24 +156,15 @@ body.admin-body {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* --- MAIN CONTENT AREA --- */
-.admin-main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    background-color: var(--admin-bg);
-}
-
-/* --- TOPBAR --- */
+/* --- 2. TOPBAR (Compact height & refined controls) --- */
 .admin-topbar {
-    height: 76px;
+    height: 64px; /* Reduced from 76px */
     background: #FFFFFF;
     border-bottom: 1px solid var(--admin-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32px;
+    padding: 0 24px; /* Reduced from 32px */
     position: sticky;
     top: 0;
     z-index: 90;
@@ -198,24 +172,25 @@ body.admin-body {
 
 .admin-search-wrapper {
     position: relative;
-    width: 320px;
+    width: 270px; /* Reduced from 320px */
 }
 
 .admin-search-wrapper i {
     position: absolute;
-    left: 14px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--admin-text-muted);
+    font-size: 0.85rem;
 }
 
 .admin-search-input {
     width: 100%;
-    padding: 10px 14px 10px 40px;
-    border-radius: 12px;
+    padding: 7px 12px 7px 34px; /* Compact padding */
+    border-radius: 10px;
     border: 1px solid var(--admin-border);
     background: #F1F5F9;
-    font-size: 0.9rem;
+    font-size: 13.5px;
     color: var(--admin-text-main);
     transition: all 0.2s ease;
 }
@@ -230,17 +205,17 @@ body.admin-body {
 .admin-topbar-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 }
 
 .admin-notification-btn {
     position: relative;
     background: transparent;
     border: none;
-    font-size: 1.25rem;
+    font-size: 1.15rem; /* Scaled from 1.25rem */
     color: var(--admin-text-muted);
     cursor: pointer;
-    padding: 6px;
+    padding: 5px;
     border-radius: 8px;
     transition: all 0.2s;
 }
@@ -252,14 +227,14 @@ body.admin-body {
 
 .admin-notification-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: 1px;
+    right: 1px;
     background: #EF4444;
     color: white;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     font-weight: 700;
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -267,23 +242,43 @@ body.admin-body {
     border: 2px solid #FFFFFF;
 }
 
+/* --- 3. SINGLE ADMIN PROFILE (In Topbar) --- */
 .admin-topbar-profile {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+
+.admin-topbar-profile:hover {
+    background: #F8FAFC;
 }
 
 .admin-topbar-profile img {
-    width: 40px;
-    height: 40px;
+    width: 34px; /* Reduced from 40px */
+    height: 34px;
     border-radius: 50%;
     object-fit: cover;
+    border: 1px solid var(--admin-border);
 }
 
-/* --- PAGE BODY CONTAINER --- */
+.admin-topbar-profile .name {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--admin-text-main);
+}
+
+.admin-topbar-profile .role {
+    font-size: 11px;
+    color: var(--admin-text-muted);
+}
+
+/* --- 4. PAGE BODY & HEADER --- */
 .admin-content {
-    padding: 32px;
+    padding: 24px; /* Reduced from 32px */
     flex-grow: 1;
 }
 
@@ -291,18 +286,19 @@ body.admin-body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 20px; /* Reduced from 28px */
 }
 
 .admin-page-title {
-    font-size: 1.75rem;
+    font-size: 30px; /* Exactly 30-32px */
     font-weight: 800;
     color: var(--admin-text-main);
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
+    line-height: 1.2;
 }
 
 .admin-page-subtitle {
-    font-size: 0.95rem;
+    font-size: 15.5px; /* Approximately 16px */
     color: var(--admin-text-muted);
     margin: 0;
 }
@@ -310,49 +306,49 @@ body.admin-body {
 .admin-date-badge {
     background: #FFFFFF;
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
-    padding: 8px 16px;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    padding: 6px 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--admin-text-muted);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
-/* --- METRIC KPI CARDS --- */
+/* --- 5. METRIC KPI CARDS --- */
 .admin-kpi-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 28px;
+    gap: 16px; /* Reduced from 24px */
+    margin-bottom: 20px; /* Reduced from 28px */
 }
 
 .admin-kpi-card {
     background: var(--admin-card-bg);
-    border-radius: 20px;
+    border-radius: 14px; /* Reduced from 20px */
     border: 1px solid var(--admin-border);
-    padding: 24px;
+    padding: 16px 18px; /* Reduced from 24px */
     display: flex;
     align-items: center;
-    gap: 20px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .admin-kpi-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
 }
 
 .admin-kpi-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 16px;
+    width: 46px; /* Reduced from 58px */
+    height: 46px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.25rem; /* Scaled from 1.5rem */
     flex-shrink: 0;
 }
 
@@ -367,22 +363,22 @@ body.admin-body {
 }
 
 .admin-kpi-label {
-    font-size: 0.85rem;
+    font-size: 13px;
     font-weight: 600;
     color: var(--admin-text-muted);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .admin-kpi-value {
-    font-size: 1.75rem;
+    font-size: 1.55rem; /* Reduced from 1.75rem */
     font-weight: 800;
     color: var(--admin-text-main);
     line-height: 1.1;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .admin-kpi-trend {
-    font-size: 0.75rem;
+    font-size: 11.5px;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -392,41 +388,41 @@ body.admin-body {
 .admin-kpi-trend.positive { color: #16A34A; }
 .admin-kpi-trend.neutral { color: var(--admin-text-muted); }
 
-/* --- SECTION / WIDGET CARDS --- */
+/* --- 6. SECTION / WIDGET CARDS --- */
 .admin-card {
     background: var(--admin-card-bg);
-    border-radius: 20px;
+    border-radius: 14px; /* Reduced from 20px */
     border: 1px solid var(--admin-border);
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.02);
-    margin-bottom: 28px;
+    padding: 18px 20px; /* Reduced from 24px */
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    margin-bottom: 20px;
 }
 
 .admin-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .admin-card-title {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--admin-text-main);
     margin: 0;
 }
 
 .admin-dropdown-select {
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 8px;
     border: 1px solid var(--admin-border);
     background: #FFFFFF;
-    font-size: 0.85rem;
+    font-size: 12.5px;
     color: var(--admin-text-muted);
     outline: none;
 }
 
-/* --- RECENT ENROLLMENTS TABLE --- */
+/* --- 7. TABLES (Refined 13–14px headers & compact cell padding) --- */
 .admin-table-responsive {
     overflow-x: auto;
 }
@@ -434,23 +430,23 @@ body.admin-body {
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
+    font-size: 13.5px;
 }
 
 .admin-table th {
     text-align: left;
-    padding: 12px 16px;
-    font-size: 0.75rem;
+    padding: 10px 14px; /* Reduced padding */
+    font-size: 13px; /* Scaled to 13–14px */
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     color: var(--admin-text-muted);
     border-bottom: 1px solid var(--admin-border);
     background: #F8FAFC;
 }
 
 .admin-table td {
-    padding: 16px;
+    padding: 12px 14px; /* Reduced from 16px */
     border-bottom: 1px solid var(--admin-border);
     vertical-align: middle;
 }
@@ -462,11 +458,11 @@ body.admin-body {
 .admin-status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
+    gap: 4px;
+    padding: 3px 10px;
     border-radius: 100px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 .admin-status-badge.active {
@@ -482,6 +478,33 @@ body.admin-body {
 .admin-status-badge.pending {
     background: #FEF3C7;
     color: #B45309;
+}
+
+/* Action Buttons inside tables */
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--admin-border);
+    background: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--admin-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+    background: #F1F5F9;
+    color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+
+.action-btn.delete:hover {
+    background: #FEF2F2;
+    color: #DC2626;
+    border-color: #DC2626;
 }
 
 /* Responsive */

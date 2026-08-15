@@ -19,14 +19,14 @@
             position: absolute;
             top: 100%;
             left: 0;
-            width: 380px;
+            width: 320px;
             background: #FFFFFF;
             border: 1px solid var(--admin-border);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
             z-index: 1000;
             display: none;
-            max-height: 360px;
+            max-height: 320px;
             overflow-y: auto;
             margin-top: 6px;
         }
@@ -34,13 +34,14 @@
             display: block;
         }
         .search-result-item {
-            padding: 10px 16px;
+            padding: 8px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             text-decoration: none;
             color: var(--admin-text-main);
             border-bottom: 1px solid #F1F5F9;
+            font-size: 13px;
             transition: background 0.15s;
         }
         .search-result-item:hover {
@@ -50,23 +51,23 @@
             position: absolute;
             top: 100%;
             right: 0;
-            width: 320px;
+            width: 300px;
             background: #FFFFFF;
             border: 1px solid var(--admin-border);
-            border-radius: 14px;
-            box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             z-index: 1000;
             display: none;
-            padding: 12px 0;
-            margin-top: 10px;
+            padding: 10px 0;
+            margin-top: 8px;
         }
         .notifications-dropdown.active {
             display: block;
         }
         .notification-item {
-            padding: 10px 16px;
+            padding: 8px 14px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             border-bottom: 1px solid #F8FAFC;
             transition: background 0.15s;
             cursor: pointer;
@@ -80,17 +81,15 @@
 
     <div class="admin-wrapper">
         
-        <!-- SIDEBAR -->
+        <!-- 1. SIDEBAR (Compact Scale) -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
-                    </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">ACADEMY</div>
-                    </div>
+                <div class="admin-brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="admin-brand-text">
+                    <div class="title">AUB DIGITAL</div>
+                    <div class="subtitle">ACADEMY</div>
                 </div>
             </div>
 
@@ -122,20 +121,13 @@
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="sidebarAvatar">
-                    <div class="admin-user-info">
-                        <div class="name" id="sidebarAdminName">Admin</div>
-                        <div class="role">System Administrator</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
         <!-- MAIN VIEW -->
         <main class="admin-main">
             
-            <!-- TOPBAR -->
+            <!-- 2. TOPBAR (Compact Search & Single Admin Profile) -->
             <header class="admin-topbar">
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search"></i>
@@ -151,20 +143,19 @@
                         </button>
                         <div class="notifications-dropdown" id="notificationsMenu">
                             <div class="d-flex justify-content-between align-items-center px-3 pb-2 border-bottom">
-                                <span class="fw-bold text-sm">Notifications</span>
-                                <button class="btn btn-sm btn-link text-xs p-0 text-primary" id="markAllReadBtn">Mark all read</button>
+                                <span class="fw-bold" style="font-size: 13px;">Notifications</span>
+                                <button class="btn btn-sm btn-link text-xs p-0 text-primary" id="markAllReadBtn" style="font-size: 11px;">Mark all read</button>
                             </div>
-                            <div id="notificationsList" class="pt-2">
-                                <!-- Dynamic notifications -->
-                            </div>
+                            <div id="notificationsList" class="pt-2"></div>
                         </div>
                     </div>
 
+                    <!-- Single Admin Profile Element -->
                     <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
                         <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm" id="topbarAdminName">Admin</div>
-                            <div class="text-xs text-muted">System Administrator</div>
+                            <div class="name" id="topbarAdminName">Admin</div>
+                            <div class="role">System Administrator</div>
                         </div>
                     </div>
                 </div>
@@ -273,7 +264,7 @@
                 </div>
 
                 <!-- MIDDLE ROW: 2 STAT WIDGETS -->
-                <div class="row g-4 mb-4">
+                <div class="row g-3 mb-3">
                     <!-- Enrollment Statistics Donut -->
                     <div class="col-lg-6">
                         <div class="admin-card h-100 mb-0">
@@ -288,27 +279,24 @@
                                 </select>
                             </div>
                             <div class="row align-items-center">
-                                <div class="col-sm-5 text-center position-relative py-3">
-                                    <!-- Donut Chart SVG -->
-                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 160px; height: 160px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3"></circle>
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3" stroke-dasharray="100 0" stroke-dashoffset="0"></circle>
+                                <div class="col-sm-5 text-center position-relative py-2">
+                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 140px; height: 140px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3.2" stroke-dasharray="100 0" stroke-dashoffset="0"></circle>
                                     </svg>
                                     <div class="position-absolute top-50 start-50 translate-middle text-center lh-1">
-                                        <div class="text-xs text-muted mb-1">Total</div>
-                                        <div class="fw-bold fs-4 text-dark" id="donutTotalNumber">0</div>
+                                        <div class="text-xs text-muted mb-1" style="font-size: 11px;">Total</div>
+                                        <div class="fw-bold fs-5 text-dark" id="donutTotalNumber">0</div>
                                     </div>
                                 </div>
-                                <div class="col-sm-7 ps-sm-4">
-                                    <div class="d-flex flex-column gap-2 text-sm" id="enrollmentCategoriesList">
-                                        <!-- Dynamic Breakdown -->
-                                    </div>
+                                <div class="col-sm-7 ps-sm-3">
+                                    <div class="d-flex flex-column gap-2" style="font-size: 13px;" id="enrollmentCategoriesList"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Students by Major Bars (Representing actual distinct students per major) -->
+                    <!-- Students by Major Bars -->
                     <div class="col-lg-6">
                         <div class="admin-card h-100 mb-0">
                             <div class="admin-card-header">
@@ -321,9 +309,7 @@
                                     <option value="all_time">All Time</option>
                                 </select>
                             </div>
-                            <div class="d-flex flex-column gap-3 pt-1" id="studentsByMajorContainer">
-                                <!-- Dynamic Progress Bars from Database -->
-                            </div>
+                            <div class="d-flex flex-column gap-2 pt-1" id="studentsByMajorContainer"></div>
                         </div>
                     </div>
                 </div>
@@ -332,7 +318,7 @@
                 <div class="admin-card">
                     <div class="admin-card-header">
                         <h3 class="admin-card-title">Recent Enrollments</h3>
-                        <a href="enrollment-management.html" class="text-primary fw-bold text-sm text-decoration-none">View All</a>
+                        <a href="enrollment-management.html" class="text-primary fw-bold text-decoration-none" style="font-size: 13px;">View All</a>
                     </div>
                     <div class="admin-table-responsive">
                         <table class="admin-table">
@@ -345,9 +331,7 @@
                                     <th>STATUS</th>
                                 </tr>
                             </thead>
-                            <tbody id="recentEnrollmentsTableBody">
-                                <!-- Dynamic SQL Query Rendering -->
-                            </tbody>
+                            <tbody id="recentEnrollmentsTableBody"></tbody>
                         </table>
                     </div>
                 </div>

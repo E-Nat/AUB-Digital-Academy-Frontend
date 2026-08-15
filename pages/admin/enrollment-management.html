@@ -19,17 +19,15 @@
 
     <div class="admin-wrapper">
         
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Compact Scale) -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
-                    </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">ACADEMY</div>
-                    </div>
+                <div class="admin-brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="admin-brand-text">
+                    <div class="title">AUB DIGITAL</div>
+                    <div class="subtitle">ACADEMY</div>
                 </div>
             </div>
 
@@ -57,17 +55,10 @@
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='../authentication/login.html';">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
-                    <div class="admin-user-info">
-                        <div class="name">Admin</div>
-                        <div class="role">System Administrator</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
@@ -77,22 +68,23 @@
             <header class="admin-topbar">
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search enrollments...">
+                    <input type="text" class="admin-search-input" id="enrollmentSearchInput" placeholder="Search enrollments...">
                 </div>
 
                 <div class="admin-topbar-actions">
                     <button class="admin-notification-btn"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge">3</span></button>
-                    <div class="admin-topbar-profile">
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
                         <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm">Admin</div>
-                            <div class="text-xs text-muted">System Administrator</div>
+                            <div class="name">Admin</div>
+                            <div class="role">System Administrator</div>
                         </div>
                     </div>
                 </div>
             </header>
 
             <div class="admin-content">
+                <!-- Page Header (Refined ~30-32px / 16px) -->
                 <div class="admin-header-row">
                     <div>
                         <h1 class="admin-page-title">Enrollment Management</h1>
@@ -131,56 +123,100 @@
             const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
                 ? 'http://localhost:5000/api'
                 : '/api';
-            const token = localStorage.getItem('aub_auth_token');
-            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-            try {
-                const res = await fetch(`${API_BASE}/admin/enrollments`, { headers });
-                const data = await res.json();
-                if (data.success && data.data) {
-                    const tbody = document.getElementById('enrollmentsTableBody');
-                    if (tbody) {
-                        tbody.innerHTML = data.data.map(e => `
-                            <tr>
-                                <td class="text-muted fw-bold">#ENR-${e.id}</td>
-                                <td>
-                                    <div class="fw-bold text-dark">${escapeHtml(e.student_name)}</div>
-                                    <div class="text-xs text-muted">${escapeHtml(e.student_id || e.student_email)}</div>
-                                </td>
-                                <td><span class="fw-semibold text-primary">${escapeHtml(e.course_title || e.program_title || 'General')}</span></td>
-                                <td class="text-muted text-sm"><i class="bi bi-calendar3 me-1"></i> ${e.enrollment_date.split(' ')[0]}</td>
-                                <td style="width: 160px;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="progress flex-grow-1" style="height: 6px;">
-                                            <div class="progress-bar bg-primary" style="width: ${e.progress_percentage || 0}%;"></div>
-                                        </div>
-                                        <span class="text-xs fw-bold">${Math.round(e.progress_percentage || 0)}%</span>
-                                    </div>
-                                </td>
-                                <td><span class="admin-status-badge ${e.status ? e.status.toLowerCase() : 'active'}">${e.status || 'Active'}</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-danger rounded-circle p-1" onclick="deleteEnrollment(${e.id})">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('');
+            function getAuthToken() {
+                return localStorage.getItem('aub_auth_token') || 
+                       localStorage.getItem('token') || 
+                       sessionStorage.getItem('aub_auth_token') || 
+                       sessionStorage.getItem('token') || '';
+            }
+
+            function getHeaders() {
+                const token = getAuthToken();
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                return headers;
+            }
+
+            let allEnrollments = [];
+
+            async function loadEnrollments() {
+                try {
+                    const res = await fetch(`${API_BASE}/admin/enrollments`, { headers: getHeaders() });
+                    const data = await res.json();
+                    if (data.success && data.data) {
+                        allEnrollments = data.data;
+                        renderEnrollments(allEnrollments);
                     }
+                } catch (e) {
+                    console.error('Error loading enrollments:', e);
                 }
-            } catch (err) {
-                console.error(err);
+            }
+
+            function renderEnrollments(items) {
+                const tbody = document.getElementById('enrollmentsTableBody');
+                if (!tbody) return;
+
+                tbody.innerHTML = items.map(e => `
+                    <tr>
+                        <td class="text-muted fw-bold">#ENR-${e.id}</td>
+                        <td>
+                            <div class="fw-bold text-dark">${escapeHtml(e.student_name || 'Student')}</div>
+                            <div class="text-xs text-muted">${escapeHtml(e.student_id || e.student_email || '')}</div>
+                        </td>
+                        <td><span class="fw-semibold text-primary">${escapeHtml(e.course_title || e.program_title || 'Academic Course')}</span></td>
+                        <td class="text-muted text-xs">${formatDate(e.enrollment_date)}</td>
+                        <td style="width: 140px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 6px;">
+                                    <div class="progress-bar bg-success" style="width: ${e.progress_percentage || 0}%; border-radius: 6px;"></div>
+                                </div>
+                                <span class="text-xs fw-bold text-muted">${e.progress_percentage || 0}%</span>
+                            </div>
+                        </td>
+                        <td><span class="admin-status-badge ${(e.status || 'active').toLowerCase()}">${escapeHtml(e.status || 'Active')}</span></td>
+                        <td>
+                            <button class="action-btn delete" title="Delete Enrollment" onclick="deleteEnrollment(${e.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            const searchInput = document.getElementById('enrollmentSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function (e) {
+                    const q = e.target.value.toLowerCase();
+                    const filtered = allEnrollments.filter(item => 
+                        (item.student_name && item.student_name.toLowerCase().includes(q)) ||
+                        (item.course_title && item.course_title.toLowerCase().includes(q)) ||
+                        (item.student_id && item.student_id.toLowerCase().includes(q))
+                    );
+                    renderEnrollments(filtered);
+                });
             }
 
             window.deleteEnrollment = async function (id) {
-                if (!confirm('Delete this enrollment record?')) return;
+                const token = getAuthToken();
+                if (!token) return;
+                if (!confirm('Are you sure you want to remove this enrollment record?')) return;
                 try {
-                    const res = await fetch(`${API_BASE}/admin/enrollments/${id}`, { method: 'DELETE', headers });
-                    const result = await res.json();
-                    if (result.success) location.reload();
-                } catch (e) {
-                    console.error(e);
+                    const res = await fetch(`${API_BASE}/admin/enrollments/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.success) loadEnrollments();
+                } catch (err) {
+                    console.error(err);
                 }
             };
+
+            function formatDate(dateStr) {
+                if (!dateStr) return '2026-05-24';
+                return dateStr.split(' ')[0] || dateStr.split('T')[0];
+            }
 
             function escapeHtml(text) {
                 if (!text) return '';
@@ -188,6 +224,8 @@
                 div.textContent = text;
                 return div.innerHTML;
             }
+
+            loadEnrollments();
         });
     </script>
 </body>

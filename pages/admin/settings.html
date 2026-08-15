@@ -22,14 +22,12 @@
         <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
-                    </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">ACADEMY</div>
-                    </div>
+                <div class="admin-brand-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <div class="admin-brand-text">
+                    <div class="title">AUB DIGITAL</div>
+                    <div class="subtitle">ACADEMY</div>
                 </div>
             </div>
 
@@ -57,17 +55,10 @@
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='../authentication/login.html';">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
-                    <div class="admin-user-info">
-                        <div class="name">Admin</div>
-                        <div class="role">System Administrator</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
@@ -85,8 +76,8 @@
                     <div class="admin-topbar-profile">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
                         <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm">Admin</div>
-                            <div class="text-xs text-muted">System Administrator</div>
+                            <div class="name">Admin</div>
+                            <div class="role">System Administrator</div>
                         </div>
                     </div>
                 </div>
