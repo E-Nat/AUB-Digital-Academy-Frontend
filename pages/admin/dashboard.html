@@ -14,6 +14,67 @@
     
     <!-- Custom Admin CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <style>
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 380px;
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+            max-height: 360px;
+            overflow-y: auto;
+            margin-top: 6px;
+        }
+        .search-results-dropdown.active {
+            display: block;
+        }
+        .search-result-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: var(--admin-text-main);
+            border-bottom: 1px solid #F1F5F9;
+            transition: background 0.15s;
+        }
+        .search-result-item:hover {
+            background: #F8FAFC;
+        }
+        .notifications-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: 14px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.12);
+            z-index: 1000;
+            display: none;
+            padding: 12px 0;
+            margin-top: 10px;
+        }
+        .notifications-dropdown.active {
+            display: block;
+        }
+        .notification-item {
+            padding: 10px 16px;
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid #F8FAFC;
+            transition: background 0.15s;
+            cursor: pointer;
+        }
+        .notification-item:hover {
+            background: #F8FAFC;
+        }
+    </style>
 </head>
 <body class="admin-body">
 
@@ -78,14 +139,27 @@
             <header class="admin-topbar">
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search anything...">
+                    <input type="text" class="admin-search-input" id="globalSearchInput" placeholder="Search anything...">
+                    <div class="search-results-dropdown" id="searchResultsContainer"></div>
                 </div>
 
                 <div class="admin-topbar-actions">
-                    <button class="admin-notification-btn" aria-label="Notifications">
-                        <i class="bi bi-bell-fill"></i>
-                        <span class="admin-notification-badge">3</span>
-                    </button>
+                    <div class="position-relative">
+                        <button class="admin-notification-btn" id="notificationBtn" aria-label="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="admin-notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div class="d-flex justify-content-between align-items-center px-3 pb-2 border-bottom">
+                                <span class="fw-bold text-sm">Notifications</span>
+                                <button class="btn btn-sm btn-link text-xs p-0 text-primary" id="markAllReadBtn">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" class="pt-2">
+                                <!-- Dynamic notifications -->
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
                         <div class="d-none d-md-block text-start lh-1">
@@ -111,7 +185,7 @@
                     </div>
                 </div>
 
-                <!-- 6 KPI CARDS -->
+                <!-- 6 KPI CARDS (Calculated Real Database Metrics) -->
                 <div class="admin-kpi-grid">
                     <!-- Total Users -->
                     <div class="admin-kpi-card">
@@ -120,7 +194,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Users</div>
-                            <div class="admin-kpi-value" id="kpiTotalUsers">1,250</div>
+                            <div class="admin-kpi-value" id="kpiTotalUsers">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +12% from last month
                             </div>
@@ -134,7 +208,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Courses</div>
-                            <div class="admin-kpi-value" id="kpiTotalCourses">48</div>
+                            <div class="admin-kpi-value" id="kpiTotalCourses">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +8% from last month
                             </div>
@@ -148,7 +222,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Students</div>
-                            <div class="admin-kpi-value" id="kpiTotalStudents">980</div>
+                            <div class="admin-kpi-value" id="kpiTotalStudents">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +15% from last month
                             </div>
@@ -162,7 +236,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Teachers</div>
-                            <div class="admin-kpi-value" id="kpiTotalTeachers">35</div>
+                            <div class="admin-kpi-value" id="kpiTotalTeachers">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +5% from last month
                             </div>
@@ -176,7 +250,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Chapters</div>
-                            <div class="admin-kpi-value" id="kpiTotalChapters">320</div>
+                            <div class="admin-kpi-value" id="kpiTotalChapters">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +10% from last month
                             </div>
@@ -190,7 +264,7 @@
                         </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Enrollments</div>
-                            <div class="admin-kpi-value" id="kpiTotalEnrollments">1,450</div>
+                            <div class="admin-kpi-value" id="kpiTotalEnrollments">0</div>
                             <div class="admin-kpi-trend positive">
                                 <i class="bi bi-arrow-up-right"></i> +18% from last month
                             </div>
@@ -205,138 +279,50 @@
                         <div class="admin-card h-100 mb-0">
                             <div class="admin-card-header">
                                 <h3 class="admin-card-title">Enrollment Statistics</h3>
-                                <select class="admin-dropdown-select">
-                                    <option>This Month</option>
-                                    <option>Last Month</option>
-                                    <option>This Year</option>
+                                <select class="admin-dropdown-select" id="enrollmentTimeframeSelect">
+                                    <option value="this_month">This Month</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="last_3_months">Last 3 Months</option>
+                                    <option value="this_year">This Year</option>
+                                    <option value="all_time">All Time</option>
                                 </select>
                             </div>
                             <div class="row align-items-center">
                                 <div class="col-sm-5 text-center position-relative py-3">
                                     <!-- Donut Chart SVG -->
-                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 160px; height: 160px; transform: rotate(-90deg);">
+                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 160px; height: 160px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
                                         <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3"></circle>
-                                        <!-- IT 28.97% -->
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3" stroke-dasharray="29 71" stroke-dashoffset="0"></circle>
-                                        <!-- Business 21.38% -->
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#3B82F6" stroke-width="3" stroke-dasharray="21 79" stroke-dashoffset="-29"></circle>
-                                        <!-- Engineering 20.00% -->
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="-50"></circle>
-                                        <!-- Design 15.86% -->
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#F59E0B" stroke-width="3" stroke-dasharray="16 84" stroke-dashoffset="-70"></circle>
-                                        <!-- Others 13.79% -->
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#8B5CF6" stroke-width="3" stroke-dasharray="14 86" stroke-dashoffset="-86"></circle>
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3" stroke-dasharray="100 0" stroke-dashoffset="0"></circle>
                                     </svg>
                                     <div class="position-absolute top-50 start-50 translate-middle text-center lh-1">
                                         <div class="text-xs text-muted mb-1">Total</div>
-                                        <div class="fw-bold fs-4 text-dark" id="donutTotalNumber">1,450</div>
+                                        <div class="fw-bold fs-4 text-dark" id="donutTotalNumber">0</div>
                                     </div>
                                 </div>
                                 <div class="col-sm-7 ps-sm-4">
-                                    <div class="d-flex flex-column gap-2 text-sm">
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #0B1F4D;"></span>
-                                                <span class="text-secondary fw-medium">IT</span>
-                                            </div>
-                                            <span class="fw-bold">420 <span class="text-muted fw-normal text-xs">(28.97%)</span></span>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #3B82F6;"></span>
-                                                <span class="text-secondary fw-medium">Business</span>
-                                            </div>
-                                            <span class="fw-bold">310 <span class="text-muted fw-normal text-xs">(21.38%)</span></span>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #10B981;"></span>
-                                                <span class="text-secondary fw-medium">Engineering</span>
-                                            </div>
-                                            <span class="fw-bold">290 <span class="text-muted fw-normal text-xs">(20.00%)</span></span>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #F59E0B;"></span>
-                                                <span class="text-secondary fw-medium">Design</span>
-                                            </div>
-                                            <span class="fw-bold">230 <span class="text-muted fw-normal text-xs">(15.86%)</span></span>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #8B5CF6;"></span>
-                                                <span class="text-secondary fw-medium">Others</span>
-                                            </div>
-                                            <span class="fw-bold">200 <span class="text-muted fw-normal text-xs">(13.79%)</span></span>
-                                        </div>
+                                    <div class="d-flex flex-column gap-2 text-sm" id="enrollmentCategoriesList">
+                                        <!-- Dynamic Breakdown -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Students by Major Bars -->
+                    <!-- Students by Major Bars (Representing actual distinct students per major) -->
                     <div class="col-lg-6">
                         <div class="admin-card h-100 mb-0">
                             <div class="admin-card-header">
                                 <h3 class="admin-card-title">Students by Major</h3>
-                                <select class="admin-dropdown-select">
-                                    <option>This Month</option>
-                                    <option>Last Month</option>
-                                    <option>This Year</option>
+                                <select class="admin-dropdown-select" id="majorTimeframeSelect">
+                                    <option value="this_month">This Month</option>
+                                    <option value="last_month">Last Month</option>
+                                    <option value="last_3_months">Last 3 Months</option>
+                                    <option value="this_year">This Year</option>
+                                    <option value="all_time">All Time</option>
                                 </select>
                             </div>
-                            <div class="d-flex flex-column gap-3 pt-1">
-                                <!-- IT -->
-                                <div>
-                                    <div class="d-flex justify-content-between text-sm mb-1">
-                                        <span class="fw-medium text-secondary">Information Technology</span>
-                                        <span class="fw-bold">420</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                        <div class="progress-bar" style="width: 85%; background: #0B1F4D; border-radius: 10px;"></div>
-                                    </div>
-                                </div>
-                                <!-- Business -->
-                                <div>
-                                    <div class="d-flex justify-content-between text-sm mb-1">
-                                        <span class="fw-medium text-secondary">Business Administration</span>
-                                        <span class="fw-bold">310</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                        <div class="progress-bar" style="width: 65%; background: #3B82F6; border-radius: 10px;"></div>
-                                    </div>
-                                </div>
-                                <!-- Software Eng -->
-                                <div>
-                                    <div class="d-flex justify-content-between text-sm mb-1">
-                                        <span class="fw-medium text-secondary">Software Engineering</span>
-                                        <span class="fw-bold">290</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                        <div class="progress-bar" style="width: 60%; background: #10B981; border-radius: 10px;"></div>
-                                    </div>
-                                </div>
-                                <!-- UI/UX -->
-                                <div>
-                                    <div class="d-flex justify-content-between text-sm mb-1">
-                                        <span class="fw-medium text-secondary">UI/UX Design</span>
-                                        <span class="fw-bold">230</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                        <div class="progress-bar" style="width: 48%; background: #F59E0B; border-radius: 10px;"></div>
-                                    </div>
-                                </div>
-                                <!-- Data Science -->
-                                <div>
-                                    <div class="d-flex justify-content-between text-sm mb-1">
-                                        <span class="fw-medium text-secondary">Data Science</span>
-                                        <span class="fw-bold">200</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                        <div class="progress-bar" style="width: 42%; background: #8B5CF6; border-radius: 10px;"></div>
-                                    </div>
-                                </div>
+                            <div class="d-flex flex-column gap-3 pt-1" id="studentsByMajorContainer">
+                                <!-- Dynamic Progress Bars from Database -->
                             </div>
                         </div>
                     </div>
@@ -354,48 +340,13 @@
                                 <tr>
                                     <th>STUDENT ID</th>
                                     <th>STUDENT NAME</th>
-                                    <th>COURSE</th>
+                                    <th>COURSE / PROGRAM</th>
                                     <th>ENROLLMENT DATE</th>
                                     <th>STATUS</th>
                                 </tr>
                             </thead>
                             <tbody id="recentEnrollmentsTableBody">
-                                <!-- Seed fallback / Dynamic rendering -->
-                                <tr>
-                                    <td class="text-muted fw-semibold">0001001</td>
-                                    <td class="fw-bold text-dark">Sok Virak</td>
-                                    <td>Web Development</td>
-                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
-                                    <td><span class="admin-status-badge active">Active</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted fw-semibold">0001002</td>
-                                    <td class="fw-bold text-dark">Meas Sreynich</td>
-                                    <td>Database Systems</td>
-                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
-                                    <td><span class="admin-status-badge active">Active</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted fw-semibold">0001003</td>
-                                    <td class="fw-bold text-dark">Chan Dara</td>
-                                    <td>UI/UX Design</td>
-                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 23, 2026</td>
-                                    <td><span class="admin-status-badge active">Active</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted fw-semibold">0001004</td>
-                                    <td class="fw-bold text-dark">Pich Chhorn</td>
-                                    <td>Network Security</td>
-                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
-                                    <td><span class="admin-status-badge active">Active</span></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-muted fw-semibold">0001005</td>
-                                    <td class="fw-bold text-dark">Vibol Pen</td>
-                                    <td>Mobile Development</td>
-                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 22, 2026</td>
-                                    <td><span class="admin-status-badge active">Active</span></td>
-                                </tr>
+                                <!-- Dynamic SQL Query Rendering -->
                             </tbody>
                         </table>
                     </div>

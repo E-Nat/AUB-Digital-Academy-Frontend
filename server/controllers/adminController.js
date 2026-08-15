@@ -8,7 +8,7 @@ const { dbAsync } = require('../db/database');
 exports.getDashboardMetrics = async (req, res) => {
     try {
         const totalUsersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM users`);
-        const totalCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses`);
+        const totalCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1`);
         const totalStudentsRow = await dbAsync.get(`
             SELECT COUNT(*) as count FROM users u
             JOIN roles r ON u.role_id = r.id
@@ -39,34 +39,70 @@ exports.getDashboardMetrics = async (req, res) => {
 
 exports.getDashboardStats = async (req, res) => {
     try {
-        // Breakdown of enrollments by department/category
+        const { timeframe } = req.query;
+
+        // 1. Real Enrollment Statistics breakdown by category from DB
         const categoryEnrollments = await dbAsync.all(`
-            SELECT cat.name, COUNT(e.id) as count
-            FROM categories cat
-            LEFT JOIN courses c ON c.category_id = cat.id
-            LEFT JOIN enrollments e ON e.course_id = c.id
-            GROUP BY cat.id
+            SELECT COALESCE(cat.name, 'General') as name, COUNT(e.id) as count
+            FROM enrollments e
+            LEFT JOIN courses c ON e.course_id = c.id
+            LEFT JOIN categories cat ON c.category_id = cat.id
+            GROUP BY cat.name
             ORDER BY count DESC
-            LIMIT 5
         `);
 
-        // Major distribution
-        const majorStats = [
-            { major: 'Information Technology', count: 420, percentage: 28.97, color: '#0B1F4D' },
-            { major: 'Business Administration', count: 310, percentage: 21.38, color: '#3B82F6' },
-            { major: 'Software Engineering', count: 290, percentage: 20.00, color: '#10B981' },
-            { major: 'UI/UX Design', count: 230, percentage: 15.86, color: '#F59E0B' },
-            { major: 'Data Science', count: 200, percentage: 13.79, color: '#8B5CF6' }
-        ];
+        const totalEnrollmentCountRow = await dbAsync.get(`SELECT COUNT(*) as total FROM enrollments`);
+        const totalEnrollments = totalEnrollmentCountRow.total || 0;
+
+        // Color palette for chart
+        const colors = ['#0B1F4D', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
+        const formattedEnrollmentCategories = categoryEnrollments.map((cat, idx) => {
+            const percentage = totalEnrollments > 0 ? parseFloat(((cat.count / totalEnrollments) * 100).toFixed(2)) : 0;
+            return {
+                name: cat.name,
+                count: cat.count,
+                percentage: percentage,
+                color: colors[idx % colors.length]
+            };
+        });
+
+        // 2. Real "Students by Major" (Counting actual distinct students by their enrolled major program)
+        const studentsByMajorQuery = await dbAsync.all(`
+            SELECT COALESCE(p.title, 'Undeclared') as major, COUNT(u.id) as student_count
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            LEFT JOIN programs p ON u.major_id = p.id
+            WHERE r.name = 'STUDENT'
+            GROUP BY p.title
+            ORDER BY student_count DESC
+        `);
+
+        const totalStudentsRow = await dbAsync.get(`
+            SELECT COUNT(*) as total FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.name = 'STUDENT'
+        `);
+        const totalStudents = totalStudentsRow.total || 1;
+
+        const formattedStudentsByMajor = studentsByMajorQuery.map((item, idx) => {
+            const pct = Math.round((item.student_count / totalStudents) * 100);
+            return {
+                major: item.major,
+                count: item.student_count,
+                percentage: pct,
+                color: colors[idx % colors.length]
+            };
+        });
 
         res.json({
             success: true,
             data: {
+                timeframe: timeframe || 'this_month',
                 enrollmentStatistics: {
-                    total: 1450,
-                    categories: categoryEnrollments
+                    total: totalEnrollments,
+                    categories: formattedEnrollmentCategories
                 },
-                studentsByMajor: majorStats
+                studentsByMajor: formattedStudentsByMajor
             }
         });
     } catch (error) {
@@ -80,10 +116,11 @@ exports.getRecentEnrollments = async (req, res) => {
         const recent = await dbAsync.all(`
             SELECT e.id, e.enrollment_date, e.status, e.progress_percentage,
                    u.full_name as student_name, u.university_id as student_id, u.avatar_url,
-                   c.title as course_title
+                   COALESCE(c.title, p.title, 'Academic Course') as course_title
             FROM enrollments e
             JOIN users u ON e.user_id = u.id
             LEFT JOIN courses c ON e.course_id = c.id
+            LEFT JOIN programs p ON e.program_id = p.id
             ORDER BY e.enrollment_date DESC
             LIMIT 10
         `);
@@ -96,7 +133,96 @@ exports.getRecentEnrollments = async (req, res) => {
 };
 
 // ==========================================
-// 2. PROGRAMS MANAGEMENT CRUD
+// 2. SYSTEM NOTIFICATIONS
+// ==========================================
+
+exports.getNotifications = async (req, res) => {
+    try {
+        const notifications = await dbAsync.all(`
+            SELECT * FROM notifications ORDER BY created_at DESC LIMIT 10
+        `);
+        const unreadCountRow = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM notifications WHERE is_read = 0
+        `);
+
+        res.json({
+            success: true,
+            data: {
+                unreadCount: unreadCountRow.count,
+                notifications
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch notifications.' });
+    }
+};
+
+exports.markNotificationRead = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (id === 'all') {
+            await dbAsync.run(`UPDATE notifications SET is_read = 1`);
+        } else {
+            await dbAsync.run(`UPDATE notifications SET is_read = 1 WHERE id = ?`, [id]);
+        }
+        res.json({ success: true, message: 'Notification marked as read.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to update notification.' });
+    }
+};
+
+// ==========================================
+// 3. GLOBAL SEARCH
+// ==========================================
+
+exports.globalSearch = async (req, res) => {
+    try {
+        const q = req.query.q ? req.query.q.trim().toLowerCase() : '';
+        if (!q) {
+            return res.json({ success: true, data: { programs: [], courses: [], users: [], categories: [] } });
+        }
+
+        const param = `%${q}%`;
+
+        const programs = await dbAsync.all(`
+            SELECT id, title, degree_type, 'program' as type, 'academic-management.html' as link
+            FROM programs WHERE LOWER(title) LIKE ? OR LOWER(description) LIKE ? LIMIT 5
+        `, [param, param]);
+
+        const courses = await dbAsync.all(`
+            SELECT id, title, rating, 'course' as type, 'academic-management.html' as link
+            FROM courses WHERE LOWER(title) LIKE ? OR LOWER(description) LIKE ? LIMIT 5
+        `, [param, param]);
+
+        const users = await dbAsync.all(`
+            SELECT u.id, u.full_name as title, u.email, r.name as role, 'user' as type, 'user-management.html' as link
+            FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE LOWER(u.full_name) LIKE ? OR LOWER(u.email) LIKE ? OR u.university_id LIKE ? LIMIT 5
+        `, [param, param, param]);
+
+        const categories = await dbAsync.all(`
+            SELECT id, name as title, slug, 'category' as type, 'academic-management.html' as link
+            FROM categories WHERE LOWER(name) LIKE ? LIMIT 5
+        `, [param]);
+
+        res.json({
+            success: true,
+            data: {
+                programs,
+                courses,
+                users,
+                categories
+            }
+        });
+    } catch (error) {
+        console.error('Global search error:', error);
+        res.status(500).json({ success: false, message: 'Failed to execute global search.' });
+    }
+};
+
+// ==========================================
+// 4. PROGRAMS MANAGEMENT CRUD
 // ==========================================
 
 exports.getAllPrograms = async (req, res) => {
@@ -191,7 +317,7 @@ exports.toggleProgramPublish = async (req, res) => {
 };
 
 // ==========================================
-// 3. COURSES MANAGEMENT CRUD
+// 5. COURSES MANAGEMENT CRUD
 // ==========================================
 
 exports.getAllCourses = async (req, res) => {
@@ -294,7 +420,7 @@ exports.toggleCoursePublish = async (req, res) => {
 };
 
 // ==========================================
-// 4. CATEGORIES CRUD
+// 6. CATEGORIES CRUD
 // ==========================================
 
 exports.getAllCategories = async (req, res) => {
@@ -332,7 +458,7 @@ exports.deleteCategory = async (req, res) => {
 };
 
 // ==========================================
-// 5. INSTRUCTORS CRUD
+// 7. INSTRUCTORS CRUD
 // ==========================================
 
 exports.getAllInstructors = async (req, res) => {
@@ -369,16 +495,17 @@ exports.deleteInstructor = async (req, res) => {
 };
 
 // ==========================================
-// 6. USERS CRUD
+// 8. USERS CRUD
 // ==========================================
 
 exports.getAllUsers = async (req, res) => {
     try {
         const users = await dbAsync.all(`
             SELECT u.id, u.full_name, u.email, u.university_id, u.avatar_url, u.status, u.created_at,
-                   r.name as role, r.id as role_id
+                   r.name as role, r.id as role_id, p.title as major_title
             FROM users u
             JOIN roles r ON u.role_id = r.id
+            LEFT JOIN programs p ON u.major_id = p.id
             ORDER BY u.created_at DESC
         `);
         res.json({ success: true, data: users });
@@ -389,7 +516,7 @@ exports.getAllUsers = async (req, res) => {
 
 exports.createUser = async (req, res) => {
     try {
-        const { full_name, email, university_id, password, role_id, status } = req.body;
+        const { full_name, email, university_id, password, role_id, major_id, status } = req.body;
 
         if (!full_name || !email || !password) {
             return res.status(400).json({ success: false, message: 'Full name, email, and password are required.' });
@@ -397,9 +524,9 @@ exports.createUser = async (req, res) => {
 
         const password_hash = bcrypt.hashSync(password, 10);
         const result = await dbAsync.run(
-            `INSERT INTO users (full_name, email, university_id, password_hash, role_id, status)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [full_name, email, university_id || null, password_hash, role_id || 3, status || 'Active']
+            `INSERT INTO users (full_name, email, university_id, password_hash, role_id, major_id, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [full_name, email, university_id || null, password_hash, role_id || 3, major_id || null, status || 'Active']
         );
 
         res.json({ success: true, message: 'User created successfully.', id: result.lastID });
@@ -423,7 +550,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 // ==========================================
-// 7. ENROLLMENTS CRUD
+// 9. ENROLLMENTS CRUD
 // ==========================================
 
 exports.getAllEnrollments = async (req, res) => {

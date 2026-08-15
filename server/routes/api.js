@@ -29,6 +29,11 @@ router.get('/admin/dashboard/metrics', authenticateToken, requireAdmin, adminCon
 router.get('/admin/dashboard/stats', authenticateToken, requireAdmin, adminController.getDashboardStats);
 router.get('/admin/dashboard/recent-enrollments', authenticateToken, requireAdmin, adminController.getRecentEnrollments);
 
+// Global Search & Notifications
+router.get('/admin/search', authenticateToken, requireAdmin, adminController.globalSearch);
+router.get('/admin/notifications', authenticateToken, requireAdmin, adminController.getNotifications);
+router.patch('/admin/notifications/:id/read', authenticateToken, requireAdmin, adminController.markNotificationRead);
+
 // Programs CRUD
 router.get('/admin/programs', authenticateToken, requireAdmin, adminController.getAllPrograms);
 router.post('/admin/programs', authenticateToken, requireAdmin, adminController.createProgram);

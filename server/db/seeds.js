@@ -19,7 +19,104 @@ async function seedDatabase() {
         );
     }
 
-    // 2. Seed Users
+    // 2. Seed Programs
+    console.log('Seeding Featured Programs...');
+    const programs = [
+        {
+            id: 1,
+            title: 'Computer Science & Engineering',
+            slug: 'computer-science-engineering',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: "Build the foundation of tomorrow's technology with strong skills in software, AI, databases, and computer systems.",
+            icon_class: 'bi-laptop',
+            theme_class: 'theme-blue',
+            detail_url: 'pages/programs/cs.html',
+            order_num: 1,
+            is_featured: 1,
+            is_published: 1
+        },
+        {
+            id: 2,
+            title: 'Information Technology',
+            slug: 'information-technology',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: 'Explore the world of software development, networks, data management, and emerging technologies.',
+            icon_class: 'bi-code-slash',
+            theme_class: 'theme-cyan',
+            detail_url: 'pages/programs/it.html',
+            order_num: 2,
+            is_featured: 1,
+            is_published: 1
+        },
+        {
+            id: 3,
+            title: 'Finance & Banking',
+            slug: 'finance-banking',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: 'Gain in-depth knowledge of financial systems, investment analysis, and modern banking operations.',
+            icon_class: 'bi-bank',
+            theme_class: 'theme-green',
+            detail_url: 'pages/programs/finance.html',
+            order_num: 3,
+            is_featured: 1,
+            is_published: 1
+        },
+        {
+            id: 4,
+            title: 'Accounting',
+            slug: 'accounting',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: 'Master the language of business with comprehensive training in financial reporting and auditing.',
+            icon_class: 'bi-calculator',
+            theme_class: 'theme-purple',
+            detail_url: 'pages/programs/accounting.html',
+            order_num: 4,
+            is_featured: 1,
+            is_published: 1
+        },
+        {
+            id: 5,
+            title: 'Business Administration',
+            slug: 'business-administration',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: "Develop leadership, management, and entrepreneurial skills to succeed in today's dynamic business world.",
+            icon_class: 'bi-briefcase',
+            theme_class: 'theme-gold',
+            detail_url: 'pages/programs/business.html',
+            order_num: 5,
+            is_featured: 1,
+            is_published: 1
+        },
+        {
+            id: 6,
+            title: 'Marketing',
+            slug: 'marketing',
+            degree_type: 'BACHELOR DEGREE',
+            duration: '4 Years',
+            description: 'Learn to understand consumer behavior, brand management, and digital marketing strategies.',
+            icon_class: 'bi-megaphone',
+            theme_class: 'theme-orange',
+            detail_url: 'pages/programs/marketing.html',
+            order_num: 6,
+            is_featured: 1,
+            is_published: 1
+        }
+    ];
+
+    for (const prog of programs) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO programs (id, title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [prog.id, prog.title, prog.slug, prog.degree_type, prog.duration, prog.description, prog.icon_class, prog.theme_class, prog.detail_url, prog.order_num, prog.is_featured, prog.is_published]
+        );
+    }
+
+    // 3. Seed Users with Major Assignment
     console.log('Seeding Users...');
     const defaultPasswordHash = bcrypt.hashSync('admin123', 10);
     const studentPasswordHash = bcrypt.hashSync('student123', 10);
@@ -32,6 +129,7 @@ async function seedDatabase() {
             university_id: '10293847',
             password_hash: defaultPasswordHash,
             role_id: 1,
+            major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -41,6 +139,7 @@ async function seedDatabase() {
             university_id: '0001001',
             password_hash: studentPasswordHash,
             role_id: 3,
+            major_id: 2, // Information Technology
             avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -50,6 +149,7 @@ async function seedDatabase() {
             university_id: '0001002',
             password_hash: studentPasswordHash,
             role_id: 3,
+            major_id: 1, // Computer Science & Engineering
             avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -59,6 +159,7 @@ async function seedDatabase() {
             university_id: '0001003',
             password_hash: studentPasswordHash,
             role_id: 3,
+            major_id: 5, // Business Administration
             avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -68,6 +169,7 @@ async function seedDatabase() {
             university_id: '0001004',
             password_hash: studentPasswordHash,
             role_id: 3,
+            major_id: 2, // Information Technology
             avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -77,6 +179,7 @@ async function seedDatabase() {
             university_id: '0001005',
             password_hash: studentPasswordHash,
             role_id: 3,
+            major_id: 1, // Computer Science & Engineering
             avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -86,6 +189,7 @@ async function seedDatabase() {
             university_id: 'T001',
             password_hash: teacherPasswordHash,
             role_id: 2,
+            major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150',
             status: 'Active'
         },
@@ -95,6 +199,7 @@ async function seedDatabase() {
             university_id: 'T002',
             password_hash: teacherPasswordHash,
             role_id: 2,
+            major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
             status: 'Active'
         }
@@ -102,13 +207,14 @@ async function seedDatabase() {
 
     for (const u of users) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO users (full_name, email, university_id, password_hash, role_id, avatar_url, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.avatar_url, u.status]
+            `INSERT INTO users (full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(email) DO UPDATE SET major_id = excluded.major_id`,
+            [u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status]
         );
     }
 
-    // 3. Seed Categories
+    // 4. Seed Categories
     console.log('Seeding Categories...');
     const categories = [
         { id: 1, name: 'Technology', slug: 'technology', icon: 'bi-laptop', type: 'general', order_num: 1 },
@@ -130,7 +236,7 @@ async function seedDatabase() {
         );
     }
 
-    // 4. Seed Instructors
+    // 5. Seed Instructors
     console.log('Seeding Instructors...');
     const instructors = [
         {
@@ -179,110 +285,7 @@ async function seedDatabase() {
         );
     }
 
-    // 5. Seed Featured Programs (Preserving Exact 6 Programs from Website)
-    console.log('Seeding Featured Programs...');
-    const programs = [
-        {
-            id: 1,
-            title: 'Computer Science & Engineering',
-            slug: 'computer-science-engineering',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: "Build the foundation of tomorrow's technology with strong skills in software, AI, databases, and computer systems.",
-            icon_class: 'bi-laptop',
-            theme_class: 'theme-blue',
-            detail_url: 'pages/programs/cs.html',
-            order_num: 1,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Programming', 'AI', 'Systems']
-        },
-        {
-            id: 2,
-            title: 'Information Technology',
-            slug: 'information-technology',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Explore the world of software development, networks, data management, and emerging technologies.',
-            icon_class: 'bi-code-slash',
-            theme_class: 'theme-cyan',
-            detail_url: 'pages/programs/it.html',
-            order_num: 2,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Development', 'Networks', 'Data']
-        },
-        {
-            id: 3,
-            title: 'Finance & Banking',
-            slug: 'finance-banking',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Gain in-depth knowledge of financial systems, investment analysis, and modern banking operations.',
-            icon_class: 'bi-bank',
-            theme_class: 'theme-green',
-            detail_url: 'pages/programs/finance.html',
-            order_num: 3,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Finance', 'Investment', 'Banking']
-        },
-        {
-            id: 4,
-            title: 'Accounting',
-            slug: 'accounting',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Master the language of business with comprehensive training in financial reporting and auditing.',
-            icon_class: 'bi-calculator',
-            theme_class: 'theme-purple',
-            detail_url: 'pages/programs/accounting.html',
-            order_num: 4,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Audit', 'Tax', 'Reporting']
-        },
-        {
-            id: 5,
-            title: 'Business Administration',
-            slug: 'business-administration',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: "Develop leadership, management, and entrepreneurial skills to succeed in today's dynamic business world.",
-            icon_class: 'bi-briefcase',
-            theme_class: 'theme-gold',
-            detail_url: 'pages/programs/business.html',
-            order_num: 5,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Management', 'Leadership', 'Strategy']
-        },
-        {
-            id: 6,
-            title: 'Marketing',
-            slug: 'marketing',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Learn to understand consumer behavior, brand management, and digital marketing strategies.',
-            icon_class: 'bi-megaphone',
-            theme_class: 'theme-orange',
-            detail_url: 'pages/programs/marketing.html',
-            order_num: 6,
-            is_featured: 1,
-            is_published: 1,
-            tags: ['Digital', 'Branding', 'Strategy']
-        }
-    ];
-
-    for (const prog of programs) {
-        await dbAsync.run(
-            `INSERT OR IGNORE INTO programs (id, title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [prog.id, prog.title, prog.slug, prog.degree_type, prog.duration, prog.description, prog.icon_class, prog.theme_class, prog.detail_url, prog.order_num, prog.is_featured, prog.is_published]
-        );
-    }
-
-    // 6. Seed Courses (Preserving Exact 4 Courses from Website)
+    // 6. Seed Courses
     console.log('Seeding Courses...');
     const courses = [
         {
@@ -290,7 +293,7 @@ async function seedDatabase() {
             title: 'Full-Stack Web Development',
             slug: 'full-stack-web-development',
             description: 'Build modern, responsive websites and scalable web applications from scratch.',
-            category_id: 1, // Technology
+            category_id: 1,
             instructor_id: 1,
             thumbnail_url: 'assets/images/course_webdev.jpg',
             rating: 4.9,
@@ -308,7 +311,7 @@ async function seedDatabase() {
             title: 'Advanced UI/UX Design',
             slug: 'advanced-ui-ux-design',
             description: 'Master Figma and design user-centered digital experiences for mobile and web.',
-            category_id: 3, // Design
+            category_id: 3,
             instructor_id: 2,
             thumbnail_url: 'assets/images/course_uiux.jpg',
             rating: 4.8,
@@ -326,7 +329,7 @@ async function seedDatabase() {
             title: 'Cyber Security Essentials',
             slug: 'cyber-security-essentials',
             description: 'Protect digital assets and infrastructure against evolving global cyber threats.',
-            category_id: 4, // Security
+            category_id: 4,
             instructor_id: 3,
             thumbnail_url: 'assets/images/course_cybersecurity.jpg',
             rating: 4.9,
@@ -344,7 +347,7 @@ async function seedDatabase() {
             title: 'Data Science Fundamentals',
             slug: 'data-science-fundamentals',
             description: 'Analyze complex datasets and generate actionable business insights.',
-            category_id: 5, // Data Science
+            category_id: 5,
             instructor_id: 4,
             thumbnail_url: 'assets/images/course_datascience.jpg',
             rating: 4.7,
@@ -367,7 +370,7 @@ async function seedDatabase() {
         );
     }
 
-    // 7. Seed Modules & Lessons for Learning Content
+    // 7. Seed Modules & Lessons
     console.log('Seeding Course Modules & Lessons...');
     const modules = [
         { id: 1, course_id: 1, title: 'Module 1: Introduction to Web Architecture & HTML5', order_num: 1 },
@@ -385,30 +388,14 @@ async function seedDatabase() {
         );
     }
 
-    const lessons = [
-        { id: 1, module_id: 1, title: 'Welcome & Course Orientation', duration: '15m', order_num: 1 },
-        { id: 2, module_id: 1, title: 'Understanding Client-Server Model', duration: '30m', order_num: 2 },
-        { id: 3, module_id: 1, title: 'Semantic HTML Elements & SEO', duration: '45m', order_num: 3 },
-        { id: 4, module_id: 2, title: 'CSS Flexbox & CSS Grid Mastery', duration: '50m', order_num: 1 },
-        { id: 5, module_id: 2, title: 'CSS Variables & Theme Systems', duration: '40m', order_num: 2 },
-        { id: 6, module_id: 4, title: 'Design Thinking Framework', duration: '35m', order_num: 1 },
-        { id: 7, module_id: 6, title: 'Core Principles of Cyber Security', duration: '45m', order_num: 1 }
-    ];
-    for (const l of lessons) {
-        await dbAsync.run(
-            `INSERT OR IGNORE INTO lessons (id, module_id, title, duration, order_num) VALUES (?, ?, ?, ?, ?)`,
-            [l.id, l.module_id, l.title, l.duration, l.order_num]
-        );
-    }
-
-    // 8. Seed Recent Enrollments (Matching Mockup exactly)
+    // 8. Seed Enrollments
     console.log('Seeding Enrollments...');
     const enrollments = [
-        { id: 1, user_id: 2, course_id: 1, enrollment_date: '2026-05-24 09:30:00', status: 'Active', progress_percentage: 65.0 }, // Sok Virak -> Web Development
-        { id: 2, user_id: 3, course_id: 1, enrollment_date: '2026-05-24 10:15:00', status: 'Active', progress_percentage: 40.0 }, // Meas Sreynich -> Database Systems
-        { id: 3, user_id: 4, course_id: 2, enrollment_date: '2026-05-23 14:20:00', status: 'Active', progress_percentage: 85.0 }, // Chan Dara -> UI/UX Design
-        { id: 4, user_id: 5, course_id: 3, enrollment_date: '2026-05-24 11:05:00', status: 'Active', progress_percentage: 20.0 }, // Pich Chhorn -> Network Security
-        { id: 5, user_id: 6, course_id: 1, enrollment_date: '2026-05-22 16:45:00', status: 'Active', progress_percentage: 95.0 }  // Vibol Pen -> Mobile Development
+        { id: 1, user_id: 2, course_id: 1, enrollment_date: '2026-05-24 09:30:00', status: 'Active', progress_percentage: 65.0 },
+        { id: 2, user_id: 3, course_id: 1, enrollment_date: '2026-05-24 10:15:00', status: 'Active', progress_percentage: 40.0 },
+        { id: 3, user_id: 4, course_id: 2, enrollment_date: '2026-05-23 14:20:00', status: 'Active', progress_percentage: 85.0 },
+        { id: 4, user_id: 5, course_id: 3, enrollment_date: '2026-05-24 11:05:00', status: 'Active', progress_percentage: 20.0 },
+        { id: 5, user_id: 6, course_id: 1, enrollment_date: '2026-05-22 16:45:00', status: 'Active', progress_percentage: 95.0 }
     ];
     for (const e of enrollments) {
         await dbAsync.run(
@@ -418,10 +405,46 @@ async function seedDatabase() {
         );
     }
 
+    // 9. Seed System Notifications
+    console.log('Seeding Notifications...');
+    const notifications = [
+        {
+            id: 1,
+            title: 'New Student Enrollment',
+            message: 'Sok Virak enrolled in Full-Stack Web Development',
+            type: 'enrollment',
+            link_url: 'enrollment-management.html',
+            is_read: 0
+        },
+        {
+            id: 2,
+            title: 'Course Update Published',
+            message: 'Cyber Security Essentials updated with 3 new lessons',
+            type: 'course',
+            link_url: 'academic-management.html',
+            is_read: 0
+        },
+        {
+            id: 3,
+            title: 'System Health Check',
+            message: 'Database backup and indexing completed successfully',
+            type: 'system',
+            link_url: 'settings.html',
+            is_read: 0
+        }
+    ];
+
+    for (const n of notifications) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO notifications (id, title, message, type, link_url, is_read)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [n.id, n.title, n.message, n.type, n.link_url, n.is_read]
+        );
+    }
+
     console.log('--- Database Seeding Completed Successfully! ---');
 }
 
-// If executed directly via node seeds.js
 if (require.main === module) {
     seedDatabase()
         .then(() => {
