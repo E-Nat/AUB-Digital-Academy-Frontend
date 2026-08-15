@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     <span class="rounded-circle" style="width: 10px; height: 10px; background: ${c.color || '#2563eb'};"></span>
                                     <span class="text-secondary fw-medium">${escapeHtml(c.name)}</span>
                                 </div>
-                                <span class="fw-bold">${c.count} <span class="text-muted fw-normal text-xs">(${c.percentage}%)</span></span>
+                                <span class="fw-bold">${c.count} <span class="text-muted fw-normal text-xs">(${c.percentage !== undefined ? c.percentage : 0}%)</span></span>
                             </div>
                         `).join('');
                     }
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     <span class="fw-bold">${m.count}</span>
                                 </div>
                                 <div class="progress" style="height: 8px; background: #F1F5F9; border-radius: 8px;">
-                                    <div class="progress-bar" style="width: ${m.percentage}%; background: ${m.color || '#2563eb'}; border-radius: 8px;"></div>
+                                    <div class="progress-bar" style="width: ${m.percentage || 0}%; background: ${m.color || '#2563eb'}; border-radius: 8px;"></div>
                                 </div>
                             </div>
                         `).join('');
