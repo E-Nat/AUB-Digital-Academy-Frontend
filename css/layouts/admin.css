@@ -1,6 +1,6 @@
 /* ==========================================
    ADMIN LAYOUT CSS - AUB DIGITAL ACADEMY
-   Refined Professional & Compact Scale
+   Refined Professional Scale & Full Viewport Responsive Layout
    ========================================== */
 
 :root {
@@ -15,12 +15,18 @@
     --admin-primary: #2563eb;
 }
 
-body.admin-body {
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body.admin-body {
     background-color: var(--admin-bg);
     color: var(--admin-text-main);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
     padding: 0;
+    width: 100%;
+    min-height: 100vh;
     overflow-x: hidden;
     font-size: 14px;
 }
@@ -29,11 +35,16 @@ body.admin-body {
     display: flex;
     min-height: 100vh;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-/* --- 1. SIDEBAR (More compact & professional) --- */
+/* --- 1. SIDEBAR (Compact Scale) --- */
 .admin-sidebar {
-    width: 240px; /* Reduced from 270px */
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
     background-color: var(--admin-sidebar-bg);
     color: #FFFFFF;
     display: flex;
@@ -62,6 +73,7 @@ body.admin-body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .admin-brand-icon i {
@@ -91,7 +103,7 @@ body.admin-body {
     padding: 14px 10px;
     display: flex;
     flex-direction: column;
-    gap: 4px; /* Reduced vertical spacing between menu items */
+    gap: 4px;
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -100,17 +112,17 @@ body.admin-body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 9px 14px; /* Compact padding */
+    padding: 9px 14px;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     font-weight: 500;
-    font-size: 15px; /* Scaled to 15px */
+    font-size: 15px;
     border-radius: 10px;
     transition: all 0.18s ease;
 }
 
 .admin-nav-item i {
-    font-size: 20px; /* Scaled to 20px */
+    font-size: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -156,23 +168,38 @@ body.admin-body {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* --- 2. TOPBAR (Compact height & refined controls) --- */
+/* --- 2. MAIN CONTENT AREA (Spans Full Available Width) --- */
+.admin-main {
+    flex: 1 1 auto;
+    width: calc(100% - 240px);
+    max-width: calc(100% - 240px);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--admin-bg);
+    margin: 0;
+    padding: 0;
+}
+
+/* --- 3. TOPBAR (Spans 100% of Main Content Area) --- */
 .admin-topbar {
-    height: 64px; /* Reduced from 76px */
+    width: 100%;
+    height: 64px;
     background: #FFFFFF;
     border-bottom: 1px solid var(--admin-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px; /* Reduced from 32px */
+    padding: 0 28px;
     position: sticky;
     top: 0;
     z-index: 90;
+    box-sizing: border-box;
 }
 
 .admin-search-wrapper {
     position: relative;
-    width: 270px; /* Reduced from 320px */
+    width: 280px;
 }
 
 .admin-search-wrapper i {
@@ -186,7 +213,7 @@ body.admin-body {
 
 .admin-search-input {
     width: 100%;
-    padding: 7px 12px 7px 34px; /* Compact padding */
+    padding: 7px 12px 7px 34px;
     border-radius: 10px;
     border: 1px solid var(--admin-border);
     background: #F1F5F9;
@@ -212,7 +239,7 @@ body.admin-body {
     position: relative;
     background: transparent;
     border: none;
-    font-size: 1.15rem; /* Scaled from 1.25rem */
+    font-size: 1.15rem;
     color: var(--admin-text-muted);
     cursor: pointer;
     padding: 5px;
@@ -242,7 +269,7 @@ body.admin-body {
     border: 2px solid #FFFFFF;
 }
 
-/* --- 3. SINGLE ADMIN PROFILE (In Topbar) --- */
+/* Single Admin Profile */
 .admin-topbar-profile {
     display: flex;
     align-items: center;
@@ -258,7 +285,7 @@ body.admin-body {
 }
 
 .admin-topbar-profile img {
-    width: 34px; /* Reduced from 40px */
+    width: 34px;
     height: 34px;
     border-radius: 50%;
     object-fit: cover;
@@ -276,21 +303,25 @@ body.admin-body {
     color: var(--admin-text-muted);
 }
 
-/* --- 4. PAGE BODY & HEADER --- */
+/* --- 4. PAGE BODY CONTAINER (Full Width) --- */
 .admin-content {
-    padding: 24px; /* Reduced from 32px */
-    flex-grow: 1;
+    padding: 28px;
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .admin-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px; /* Reduced from 28px */
+    margin-bottom: 22px;
+    width: 100%;
 }
 
 .admin-page-title {
-    font-size: 30px; /* Exactly 30-32px */
+    font-size: 30px;
     font-weight: 800;
     color: var(--admin-text-main);
     margin: 0 0 2px 0;
@@ -298,7 +329,7 @@ body.admin-body {
 }
 
 .admin-page-subtitle {
-    font-size: 15.5px; /* Approximately 16px */
+    font-size: 15.5px;
     color: var(--admin-text-muted);
     margin: 0;
 }
@@ -314,26 +345,30 @@ body.admin-body {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex-shrink: 0;
 }
 
-/* --- 5. METRIC KPI CARDS --- */
+/* --- 5. METRIC KPI CARDS (Responsive 3-column Grid) --- */
 .admin-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px; /* Reduced from 24px */
-    margin-bottom: 20px; /* Reduced from 28px */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+    width: 100%;
 }
 
 .admin-kpi-card {
     background: var(--admin-card-bg);
-    border-radius: 14px; /* Reduced from 20px */
+    border-radius: 14px;
     border: 1px solid var(--admin-border);
-    padding: 16px 18px; /* Reduced from 24px */
+    padding: 18px 20px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
     transition: transform 0.18s ease, box-shadow 0.18s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .admin-kpi-card:hover {
@@ -342,13 +377,13 @@ body.admin-body {
 }
 
 .admin-kpi-icon {
-    width: 46px; /* Reduced from 58px */
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem; /* Scaled from 1.5rem */
+    font-size: 1.3rem;
     flex-shrink: 0;
 }
 
@@ -360,6 +395,7 @@ body.admin-body {
 
 .admin-kpi-info {
     flex-grow: 1;
+    min-width: 0;
 }
 
 .admin-kpi-label {
@@ -367,13 +403,16 @@ body.admin-body {
     font-weight: 600;
     color: var(--admin-text-muted);
     margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .admin-kpi-value {
-    font-size: 1.55rem; /* Reduced from 1.75rem */
+    font-size: 1.65rem;
     font-weight: 800;
     color: var(--admin-text-main);
-    line-height: 1.1;
+    line-height: 1.15;
     margin-bottom: 3px;
 }
 
@@ -383,48 +422,54 @@ body.admin-body {
     display: flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
 }
 
 .admin-kpi-trend.positive { color: #16A34A; }
 .admin-kpi-trend.neutral { color: var(--admin-text-muted); }
 
-/* --- 6. SECTION / WIDGET CARDS --- */
+/* --- 6. SECTION & STAT CARDS --- */
 .admin-card {
     background: var(--admin-card-bg);
-    border-radius: 14px; /* Reduced from 20px */
+    border-radius: 14px;
     border: 1px solid var(--admin-border);
-    padding: 18px 20px; /* Reduced from 24px */
+    padding: 20px 22px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .admin-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    width: 100%;
 }
 
 .admin-card-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--admin-text-main);
     margin: 0;
 }
 
 .admin-dropdown-select {
-    padding: 5px 10px;
+    padding: 5px 12px;
     border-radius: 8px;
     border: 1px solid var(--admin-border);
     background: #FFFFFF;
     font-size: 12.5px;
     color: var(--admin-text-muted);
     outline: none;
+    cursor: pointer;
 }
 
-/* --- 7. TABLES (Refined 13–14px headers & compact cell padding) --- */
+/* --- 7. TABLES (Full Width & Clean Columns) --- */
 .admin-table-responsive {
     overflow-x: auto;
+    width: 100%;
 }
 
 .admin-table {
@@ -435,18 +480,19 @@ body.admin-body {
 
 .admin-table th {
     text-align: left;
-    padding: 10px 14px; /* Reduced padding */
-    font-size: 13px; /* Scaled to 13–14px */
+    padding: 10px 16px;
+    font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--admin-text-muted);
     border-bottom: 1px solid var(--admin-border);
     background: #F8FAFC;
+    white-space: nowrap;
 }
 
 .admin-table td {
-    padding: 12px 14px; /* Reduced from 16px */
+    padding: 13px 16px;
     border-bottom: 1px solid var(--admin-border);
     vertical-align: middle;
 }
@@ -507,10 +553,10 @@ body.admin-body {
     border-color: #DC2626;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* --- 8. RESPONSIVE BREAKPOINTS --- */
+@media (max-width: 1200px) {
     .admin-kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -518,10 +564,17 @@ body.admin-body {
     .admin-sidebar {
         display: none;
     }
-    .admin-kpi-grid {
-        grid-template-columns: 1fr;
+    .admin-main {
+        width: 100%;
+        max-width: 100%;
+    }
+    .admin-topbar {
+        padding: 0 16px;
     }
     .admin-content {
         padding: 16px;
+    }
+    .admin-kpi-grid {
+        grid-template-columns: 1fr;
     }
 }

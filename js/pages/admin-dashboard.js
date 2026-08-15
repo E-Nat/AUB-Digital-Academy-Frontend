@@ -1,31 +1,51 @@
 // Admin Dashboard dynamic script (Vanilla JS)
 document.addEventListener('DOMContentLoaded', async function () {
-    const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-        ? 'http://localhost:5000/api'
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.protocol === 'file:';
+    const API_BASE = (isLocal && window.location.port !== '5000') 
+        ? 'http://localhost:5000/api' 
         : '/api';
 
-    const token = localStorage.getItem('aub_auth_token');
-    const userStr = localStorage.getItem('aub_user');
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    function getAuthToken() {
+        return localStorage.getItem('aub_auth_token') || 
+               localStorage.getItem('token') || 
+               sessionStorage.getItem('aub_auth_token') || 
+               sessionStorage.getItem('token') || '';
+    }
 
-    // 1. Display Current Admin User Info
+    function getHeaders() {
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    }
+
+    // 1. Session & Auth Check
+    const token = getAuthToken();
+    if (!token) {
+        console.warn('No active JWT session found. Redirecting to login.');
+        window.location.href = '../authentication/login.html';
+        return;
+    }
+
+    // 2. Display Admin User Info
+    const userStr = localStorage.getItem('aub_user') || sessionStorage.getItem('aub_user');
     if (userStr) {
         try {
             const user = JSON.parse(userStr);
-            const nameElements = [document.getElementById('sidebarAdminName'), document.getElementById('topbarAdminName')];
-            nameElements.forEach(el => {
-                if (el && user.full_name) el.textContent = user.full_name;
-            });
-            const avatarElements = [document.getElementById('sidebarAvatar'), document.getElementById('topbarAvatar')];
-            avatarElements.forEach(el => {
-                if (el && user.avatar_url) el.src = user.avatar_url;
-            });
+            const nameEl = document.getElementById('topbarAdminName');
+            if (nameEl && user.full_name) nameEl.textContent = user.full_name;
+            const avatarEl = document.getElementById('topbarAvatar');
+            if (avatarEl && user.avatar_url) avatarEl.src = user.avatar_url;
         } catch (e) {
             console.error('Error parsing stored user data', e);
         }
     }
 
-    // 2. Set Dynamic Date Badge
+    // 3. Set Dynamic Date Badge
     const dateBadge = document.getElementById('currentDateBadge');
     if (dateBadge) {
         const now = new Date();
@@ -34,20 +54,30 @@ document.addEventListener('DOMContentLoaded', async function () {
         dateBadge.textContent = `${formatted} | ${weekday}`;
     }
 
-    // 3. Handle Logout
+    // 4. Handle Logout
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function () {
-            localStorage.removeItem('aub_auth_token');
-            localStorage.removeItem('aub_user');
+            localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '../authentication/login.html';
         });
     }
 
-    // 4. Fetch Real Dynamic Dashboard Metrics from SQLite Database
+    // 5. Fetch Real Dynamic Dashboard Metrics from SQLite Database
     async function loadMetrics() {
         try {
-            const response = await fetch(`${API_BASE}/admin/dashboard/metrics`, { headers });
+            const response = await fetch(`${API_BASE}/admin/dashboard/metrics`, { 
+                headers: getHeaders() 
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                console.warn('Session invalid or expired. Redirecting to login.');
+                localStorage.clear();
+                window.location.href = '../authentication/login.html';
+                return;
+            }
+
             if (response.ok) {
                 const result = await response.json();
                 if (result.success && result.data) {
@@ -75,16 +105,21 @@ document.addEventListener('DOMContentLoaded', async function () {
                         if (donutTotal) donutTotal.textContent = totalEnrollments.toLocaleString();
                     }
                 }
+            } else {
+                console.error('Failed to load metrics from API:', response.status);
             }
         } catch (err) {
-            console.log('Metrics API note:', err.message);
+            console.error('Error fetching dashboard metrics:', err.message);
         }
     }
 
-    // 5. Fetch Real Dynamic Statistics with Timeframe
+    // 6. Fetch Real Dynamic Statistics with Timeframe
     async function loadStats(timeframe = 'this_month') {
         try {
-            const res = await fetch(`${API_BASE}/admin/dashboard/stats?timeframe=${timeframe}`, { headers });
+            const res = await fetch(`${API_BASE}/admin/dashboard/stats?timeframe=${timeframe}`, { 
+                headers: getHeaders() 
+            });
+
             if (res.ok) {
                 const result = await res.json();
                 if (result.success && result.data) {
@@ -113,8 +148,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                                     <span class="fw-medium text-secondary">${escapeHtml(m.major)}</span>
                                     <span class="fw-bold">${m.count}</span>
                                 </div>
-                                <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
-                                    <div class="progress-bar" style="width: ${m.percentage}%; background: ${m.color || '#2563eb'}; border-radius: 10px;"></div>
+                                <div class="progress" style="height: 8px; background: #F1F5F9; border-radius: 8px;">
+                                    <div class="progress-bar" style="width: ${m.percentage}%; background: ${m.color || '#2563eb'}; border-radius: 8px;"></div>
                                 </div>
                             </div>
                         `).join('');
@@ -126,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 6. Bind Timeframe Select Dropdowns
+    // 7. Bind Timeframe Select Dropdowns
     const enrollmentSelect = document.getElementById('enrollmentTimeframeSelect');
     if (enrollmentSelect) {
         enrollmentSelect.addEventListener('change', (e) => loadStats(e.target.value));
@@ -136,10 +171,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         majorSelect.addEventListener('change', (e) => loadStats(e.target.value));
     }
 
-    // 7. Fetch Recent Enrollments from Database
+    // 8. Fetch Recent Enrollments from Database
     async function loadRecentEnrollments() {
         try {
-            const res = await fetch(`${API_BASE}/admin/dashboard/recent-enrollments`, { headers });
+            const res = await fetch(`${API_BASE}/admin/dashboard/recent-enrollments`, { 
+                headers: getHeaders() 
+            });
+
             if (res.ok) {
                 const result = await res.json();
                 if (result.success && result.data) {
@@ -158,14 +196,17 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
             }
         } catch (err) {
-            console.log('Enrollments API note:', err.message);
+            console.error('Enrollments API error:', err.message);
         }
     }
 
-    // 8. Notifications System
+    // 9. Notifications System
     async function loadNotifications() {
         try {
-            const res = await fetch(`${API_BASE}/admin/notifications`, { headers });
+            const res = await fetch(`${API_BASE}/admin/notifications`, { 
+                headers: getHeaders() 
+            });
+
             if (res.ok) {
                 const result = await res.json();
                 if (result.success && result.data) {
@@ -207,12 +248,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     const markAllReadBtn = document.getElementById('markAllReadBtn');
     if (markAllReadBtn) {
         markAllReadBtn.addEventListener('click', async () => {
-            await fetch(`${API_BASE}/admin/notifications/all/read`, { method: 'PATCH', headers });
+            await fetch(`${API_BASE}/admin/notifications/all/read`, { method: 'PATCH', headers: getHeaders() });
             loadNotifications();
         });
     }
 
-    // 9. Functional Global Search
+    // 10. Functional Global Search
     const searchInput = document.getElementById('globalSearchInput');
     const searchContainer = document.getElementById('searchResultsContainer');
     let searchTimeout;
@@ -229,7 +270,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             searchTimeout = setTimeout(async () => {
                 try {
-                    const res = await fetch(`${API_BASE}/admin/search?q=${encodeURIComponent(query)}`, { headers });
+                    const res = await fetch(`${API_BASE}/admin/search?q=${encodeURIComponent(query)}`, { 
+                        headers: getHeaders() 
+                    });
+
                     if (res.ok) {
                         const result = await res.json();
                         if (result.success && result.data) {
@@ -293,7 +337,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return div.innerHTML;
     }
 
-    // Initial loads
+    // Execute Initial dynamic data loads
     loadMetrics();
     loadStats('this_month');
     loadRecentEnrollments();
