@@ -39,23 +39,43 @@ exports.getDashboardMetrics = async (req, res) => {
 
 exports.getDashboardStats = async (req, res) => {
     try {
-        const { timeframe } = req.query;
+        const enrollmentTf = req.query.enrollmentTimeframe || req.query.timeframe || 'this_month';
+        const majorTf = req.query.majorTimeframe || req.query.timeframe || 'this_month';
 
-        // 1. Real Enrollment Statistics breakdown by category from DB
+        // 1. Real SQL Date Filter for Enrollments
+        let enrollmentDateClause = "";
+        if (enrollmentTf === 'this_month') {
+            enrollmentDateClause = "WHERE strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now')";
+        } else if (enrollmentTf === 'last_month') {
+            enrollmentDateClause = "WHERE strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now', '-1 month')";
+        } else if (enrollmentTf === 'last_3_months') {
+            enrollmentDateClause = "WHERE e.enrollment_date >= date('now', 'start of month', '-2 months')";
+        } else if (enrollmentTf === 'this_year') {
+            enrollmentDateClause = "WHERE strftime('%Y', e.enrollment_date) = strftime('%Y', 'now')";
+        } else {
+            // all_time
+            enrollmentDateClause = "";
+        }
+
+        // Query Category Breakdown
         const categoryEnrollments = await dbAsync.all(`
             SELECT COALESCE(cat.name, 'General') as name, COUNT(e.id) as count
             FROM enrollments e
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN categories cat ON c.category_id = cat.id
+            ${enrollmentDateClause}
             GROUP BY cat.name
             ORDER BY count DESC
         `);
 
-        const totalEnrollmentCountRow = await dbAsync.get(`SELECT COUNT(*) as total FROM enrollments`);
+        // Total Enrollments in this timeframe
+        const totalEnrollmentCountRow = await dbAsync.get(`
+            SELECT COUNT(*) as total FROM enrollments e ${enrollmentDateClause}
+        `);
         const totalEnrollments = totalEnrollmentCountRow.total || 0;
 
-        // Color palette for chart
-        const colors = ['#0B1F4D', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
+        // Palette for chart
+        const colors = ['#0B1F4D', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
         const formattedEnrollmentCategories = categoryEnrollments.map((cat, idx) => {
             const percentage = totalEnrollments > 0 ? Math.round((cat.count / totalEnrollments) * 100) : 0;
             return {
@@ -66,13 +86,28 @@ exports.getDashboardStats = async (req, res) => {
             };
         });
 
-        // 2. Real "Students by Major" (Counting actual distinct students by their enrolled major program)
+        // 2. Real SQL Date Filter for Students by Major
+        let studentDateClause = "";
+        if (majorTf === 'this_month') {
+            studentDateClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now')";
+        } else if (majorTf === 'last_month') {
+            studentDateClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now', '-1 month')";
+        } else if (majorTf === 'last_3_months') {
+            studentDateClause = "AND u.created_at >= date('now', 'start of month', '-2 months')";
+        } else if (majorTf === 'this_year') {
+            studentDateClause = "AND strftime('%Y', u.created_at) = strftime('%Y', 'now')";
+        } else {
+            // all_time
+            studentDateClause = "";
+        }
+
+        // Query distinct students grouped by their chosen major
         const studentsByMajorQuery = await dbAsync.all(`
             SELECT COALESCE(p.title, 'Undeclared') as major, COUNT(u.id) as student_count
             FROM users u
             JOIN roles r ON u.role_id = r.id
             LEFT JOIN programs p ON u.major_id = p.id
-            WHERE r.name = 'STUDENT'
+            WHERE r.name = 'STUDENT' ${studentDateClause}
             GROUP BY p.title
             ORDER BY student_count DESC
         `);
@@ -80,16 +115,16 @@ exports.getDashboardStats = async (req, res) => {
         const totalStudentsRow = await dbAsync.get(`
             SELECT COUNT(*) as total FROM users u
             JOIN roles r ON u.role_id = r.id
-            WHERE r.name = 'STUDENT'
+            WHERE r.name = 'STUDENT' ${studentDateClause}
         `);
-        const totalStudents = totalStudentsRow.total || 1;
+        const totalStudents = totalStudentsRow.total || 0;
 
         const formattedStudentsByMajor = studentsByMajorQuery.map((item, idx) => {
-            const pct = Math.round((item.student_count / totalStudents) * 100);
+            const percentage = totalStudents > 0 ? Math.round((item.student_count / totalStudents) * 100) : 0;
             return {
                 major: item.major,
                 count: item.student_count,
-                percentage: pct,
+                percentage: percentage,
                 color: colors[idx % colors.length]
             };
         });
@@ -97,12 +132,16 @@ exports.getDashboardStats = async (req, res) => {
         res.json({
             success: true,
             data: {
-                timeframe: timeframe || 'this_month',
+                enrollmentTimeframe: enrollmentTf,
+                majorTimeframe: majorTf,
                 enrollmentStatistics: {
                     total: totalEnrollments,
                     categories: formattedEnrollmentCategories
                 },
-                studentsByMajor: formattedStudentsByMajor
+                studentsByMajor: {
+                    total: totalStudents,
+                    majors: formattedStudentsByMajor
+                }
             }
         });
     } catch (error) {

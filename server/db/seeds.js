@@ -1,17 +1,18 @@
 const bcrypt = require('bcryptjs');
-const { db, dbAsync, initSchema } = require('./database');
+const { dbAsync, initSchema } = require('./database');
 
 async function seedDatabase() {
-    console.log('--- Starting Database Seeding ---');
+    console.log('Starting SQLite database seeding...');
     await initSchema();
 
     // 1. Seed Roles
     console.log('Seeding Roles...');
     const roles = [
         { id: 1, name: 'ADMIN', description: 'System Administrator with full access' },
-        { id: 2, name: 'TEACHER', description: 'Instructor managing courses and assignments' },
-        { id: 3, name: 'STUDENT', description: 'Enrolled student accessing course materials' }
+        { id: 2, name: 'TEACHER', description: 'Faculty instructor' },
+        { id: 3, name: 'STUDENT', description: 'Enrolled student learner' }
     ];
+
     for (const r of roles) {
         await dbAsync.run(
             `INSERT OR IGNORE INTO roles (id, name, description) VALUES (?, ?, ?)`,
@@ -20,7 +21,7 @@ async function seedDatabase() {
     }
 
     // 2. Seed Programs
-    console.log('Seeding Featured Programs...');
+    console.log('Seeding Programs...');
     const programs = [
         {
             id: 1,
@@ -28,10 +29,10 @@ async function seedDatabase() {
             slug: 'computer-science-engineering',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: "Build the foundation of tomorrow's technology with strong skills in software, AI, databases, and computer systems.",
+            description: 'Master software engineering, algorithms, AI architectures, and modern cloud systems.',
             icon_class: 'bi-laptop',
             theme_class: 'theme-blue',
-            detail_url: 'pages/programs/cs.html',
+            detail_url: '#',
             order_num: 1,
             is_featured: 1,
             is_published: 1
@@ -42,10 +43,10 @@ async function seedDatabase() {
             slug: 'information-technology',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: 'Explore the world of software development, networks, data management, and emerging technologies.',
-            icon_class: 'bi-code-slash',
+            description: 'Network architecture, cybersecurity, and enterprise systems administration.',
+            icon_class: 'bi-hdd-network',
             theme_class: 'theme-cyan',
-            detail_url: 'pages/programs/it.html',
+            detail_url: '#',
             order_num: 2,
             is_featured: 1,
             is_published: 1
@@ -56,10 +57,10 @@ async function seedDatabase() {
             slug: 'finance-banking',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: 'Gain in-depth knowledge of financial systems, investment analysis, and modern banking operations.',
+            description: 'Corporate finance, investment analysis, digital fintech, and banking regulations.',
             icon_class: 'bi-bank',
-            theme_class: 'theme-green',
-            detail_url: 'pages/programs/finance.html',
+            theme_class: 'theme-emerald',
+            detail_url: '#',
             order_num: 3,
             is_featured: 1,
             is_published: 1
@@ -70,10 +71,10 @@ async function seedDatabase() {
             slug: 'accounting',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: 'Master the language of business with comprehensive training in financial reporting and auditing.',
+            description: 'Financial reporting, managerial accounting, auditing standards, and tax frameworks.',
             icon_class: 'bi-calculator',
-            theme_class: 'theme-purple',
-            detail_url: 'pages/programs/accounting.html',
+            theme_class: 'theme-amber',
+            detail_url: '#',
             order_num: 4,
             is_featured: 1,
             is_published: 1
@@ -84,96 +85,107 @@ async function seedDatabase() {
             slug: 'business-administration',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: "Develop leadership, management, and entrepreneurial skills to succeed in today's dynamic business world.",
+            description: 'Strategic management, organizational leadership, entrepreneurship, and commerce.',
             icon_class: 'bi-briefcase',
-            theme_class: 'theme-gold',
-            detail_url: 'pages/programs/business.html',
+            theme_class: 'theme-purple',
+            detail_url: '#',
             order_num: 5,
             is_featured: 1,
             is_published: 1
         },
         {
             id: 6,
-            title: 'Marketing',
-            slug: 'marketing',
+            title: 'Marketing & Digital Media',
+            slug: 'marketing-digital-media',
             degree_type: 'BACHELOR DEGREE',
             duration: '4 Years',
-            description: 'Learn to understand consumer behavior, brand management, and digital marketing strategies.',
+            description: 'Digital brand strategy, consumer behavior, market analytics, and social campaigns.',
             icon_class: 'bi-megaphone',
-            theme_class: 'theme-orange',
-            detail_url: 'pages/programs/marketing.html',
+            theme_class: 'theme-rose',
+            detail_url: '#',
             order_num: 6,
             is_featured: 1,
             is_published: 1
         }
     ];
 
-    for (const prog of programs) {
+    for (const p of programs) {
         await dbAsync.run(
             `INSERT OR IGNORE INTO programs (id, title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [prog.id, prog.title, prog.slug, prog.degree_type, prog.duration, prog.description, prog.icon_class, prog.theme_class, prog.detail_url, prog.order_num, prog.is_featured, prog.is_published]
+            [p.id, p.title, p.slug, p.degree_type, p.duration, p.description, p.icon_class, p.theme_class, p.detail_url, p.order_num, p.is_featured, p.is_published]
         );
     }
 
-    // 3. Seed Users with Major Assignment
+    // 3. Seed Users
     console.log('Seeding Users...');
-    const defaultPasswordHash = bcrypt.hashSync('admin123', 10);
-    const studentPasswordHash = bcrypt.hashSync('student123', 10);
+    const adminPasswordHash = bcrypt.hashSync('admin123', 10);
     const teacherPasswordHash = bcrypt.hashSync('teacher123', 10);
+    const studentPasswordHash = bcrypt.hashSync('student123', 10);
 
     const users = [
         {
+            id: 1,
             full_name: 'Admin System',
             email: 'admin@aub.edu.kh',
             university_id: '10293847',
-            password_hash: defaultPasswordHash,
+            password_hash: adminPasswordHash,
             role_id: 1,
             major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         },
         {
+            id: 2,
             full_name: 'Sok Virak',
             email: 'sok.virak@student.aub.edu.kh',
             university_id: '0001001',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 2, // Information Technology
+            major_id: 1, // Computer Science & Engineering
             avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 5 * 86400000).toISOString()
         },
         {
-            full_name: 'Meas Sreynich',
-            email: 'meas.sreynich@student.aub.edu.kh',
+            id: 3,
+            full_name: 'Chanthou Meas',
+            email: 'chanthou.meas@student.aub.edu.kh',
             university_id: '0001002',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 1, // Computer Science & Engineering
+            major_id: 2, // Information Technology
             avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 10 * 86400000).toISOString()
         },
         {
-            full_name: 'Chan Dara',
-            email: 'chan.dara@student.aub.edu.kh',
+            id: 4,
+            full_name: 'Dara Keo',
+            email: 'dara.keo@student.aub.edu.kh',
             university_id: '0001003',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 5, // Business Administration
             avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 15 * 86400000).toISOString()
         },
         {
-            full_name: 'Pich Chhorn',
-            email: 'pich.chhorn@student.aub.edu.kh',
+            id: 5,
+            full_name: 'Kanha Rath',
+            email: 'kanha.rath@student.aub.edu.kh',
             university_id: '0001004',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 2, // Information Technology
             avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 25 * 86400000).toISOString()
         },
         {
+            id: 6,
             full_name: 'Vibol Pen',
             email: 'vibol.pen@student.aub.edu.kh',
             university_id: '0001005',
@@ -181,9 +193,11 @@ async function seedDatabase() {
             role_id: 3,
             major_id: 1, // Computer Science & Engineering
             avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 35 * 86400000).toISOString()
         },
         {
+            id: 7,
             full_name: 'Dr. Sarah Johnson',
             email: 'sarah.johnson@aub.edu.kh',
             university_id: 'T001',
@@ -191,9 +205,11 @@ async function seedDatabase() {
             role_id: 2,
             major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         },
         {
+            id: 8,
             full_name: 'Prof. Alex Chen',
             email: 'alex.chen@aub.edu.kh',
             university_id: 'T002',
@@ -201,16 +217,17 @@ async function seedDatabase() {
             role_id: 2,
             major_id: null,
             avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
-            status: 'Active'
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         }
     ];
 
     for (const u of users) {
         await dbAsync.run(
-            `INSERT INTO users (full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(email) DO UPDATE SET major_id = excluded.major_id`,
-            [u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status]
+            `INSERT INTO users (id, full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET major_id = excluded.major_id, created_at = excluded.created_at`,
+            [u.id, u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status, u.created_at]
         );
     }
 
@@ -250,30 +267,30 @@ async function seedDatabase() {
         },
         {
             id: 2,
-            name: 'Prof. Alex Chen',
-            title: 'Head of Digital Product & UI/UX Design',
-            bio: 'Award-winning product designer who has designed design systems for enterprise mobile and web applications.',
-            avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300',
-            email: 'alex.chen@aub.edu.kh',
-            expertise: 'UI/UX Design, Design Systems, User Research'
+            name: 'Michael Chang',
+            title: 'Principal Design System Specialist',
+            bio: 'Former senior UX designer with a passion for scalable design systems, micro-interactions, and UX strategy.',
+            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300',
+            email: 'michael.chang@aub.edu.kh',
+            expertise: 'Product Design, UI/UX, Design Systems, Design Sprint'
         },
         {
             id: 3,
-            name: 'Marcus Brody',
-            title: 'Principal Cyber Defense Specialist',
-            bio: 'Certified ethical hacker and enterprise security consultant specializing in threat modeling and cloud defense.',
-            avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300',
-            email: 'marcus.brody@aub.edu.kh',
-            expertise: 'Cyber Security, Network Infrastructure, Cloud Security'
+            name: 'David Roberts',
+            title: 'Chief Information Security Officer',
+            bio: 'Cybersecurity veteran specializing in ethical hacking, cryptography, security auditing, and cloud defense.',
+            avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300',
+            email: 'david.roberts@aub.edu.kh',
+            expertise: 'Network Defense, Ethical Hacking, Threat Analysis'
         },
         {
             id: 4,
             name: 'Elena Rostova',
-            title: 'Senior Data Scientist & Analytics Lead',
-            bio: 'Former data lead at international fintech firm specializing in predictive analytics and large-scale data modeling.',
+            title: 'Senior Data Scientist & ML Engineer',
+            bio: 'Machine learning consultant helping enterprise clients build robust predictive models and data pipelines.',
             avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300',
             email: 'elena.rostova@aub.edu.kh',
-            expertise: 'Data Science, Machine Learning, Python, SQL'
+            expertise: 'Big Data, Python, Machine Learning, Statistical Modeling'
         }
     ];
 
@@ -292,8 +309,8 @@ async function seedDatabase() {
             id: 1,
             title: 'Full-Stack Web Development',
             slug: 'full-stack-web-development',
-            description: 'Build modern, responsive websites and scalable web applications from scratch.',
-            category_id: 1,
+            description: 'Build enterprise web applications with modern HTML5, CSS3, JavaScript, Node.js, and SQL.',
+            category_id: 1, // Technology
             instructor_id: 1,
             thumbnail_url: 'assets/images/course_webdev.jpg',
             rating: 4.9,
@@ -311,7 +328,7 @@ async function seedDatabase() {
             title: 'Advanced UI/UX Design',
             slug: 'advanced-ui-ux-design',
             description: 'Master Figma and design user-centered digital experiences for mobile and web.',
-            category_id: 3,
+            category_id: 3, // Design
             instructor_id: 2,
             thumbnail_url: 'assets/images/course_uiux.jpg',
             rating: 4.8,
@@ -329,7 +346,7 @@ async function seedDatabase() {
             title: 'Cyber Security Essentials',
             slug: 'cyber-security-essentials',
             description: 'Protect digital assets and infrastructure against evolving global cyber threats.',
-            category_id: 4,
+            category_id: 4, // Security
             instructor_id: 3,
             thumbnail_url: 'assets/images/course_cybersecurity.jpg',
             rating: 4.9,
@@ -347,7 +364,7 @@ async function seedDatabase() {
             title: 'Data Science Fundamentals',
             slug: 'data-science-fundamentals',
             description: 'Analyze complex datasets and generate actionable business insights.',
-            category_id: 5,
+            category_id: 5, // Data Science
             instructor_id: 4,
             thumbnail_url: 'assets/images/course_datascience.jpg',
             rating: 4.7,
@@ -388,19 +405,62 @@ async function seedDatabase() {
         );
     }
 
-    // 8. Seed Enrollments
+    // 8. Seed Enrollments (Realistic active dates)
     console.log('Seeding Enrollments...');
+    const now = Date.now();
     const enrollments = [
-        { id: 1, user_id: 2, course_id: 1, enrollment_date: '2026-05-24 09:30:00', status: 'Active', progress_percentage: 65.0 },
-        { id: 2, user_id: 3, course_id: 1, enrollment_date: '2026-05-24 10:15:00', status: 'Active', progress_percentage: 40.0 },
-        { id: 3, user_id: 4, course_id: 2, enrollment_date: '2026-05-23 14:20:00', status: 'Active', progress_percentage: 85.0 },
-        { id: 4, user_id: 5, course_id: 3, enrollment_date: '2026-05-24 11:05:00', status: 'Active', progress_percentage: 20.0 },
-        { id: 5, user_id: 6, course_id: 1, enrollment_date: '2026-05-22 16:45:00', status: 'Active', progress_percentage: 95.0 }
+        { 
+            id: 1, 
+            user_id: 2, 
+            course_id: 1, 
+            enrollment_date: new Date(now - 2 * 86400000).toISOString(), // 2 days ago (Technology)
+            status: 'Active', 
+            progress_percentage: 65.0 
+        },
+        { 
+            id: 2, 
+            user_id: 3, 
+            course_id: 1, 
+            enrollment_date: new Date(now - 4 * 86400000).toISOString(), // 4 days ago (Technology)
+            status: 'Active', 
+            progress_percentage: 40.0 
+        },
+        { 
+            id: 3, 
+            user_id: 4, 
+            course_id: 2, 
+            enrollment_date: new Date(now - 6 * 86400000).toISOString(), // 6 days ago (Design)
+            status: 'Active', 
+            progress_percentage: 85.0 
+        },
+        { 
+            id: 4, 
+            user_id: 5, 
+            course_id: 3, 
+            enrollment_date: new Date(now - 8 * 86400000).toISOString(), // 8 days ago (Security)
+            status: 'Active', 
+            progress_percentage: 20.0 
+        },
+        { 
+            id: 5, 
+            user_id: 6, 
+            course_id: 1, 
+            enrollment_date: new Date(now - 12 * 86400000).toISOString(), // 12 days ago (Technology)
+            status: 'Active', 
+            progress_percentage: 95.0 
+        }
     ];
+
     for (const e of enrollments) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO enrollments (id, user_id, course_id, enrollment_date, status, progress_percentage)
-             VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO enrollments (id, user_id, course_id, enrollment_date, status, progress_percentage)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET 
+                user_id = excluded.user_id,
+                course_id = excluded.course_id,
+                enrollment_date = excluded.enrollment_date,
+                status = excluded.status,
+                progress_percentage = excluded.progress_percentage`,
             [e.id, e.user_id, e.course_id, e.enrollment_date, e.status, e.progress_percentage]
         );
     }
@@ -429,7 +489,7 @@ async function seedDatabase() {
             title: 'System Health Check',
             message: 'Database backup and indexing completed successfully',
             type: 'system',
-            link_url: 'settings.html',
+            link_url: 'dashboard.html',
             is_read: 0
         }
     ];
@@ -442,19 +502,14 @@ async function seedDatabase() {
         );
     }
 
-    console.log('--- Database Seeding Completed Successfully! ---');
+    console.log('✅ SQLite Database seeded successfully with all relationships intact.');
 }
 
 if (require.main === module) {
-    seedDatabase()
-        .then(() => {
-            console.log('Seeding finished.');
-            process.exit(0);
-        })
-        .catch(err => {
-            console.error('Seeding error:', err);
-            process.exit(1);
-        });
+    seedDatabase().then(() => process.exit(0)).catch(err => {
+        console.error('Seeding failed:', err);
+        process.exit(1);
+    });
 }
 
 module.exports = { seedDatabase };

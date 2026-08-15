@@ -99,11 +99,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     if (elChapters && totalChapters !== undefined) elChapters.textContent = totalChapters.toLocaleString();
 
                     const elEnrollments = document.getElementById('kpiTotalEnrollments');
-                    if (elEnrollments && totalEnrollments !== undefined) {
-                        elEnrollments.textContent = totalEnrollments.toLocaleString();
-                        const donutTotal = document.getElementById('donutTotalNumber');
-                        if (donutTotal) donutTotal.textContent = totalEnrollments.toLocaleString();
-                    }
+                    if (elEnrollments && totalEnrollments !== undefined) elEnrollments.textContent = totalEnrollments.toLocaleString();
                 }
             } else {
                 console.error('Failed to load metrics from API:', response.status);
@@ -113,10 +109,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // 6. Fetch Real Dynamic Statistics with Timeframe
-    async function loadStats(timeframe = 'this_month') {
+    // 6. Fetch Real Dynamic Statistics with Live Timeframe SQL Queries
+    async function loadStats() {
+        const enrollmentSelect = document.getElementById('enrollmentTimeframeSelect');
+        const majorSelect = document.getElementById('majorTimeframeSelect');
+
+        const enrollmentTf = enrollmentSelect ? enrollmentSelect.value : 'this_month';
+        const majorTf = majorSelect ? majorSelect.value : 'this_month';
+
         try {
-            const res = await fetch(`${API_BASE}/admin/dashboard/stats?timeframe=${timeframe}`, { 
+            const res = await fetch(`${API_BASE}/admin/dashboard/stats?enrollmentTimeframe=${encodeURIComponent(enrollmentTf)}&majorTimeframe=${encodeURIComponent(majorTf)}`, { 
                 headers: getHeaders() 
             });
 
@@ -125,34 +127,70 @@ document.addEventListener('DOMContentLoaded', async function () {
                 if (result.success && result.data) {
                     const { enrollmentStatistics, studentsByMajor } = result.data;
 
-                    // Render Enrollment Statistics Categories
-                    const catContainer = document.getElementById('enrollmentCategoriesList');
-                    if (catContainer && enrollmentStatistics && enrollmentStatistics.categories) {
-                        catContainer.innerHTML = enrollmentStatistics.categories.map(c => `
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="rounded-circle" style="width: 10px; height: 10px; background: ${c.color || '#2563eb'};"></span>
-                                    <span class="text-secondary fw-medium">${escapeHtml(c.name)}</span>
-                                </div>
-                                <span class="fw-bold">${c.count} <span class="text-muted fw-normal text-xs">(${c.percentage !== undefined ? c.percentage : 0}%)</span></span>
-                            </div>
-                        `).join('');
+                    // A. Update Donut Chart Total and SVG arcs
+                    const donutTotal = document.getElementById('donutTotalNumber');
+                    if (donutTotal && enrollmentStatistics) {
+                        donutTotal.textContent = (enrollmentStatistics.total || 0).toLocaleString();
                     }
 
-                    // Render Students by Major (Actual Students Count)
+                    const donutSvg = document.getElementById('enrollmentDonutSvg');
+                    if (donutSvg && enrollmentStatistics) {
+                        if (enrollmentStatistics.total === 0 || !enrollmentStatistics.categories || enrollmentStatistics.categories.length === 0) {
+                            donutSvg.innerHTML = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>`;
+                        } else {
+                            let svgContent = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>`;
+                            let currentOffset = 0;
+                            enrollmentStatistics.categories.forEach(c => {
+                                const strokeDash = `${c.percentage} ${100 - c.percentage}`;
+                                svgContent += `
+                                    <circle cx="18" cy="18" r="15.915" fill="transparent" 
+                                            stroke="${c.color || '#2563eb'}" stroke-width="3.2" 
+                                            stroke-dasharray="${strokeDash}" stroke-dashoffset="${-currentOffset}">
+                                    </circle>
+                                `;
+                                currentOffset += c.percentage;
+                            });
+                            donutSvg.innerHTML = svgContent;
+                        }
+                    }
+
+                    // B. Render Enrollment Statistics Category List
+                    const catContainer = document.getElementById('enrollmentCategoriesList');
+                    if (catContainer && enrollmentStatistics) {
+                        if (!enrollmentStatistics.categories || enrollmentStatistics.categories.length === 0) {
+                            catContainer.innerHTML = `<div class="text-muted text-center py-3 text-sm">No enrollments recorded for this period</div>`;
+                        } else {
+                            catContainer.innerHTML = enrollmentStatistics.categories.map(c => `
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="rounded-circle" style="width: 10px; height: 10px; background: ${c.color || '#2563eb'};"></span>
+                                        <span class="text-secondary fw-medium">${escapeHtml(c.name)}</span>
+                                    </div>
+                                    <span class="fw-bold">${c.count} <span class="text-muted fw-normal text-xs">(${c.percentage}%)</span></span>
+                                </div>
+                            `).join('');
+                        }
+                    }
+
+                    // C. Render Students by Major (Actual distinct student headcounts from DB)
                     const majorContainer = document.getElementById('studentsByMajorContainer');
                     if (majorContainer && studentsByMajor) {
-                        majorContainer.innerHTML = studentsByMajor.map(m => `
-                            <div>
-                                <div class="d-flex justify-content-between text-sm mb-1">
-                                    <span class="fw-medium text-secondary">${escapeHtml(m.major)}</span>
-                                    <span class="fw-bold">${m.count}</span>
+                        const majors = studentsByMajor.majors || [];
+                        if (majors.length === 0) {
+                            majorContainer.innerHTML = `<div class="text-muted text-center py-3 text-sm">No students registered in this period</div>`;
+                        } else {
+                            majorContainer.innerHTML = majors.map(m => `
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">${escapeHtml(m.major)}</span>
+                                        <span class="fw-bold text-dark">${m.count}</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px; background: #F1F5F9; border-radius: 8px;">
+                                        <div class="progress-bar" style="width: ${m.percentage}%; background: ${m.color || '#2563eb'}; border-radius: 8px;"></div>
+                                    </div>
                                 </div>
-                                <div class="progress" style="height: 8px; background: #F1F5F9; border-radius: 8px;">
-                                    <div class="progress-bar" style="width: ${m.percentage || 0}%; background: ${m.color || '#2563eb'}; border-radius: 8px;"></div>
-                                </div>
-                            </div>
-                        `).join('');
+                            `).join('');
+                        }
                     }
                 }
             }
@@ -164,11 +202,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 7. Bind Timeframe Select Dropdowns
     const enrollmentSelect = document.getElementById('enrollmentTimeframeSelect');
     if (enrollmentSelect) {
-        enrollmentSelect.addEventListener('change', (e) => loadStats(e.target.value));
+        enrollmentSelect.addEventListener('change', () => loadStats());
     }
     const majorSelect = document.getElementById('majorTimeframeSelect');
     if (majorSelect) {
-        majorSelect.addEventListener('change', (e) => loadStats(e.target.value));
+        majorSelect.addEventListener('change', () => loadStats());
     }
 
     // 8. Fetch Recent Enrollments from Database
@@ -339,7 +377,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Execute Initial dynamic data loads
     loadMetrics();
-    loadStats('this_month');
+    loadStats();
     loadRecentEnrollments();
     loadNotifications();
 });
