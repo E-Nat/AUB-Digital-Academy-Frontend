@@ -46,9 +46,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const data = await res.json();
 
-                if (res.ok && data.success) {
+                if (res.ok && data.success && data.token) {
                     // Store session token and user profile
                     localStorage.setItem('aub_auth_token', data.token);
+                    localStorage.setItem('token', data.token);
+                    sessionStorage.setItem('aub_auth_token', data.token);
+                    sessionStorage.setItem('token', data.token);
                     localStorage.setItem('aub_user', JSON.stringify(data.user));
 
                     // Role-Based Redirection
@@ -67,18 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (err) {
-                console.warn('API server connection note:', err.message);
-                // Fallback for standalone static testing:
-                if (loginId === 'admin@aub.edu.kh' || loginId === '10293847') {
-                    localStorage.setItem('aub_auth_token', 'mock_admin_token');
-                    localStorage.setItem('aub_user', JSON.stringify({ full_name: 'Admin', role: 'ADMIN', email: 'admin@aub.edu.kh' }));
-                    window.location.href = '../admin/dashboard.html';
-                } else {
-                    alert('Could not connect to authentication server. Please check that the server is running on port 5000.');
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Sign In';
-                    }
+                console.error('API connection error:', err);
+                alert('Could not connect to backend server at ' + API_BASE + '.\nPlease ensure "node server.js" is running in the server/ directory.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign In';
                 }
             }
         });

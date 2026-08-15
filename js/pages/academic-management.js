@@ -4,8 +4,21 @@ document.addEventListener('DOMContentLoaded', function () {
         ? 'http://localhost:5000/api'
         : '/api';
 
-    const token = localStorage.getItem('aub_auth_token');
-    const headers = token ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    function getAuthToken() {
+        return localStorage.getItem('aub_auth_token') || 
+               localStorage.getItem('token') || 
+               sessionStorage.getItem('aub_auth_token') || 
+               sessionStorage.getItem('token') || '';
+    }
+
+    function getHeaders() {
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        return headers;
+    }
 
     loadPrograms();
     loadCourses();
@@ -15,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 1. PROGRAMS
     async function loadPrograms() {
         try {
-            const res = await fetch(`${API_BASE}/admin/programs`, { headers });
+            const res = await fetch(`${API_BASE}/admin/programs`, { headers: getHeaders() });
             const data = await res.json();
             if (data.success && data.data) {
                 renderProgramsTable(data.data);
@@ -70,6 +83,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (programForm) {
         programForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            const token = getAuthToken();
+            if (!token) {
+                alert('Authentication required. Please log in as an administrator.');
+                window.location.href = '../authentication/login.html';
+                return;
+            }
+
             const id = document.getElementById('programId').value;
             const payload = {
                 title: document.getElementById('programTitle').value,
@@ -89,7 +109,10 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const res = await fetch(url, {
                     method,
-                    headers,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(payload)
                 });
                 const result = await res.json();
@@ -108,8 +131,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.toggleProgramStatus = async function (id) {
+        const token = getAuthToken();
+        if (!token) {
+            alert('Please log in first.');
+            return;
+        }
         try {
-            const res = await fetch(`${API_BASE}/admin/programs/${id}/toggle-publish`, { method: 'PATCH', headers });
+            const res = await fetch(`${API_BASE}/admin/programs/${id}/toggle-publish`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.success) loadPrograms();
         } catch (e) {
@@ -118,9 +149,17 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.deleteProgram = async function (id) {
+        const token = getAuthToken();
+        if (!token) {
+            alert('Please log in first.');
+            return;
+        }
         if (!confirm('Are you sure you want to delete this program?')) return;
         try {
-            const res = await fetch(`${API_BASE}/admin/programs/${id}`, { method: 'DELETE', headers });
+            const res = await fetch(`${API_BASE}/admin/programs/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.success) loadPrograms();
         } catch (e) {
@@ -147,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. COURSES
     async function loadCourses() {
         try {
-            const res = await fetch(`${API_BASE}/admin/courses`, { headers });
+            const res = await fetch(`${API_BASE}/admin/courses`, { headers: getHeaders() });
             const data = await res.json();
             if (data.success && data.data) {
                 renderCoursesTable(data.data);
@@ -193,8 +232,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.toggleCourseStatus = async function (id) {
+        const token = getAuthToken();
+        if (!token) return;
         try {
-            const res = await fetch(`${API_BASE}/admin/courses/${id}/toggle-publish`, { method: 'PATCH', headers });
+            const res = await fetch(`${API_BASE}/admin/courses/${id}/toggle-publish`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.success) loadCourses();
         } catch (e) {
@@ -203,9 +247,14 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.deleteCourse = async function (id) {
+        const token = getAuthToken();
+        if (!token) return;
         if (!confirm('Delete this course?')) return;
         try {
-            const res = await fetch(`${API_BASE}/admin/courses/${id}`, { method: 'DELETE', headers });
+            const res = await fetch(`${API_BASE}/admin/courses/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             const data = await res.json();
             if (data.success) loadCourses();
         } catch (e) {
@@ -216,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // 3. CATEGORIES & INSTRUCTORS
     async function loadCategories() {
         try {
-            const res = await fetch(`${API_BASE}/admin/categories`, { headers });
+            const res = await fetch(`${API_BASE}/admin/categories`, { headers: getHeaders() });
             const data = await res.json();
             if (data.success && data.data) {
                 const tbody = document.getElementById('categoriesTableBody');
@@ -246,7 +295,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function loadInstructors() {
         try {
-            const res = await fetch(`${API_BASE}/admin/instructors`, { headers });
+            const res = await fetch(`${API_BASE}/admin/instructors`, { headers: getHeaders() });
             const data = await res.json();
             if (data.success && data.data) {
                 const tbody = document.getElementById('instructorsTableBody');
