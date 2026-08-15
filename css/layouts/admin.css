@@ -5,8 +5,8 @@
 
 :root {
     --admin-sidebar-bg: #071329;
-    --admin-sidebar-hover: rgba(255, 255, 255, 0.06);
-    --admin-sidebar-active: #2563eb;
+    --admin-sidebar-hover: rgba(255, 255, 255, 0.08);
+    --admin-sidebar-active: #1D4ED8;
     --admin-bg: #F8FAFC;
     --admin-card-bg: #FFFFFF;
     --admin-text-main: #0F172A;
@@ -40,7 +40,7 @@ html, body.admin-body {
     padding: 0;
 }
 
-/* --- 1. SIDEBAR (Compact Scale) --- */
+/* --- 1. SIDEBAR (Compact Scale & Brand Typography) --- */
 .admin-sidebar {
     width: 240px;
     min-width: 240px;
@@ -58,52 +58,66 @@ html, body.admin-body {
 }
 
 .admin-sidebar-brand {
-    padding: 16px 18px;
+    padding: 20px 18px;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.18);
 }
 
-.admin-brand-icon {
-    width: 32px;
-    height: 32px;
-    background-color: var(--admin-primary) !important;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.admin-brand-logo-img {
+    height: 38px;
+    width: auto;
+    object-fit: contain;
     flex-shrink: 0;
 }
 
-.admin-brand-icon i {
-    font-size: 1.1rem;
-    color: #FFFFFF;
+.admin-brand-text-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
 }
 
-.admin-brand-text {
-    line-height: 1.15;
-}
-
-.admin-brand-text .title {
+.admin-brand-aub {
     font-weight: 800;
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-size: 1.35rem;
+    letter-spacing: 0.03em;
     color: #FFFFFF;
 }
 
-.admin-brand-text .subtitle {
-    font-size: 0.65rem;
+.admin-brand-divider {
+    width: 1.5px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.25);
+    display: inline-block;
+}
+
+.admin-brand-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.admin-brand-digital {
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.06em;
+    color: #FFFFFF;
+}
+
+.admin-brand-academy {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
     color: #F59E0B;
 }
 
 .admin-sidebar-menu {
-    padding: 14px 10px;
+    padding: 16px 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -111,18 +125,18 @@ html, body.admin-body {
 .admin-nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 9px 14px;
-    color: rgba(255, 255, 255, 0.7);
+    gap: 14px;
+    padding: 11px 16px;
+    color: rgba(255, 255, 255, 0.78);
     text-decoration: none;
     font-weight: 500;
-    font-size: 15px;
-    border-radius: 10px;
+    font-size: 14.5px;
+    border-radius: 12px;
     transition: all 0.18s ease;
 }
 
 .admin-nav-item i {
-    font-size: 20px;
+    font-size: 19px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -137,12 +151,12 @@ html, body.admin-body {
     color: #FFFFFF;
     background-color: var(--admin-sidebar-active);
     font-weight: 600;
-    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.4);
 }
 
 .admin-sidebar-footer {
-    padding: 14px 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 16px 14px;
+    border-top: 1px dotted rgba(255, 255, 255, 0.18);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -152,11 +166,11 @@ html, body.admin-body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.65);
     background: transparent;
     border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 9px 14px;
+    border-radius: 10px;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.2s ease;
