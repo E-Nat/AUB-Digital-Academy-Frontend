@@ -61,6 +61,7 @@ router.delete('/admin/instructors/:id', authenticateToken, requireAdmin, adminCo
 // Users CRUD
 router.get('/admin/users', authenticateToken, requireAdmin, adminController.getAllUsers);
 router.post('/admin/users', authenticateToken, requireAdmin, adminController.createUser);
+router.put('/admin/users/:id', authenticateToken, requireAdmin, adminController.updateUser);
 router.delete('/admin/users/:id', authenticateToken, requireAdmin, adminController.deleteUser);
 
 // Enrollments CRUD

@@ -57,7 +57,7 @@ exports.getDashboardStats = async (req, res) => {
         // Color palette for chart
         const colors = ['#0B1F4D', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
         const formattedEnrollmentCategories = categoryEnrollments.map((cat, idx) => {
-            const percentage = totalEnrollments > 0 ? parseFloat(((cat.count / totalEnrollments) * 100).toFixed(2)) : 0;
+            const percentage = totalEnrollments > 0 ? Math.round((cat.count / totalEnrollments) * 100) : 0;
             return {
                 name: cat.name,
                 count: cat.count,
@@ -533,6 +533,39 @@ exports.createUser = async (req, res) => {
     } catch (error) {
         console.error('Create user error:', error);
         res.status(500).json({ success: false, message: 'Failed to create user. Email or University ID might already exist.' });
+    }
+};
+
+exports.updateUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { full_name, email, university_id, role_id, status, password } = req.body;
+
+        if (!full_name || !email) {
+            return res.status(400).json({ success: false, message: 'Full name and email are required.' });
+        }
+
+        if (password && password.trim()) {
+            const password_hash = bcrypt.hashSync(password, 10);
+            await dbAsync.run(
+                `UPDATE users
+                 SET full_name = ?, email = ?, university_id = ?, role_id = ?, status = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE id = ?`,
+                [full_name, email, university_id || null, role_id || 3, status || 'Active', password_hash, id]
+            );
+        } else {
+            await dbAsync.run(
+                `UPDATE users
+                 SET full_name = ?, email = ?, university_id = ?, role_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE id = ?`,
+                [full_name, email, university_id || null, role_id || 3, status || 'Active', id]
+            );
+        }
+
+        res.json({ success: true, message: 'User updated successfully.' });
+    } catch (error) {
+        console.error('Update user error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update user.' });
     }
 };
 
