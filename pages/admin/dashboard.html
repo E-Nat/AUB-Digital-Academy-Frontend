@@ -1,1 +1,412 @@
-<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AUB Digital Academy</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Admin CSS -->
+    <link href="../../css/layouts/admin.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <div class="admin-wrapper">
+        
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
+                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <div class="title">AUB DIGITAL</div>
+                        <div class="subtitle">ACADEMY</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="admin-sidebar-menu">
+                <a href="dashboard.html" class="admin-nav-item active">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="user-management.html" class="admin-nav-item">
+                    <i class="bi bi-people-fill"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="academic-management.html" class="admin-nav-item">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Academic Management</span>
+                </a>
+                <a href="enrollment-management.html" class="admin-nav-item">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>Enrollment Management</span>
+                </a>
+                <a href="settings.html" class="admin-nav-item">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" id="logoutBtn">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+                <div class="admin-user-card">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="sidebarAvatar">
+                    <div class="admin-user-info">
+                        <div class="name" id="sidebarAdminName">Admin</div>
+                        <div class="role">System Administrator</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW -->
+        <main class="admin-main">
+            
+            <!-- TOPBAR -->
+            <header class="admin-topbar">
+                <div class="admin-search-wrapper">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="admin-search-input" placeholder="Search anything...">
+                </div>
+
+                <div class="admin-topbar-actions">
+                    <button class="admin-notification-btn" aria-label="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="admin-notification-badge">3</span>
+                    </button>
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
+                        <div class="d-none d-md-block text-start lh-1">
+                            <div class="fw-bold text-sm" id="topbarAdminName">Admin</div>
+                            <div class="text-xs text-muted">System Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTENT BODY -->
+            <div class="admin-content">
+                
+                <!-- HEADER -->
+                <div class="admin-header-row">
+                    <div>
+                        <h1 class="admin-page-title">Dashboard</h1>
+                        <p class="admin-page-subtitle">Welcome back, Admin! Here's what's happening in your academy.</p>
+                    </div>
+                    <div class="admin-date-badge">
+                        <i class="bi bi-calendar3"></i>
+                        <span id="currentDateBadge">May 24, 2026 | Wednesday</span>
+                    </div>
+                </div>
+
+                <!-- 6 KPI CARDS -->
+                <div class="admin-kpi-grid">
+                    <!-- Total Users -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon blue">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Total Users</div>
+                            <div class="admin-kpi-value" id="kpiTotalUsers">1,250</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +12% from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Courses -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon blue">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Total Courses</div>
+                            <div class="admin-kpi-value" id="kpiTotalCourses">48</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +8% from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Students -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon green">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Total Students</div>
+                            <div class="admin-kpi-value" id="kpiTotalStudents">980</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +15% from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Teachers -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon purple">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Total Teachers</div>
+                            <div class="admin-kpi-value" id="kpiTotalTeachers">35</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +5% from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Chapters -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon blue">
+                            <i class="bi bi-book-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Total Chapters</div>
+                            <div class="admin-kpi-value" id="kpiTotalChapters">320</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +10% from last month
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Enrollments -->
+                    <div class="admin-kpi-card">
+                        <div class="admin-kpi-icon blue">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                        </div>
+                        <div class="admin-kpi-info">
+                            <div class="admin-kpi-label">Enrollments</div>
+                            <div class="admin-kpi-value" id="kpiTotalEnrollments">1,450</div>
+                            <div class="admin-kpi-trend positive">
+                                <i class="bi bi-arrow-up-right"></i> +18% from last month
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MIDDLE ROW: 2 STAT WIDGETS -->
+                <div class="row g-4 mb-4">
+                    <!-- Enrollment Statistics Donut -->
+                    <div class="col-lg-6">
+                        <div class="admin-card h-100 mb-0">
+                            <div class="admin-card-header">
+                                <h3 class="admin-card-title">Enrollment Statistics</h3>
+                                <select class="admin-dropdown-select">
+                                    <option>This Month</option>
+                                    <option>Last Month</option>
+                                    <option>This Year</option>
+                                </select>
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col-sm-5 text-center position-relative py-3">
+                                    <!-- Donut Chart SVG -->
+                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 160px; height: 160px; transform: rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3"></circle>
+                                        <!-- IT 28.97% -->
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3" stroke-dasharray="29 71" stroke-dashoffset="0"></circle>
+                                        <!-- Business 21.38% -->
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#3B82F6" stroke-width="3" stroke-dasharray="21 79" stroke-dashoffset="-29"></circle>
+                                        <!-- Engineering 20.00% -->
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#10B981" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="-50"></circle>
+                                        <!-- Design 15.86% -->
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#F59E0B" stroke-width="3" stroke-dasharray="16 84" stroke-dashoffset="-70"></circle>
+                                        <!-- Others 13.79% -->
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#8B5CF6" stroke-width="3" stroke-dasharray="14 86" stroke-dashoffset="-86"></circle>
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle text-center lh-1">
+                                        <div class="text-xs text-muted mb-1">Total</div>
+                                        <div class="fw-bold fs-4 text-dark" id="donutTotalNumber">1,450</div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7 ps-sm-4">
+                                    <div class="d-flex flex-column gap-2 text-sm">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #0B1F4D;"></span>
+                                                <span class="text-secondary fw-medium">IT</span>
+                                            </div>
+                                            <span class="fw-bold">420 <span class="text-muted fw-normal text-xs">(28.97%)</span></span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #3B82F6;"></span>
+                                                <span class="text-secondary fw-medium">Business</span>
+                                            </div>
+                                            <span class="fw-bold">310 <span class="text-muted fw-normal text-xs">(21.38%)</span></span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #10B981;"></span>
+                                                <span class="text-secondary fw-medium">Engineering</span>
+                                            </div>
+                                            <span class="fw-bold">290 <span class="text-muted fw-normal text-xs">(20.00%)</span></span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #F59E0B;"></span>
+                                                <span class="text-secondary fw-medium">Design</span>
+                                            </div>
+                                            <span class="fw-bold">230 <span class="text-muted fw-normal text-xs">(15.86%)</span></span>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="width: 10px; height: 10px; background: #8B5CF6;"></span>
+                                                <span class="text-secondary fw-medium">Others</span>
+                                            </div>
+                                            <span class="fw-bold">200 <span class="text-muted fw-normal text-xs">(13.79%)</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Students by Major Bars -->
+                    <div class="col-lg-6">
+                        <div class="admin-card h-100 mb-0">
+                            <div class="admin-card-header">
+                                <h3 class="admin-card-title">Students by Major</h3>
+                                <select class="admin-dropdown-select">
+                                    <option>This Month</option>
+                                    <option>Last Month</option>
+                                    <option>This Year</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column gap-3 pt-1">
+                                <!-- IT -->
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">Information Technology</span>
+                                        <span class="fw-bold">420</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
+                                        <div class="progress-bar" style="width: 85%; background: #0B1F4D; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                                <!-- Business -->
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">Business Administration</span>
+                                        <span class="fw-bold">310</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
+                                        <div class="progress-bar" style="width: 65%; background: #3B82F6; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                                <!-- Software Eng -->
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">Software Engineering</span>
+                                        <span class="fw-bold">290</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
+                                        <div class="progress-bar" style="width: 60%; background: #10B981; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                                <!-- UI/UX -->
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">UI/UX Design</span>
+                                        <span class="fw-bold">230</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
+                                        <div class="progress-bar" style="width: 48%; background: #F59E0B; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                                <!-- Data Science -->
+                                <div>
+                                    <div class="d-flex justify-content-between text-sm mb-1">
+                                        <span class="fw-medium text-secondary">Data Science</span>
+                                        <span class="fw-bold">200</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; background: #F1F5F9; border-radius: 10px;">
+                                        <div class="progress-bar" style="width: 42%; background: #8B5CF6; border-radius: 10px;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECENT ENROLLMENTS TABLE -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h3 class="admin-card-title">Recent Enrollments</h3>
+                        <a href="enrollment-management.html" class="text-primary fw-bold text-sm text-decoration-none">View All</a>
+                    </div>
+                    <div class="admin-table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>STUDENT ID</th>
+                                    <th>STUDENT NAME</th>
+                                    <th>COURSE</th>
+                                    <th>ENROLLMENT DATE</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentEnrollmentsTableBody">
+                                <!-- Seed fallback / Dynamic rendering -->
+                                <tr>
+                                    <td class="text-muted fw-semibold">0001001</td>
+                                    <td class="fw-bold text-dark">Sok Virak</td>
+                                    <td>Web Development</td>
+                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold">0001002</td>
+                                    <td class="fw-bold text-dark">Meas Sreynich</td>
+                                    <td>Database Systems</td>
+                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold">0001003</td>
+                                    <td class="fw-bold text-dark">Chan Dara</td>
+                                    <td>UI/UX Design</td>
+                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 23, 2026</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold">0001004</td>
+                                    <td class="fw-bold text-dark">Pich Chhorn</td>
+                                    <td>Network Security</td>
+                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 24, 2026</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fw-semibold">0001005</td>
+                                    <td class="fw-bold text-dark">Vibol Pen</td>
+                                    <td>Mobile Development</td>
+                                    <td class="text-muted"><i class="bi bi-calendar3 me-1"></i> May 22, 2026</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/pages/admin-dashboard.js"></script>
+</body>
+</html>

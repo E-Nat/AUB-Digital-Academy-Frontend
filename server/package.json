@@ -1,0 +1,17 @@
+{
+  "name": "aub-digital-academy-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API and SQLite Database for AUB Digital Academy",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node db/seeds.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  }
+}

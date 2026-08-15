@@ -1,1 +1,179 @@
-<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - AUB Digital Academy</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="../../css/layouts/admin.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
+                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <div class="title">AUB DIGITAL</div>
+                        <div class="subtitle">FACULTY PORTAL</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="admin-sidebar-menu">
+                <a href="dashboard.html" class="admin-nav-item active">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Teaching Overview</span>
+                </a>
+                <a href="my-courses.html" class="admin-nav-item">
+                    <i class="bi bi-book"></i>
+                    <span>My Courses</span>
+                </a>
+                <a href="assignments.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Assignments</span>
+                </a>
+                <a href="submissions.html" class="admin-nav-item">
+                    <i class="bi bi-inbox-fill"></i>
+                    <span>Student Submissions</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-house"></i>
+                    <span>Back to Website</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+                <div class="admin-user-card">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Teacher" id="teacherAvatar">
+                    <div class="admin-user-info">
+                        <div class="name" id="teacherName">Dr. Sarah Johnson</div>
+                        <div class="role">Instructor</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main View -->
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <div class="admin-search-wrapper">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="admin-search-input" placeholder="Search students, submissions...">
+                </div>
+                <div class="admin-topbar-actions">
+                    <div class="admin-topbar-profile">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Teacher">
+                        <div class="d-none d-md-block text-start lh-1">
+                            <div class="fw-bold text-sm" id="topbarTeacherName">Dr. Sarah Johnson</div>
+                            <div class="text-xs text-muted">Lead Instructor</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <div class="admin-header-row">
+                    <div>
+                        <h1 class="admin-page-title">Faculty Dashboard</h1>
+                        <p class="admin-page-subtitle">Manage curriculum content, grade student submissions, and review student progress.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon blue"><i class="bi bi-people-fill"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Active Students</div>
+                                <div class="admin-kpi-value">1,250</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon green"><i class="bi bi-journal-bookmark-fill"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Courses Taught</div>
+                                <div class="admin-kpi-value">3</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon amber"><i class="bi bi-clock-history"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Pending Reviews</div>
+                                <div class="admin-kpi-value">14</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <h3 class="admin-card-title mb-3">My Courses</h3>
+                    <div class="admin-table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>COURSE TITLE</th>
+                                    <th>CATEGORY</th>
+                                    <th>ENROLLED</th>
+                                    <th>LESSONS</th>
+                                    <th>RATING</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Full-Stack Web Development</td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">Technology</span></td>
+                                    <td>1,250 Students</td>
+                                    <td>12 Lessons</td>
+                                    <td><i class="bi bi-star-fill text-warning me-1"></i> 4.9</td>
+                                    <td><span class="admin-status-badge active">Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const userStr = localStorage.getItem('aub_user');
+            if (userStr) {
+                try {
+                    const u = JSON.parse(userStr);
+                    if (u.full_name) {
+                        document.getElementById('teacherName').textContent = u.full_name;
+                        document.getElementById('topbarTeacherName').textContent = u.full_name;
+                    }
+                    if (u.avatar_url) {
+                        document.getElementById('teacherAvatar').src = u.avatar_url;
+                    }
+                } catch (e) {}
+            }
+        });
+    </script>
+</body>
+</html>
