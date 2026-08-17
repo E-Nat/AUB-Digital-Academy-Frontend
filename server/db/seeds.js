@@ -583,6 +583,344 @@ async function seedDatabase() {
         );
     }
 
+    // 14. Seed Departments
+    console.log('Seeding Departments...');
+    const departments = [
+        { id: 1, name: 'Computer Science', code: 'CS', description: 'Algorithms, Software Engineering, AI & Systems' },
+        { id: 2, name: 'Information Technology', code: 'IT', description: 'Network Infrastructure, Cloud, & Security' },
+        { id: 3, name: 'Business Administration', code: 'BA', description: 'Management, Leadership, & Global Commerce' },
+        { id: 4, name: 'Finance & Banking', code: 'FIN', description: 'Corporate Finance, Investment, & Fintech' },
+        { id: 5, name: 'Accounting', code: 'ACC', description: 'Auditing, Financial Reporting, & Taxation' },
+        { id: 6, name: 'Marketing', code: 'MKT', description: 'Digital Marketing, Brand Strategy, & Consumer Behavior' },
+        { id: 7, name: 'Economics', code: 'ECON', description: 'Macroeconomics, Microeconomics, & Quantitative Methods' },
+        { id: 8, name: 'Engineering', code: 'ENG', description: 'Robotics, Hardware Architecture, & Embedded Systems' },
+        { id: 9, name: 'Languages', code: 'LANG', description: 'Academic English, Business Communication, & Linguistics' },
+        { id: 10, name: 'Law', code: 'LAW', description: 'Digital Law, Cyber Governance, & Commercial Regulations' }
+    ];
+
+    for (const d of departments) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO departments (id, name, code, description) VALUES (?, ?, ?, ?)`,
+            [d.id, d.name, d.code, d.description]
+        );
+    }
+
+    // 15. Seed Teachers (16+ Faculty Members)
+    console.log('Seeding Teachers & Faculty Records...');
+    const facultyList = [
+        {
+            userId: 7,
+            name: 'Dr. Sarah Johnson',
+            email: 'sarah.johnson@aub.edu.kh',
+            uniId: 'TCH-001',
+            deptId: 1, // CS
+            spec: 'Full-Stack Web Architectures & Cloud Computing',
+            empType: 'Full-Time',
+            exp: 12,
+            bio: 'Senior Lecturer with 12+ years of research and production software engineering experience.',
+            room: 'Faculty Bldg A, 402',
+            phone: '+855 23 999 101',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 8,
+            name: 'Prof. Alex Chen',
+            email: 'alex.chen@aub.edu.kh',
+            uniId: 'TCH-002',
+            deptId: 1, // CS
+            spec: 'Human-Computer Interaction & Design Systems',
+            empType: 'Full-Time',
+            exp: 10,
+            bio: 'Specialist in interaction design, micro-interactions, and accessibility standards.',
+            room: 'Faculty Bldg A, 405',
+            phone: '+855 23 999 102',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 9,
+            name: 'Dr. Michael Roberts',
+            email: 'michael.roberts@aub.edu.kh',
+            uniId: 'TCH-003',
+            deptId: 2, // IT
+            spec: 'Cybersecurity, Cryptography & Network Defense',
+            empType: 'Full-Time',
+            exp: 15,
+            bio: 'Certified ethical hacker and enterprise infrastructure security architect.',
+            room: 'Faculty Bldg B, 201',
+            phone: '+855 23 999 103',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 10,
+            name: 'Dr. Emily Watson',
+            email: 'emily.watson@aub.edu.kh',
+            uniId: 'TCH-004',
+            deptId: 1, // CS
+            spec: 'Machine Learning, Deep Neural Networks & Python',
+            empType: 'Full-Time',
+            exp: 8,
+            bio: 'Researcher in natural language processing and computer vision algorithms.',
+            room: 'Faculty Bldg B, 204',
+            phone: '+855 23 999 104',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 11,
+            name: 'Dr. Sokhom Srun',
+            email: 'sokhom.srun@aub.edu.kh',
+            uniId: 'TCH-005',
+            deptId: 4, // Finance
+            spec: 'Fintech, Digital Assets & Financial Risk Analysis',
+            empType: 'Full-Time',
+            exp: 14,
+            bio: 'Former financial consultant advising national banking digitalization programs.',
+            room: 'Faculty Bldg C, 301',
+            phone: '+855 23 999 105',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 12,
+            name: 'Prof. Sophea Chea',
+            email: 'sophea.chea@aub.edu.kh',
+            uniId: 'TCH-006',
+            deptId: 5, // Accounting
+            spec: 'Auditing Standards, Taxation & Enterprise ERP',
+            empType: 'Full-Time',
+            exp: 11,
+            bio: 'Certified public accountant with extensive corporate governance expertise.',
+            room: 'Faculty Bldg C, 305',
+            phone: '+855 23 999 106',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 13,
+            name: 'Dr. Rithy Kong',
+            email: 'rithy.kong@aub.edu.kh',
+            uniId: 'TCH-007',
+            deptId: 3, // BA
+            spec: 'Strategic Management & Startup Incubation',
+            empType: 'Full-Time',
+            exp: 9,
+            bio: 'Director of entrepreneurial leadership initiatives and business incubator.',
+            room: 'Faculty Bldg D, 102',
+            phone: '+855 23 999 107',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 14,
+            name: 'Prof. David Miller',
+            email: 'david.miller@aub.edu.kh',
+            uniId: 'TCH-008',
+            deptId: 6, // Marketing
+            spec: 'Growth Marketing, SEO & Brand Communications',
+            empType: 'Part-Time',
+            exp: 7,
+            bio: 'Digital marketing strategist managing multi-channel branding campaigns.',
+            room: 'Faculty Bldg D, 108',
+            phone: '+855 23 999 108',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 15,
+            name: 'Dr. Elena Rostova',
+            email: 'elena.rostova@aub.edu.kh',
+            uniId: 'TCH-009',
+            deptId: 7, // Economics
+            spec: 'Macroeconomic Modeling & Econometrics',
+            empType: 'Full-Time',
+            exp: 13,
+            bio: 'Specialist in quantitative economics and regional developmental trade policies.',
+            room: 'Faculty Bldg C, 204',
+            phone: '+855 23 999 109',
+            status: 'On Leave',
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 16,
+            name: 'Prof. James Wilson',
+            email: 'james.wilson@aub.edu.kh',
+            uniId: 'TCH-010',
+            deptId: 8, // Engineering
+            spec: 'Embedded Systems, IoT & Robotics Control',
+            empType: 'Full-Time',
+            exp: 16,
+            bio: 'Hardware engineer with experience in automotive embedded computing.',
+            room: 'Lab Bldg E, 101',
+            phone: '+855 23 999 110',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 17,
+            name: 'Dr. Kimberly Adams',
+            email: 'kimberly.adams@aub.edu.kh',
+            uniId: 'TCH-011',
+            deptId: 9, // Languages
+            spec: 'Academic English & Technical Communication',
+            empType: 'Full-Time',
+            exp: 6,
+            bio: 'Lead coordinator for English for Academic Purposes and thesis writing.',
+            room: 'Faculty Bldg A, 202',
+            phone: '+855 23 999 111',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 18,
+            name: 'Prof. Chantha Noun',
+            email: 'chantha.noun@aub.edu.kh',
+            uniId: 'TCH-012',
+            deptId: 10, // Law
+            spec: 'Cyber Law, IP Governance & Digital Rights',
+            empType: 'Adjunct',
+            exp: 10,
+            bio: 'Legal practitioner specializing in international copyright and digital data privacy.',
+            room: 'Faculty Bldg D, 301',
+            phone: '+855 23 999 112',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 19,
+            name: 'Dr. Marcus Vance',
+            email: 'marcus.vance@aub.edu.kh',
+            uniId: 'TCH-013',
+            deptId: 1, // CS
+            spec: 'Distributed Systems & Database Engine Architecture',
+            empType: 'Full-Time',
+            exp: 9,
+            bio: 'Researches distributed consensus algorithms and high-throughput query optimization.',
+            room: 'Faculty Bldg A, 408',
+            phone: '+855 23 999 113',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 20,
+            name: 'Prof. Socheata Lim',
+            email: 'socheata.lim@aub.edu.kh',
+            uniId: 'TCH-014',
+            deptId: 2, // IT
+            spec: 'DevOps, CI/CD Pipelines & Kubernetes Orchestration',
+            empType: 'Part-Time',
+            exp: 8,
+            bio: 'Cloud operations architect specializing in containerized enterprise workloads.',
+            room: 'Faculty Bldg B, 210',
+            phone: '+855 23 999 114',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 21,
+            name: 'Dr. Robert Hansen',
+            email: 'robert.hansen@aub.edu.kh',
+            uniId: 'TCH-015',
+            deptId: 4, // Finance
+            spec: 'Quantitative Investment & Portfolio Management',
+            empType: 'Adjunct',
+            exp: 15,
+            bio: 'Portfolio risk analyst with experience in capital market structuring.',
+            room: 'Faculty Bldg C, 308',
+            phone: '+855 23 999 115',
+            status: 'Inactive',
+            avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=150'
+        },
+        {
+            userId: 22,
+            name: 'Prof. Linda Thorne',
+            email: 'linda.thorne@aub.edu.kh',
+            uniId: 'TCH-016',
+            deptId: 3, // BA
+            spec: 'Organizational Behavior & Corporate Communications',
+            empType: 'Full-Time',
+            exp: 12,
+            bio: 'Advises corporate boards on team leadership, retention, and workplace culture.',
+            room: 'Faculty Bldg D, 112',
+            phone: '+855 23 999 116',
+            status: 'Active',
+            avatar: 'https://images.unsplash.com/photo-1548142813-c348350df52b?auto=format&fit=crop&w=150'
+        }
+    ];
+
+    for (const f of facultyList) {
+        // Ensure user account exists
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO users (id, full_name, email, university_id, password_hash, role_id, avatar_url, status)
+             VALUES (?, ?, ?, ?, ?, 2, ?, ?)`,
+            [f.userId, f.name, f.email, f.uniId, teacherPasswordHash, f.avatar, f.status]
+        );
+
+        // Ensure teacher profile exists
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO teachers (user_id, teacher_code, department_id, specialization, employment_type, experience_years, bio, office_room, phone, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [f.userId, f.uniId, f.deptId, f.spec, f.empType, f.exp, f.bio, f.room, f.phone, f.status]
+        );
+    }
+
+    // 16. Seed Teacher <-> Course Many-to-Many Relationships
+    console.log('Seeding Teacher Course Assignments...');
+    const teacherCourses = [
+        { teacherId: 7, courseId: 1 }, // Dr. Sarah Johnson -> Web Dev
+        { teacherId: 8, courseId: 2 }, // Prof. Alex Chen -> UI/UX
+        { teacherId: 9, courseId: 3 }, // Dr. Michael Roberts -> Cyber Security
+        { teacherId: 10, courseId: 4 }, // Dr. Emily Watson -> Data Science
+        { teacherId: 19, courseId: 1 }, // Dr. Marcus Vance -> Web Dev (multiple teachers per course)
+        { teacherId: 20, courseId: 3 }  // Prof. Socheata Lim -> Cyber Security
+    ];
+
+    for (const tc of teacherCourses) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO teacher_courses (teacher_id, course_id) VALUES (?, ?)`,
+            [tc.teacherId, tc.courseId]
+        );
+    }
+
+    // 17. Seed Classes
+    console.log('Seeding Classes...');
+    const classes = [
+        { id: 1, courseId: 1, teacherId: 7, name: 'CS-101: Web Dev Alpha', room: 'Lab 301', schedule: 'Mon/Wed 08:30 - 10:30', start: '2026-08-01', end: '2026-11-30', status: 'Active' },
+        { id: 2, courseId: 1, teacherId: 7, name: 'CS-102: Web Dev Beta', room: 'Lab 302', schedule: 'Tue/Thu 13:30 - 15:30', start: '2026-08-01', end: '2026-11-30', status: 'Active' },
+        { id: 3, courseId: 2, teacherId: 8, name: 'DS-201: UI/UX Studio', room: 'Studio 105', schedule: 'Mon/Wed 14:00 - 16:00', start: '2026-08-01', end: '2026-11-30', status: 'Active' },
+        { id: 4, courseId: 3, teacherId: 9, name: 'SEC-301: Network Security Lab', room: 'Security Lab 401', schedule: 'Fri 09:00 - 12:00', start: '2026-08-01', end: '2026-11-30', status: 'Active' },
+        { id: 5, courseId: 4, teacherId: 10, name: 'DATA-401: Applied Python Analytics', room: 'Lab 304', schedule: 'Tue/Thu 09:00 - 11:00', start: '2026-08-01', end: '2026-11-30', status: 'Active' }
+    ];
+
+    for (const cl of classes) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO classes (id, course_id, teacher_id, class_name, room, schedule, start_date, end_date, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [cl.id, cl.courseId, cl.teacherId, cl.name, cl.room, cl.schedule, cl.start, cl.end, cl.status]
+        );
+    }
+
+    // 18. Seed Class Enrollments (Teacher -> Class -> Enrollment -> Student)
+    console.log('Seeding Class Enrollments...');
+    const classEnrollments = [
+        { classId: 1, studentId: 2 }, // Sok Virak in Web Dev Alpha
+        { classId: 1, studentId: 3 }, // Chanthou Meas in Web Dev Alpha
+        { classId: 1, studentId: 6 }, // Vibol Pen in Web Dev Alpha
+        { classId: 2, studentId: 4 }, // Dara Keo in Web Dev Beta
+        { classId: 2, studentId: 5 }, // Kanha Rath in Web Dev Beta
+        { classId: 3, studentId: 2 }, // Sok Virak in UI/UX Studio
+        { classId: 4, studentId: 3 }  // Chanthou Meas in Security Lab
+    ];
+
+    for (const ce of classEnrollments) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO class_enrollments (class_id, student_id) VALUES (?, ?)`,
+            [ce.classId, ce.studentId]
+        );
+    }
+
     console.log('✅ SQLite Database seeded successfully with all relationships intact.');
 }
 

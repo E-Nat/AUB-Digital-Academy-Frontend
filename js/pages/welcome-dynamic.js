@@ -2,6 +2,8 @@
 // Connects welcomepage.html to the SQLite Database & REST API as the single source of truth
 
 (function () {
+    'use strict';
+
     const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
         ? 'http://localhost:5000/api'
         : '/api';
@@ -22,11 +24,11 @@
             if (!res.ok) throw new Error('API offline or error');
             const result = await res.json();
 
-            if (result.success && result.data && result.data.length > 0) {
+            if (result.success && Array.isArray(result.data) && result.data.length > 0) {
                 // Render exact HTML structure matching public website
-                track.innerHTML = result.data.map((p, idx) => `
+                track.innerHTML = result.data.map((p) => `
                     <div class="carousel-slide ${escapeHtml(p.theme_class || 'theme-blue')}">
-                        <a href="${escapeHtml(p.detail_url || 'pages/programs/' + p.slug + '.html')}" class="card-program-refined text-center text-decoration-none" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.2">
+                        <a href="${escapeHtml(p.detail_url || 'pages/programs/' + (p.slug || 'cs') + '.html')}" class="card-program-refined text-center text-decoration-none">
                             <div class="card-arrow-icon"><i class="bi bi-arrow-up-right"></i></div>
                             <div class="card-icon-square">
                                 <i class="bi ${escapeHtml(p.icon_class || 'bi-laptop')}"></i>
@@ -51,15 +53,17 @@
                     </div>
                 `).join('');
 
-                // Re-initialize VanillaTilt
-                if (typeof VanillaTilt !== 'undefined') {
-                    document.querySelectorAll('.featured-carousel-track [data-tilt]').forEach(el => {
-                        VanillaTilt.init(el);
-                    });
+                // Re-initialize carousel with new dynamic slides
+                if (typeof window.initProgramsCarousel === 'function') {
+                    window.initProgramsCarousel();
+                }
+
+                if (typeof window.refreshScrollReveal === 'function') {
+                    window.refreshScrollReveal();
                 }
             }
         } catch (e) {
-            console.log('Programs API unavailable, gracefully retaining existing HTML markup.');
+            // Gracefully retain existing HTML markup if API is offline
         }
     }
 
@@ -73,9 +77,9 @@
             if (!res.ok) throw new Error('API offline');
             const result = await res.json();
 
-            if (result.success && result.data && result.data.length > 0) {
+            if (result.success && Array.isArray(result.data) && result.data.length > 0) {
                 grid.innerHTML = result.data.map((c, idx) => `
-                    <div class="col-lg-3 col-md-6 reveal-up delay-${(idx + 1) * 100} course-item" data-category="${escapeHtml(c.category_slug || 'technology')}">
+                    <div class="col-lg-3 col-md-6 reveal-up delay-${Math.min((idx + 1) * 100, 500)} course-item" data-category="${escapeHtml(c.category_slug || 'technology')}">
                         <div class="card card-course-premium h-100 bg-white shadow-sm border-0">
                             <div class="course-thumbnail position-relative overflow-hidden">
                                 <img src="${escapeHtml(c.thumbnail_url || 'assets/images/course_webdev.jpg')}" class="w-100 h-100 object-fit-cover" alt="${escapeHtml(c.title)}" onerror="this.src='assets/images/course_webdev.jpg'">
@@ -107,21 +111,25 @@
                                     </div>
                                 </div>
                                 
-                                <a href="pages/student/course-detail.html?slug=${c.slug}" class="btn btn-primary w-100 rounded-pill btn-course-cta fw-semibold py-2">
+                                <a href="pages/student/course-detail.html?slug=${escapeHtml(c.slug || '')}" class="btn btn-primary w-100 rounded-pill btn-course-cta fw-semibold py-2">
                                     Start Learning <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         </div>
                     </div>
                 `).join('');
+
+                if (typeof window.refreshScrollReveal === 'function') {
+                    window.refreshScrollReveal();
+                }
             }
         } catch (e) {
-            console.log('Courses API unavailable, gracefully retaining existing HTML markup.');
+            // Gracefully retain existing HTML markup if API is offline
         }
     }
 
     // 3. DYNAMIC CATEGORIES FOR MARQUEE & FILTER CHIPS
-    async function fetchCategoriesForFilters() {
+    function fetchCategoriesForFilters() {
         const filterContainer = document.querySelector('.course-filters');
         if (!filterContainer) return;
 
@@ -140,6 +148,9 @@
                 const category = item.getAttribute('data-category');
                 if (filterVal === 'all' || category === filterVal) {
                     item.style.display = 'block';
+                    item.classList.add('is-visible');
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
                 } else {
                     item.style.display = 'none';
                 }
@@ -154,3 +165,4 @@
         return div.innerHTML;
     }
 })();
+

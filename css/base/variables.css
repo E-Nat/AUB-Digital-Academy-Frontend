@@ -1,42 +1,62 @@
 /**
  * variables.css
  * Core Design Tokens for AUB Digital Academy
+ * Exact Brand System: Primary Navy (#0B1733), Deep Navy (#07101F), Gold (#F5B800), Primary Blue (#4F9CF9)
  */
 
 :root {
     /* =========================================
        Brand Colors
        ========================================= */
-    --aub-primary: #0F2B5B; /* Navy */
-    --aub-primary-hover: #153A7A;
+    --aub-primary: #0B1733;       /* Primary Navy */
+    --aub-primary-hover: #12234D;
+    --aub-deep-navy: #07101F;     /* Deep Space Navy */
     
-    --aub-secondary: #F4B400; /* Gold */
+    --aub-secondary: #F5B800;     /* Academic Gold */
     --aub-secondary-hover: #DDA300;
     
-    --aub-accent: #3B82F6;
+    --aub-accent: #4F9CF9;        /* Digital Blue */
+    --aub-accent-hover: #3B82F6;
     
     /* Surface & Background */
-    --aub-background: #F8FAFC;
-    --aub-surface: #FFFFFF;
+    --aub-background: #F7F9FC;    /* Clean Light Background */
+    --aub-surface: #FFFFFF;       /* Pure White Card */
     --aub-border: #E2E8F0;
+    --aub-border-subtle: #F1F5F9;
     
     /* Text Colors */
-    --aub-text-primary: #0F172A;
-    --aub-text-secondary: #475569;
+    --aub-text-primary: #0B1733;  /* Deep Navy Text */
+    --aub-text-secondary: #6F82A3;/* Clean Slate Body Text */
     --aub-text-muted: #94A3B8;
     
+    /* Academic Program Card Accent Palette */
+    --prog-cs: #4F9CF9;           /* Soft Blue */
+    --prog-cs-bg: #EBF4FF;
+    --prog-it: #06B6D4;           /* Soft Cyan */
+    --prog-it-bg: #ECFEFF;
+    --prog-finance: #10B981;      /* Soft Green */
+    --prog-finance-bg: #ECFDF5;
+    --prog-accounting: #8B5CF6;   /* Soft Purple */
+    --prog-accounting-bg: #F5F3FF;
+    --prog-business: #F5B800;     /* Soft Gold */
+    --prog-business-bg: #FFFBEB;
+    --prog-marketing: #F97316;    /* Soft Orange */
+    --prog-marketing-bg: #FFF7ED;
+    --prog-engineering: #6366F1;  /* Soft Indigo */
+    --prog-engineering-bg: #EEF2FF;
+    
     /* Semantic Colors */
-    --aub-success: #22C55E;
-    --aub-warning: #F59E0B;
+    --aub-success: #10B981;
+    --aub-warning: #F5B800;
     --aub-danger: #EF4444;
-    --aub-info: #0EA5E9;
+    --aub-info: #4F9CF9;
 
     /* Bootstrap Overrides mapped to our variables */
     --bs-primary: var(--aub-primary);
     --bs-secondary: var(--aub-secondary);
     --bs-success: var(--aub-success);
-    --bs-info: var(--aub-info);
-    --bs-warning: var(--aub-warning);
+    --bs-info: var(--aub-accent);
+    --bs-warning: var(--aub-secondary);
     --bs-danger: var(--aub-danger);
     --bs-body-bg: var(--aub-background);
     --bs-body-color: var(--aub-text-primary);
@@ -81,9 +101,9 @@
     /* =========================================
        Shadows
        ========================================= */
-    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+    --shadow-sm: 0 1px 3px rgba(11, 23, 51, 0.06), 0 1px 2px rgba(11, 23, 51, 0.04);
+    --shadow-md: 0 4px 12px -1px rgba(11, 23, 51, 0.08), 0 2px 6px -2px rgba(11, 23, 51, 0.04);
+    --shadow-lg: 0 12px 24px -4px rgba(11, 23, 51, 0.12), 0 4px 8px -4px rgba(11, 23, 51, 0.06);
 
     /* =========================================
        Transitions

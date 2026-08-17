@@ -1,145 +1,165 @@
 /**
  * animations.js
- * Intersection Observer for scroll reveal animations
+ * Comprehensive scroll reveal, sticky navigation, and interaction controller
+ * AUB Digital Academy - Academic, Clean, Digital & Premium
  */
 
-document.addEventListener("DOMContentLoaded", function() {
-    
-    // 1. Scroll Reveal Observer
+(function () {
+    'use strict';
+
+    // 1. SCROLL REVEAL OBSERVER
     const revealOptions = {
-        threshold: 0.1,  // Trigger when 10% visible
-        rootMargin: "0px 0px -50px 0px"
+        threshold: 0.12,
+        rootMargin: "0px 0px -40px 0px"
     };
 
-        const revealOnScroll = new IntersectionObserver(function(entries, observer) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Add is-visible class to trigger animation when entering viewport
-                entry.target.classList.add('is-visible');
+    let scrollObserver = null;
+
+    function initScrollReveal() {
+        if ('IntersectionObserver' in window) {
+            scrollObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        // Keep element visible once revealed to prevent flickering on scroll
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, revealOptions);
+
+            observeAllRevealElements();
+        } else {
+            // Fallback for browsers without IntersectionObserver
+            document.querySelectorAll('.reveal-up, .reveal-fade, .img-reveal').forEach(el => {
+                el.classList.add('is-visible');
+            });
+        }
+    }
+
+    function observeAllRevealElements() {
+        if (!scrollObserver) return;
+        const revealElements = document.querySelectorAll('.reveal-up:not(.is-visible), .reveal-fade:not(.is-visible), .img-reveal:not(.is-visible)');
+        revealElements.forEach(el => {
+            // If element is already in the viewport on load (e.g. Hero), reveal immediately
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                el.classList.add('is-visible');
             } else {
-                // Remove class when leaving viewport so it replays next time
-                entry.target.classList.remove('is-visible');
+                scrollObserver.observe(el);
             }
         });
-    }, revealOptions);
+    }
 
-    const revealElements = document.querySelectorAll('.reveal-up, .img-reveal');
-    revealElements.forEach(el => revealOnScroll.observe(el));
+    // Expose global refresh function for dynamic content
+    window.refreshScrollReveal = function () {
+        observeAllRevealElements();
+    };
 
-    // 2. Sticky Navbar Logic
-    const navbar = document.getElementById('mainNav');
-    if (navbar) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 10) {
+    // 2. STICKY NAVBAR LOGIC
+    function initStickyNavbar() {
+        const navbar = document.getElementById('mainNav');
+        if (!navbar) return;
+
+        const handleScroll = () => {
+            if (window.scrollY > 20) {
                 navbar.classList.add('navbar-scrolled');
             } else {
                 navbar.classList.remove('navbar-scrolled');
             }
-        });
-        
-        // Trigger once on load in case page is already scrolled
-        if (window.scrollY > 10) {
-            navbar.classList.add('navbar-scrolled');
-        }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Initial check
     }
 
-    // 3. Mobile Menu Toggle
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    const mobileMenu = document.getElementById('mobileMenu');
-    
-    if (mobileMenuToggle && mobileMenu) {
-        mobileMenuToggle.addEventListener('click', function() {
-            mobileMenu.classList.toggle('is-open');
+    // 3. MOBILE MENU TOGGLE
+    function initMobileMenu() {
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        if (!mobileMenuToggle || !mobileMenu) return;
+
+        mobileMenuToggle.addEventListener('click', function () {
+            const isOpen = mobileMenu.classList.toggle('is-open');
             const icon = this.querySelector('i');
-            if (mobileMenu.classList.contains('is-open')) {
-                icon.classList.replace('bi-list', 'bi-x-lg');
-            } else {
-                icon.classList.replace('bi-x-lg', 'bi-list');
+            if (icon) {
+                if (isOpen) {
+                    icon.classList.replace('bi-list', 'bi-x-lg');
+                } else {
+                    icon.classList.replace('bi-x-lg', 'bi-list');
+                }
             }
+            document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
         // Close menu when a link is clicked
-        const mobileLinks = mobileMenu.querySelectorAll('.nav-link');
+        const mobileLinks = mobileMenu.querySelectorAll('.nav-link, .btn');
         mobileLinks.forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.remove('is-open');
+                document.body.style.overflow = '';
                 const icon = mobileMenuToggle.querySelector('i');
-                if(icon) icon.classList.replace('bi-x-lg', 'bi-list');
+                if (icon) icon.classList.replace('bi-x-lg', 'bi-list');
             });
         });
     }
 
-    // 4. ScrollSpy for Navigation Links
-    const sections = document.querySelectorAll('section');
-    const navItems = document.querySelectorAll('.navbar-nav .nav-item');
+    // 4. SCROLLSPY FOR NAVIGATION LINKS
+    function initScrollSpy() {
+        const sections = document.querySelectorAll('section[id]');
+        const navItems = document.querySelectorAll('.navbar-nav .nav-item');
 
-    window.addEventListener('scroll', () => {
-        let current = '';
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            // Activate section when it's in the top 3rd of the viewport
-            if (window.scrollY >= (sectionTop - 300)) {
-                if (section.classList.contains('hero-section')) {
-                    current = 'home';
-                } else {
-                    current = section.getAttribute('id');
-                }
-            }
-        });
+        if (!sections.length || !navItems.length) return;
 
-        // Force home if at the very top
-        if (window.scrollY < 100) {
-            current = 'home';
-        }
+        const updateActiveNav = () => {
+            let current = 'home';
+            const scrollPosition = window.scrollY + 200;
 
-        navItems.forEach(li => {
-            li.classList.remove('active');
-            const a = li.querySelector('a');
-            if (a) {
-                const href = a.getAttribute('href');
-                if (href === '#' && current === 'home') {
-                    li.classList.add('active');
-                } else if (current && href === `#${current}`) {
-                    li.classList.add('active');
-                }
-            }
-        });
-    });
-});
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
 
-
-// Course Filtering
-document.addEventListener('DOMContentLoaded', () => {
-    const filterBtns = document.querySelectorAll('.btn-filter');
-    const courseItems = document.querySelectorAll('.course-item');
-
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remove active class from all buttons
-            filterBtns.forEach(b => b.classList.remove('active'));
-            // Add active class to clicked button
-            btn.classList.add('active');
-
-            const filterValue = btn.getAttribute('data-filter');
-
-            courseItems.forEach(item => {
-                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                    item.style.display = 'block';
-                    // Trigger reflow for animation if needed
-                    setTimeout(() => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateY(0)';
-                    }, 50);
-                } else {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        item.style.display = 'none';
-                    }, 300);
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    current = sectionId;
                 }
             });
-        });
+
+            if (window.scrollY < 120) {
+                current = 'home';
+            }
+
+            navItems.forEach(li => {
+                li.classList.remove('active');
+                const a = li.querySelector('a');
+                if (a) {
+                    const href = a.getAttribute('href');
+                    if (href === `#${current}` || (current === 'home' && (href === '#home' || href === '#'))) {
+                        li.classList.add('active');
+                    }
+                }
+            });
+        };
+
+        window.addEventListener('scroll', updateActiveNav, { passive: true });
+        updateActiveNav();
+    }
+
+    // DOM Ready Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+        initScrollReveal();
+        initStickyNavbar();
+        initMobileMenu();
+        initScrollSpy();
+
+        // Reveal hero elements promptly
+        setTimeout(() => {
+            document.querySelectorAll('.hero-section .reveal-up').forEach(el => {
+                el.classList.add('is-visible');
+            });
+        }, 80);
     });
-});
+
+})();
+
 

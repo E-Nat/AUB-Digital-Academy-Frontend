@@ -1,8 +1,7 @@
-// ==========================================
-// AUB Digital Academy - User Management Controller
-// Specification: Full Name, Email Address, University ID, Role, Status, Password
-// Integrated with SweetAlert2, Client Validation, & Local Mock Store
-// ==========================================
+/**
+ * AUB Digital Academy - User Management Controller
+ * Comprehensive university administration portal for Students, Teachers, and Admins.
+ */
 
 document.addEventListener('DOMContentLoaded', async function () {
     const isLocal = window.location.hostname === 'localhost' || 
@@ -26,18 +25,57 @@ document.addEventListener('DOMContentLoaded', async function () {
         return headers;
     }
 
+    // State Variables
     let allUsers = [];
+    let departmentsList = [];
     let currentRoleFilter = 'all';
     let currentStatusFilter = 'all';
+    let currentDepartmentFilter = 'all';
+    let currentSearchQuery = '';
     let currentUserInView = null;
+    let currentWizardStep = 1;
 
+    // DOM Elements
     const userModalEl = document.getElementById('userModal');
     const userModal = userModalEl ? new bootstrap.Modal(userModalEl) : null;
 
     const viewUserModalEl = document.getElementById('viewUserModal');
     const viewUserModal = viewUserModalEl ? new bootstrap.Modal(viewUserModalEl) : null;
 
-    // 1. Password Visibility Toggle
+    const searchInput = document.getElementById('userSearchInput');
+    const userRoleFilter = document.getElementById('userRoleFilter');
+    const userStatusFilter = document.getElementById('userStatusFilter');
+    const userDepartmentFilter = document.getElementById('userDepartmentFilter');
+    const rolePillGroup = document.getElementById('rolePillGroup');
+    const usersTableBody = document.getElementById('usersTableBody');
+    const tableRecordCount = document.getElementById('tableRecordCount');
+
+    // Multi-Step Wizard Elements
+    const stepBtn1 = document.getElementById('stepBtn1');
+    const stepBtn2 = document.getElementById('stepBtn2');
+    const stepBtn3 = document.getElementById('stepBtn3');
+    const wizardStep1 = document.getElementById('wizardStep1');
+    const wizardStep2 = document.getElementById('wizardStep2');
+    const wizardStep3 = document.getElementById('wizardStep3');
+    const prevStepBtn = document.getElementById('prevStepBtn');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const saveUserBtn = document.getElementById('saveUserBtn');
+
+    const userRoleSelect = document.getElementById('userRole');
+    const studentSpecificFields = document.getElementById('studentSpecificFields');
+    const teacherSpecificFields = document.getElementById('teacherSpecificFields');
+    const adminSpecificFields = document.getElementById('adminSpecificFields');
+
+    // Mobile Sidebar Toggle
+    const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+    const adminSidebar = document.getElementById('adminSidebar');
+    if (mobileSidebarToggle && adminSidebar) {
+        mobileSidebarToggle.addEventListener('click', () => {
+            adminSidebar.classList.toggle('show');
+        });
+    }
+
+    // Password Visibility Toggle
     const togglePassBtn = document.getElementById('toggleUserPasswordBtn');
     const passInput = document.getElementById('userPassword');
     if (togglePassBtn && passInput) {
@@ -51,54 +89,121 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // 2. Load Users
+    /**
+     * 1. Load Academic Departments
+     */
+    async function loadDepartments() {
+        try {
+            const res = await fetch(`${API_BASE}/departments`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && Array.isArray(data.data)) {
+                    departmentsList = data.data;
+                }
+            }
+        } catch (e) {
+            departmentsList = [
+                { id: 1, name: 'Computer Science', code: 'CS' },
+                { id: 2, name: 'Information Technology', code: 'IT' },
+                { id: 3, name: 'Business Administration', code: 'BA' },
+                { id: 4, name: 'Finance & Banking', code: 'FIN' },
+                { id: 5, name: 'Accounting', code: 'ACC' },
+                { id: 6, name: 'Marketing', code: 'MKT' },
+                { id: 7, name: 'Economics', code: 'ECON' },
+                { id: 8, name: 'Engineering', code: 'ENG' },
+                { id: 9, name: 'Languages', code: 'LANG' },
+                { id: 10, name: 'Law', code: 'LAW' }
+            ];
+        }
+
+        // Populate Department Filter & Form Select
+        if (userDepartmentFilter) {
+            userDepartmentFilter.innerHTML = '<option value="all">All Departments</option>';
+            departmentsList.forEach(dept => {
+                const opt = document.createElement('option');
+                opt.value = dept.name;
+                opt.textContent = `${dept.name} (${dept.code})`;
+                userDepartmentFilter.appendChild(opt);
+            });
+        }
+
+        const userDepartmentSelect = document.getElementById('userDepartmentSelect');
+        if (userDepartmentSelect) {
+            userDepartmentSelect.innerHTML = '';
+            departmentsList.forEach(dept => {
+                const opt = document.createElement('option');
+                opt.value = dept.name;
+                opt.textContent = `${dept.name} (${dept.code})`;
+                userDepartmentSelect.appendChild(opt);
+            });
+        }
+    }
+
+    /**
+     * 2. Load Users
+     */
     async function loadUsers() {
         let loaded = false;
 
-        // Attempt API if available
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
-            const res = await fetch(`${API_BASE}/admin/users`, { 
-                headers: getHeaders(),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
+            const res = await fetch(`${API_BASE}/admin/users`, { headers: getHeaders() });
             if (res.ok) {
                 const data = await res.json();
-                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                if (data.success && Array.isArray(data.data)) {
                     allUsers = data.data;
                     loaded = true;
                 }
             }
-        } catch (e) {}
+        } catch (e) {
+            console.warn('API unavailable, checking fallback store...');
+        }
 
         if (!loaded && window.AdminStore) {
             allUsers = window.AdminStore.getUsers();
         }
 
-        updateCounters();
+        updateStatistics();
         applyFilters();
     }
 
-    function updateCounters() {
-        const countAll = allUsers.length;
-        const countStudents = allUsers.filter(u => getNormalizedRole(u) === 'STUDENT').length;
-        const countTeachers = allUsers.filter(u => getNormalizedRole(u) === 'TEACHER').length;
-        const countAdmins = allUsers.filter(u => getNormalizedRole(u) === 'ADMIN').length;
+    /**
+     * 3. Update Statistics Cards and Pills
+     */
+    function updateStatistics() {
+        const totalUsers = allUsers.length;
+        const totalStudents = allUsers.filter(u => getNormalizedRole(u) === 'STUDENT').length;
+        const totalTeachers = allUsers.filter(u => getNormalizedRole(u) === 'TEACHER').length;
+        const totalAdmins = allUsers.filter(u => getNormalizedRole(u) === 'ADMIN').length;
+        const totalActive = allUsers.filter(u => (u.status || 'Active').toLowerCase() === 'active').length;
 
-        const elAll = document.getElementById('countAll');
-        if (elAll) elAll.textContent = countAll;
+        // Statistics Cards
+        const elTotalUsers = document.getElementById('statTotalUsers');
+        if (elTotalUsers) elTotalUsers.textContent = totalUsers;
 
-        const elStudents = document.getElementById('countStudents');
-        if (elStudents) elStudents.textContent = countStudents;
+        const elStudents = document.getElementById('statStudents');
+        if (elStudents) elStudents.textContent = totalStudents;
 
-        const elTeachers = document.getElementById('countTeachers');
-        if (elTeachers) elTeachers.textContent = countTeachers;
+        const elTeachers = document.getElementById('statTeachers');
+        if (elTeachers) elTeachers.textContent = totalTeachers;
 
-        const elAdmins = document.getElementById('countAdmins');
-        if (elAdmins) elAdmins.textContent = countAdmins;
+        const elAdmins = document.getElementById('statAdmins');
+        if (elAdmins) elAdmins.textContent = totalAdmins;
+
+        const elActive = document.getElementById('statActiveUsers');
+        if (elActive) elActive.textContent = totalActive;
+
+        // Filter Pills Badges
+        const elCountAll = document.getElementById('countAll');
+        if (elCountAll) elCountAll.textContent = totalUsers;
+
+        const elCountStudents = document.getElementById('countStudents');
+        if (elCountStudents) elCountStudents.textContent = totalStudents;
+
+        const elCountTeachers = document.getElementById('countTeachers');
+        if (elCountTeachers) elCountTeachers.textContent = totalTeachers;
+
+        const elCountAdmins = document.getElementById('countAdmins');
+        if (elCountAdmins) elCountAdmins.textContent = totalAdmins;
     }
 
     function getNormalizedRole(u) {
@@ -108,72 +213,158 @@ document.addEventListener('DOMContentLoaded', async function () {
         return 'STUDENT';
     }
 
-    function renderUsers(users) {
-        const tbody = document.getElementById('usersTableBody');
-        const countIndicator = document.getElementById('tableRecordCount');
-        if (!tbody) return;
+    /**
+     * 4. Apply Dynamic Search & Filters
+     */
+    function applyFilters() {
+        const search = currentSearchQuery.toLowerCase().trim();
+        const role = currentRoleFilter.toLowerCase();
+        const status = currentStatusFilter.toLowerCase();
+        const department = currentDepartmentFilter.toLowerCase();
 
-        if (countIndicator) {
-            countIndicator.textContent = `Showing ${users.length} of ${allUsers.length} users`;
+        const filtered = allUsers.filter(u => {
+            // Search criteria: Full name, email, university ID, phone
+            const matchSearch = !search ||
+                (u.full_name && u.full_name.toLowerCase().includes(search)) ||
+                (u.email && u.email.toLowerCase().includes(search)) ||
+                (u.university_id && u.university_id.toLowerCase().includes(search)) ||
+                (u.phone && u.phone.toLowerCase().includes(search));
+
+            // Role criteria
+            const uRole = getNormalizedRole(u).toLowerCase();
+            const matchRole = role === 'all' || uRole === role;
+
+            // Status criteria
+            const uStatus = (u.status || 'Active').toLowerCase();
+            const matchStatus = status === 'all' || uStatus === status;
+
+            // Department criteria
+            let userDept = (u.department_name || u.teacher_department || u.major_title || u.faculty || '').toLowerCase();
+            const matchDepartment = department === 'all' || userDept.includes(department);
+
+            return matchSearch && matchRole && matchStatus && matchDepartment;
+        });
+
+        renderUsers(filtered);
+    }
+
+    /**
+     * 5. Render Users Table with Actions
+     */
+    function renderUsers(users) {
+        if (!usersTableBody) return;
+
+        if (tableRecordCount) {
+            tableRecordCount.textContent = `Showing ${users.length} of ${allUsers.length} users`;
         }
 
         if (users.length === 0) {
-            tbody.innerHTML = `
+            usersTableBody.innerHTML = `
                 <tr>
                     <td colspan="7" class="text-center py-5 text-muted">
                         <i class="bi bi-people fs-2 d-block mb-2 text-secondary opacity-50"></i>
-                        <span class="fw-semibold">No user accounts found</span>
-                        <div style="font-size: 11.5px;" class="mt-1">Try adjusting your search query, role pill, or status filter.</div>
+                        <span class="fw-bold text-dark">No user accounts found</span>
+                        <div style="font-size: 12px;" class="mt-1">Try adjusting your search keywords, role pill, or filter dropdowns.</div>
+                        <button class="btn btn-outline-primary btn-sm mt-3" onclick="resetFilters()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
+                        </button>
                     </td>
                 </tr>
             `;
             return;
         }
 
-        tbody.innerHTML = users.map(u => {
+        usersTableBody.innerHTML = users.map(u => {
             const role = getNormalizedRole(u);
-            const roleClass = role.toLowerCase();
-            const statusClass = (u.status || 'Active').toLowerCase();
-            const isActive = statusClass === 'active';
-            
+            let roleBadge = '';
+            if (role === 'ADMIN') {
+                roleBadge = `<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 fw-bold px-2 py-1"><i class="bi bi-shield-lock-fill me-1"></i>ADMIN</span>`;
+            } else if (role === 'TEACHER') {
+                roleBadge = `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 fw-bold px-2 py-1"><i class="bi bi-person-badge-fill me-1"></i>TEACHER</span>`;
+            } else {
+                roleBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 fw-bold px-2 py-1"><i class="bi bi-mortarboard-fill me-1"></i>STUDENT</span>`;
+            }
+
+            const status = u.status || 'Active';
+            let statusDot = 'active';
+            if (status === 'Pending') statusDot = 'pending';
+            else if (status === 'Suspended') statusDot = 'suspended';
+            else if (status === 'Inactive') statusDot = 'inactive';
+
+            const avatar = u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.full_name)}`;
+            const joinedDate = formatDate(u.created_at);
+
             return `
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <img src="${u.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover shadow-sm" style="width: 34px; height: 34px; border: 1px solid #E2E8F0;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
+                            <img src="${escapeHtml(avatar)}" class="rounded-circle object-fit-cover shadow-sm" style="width: 36px; height: 36px; border: 1.5px solid #E2E8F0;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
                             <div>
-                                <div class="fw-bold text-dark" style="font-size: 13px;">${escapeHtml(u.full_name)}</div>
+                                <div class="fw-bold text-dark text-sm">${escapeHtml(u.full_name)}</div>
+                                <div class="text-xs text-muted">${escapeHtml(u.department_name || u.teacher_department || u.major_title || u.faculty || 'AUB Academy')}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="text-muted fw-semibold" style="font-size: 12px;">${escapeHtml(u.university_id || 'N/A')}</td>
-                    <td class="text-muted" style="font-size: 12px;">${escapeHtml(u.email)}</td>
                     <td>
-                        <span class="admin-role-badge ${roleClass}">
-                            ${role}
-                        </span>
+                        <span class="badge bg-light text-dark border font-monospace text-xs">${escapeHtml(u.university_id || 'N/A')}</span>
                     </td>
                     <td>
-                        <span class="admin-status-badge ${statusClass} cursor-pointer" onclick="toggleUserStatus(${u.id})" title="Click to toggle status">
-                            <i class="bi ${isActive ? 'bi-check-circle-fill' : 'bi-dash-circle'} me-1"></i>
-                            ${escapeHtml(u.status || 'Active')}
-                        </span>
+                        <a href="mailto:${escapeHtml(u.email)}" class="text-muted text-xs text-decoration-none hover-primary">
+                            ${escapeHtml(u.email)}
+                        </a>
                     </td>
-                    <td class="text-muted" style="font-size: 11.5px;">${formatDate(u.created_at)}</td>
                     <td>
-                        <div class="d-flex gap-1">
-                            <button class="action-btn" title="View Profile" onclick="openViewUserModal(${u.id})">
+                        ${roleBadge}
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center text-xs fw-semibold">
+                            <span class="status-dot ${statusDot}"></span>
+                            <span>${escapeHtml(status)}</span>
+                        </div>
+                    </td>
+                    <td class="text-muted text-xs">
+                        ${joinedDate}
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex align-items-center justify-content-end gap-1">
+                            <!-- 1. View Button -->
+                            <button class="btn btn-outline-primary btn-sm py-1 px-2" title="View Profile" onclick="openViewUserModal(${u.id})">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <button class="action-btn" title="Edit User" onclick="openEditUserModal(${u.id})">
+                            <!-- 2. Edit Button -->
+                            <button class="btn btn-outline-secondary btn-sm py-1 px-2" title="Edit User" onclick="openEditUserModal(${u.id})">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="action-btn ${isActive ? 'text-warning' : 'text-success'}" title="${isActive ? 'Deactivate User' : 'Activate User'}" onclick="toggleUserStatus(${u.id})">
-                                <i class="bi ${isActive ? 'bi-toggle-on text-primary' : 'bi-toggle-off'}"></i>
-                            </button>
-                            <button class="action-btn delete" title="Delete User" onclick="deleteUser(${u.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <!-- 3. More Dropdown Menu -->
+                            <div class="dropdown d-inline-block">
+                                <button class="btn btn-outline-secondary btn-sm py-1 px-2 dropdown-toggle-no-caret" data-bs-toggle="dropdown" aria-expanded="false" title="More Actions">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 text-sm">
+                                    <li>
+                                        <button class="dropdown-item py-2" onclick="openChangeRoleDialog(${u.id})">
+                                            <i class="bi bi-person-gear text-primary me-2"></i> Change Role
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item py-2" onclick="openResetPasswordDialog(${u.id})">
+                                            <i class="bi bi-key text-warning me-2"></i> Reset Password
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item py-2" onclick="toggleUserStatus(${u.id})">
+                                            <i class="bi ${status === 'Active' ? 'bi-dash-circle text-secondary' : 'bi-check-circle text-success'} me-2"></i>
+                                            ${status === 'Active' ? 'Suspend Account' : 'Activate Account'}
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <button class="dropdown-item py-2 text-danger" onclick="deleteUser(${u.id})">
+                                            <i class="bi bi-trash me-2"></i> Delete User
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -181,159 +372,327 @@ document.addEventListener('DOMContentLoaded', async function () {
         }).join('');
     }
 
-    function applyFilters() {
-        const search = (document.getElementById('userSearchInput')?.value || '').toLowerCase().trim();
-        const status = (document.getElementById('userStatusFilter')?.value || 'all').toLowerCase();
-
-        const filtered = allUsers.filter(u => {
-            const matchSearch = !search || 
-                (u.full_name && u.full_name.toLowerCase().includes(search)) ||
-                (u.email && u.email.toLowerCase().includes(search)) ||
-                (u.university_id && u.university_id.toLowerCase().includes(search));
-
-            const uRole = getNormalizedRole(u).toLowerCase();
-            const matchRole = currentRoleFilter === 'all' || uRole === currentRoleFilter.toLowerCase();
-
-            const uStatus = (u.status || 'Active').toLowerCase();
-            const matchStatus = status === 'all' || uStatus === status;
-
-            return matchSearch && matchRole && matchStatus;
-        });
-
-        renderUsers(filtered);
-    }
-
-    // Role Filter Pill Selection
-    const rolePillGroup = document.getElementById('rolePillGroup');
-    if (rolePillGroup) {
-        rolePillGroup.addEventListener('click', function (e) {
-            const btn = e.target.closest('.btn-filter-pill');
-            if (!btn) return;
-
-            rolePillGroup.querySelectorAll('.btn-filter-pill').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            currentRoleFilter = btn.getAttribute('data-role') || 'all';
+    /**
+     * 6. Search & Filter Event Handlers
+     */
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            currentSearchQuery = e.target.value;
             applyFilters();
         });
     }
 
-    // Status Filter Selection
-    const statusFilter = document.getElementById('userStatusFilter');
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function () {
+    if (userRoleFilter) {
+        userRoleFilter.addEventListener('change', function () {
+            currentRoleFilter = this.value;
+            if (rolePillGroup) {
+                rolePillGroup.querySelectorAll('.btn-filter-pill').forEach(b => {
+                    b.classList.toggle('active', b.getAttribute('data-role') === currentRoleFilter);
+                });
+            }
+            applyFilters();
+        });
+    }
+
+    if (rolePillGroup) {
+        rolePillGroup.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-filter-pill');
+            if (!btn) return;
+            rolePillGroup.querySelectorAll('.btn-filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRoleFilter = btn.getAttribute('data-role') || 'all';
+            if (userRoleFilter) userRoleFilter.value = currentRoleFilter;
+            applyFilters();
+        });
+    }
+
+    if (userStatusFilter) {
+        userStatusFilter.addEventListener('change', function () {
             currentStatusFilter = this.value;
             applyFilters();
         });
     }
 
-    // Search Input Real-time Filtering
-    const searchInput = document.getElementById('userSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', applyFilters);
+    if (userDepartmentFilter) {
+        userDepartmentFilter.addEventListener('change', function () {
+            currentDepartmentFilter = this.value;
+            applyFilters();
+        });
     }
 
-    // Reset Filters Button
     window.resetFilters = function () {
         if (searchInput) searchInput.value = '';
-        if (statusFilter) statusFilter.value = 'all';
+        if (userRoleFilter) userRoleFilter.value = 'all';
+        if (userStatusFilter) userStatusFilter.value = 'all';
+        if (userDepartmentFilter) userDepartmentFilter.value = 'all';
+        currentSearchQuery = '';
         currentRoleFilter = 'all';
         currentStatusFilter = 'all';
+        currentDepartmentFilter = 'all';
 
         if (rolePillGroup) {
             rolePillGroup.querySelectorAll('.btn-filter-pill').forEach(b => {
-                if (b.getAttribute('data-role') === 'all') {
-                    b.classList.add('active');
-                } else {
-                    b.classList.remove('active');
-                }
+                b.classList.toggle('active', b.getAttribute('data-role') === 'all');
             });
         }
-
         applyFilters();
-        if (window.AdminStore) window.AdminStore.constructor.toast('Filters reset', 'info');
     };
 
-    // Toggle User Status
-    window.toggleUserStatus = async function (userId) {
-        let updated = null;
-        if (window.AdminStore) {
-            updated = window.AdminStore.toggleUserStatus(userId);
-            allUsers = window.AdminStore.getUsers();
-        } else {
-            const user = allUsers.find(u => u.id === userId);
-            if (user) {
-                user.status = (user.status || 'Active') === 'Active' ? 'Inactive' : 'Active';
-                updated = user;
-            }
-        }
-
-        if (updated) {
-            updateCounters();
-            applyFilters();
-            const isNowActive = (updated.status || 'Active') === 'Active';
-            if (window.AdminStore) {
-                window.AdminStore.constructor.toast(
-                    `${updated.full_name} is now ${isNowActive ? 'Active' : 'Inactive'}`,
-                    isNowActive ? 'success' : 'info'
-                );
-            }
-        }
-
-        // Try API sync if running
-        try {
-            await fetch(`${API_BASE}/admin/users/${userId}`, {
-                method: 'PUT',
-                headers: getHeaders(),
-                body: JSON.stringify({ status: updated ? updated.status : 'Active' })
-            });
-        } catch (e) {}
-    };
-
-    // View User Modal (Exact specification: Full Name, Email, University ID, Role, Status, Joined Date)
-    window.openViewUserModal = function (userId) {
-        const u = allUsers.find(user => user.id === userId);
+    /**
+     * 7. View User Profile Drawer/Modal
+     */
+    window.openViewUserModal = async function (userId) {
+        let u = allUsers.find(user => user.id === userId);
         if (!u) return;
 
         currentUserInView = u;
-        const role = getNormalizedRole(u);
-        const roleClass = role.toLowerCase();
-        const statusClass = (u.status || 'Active').toLowerCase();
-
         const body = document.getElementById('viewUserModalBody');
-        if (body) {
-            body.innerHTML = `
-                <div class="text-center pb-3 border-bottom mb-3">
-                    <img src="${u.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover shadow-sm mb-2" style="width: 70px; height: 70px; border: 2px solid #E2E8F0;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
-                    <h5 class="fw-bold mb-1">${escapeHtml(u.full_name)}</h5>
-                    <div class="d-flex justify-content-center align-items-center gap-2 mt-1">
-                        <span class="admin-role-badge ${roleClass}">${role}</span>
-                        <span class="admin-status-badge ${statusClass}">${escapeHtml(u.status || 'Active')}</span>
+        const leftActions = document.getElementById('viewModalLeftActions');
+        if (!body) return;
+
+        body.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading profile details...
+            </div>
+        `;
+
+        if (viewUserModal) viewUserModal.show();
+
+        // Fetch detailed profile with logs if backend is running
+        try {
+            const res = await fetch(`${API_BASE}/admin/users/${userId}`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.data) {
+                    u = data.data;
+                    currentUserInView = u;
+                }
+            }
+        } catch (e) {}
+
+        const role = getNormalizedRole(u);
+        let roleBadgeClass = 'bg-primary';
+        if (role === 'ADMIN') roleBadgeClass = 'bg-warning text-dark';
+        else if (role === 'TEACHER') roleBadgeClass = 'bg-info text-dark';
+
+        const status = u.status || 'Active';
+        let statusDot = 'active';
+        if (status === 'Pending') statusDot = 'pending';
+        else if (status === 'Suspended') statusDot = 'suspended';
+        else if (status === 'Inactive') statusDot = 'inactive';
+
+        const avatar = u.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.full_name)}`;
+
+        // Academic Info Block based on Role
+        let academicHtml = '';
+        if (role === 'STUDENT') {
+            academicHtml = `
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">University ID</div>
+                        <div class="profile-info-value font-monospace">${escapeHtml(u.university_id || 'N/A')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Faculty</div>
+                        <div class="profile-info-value">${escapeHtml(u.faculty || 'Faculty of Computer Science & IT')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Major / Program</div>
+                        <div class="profile-info-value">${escapeHtml(u.major_title || u.major || 'Computer Science')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Academic Year</div>
+                        <div class="profile-info-value">${escapeHtml(u.academic_year || 'Year 2')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Semester</div>
+                        <div class="profile-info-value">${escapeHtml(u.semester || 'Semester 1')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Enrollment Status</div>
+                        <div class="profile-info-value">${escapeHtml(u.enrollment_status || 'Full-Time')}</div>
                     </div>
                 </div>
-
-                <div class="row g-2 text-sm" style="font-size: 13px;">
-                    <div class="col-6 py-2 border-bottom">
-                        <span class="text-muted d-block" style="font-size: 11px;">FULL NAME</span>
-                        <span class="fw-semibold text-dark">${escapeHtml(u.full_name)}</span>
+            `;
+        } else if (role === 'TEACHER') {
+            academicHtml = `
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Teacher / Faculty ID</div>
+                        <div class="profile-info-value font-monospace">${escapeHtml(u.teacher_code || u.university_id || 'TCH')}</div>
                     </div>
-                    <div class="col-6 py-2 border-bottom">
-                        <span class="text-muted d-block" style="font-size: 11px;">EMAIL ADDRESS</span>
-                        <span class="fw-semibold text-dark">${escapeHtml(u.email)}</span>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Faculty</div>
+                        <div class="profile-info-value">${escapeHtml(u.faculty || 'Academic Directorate')}</div>
                     </div>
-                    <div class="col-6 py-2 border-bottom">
-                        <span class="text-muted d-block" style="font-size: 11px;">UNIVERSITY ID</span>
-                        <span class="fw-semibold text-dark">${escapeHtml(u.university_id || 'N/A')}</span>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Department</div>
+                        <div class="profile-info-value">${escapeHtml(u.teacher_department || u.department_name || 'Computer Science')}</div>
                     </div>
-                    <div class="col-6 py-2 border-bottom">
-                        <span class="text-muted d-block" style="font-size: 11px;">JOINED DATE</span>
-                        <span class="fw-semibold text-dark">${formatDate(u.created_at)}</span>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Academic Position</div>
+                        <div class="profile-info-value">${escapeHtml(u.position || 'Senior Lecturer')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Employment Type</div>
+                        <div class="profile-info-value">${escapeHtml(u.teacher_employment_type || 'Full-Time')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Office / Room</div>
+                        <div class="profile-info-value">${escapeHtml(u.teacher_office_room || 'Faculty Bldg A')}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            academicHtml = `
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Staff ID</div>
+                        <div class="profile-info-value font-monospace">${escapeHtml(u.university_id || 'ADM-001')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Department</div>
+                        <div class="profile-info-value">${escapeHtml(u.department_name || 'Information Technology Directorate')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <div class="profile-info-label">Position</div>
+                        <div class="profile-info-value">${escapeHtml(u.position || 'System Administrator')}</div>
                     </div>
                 </div>
             `;
         }
 
-        if (viewUserModal) viewUserModal.show();
+        // Activity Logs Block
+        let logsHtml = '';
+        const logs = u.activity_logs || [
+            { action: 'Account Created', details: `User registered with ${role} credentials`, created_at: u.created_at },
+            { action: 'Profile Initialized', details: 'AUB Digital Academy system identity verified', created_at: u.created_at }
+        ];
+
+        logsHtml = logs.map(log => `
+            <div class="activity-item">
+                <div class="activity-dot"></div>
+                <div class="d-flex justify-content-between align-items-baseline mb-1">
+                    <div class="fw-bold text-dark text-xs">${escapeHtml(log.action)}</div>
+                    <div class="text-muted" style="font-size: 11px;">${formatDate(log.created_at)}</div>
+                </div>
+                <div class="text-muted text-xs">${escapeHtml(log.details || '')}</div>
+            </div>
+        `).join('');
+
+        body.innerHTML = `
+            <!-- HEADER -->
+            <div class="bg-light p-4 rounded-3 border mb-4 d-flex flex-column flex-md-row align-items-center gap-4">
+                <img src="${escapeHtml(avatar)}" class="profile-avatar-lg" alt="${escapeHtml(u.full_name)}">
+                <div class="flex-grow-1 text-center text-md-start">
+                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                        <h4 class="fw-bold text-dark mb-0">${escapeHtml(u.full_name)}</h4>
+                        <span class="badge ${roleBadgeClass} text-xs px-2 py-1">${role}</span>
+                        <div class="badge bg-white text-dark border text-xs px-2 py-1 d-inline-flex align-items-center">
+                            <span class="status-dot ${statusDot}"></span>
+                            <span>${escapeHtml(status)}</span>
+                        </div>
+                    </div>
+                    <div class="text-xs text-muted mb-1">
+                        <i class="bi bi-envelope me-1"></i> ${escapeHtml(u.email)} &bull; 
+                        <i class="bi bi-telephone me-1"></i> ${escapeHtml(u.phone || '+855 23 999 000')}
+                    </div>
+                    <div class="text-xs text-muted">
+                        <i class="bi bi-card-text me-1"></i> University ID: <span class="font-monospace fw-bold">${escapeHtml(u.university_id || 'N/A')}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION A: OVERVIEW -->
+            <div class="card border-0 bg-light p-3 rounded-3 mb-3">
+                <h6 class="fw-bold text-dark text-xs text-uppercase mb-3 d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i> Overview
+                </h6>
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Full Name</div>
+                        <div class="profile-info-value">${escapeHtml(u.full_name)}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Email Address</div>
+                        <div class="profile-info-value text-truncate" title="${escapeHtml(u.email)}">${escapeHtml(u.email)}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Phone Number</div>
+                        <div class="profile-info-value">${escapeHtml(u.phone || 'N/A')}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Joined Date</div>
+                        <div class="profile-info-value">${formatDate(u.created_at)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION B: ACADEMIC INFORMATION -->
+            <div class="card border-0 bg-light p-3 rounded-3 mb-3">
+                <h6 class="fw-bold text-dark text-xs text-uppercase mb-3 d-flex align-items-center">
+                    <i class="bi bi-mortarboard-fill text-primary me-2"></i> Academic Information (${role})
+                </h6>
+                ${academicHtml}
+            </div>
+
+            <!-- SECTION C: ACCOUNT & SECURITY -->
+            <div class="card border-0 bg-light p-3 rounded-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark text-xs text-uppercase mb-0 d-flex align-items-center">
+                        <i class="bi bi-shield-check text-primary me-2"></i> Account & Security
+                    </h6>
+                    <button class="btn btn-outline-warning btn-sm py-1 px-2 text-xs" onclick="openResetPasswordDialog(${u.id})">
+                        <i class="bi bi-key me-1"></i> Reset Password
+                    </button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Email Verification</div>
+                        <div class="profile-info-value text-success"><i class="bi bi-check-circle-fill me-1"></i> Verified</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Two-Factor Authentication</div>
+                        <div class="profile-info-value ${u.two_factor_enabled ? 'text-success' : 'text-muted'}">
+                            <i class="bi ${u.two_factor_enabled ? 'bi-shield-fill-check' : 'bi-shield-slash'} me-1"></i>
+                            ${u.two_factor_enabled ? 'Enabled' : 'Disabled'}
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Last Login</div>
+                        <div class="profile-info-value">${u.last_login_at ? formatDate(u.last_login_at) : 'Active this week'}</div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="profile-info-label">Account Created</div>
+                        <div class="profile-info-value">${formatDate(u.created_at)}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION D: ACTIVITY / AUDIT LOG -->
+            <div class="card border-0 bg-light p-3 rounded-3">
+                <h6 class="fw-bold text-dark text-xs text-uppercase mb-3 d-flex align-items-center">
+                    <i class="bi bi-clock-history text-primary me-2"></i> Account Activity Log
+                </h6>
+                <div class="activity-timeline">
+                    ${logsHtml}
+                </div>
+            </div>
+        `;
+
+        // Left Footer Actions: Suspend / Activate & Delete
+        if (leftActions) {
+            const isSuspended = (u.status || 'Active') === 'Suspended';
+            leftActions.innerHTML = `
+                <button type="button" class="btn ${isSuspended ? 'btn-outline-success' : 'btn-outline-warning'} btn-sm me-2" onclick="toggleUserStatus(${u.id})">
+                    <i class="bi ${isSuspended ? 'bi-check-circle' : 'bi-dash-circle'} me-1"></i>
+                    ${isSuspended ? 'Activate Account' : 'Suspend Account'}
+                </button>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteUser(${u.id})">
+                    <i class="bi bi-trash me-1"></i> Delete User
+                </button>
+            `;
+        }
     };
 
     const editFromViewBtn = document.getElementById('editFromViewBtn');
@@ -341,225 +700,506 @@ document.addEventListener('DOMContentLoaded', async function () {
         editFromViewBtn.addEventListener('click', function () {
             if (viewUserModal) viewUserModal.hide();
             if (currentUserInView) {
-                openEditUserModal(currentUserInView.id);
+                setTimeout(() => openEditUserModal(currentUserInView.id), 250);
             }
         });
     }
 
-    // Modal Handlers: Add User
+    /**
+     * 8. Multi-Step Wizard Handlers (Add & Edit User)
+     */
+    function setWizardStep(step) {
+        currentWizardStep = step;
+
+        // Step headers
+        [stepBtn1, stepBtn2, stepBtn3].forEach((btn, idx) => {
+            if (btn) btn.classList.toggle('active', idx + 1 === step);
+        });
+
+        // Step panels
+        if (wizardStep1) wizardStep1.classList.toggle('d-none', step !== 1);
+        if (wizardStep2) wizardStep2.classList.toggle('d-none', step !== 2);
+        if (wizardStep3) wizardStep3.classList.toggle('d-none', step !== 3);
+
+        // Buttons
+        if (prevStepBtn) prevStepBtn.disabled = step === 1;
+        if (nextStepBtn) nextStepBtn.classList.toggle('d-none', step === 3);
+        if (saveUserBtn) saveUserBtn.classList.toggle('d-none', step !== 3);
+    }
+
+    if (stepBtn1) stepBtn1.addEventListener('click', () => setWizardStep(1));
+    if (stepBtn2) stepBtn2.addEventListener('click', () => validateStep(1) && setWizardStep(2));
+    if (stepBtn3) stepBtn3.addEventListener('click', () => validateStep(1) && validateStep(2) && setWizardStep(3));
+
+    if (nextStepBtn) {
+        nextStepBtn.addEventListener('click', () => {
+            if (validateStep(currentWizardStep)) {
+                setWizardStep(currentWizardStep + 1);
+            }
+        });
+    }
+
+    if (prevStepBtn) {
+        prevStepBtn.addEventListener('click', () => {
+            if (currentWizardStep > 1) {
+                setWizardStep(currentWizardStep - 1);
+            }
+        });
+    }
+
+    function validateStep(step) {
+        if (step === 1) {
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            if (name.length < 2) {
+                Swal.fire({ icon: 'warning', title: 'Name Required', text: 'Please enter a valid full name.' });
+                return false;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Email', text: 'Please enter a valid email address.' });
+                return false;
+            }
+            return true;
+        } else if (step === 2) {
+            const uniId = document.getElementById('userUniId').value.trim();
+            if (!uniId) {
+                Swal.fire({ icon: 'warning', title: 'University ID Required', text: 'Please provide a University / Staff / Teacher ID.' });
+                return false;
+            }
+            return true;
+        }
+        return true;
+    }
+
+    // Role-specific dynamic fields in Wizard
+    if (userRoleSelect) {
+        userRoleSelect.addEventListener('change', function () {
+            updateRoleFieldsVisibility(this.value);
+        });
+    }
+
+    function updateRoleFieldsVisibility(roleId) {
+        const id = parseInt(roleId);
+        const uniLabel = document.getElementById('uniIdLabel');
+
+        if (id === 1) { // ADMIN
+            if (studentSpecificFields) studentSpecificFields.classList.add('d-none');
+            if (teacherSpecificFields) teacherSpecificFields.classList.add('d-none');
+            if (adminSpecificFields) adminSpecificFields.classList.remove('d-none');
+            if (uniLabel) uniLabel.textContent = 'Staff / Admin ID *';
+        } else if (id === 2) { // TEACHER
+            if (studentSpecificFields) studentSpecificFields.classList.add('d-none');
+            if (teacherSpecificFields) teacherSpecificFields.classList.remove('d-none');
+            if (adminSpecificFields) adminSpecificFields.classList.add('d-none');
+            if (uniLabel) uniLabel.textContent = 'Teacher ID *';
+        } else { // STUDENT
+            if (studentSpecificFields) studentSpecificFields.classList.remove('d-none');
+            if (teacherSpecificFields) teacherSpecificFields.classList.add('d-none');
+            if (adminSpecificFields) adminSpecificFields.classList.add('d-none');
+            if (uniLabel) uniLabel.textContent = 'University / Student ID *';
+        }
+    }
+
+    // Open Modal for Create
     window.openCreateUserModal = function () {
         document.getElementById('userForm').reset();
         document.getElementById('userId').value = '';
-        document.getElementById('userModalTitle').textContent = 'Add New User';
-        document.getElementById('passwordLabel').textContent = 'Password *';
-        document.getElementById('userPassword').required = true;
-        document.getElementById('userPassword').placeholder = 'Enter secure password';
-        document.getElementById('userPassword').setAttribute('type', 'password');
+        document.getElementById('userModalTitle').textContent = 'Add New User Account';
         document.getElementById('userRole').value = '3'; // Default STUDENT
         document.getElementById('userStatus').value = 'Active';
-        const icon = document.querySelector('#toggleUserPasswordBtn i');
-        if (icon) icon.className = 'bi bi-eye';
+        document.getElementById('userPassword').value = '';
+        document.getElementById('passwordLabel').textContent = 'Initial Password (Default: Password123!)';
+
+        // Auto generate next University ID
+        const nextNum = allUsers.length + 1001;
+        document.getElementById('userUniId').value = `000${nextNum}`;
+
+        document.getElementById('saveUserBtn').innerHTML = '<i class="bi bi-check2-circle me-1"></i> Create User';
+        updateRoleFieldsVisibility('3');
+        setWizardStep(1);
         if (userModal) userModal.show();
     };
 
-    // Modal Handlers: Edit User (Password optional when editing)
+    // Open Modal for Edit
     window.openEditUserModal = function (userId) {
         const u = allUsers.find(user => user.id === userId);
         if (!u) return;
 
         document.getElementById('userId').value = u.id;
-        document.getElementById('userName').value = u.full_name;
-        document.getElementById('userEmail').value = u.email;
+        document.getElementById('userModalTitle').textContent = `Edit User: ${u.full_name}`;
+        document.getElementById('userName').value = u.full_name || '';
+        document.getElementById('userEmail').value = u.email || '';
+        document.getElementById('userPhone').value = u.phone || '';
+        document.getElementById('userAvatarUrl').value = u.avatar_url || '';
         document.getElementById('userUniId').value = u.university_id || '';
-        document.getElementById('userRole').value = u.role_id || (u.role === 'ADMIN' ? 1 : u.role === 'TEACHER' ? 2 : 3);
+        document.getElementById('userFacultySelect').value = u.faculty || 'Faculty of Computer Science & IT';
+        document.getElementById('userMajorSelect').value = u.major_title || u.major || 'Computer Science';
+        document.getElementById('userAcademicYearSelect').value = u.academic_year || 'Year 1';
+        document.getElementById('userSemesterSelect').value = u.semester || 'Semester 1';
+
+        const roleId = u.role_id || (u.role === 'ADMIN' ? 1 : u.role === 'TEACHER' ? 2 : 3);
+        document.getElementById('userRole').value = String(roleId);
         document.getElementById('userStatus').value = u.status || 'Active';
+
+        if (document.getElementById('userDepartmentSelect')) {
+            document.getElementById('userDepartmentSelect').value = u.teacher_department || u.department_name || 'Computer Science';
+        }
+        if (document.getElementById('teacherPositionInput')) {
+            document.getElementById('teacherPositionInput').value = u.position || u.teacher_specialization || 'Senior Lecturer';
+        }
+        if (document.getElementById('teacherSubjectsInput')) {
+            document.getElementById('teacherSubjectsInput').value = u.teacher_specialization || '';
+        }
+        if (document.getElementById('adminDeptInput')) {
+            document.getElementById('adminDeptInput').value = u.department_name || 'IT Directorate';
+        }
+        if (document.getElementById('adminPositionInput')) {
+            document.getElementById('adminPositionInput').value = u.position || 'System Administrator';
+        }
+
         document.getElementById('userPassword').value = '';
-        document.getElementById('userPassword').required = false;
-        document.getElementById('userPassword').placeholder = 'Leave blank to keep current password';
-        document.getElementById('userPassword').setAttribute('type', 'password');
-        document.getElementById('passwordLabel').textContent = 'Password (leave blank to keep current)';
-        document.getElementById('userModalTitle').textContent = 'Edit User Account';
-        const icon = document.querySelector('#toggleUserPasswordBtn i');
-        if (icon) icon.className = 'bi bi-eye';
+        document.getElementById('passwordLabel').textContent = 'New Password (leave blank to keep current password)';
+        document.getElementById('saveUserBtn').innerHTML = '<i class="bi bi-check2-circle me-1"></i> Save Changes';
+
+        updateRoleFieldsVisibility(String(roleId));
+        setWizardStep(1);
         if (userModal) userModal.show();
     };
 
-    // Form Submit: Create or Update User with Exact Field Specification & SweetAlert2
-    const form = document.getElementById('userForm');
-    if (form) {
-        form.addEventListener('submit', async function (e) {
+    /**
+     * 9. Form Submission: Create / Update
+     */
+    const userForm = document.getElementById('userForm');
+    if (userForm) {
+        userForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const id = document.getElementById('userId').value;
-            const roleId = parseInt(document.getElementById('userRole').value);
-            const roleName = roleId === 1 ? 'ADMIN' : roleId === 2 ? 'TEACHER' : 'STUDENT';
             const fullName = document.getElementById('userName').value.trim();
             const email = document.getElementById('userEmail').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const avatarUrl = document.getElementById('userAvatarUrl').value.trim();
             const uniId = document.getElementById('userUniId').value.trim();
+            const faculty = document.getElementById('userFacultySelect').value;
+            const roleId = parseInt(document.getElementById('userRole').value);
+            const roleName = roleId === 1 ? 'ADMIN' : roleId === 2 ? 'TEACHER' : 'STUDENT';
             const status = document.getElementById('userStatus').value;
-            const password = document.getElementById('userPassword').value;
+            const password = document.getElementById('userPassword').value.trim();
 
-            // Form Validation
-            if (fullName.length < 2) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Validation Error', 'Full Name must be at least 2 characters long.');
-                return;
-            }
+            let deptName = '';
+            let position = '';
+            let major = '';
+            let academicYear = 'Year 1';
+            let semester = 'Semester 1';
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Invalid Email', 'Please enter a valid email address.');
-                return;
-            }
-
-            if (!uniId) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Missing University ID', 'University ID is required.');
-                return;
-            }
-
-            // Check duplicate University ID or Email if new user
-            if (!id) {
-                const dupUni = allUsers.find(u => (u.university_id || '').toLowerCase() === uniId.toLowerCase());
-                if (dupUni) {
-                    if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Duplicate ID', `University ID "${uniId}" is already assigned to ${dupUni.full_name}.`);
-                    return;
-                }
-                const dupEmail = allUsers.find(u => (u.email || '').toLowerCase() === email.toLowerCase());
-                if (dupEmail) {
-                    if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Duplicate Email', `Email "${email}" is already registered.`);
-                    return;
-                }
-            }
-
-            // Password validation
-            if (!id && password.length < 6) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Password Required', 'Password must be at least 6 characters.');
-                return;
-            }
-            if (id && password && password.length < 6) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyWarning('Password Too Short', 'New password must be at least 6 characters.');
-                return;
+            if (roleId === 1) {
+                deptName = document.getElementById('adminDeptInput').value.trim() || 'IT Directorate';
+                position = document.getElementById('adminPositionInput').value.trim() || 'System Administrator';
+            } else if (roleId === 2) {
+                deptName = document.getElementById('userDepartmentSelect')?.value || 'Computer Science';
+                position = document.getElementById('teacherPositionInput')?.value.trim() || 'Lecturer';
+            } else {
+                major = document.getElementById('userMajorSelect')?.value || 'Computer Science';
+                academicYear = document.getElementById('userAcademicYearSelect')?.value || 'Year 1';
+                semester = document.getElementById('userSemesterSelect')?.value || 'Semester 1';
             }
 
             const payload = {
                 full_name: fullName,
                 email: email,
+                phone: phone,
+                avatar_url: avatarUrl,
                 university_id: uniId,
+                faculty: faculty,
                 role_id: roleId,
                 role: roleName,
-                status: status
+                status: status,
+                department_name: deptName,
+                position: position,
+                major: major,
+                academic_year: academicYear,
+                semester: semester
             };
+
             if (password) payload.password = password;
 
-            if (id) {
-                // Update User
-                if (window.AdminStore) {
-                    window.AdminStore.updateUser(id, payload);
-                    allUsers = window.AdminStore.getUsers();
+            const submitBtn = document.getElementById('saveUserBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
+
+            try {
+                let res;
+                if (id) {
+                    res = await fetch(`${API_BASE}/admin/users/${id}`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify(payload)
+                    });
                 } else {
-                    const existingIdx = allUsers.findIndex(u => u.id === parseInt(id));
-                    if (existingIdx !== -1) {
-                        allUsers[existingIdx] = { ...allUsers[existingIdx], ...payload };
-                    }
+                    res = await fetch(`${API_BASE}/admin/users`, {
+                        method: 'POST',
+                        headers: getHeaders(),
+                        body: JSON.stringify(payload)
+                    });
                 }
 
-                if (userModal) userModal.hide();
-                updateCounters();
-                applyFilters();
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.notifySuccess('User Updated', 'User updated successfully');
+                const result = await res.json();
+                if (res.ok && result.success) {
+                    if (userModal) userModal.hide();
+                    Swal.fire({
+                        icon: 'success',
+                        title: id ? 'User Updated' : 'User Created',
+                        text: result.message || 'User account successfully saved.',
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    loadUsers();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Save Failed',
+                        text: result.message || 'Could not save user. Please check email or ID uniqueness.'
+                    });
                 }
-            } else {
-                // Create New User
-                if (window.AdminStore) {
-                    window.AdminStore.createUser(payload);
-                    allUsers = window.AdminStore.getUsers();
+            } catch (err) {
+                // Local fallback update
+                if (id) {
+                    const idx = allUsers.findIndex(u => u.id === parseInt(id));
+                    if (idx !== -1) allUsers[idx] = { ...allUsers[idx], ...payload };
                 } else {
                     const newId = allUsers.length > 0 ? Math.max(...allUsers.map(u => u.id || 0)) + 1 : 1;
-                    const newUser = {
-                        id: newId,
-                        ...payload,
-                        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(fullName)}`,
-                        created_at: new Date().toISOString()
-                    };
-                    allUsers.unshift(newUser);
+                    allUsers.unshift({ id: newId, ...payload, created_at: new Date().toISOString() });
                 }
-
                 if (userModal) userModal.hide();
-                updateCounters();
+                updateStatistics();
                 applyFilters();
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.notifySuccess('User Created', 'User created successfully');
-                }
+                Swal.fire({ icon: 'success', title: 'Saved', text: 'Account updated successfully.' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Save Account`;
             }
-
-            // Try backend save if running
-            try {
-                const url = id ? `${API_BASE}/admin/users/${id}` : `${API_BASE}/admin/users`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, {
-                    method: method,
-                    headers: getHeaders(),
-                    body: JSON.stringify(payload)
-                });
-            } catch (err) {}
         });
     }
 
-    // Delete User with SweetAlert2 Confirmation Dialog
-    window.deleteUser = async function (id) {
-        const user = allUsers.find(u => u.id === id);
-        const name = user ? user.full_name : 'this user';
+    /**
+     * 10. Change Role Dialog
+     */
+    window.openChangeRoleDialog = async function (userId) {
+        const u = allUsers.find(user => user.id === userId);
+        if (!u) return;
 
-        let confirmed = false;
-        if (window.AdminStore) {
-            confirmed = await window.AdminStore.constructor.confirmDialog(
-                'Delete User Account?',
-                `Are you sure you want to delete ${name}? This action cannot be undone.`,
-                'Yes, Delete User',
-                '#DC2626'
-            );
-        } else {
-            confirmed = confirm(`Are you sure you want to delete ${name}?`);
+        const currentRole = getNormalizedRole(u);
+        const { value: selectedRole } = await Swal.fire({
+            title: `Change Role for ${u.full_name}`,
+            input: 'select',
+            inputOptions: {
+                '3': 'STUDENT',
+                '2': 'TEACHER',
+                '1': 'ADMIN'
+            },
+            inputValue: u.role_id || (currentRole === 'ADMIN' ? '1' : currentRole === 'TEACHER' ? '2' : '3'),
+            showCancelButton: true,
+            confirmButtonText: 'Update Role',
+            confirmButtonColor: '#2563eb',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (selectedRole) {
+            const roleId = parseInt(selectedRole);
+            const roleName = roleId === 1 ? 'ADMIN' : roleId === 2 ? 'TEACHER' : 'STUDENT';
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ role_id: roleId, role: roleName })
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Role Updated',
+                        text: `${u.full_name} is now a ${roleName}`,
+                        timer: 1600,
+                        showConfirmButton: false
+                    });
+                    loadUsers();
+                }
+            } catch (e) {
+                u.role_id = roleId;
+                u.role = roleName;
+                updateStatistics();
+                applyFilters();
+                Swal.fire({ icon: 'success', title: 'Role Updated', text: `${u.full_name} is now a ${roleName}` });
+            }
         }
-
-        if (!confirmed) return;
-
-        if (window.AdminStore) {
-            window.AdminStore.deleteUser(id);
-            allUsers = window.AdminStore.getUsers();
-        } else {
-            allUsers = allUsers.filter(u => u.id !== id);
-        }
-
-        updateCounters();
-        applyFilters();
-
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`User "${name}" deleted successfully`, 'success');
-        }
-
-        try {
-            await fetch(`${API_BASE}/admin/users/${id}`, {
-                method: 'DELETE',
-                headers: getHeaders()
-            });
-        } catch (err) {}
     };
 
-    // Export Users to CSV
+    /**
+     * 11. Reset Password Dialog
+     */
+    window.openResetPasswordDialog = async function (userId) {
+        const u = allUsers.find(user => user.id === userId);
+        if (!u) return;
+
+        const result = await Swal.fire({
+            title: 'Reset Password',
+            html: `Generate a new temporary password for <b>${escapeHtml(u.full_name)}</b>?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Reset Password',
+            confirmButtonColor: '#f59e0b',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            const tempPassword = 'AUB' + Math.floor(100000 + Math.random() * 900000) + '!';
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/users/${userId}/reset-password`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ new_password: tempPassword })
+                });
+
+                const data = await res.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Reset Successful!',
+                    html: `
+                        <div class="p-3 bg-light rounded border text-start">
+                            <div class="text-xs text-muted mb-1">Temporary Password for <b>${escapeHtml(u.email)}</b>:</div>
+                            <div class="font-monospace fs-5 text-primary fw-bold user-select-all">${escapeHtml(data.temporaryPassword || tempPassword)}</div>
+                        </div>
+                        <div class="text-xs text-muted mt-2">Please provide this password to the user. They will be prompted to update it on next sign-in.</div>
+                    `
+                });
+            } catch (e) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Reset',
+                    html: `<div class="p-3 bg-light rounded border font-monospace fs-5 text-primary fw-bold">${tempPassword}</div>`
+                });
+            }
+        }
+    };
+
+    /**
+     * 12. Toggle User Status (Suspend / Activate)
+     */
+    window.toggleUserStatus = async function (userId) {
+        const u = allUsers.find(user => user.id === userId);
+        if (!u) return;
+
+        const isCurrentlyActive = (u.status || 'Active') === 'Active';
+        const targetStatus = isCurrentlyActive ? 'Suspended' : 'Active';
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/users/${userId}/status`, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify({ status: targetStatus })
+            });
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: isCurrentlyActive ? 'warning' : 'success',
+                    title: isCurrentlyActive ? 'Account Suspended' : 'Account Activated',
+                    text: `${u.full_name}'s account is now ${targetStatus}.`,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+                if (viewUserModal) viewUserModal.hide();
+                loadUsers();
+                return;
+            }
+        } catch (e) {}
+
+        u.status = targetStatus;
+        if (viewUserModal) viewUserModal.hide();
+        updateStatistics();
+        applyFilters();
+        Swal.fire({
+            icon: isCurrentlyActive ? 'warning' : 'success',
+            title: isCurrentlyActive ? 'Account Suspended' : 'Account Activated',
+            text: `${u.full_name}'s account is now ${targetStatus}.`,
+            timer: 1800,
+            showConfirmButton: false
+        });
+    };
+
+    /**
+     * 13. Delete User with Confirmation
+     */
+    window.deleteUser = async function (userId) {
+        const u = allUsers.find(user => user.id === userId);
+        const name = u ? u.full_name : 'this user';
+
+        const result = await Swal.fire({
+            title: 'Delete User Account?',
+            html: `Are you sure you want to delete <b>"${escapeHtml(name)}"</b>?<br><br><span class="text-danger fw-semibold">This action cannot be undone.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Delete User',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (res.ok) {
+                    if (viewUserModal) viewUserModal.hide();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'User Deleted',
+                        text: `User "${name}" has been permanently removed.`,
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    loadUsers();
+                    return;
+                }
+            } catch (e) {}
+
+            allUsers = allUsers.filter(user => user.id !== userId);
+            if (viewUserModal) viewUserModal.hide();
+            updateStatistics();
+            applyFilters();
+            Swal.fire({
+                icon: 'success',
+                title: 'User Deleted',
+                text: `User "${name}" has been removed.`,
+                timer: 1800,
+                showConfirmButton: false
+            });
+        }
+    };
+
+    /**
+     * 14. Export Users to CSV
+     */
     window.exportUsersCSV = function () {
         if (allUsers.length === 0) {
-            if (window.AdminStore) window.AdminStore.constructor.notifyWarning('No Data', 'No user records available to export.');
+            Swal.fire({ icon: 'warning', title: 'No Data', text: 'No user accounts available to export.' });
             return;
         }
 
-        const headers = ['ID', 'Full Name', 'University ID', 'Email', 'Role', 'Status', 'Joined Date'];
+        const headers = ['ID', 'Full Name', 'University ID', 'Email', 'Phone', 'Role', 'Department/Major', 'Status', 'Joined Date'];
         const rows = allUsers.map(u => [
             u.id,
             `"${(u.full_name || '').replace(/"/g, '""')}"`,
             `"${u.university_id || ''}"`,
             `"${u.email || ''}"`,
+            `"${u.phone || ''}"`,
             getNormalizedRole(u),
+            `"${(u.department_name || u.teacher_department || u.major_title || u.faculty || '').replace(/"/g, '""')}"`,
             u.status || 'Active',
             formatDate(u.created_at)
         ]);
@@ -568,14 +1208,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement('a');
         link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `AUB_Users_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+        link.setAttribute('download', `AUB_Users_Directory_${new Date().toISOString().slice(0, 10)}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`Exported ${allUsers.length} user accounts to CSV`, 'success');
-        }
+        Swal.fire({
+            icon: 'success',
+            title: 'CSV Exported',
+            text: `Successfully exported ${allUsers.length} user records.`,
+            timer: 1800,
+            showConfirmButton: false
+        });
     };
 
     function formatDate(dateStr) {
@@ -590,11 +1234,11 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function escapeHtml(text) {
         if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
     // Initialize View
-    loadUsers();
+    await loadDepartments();
+    await loadUsers();
 });

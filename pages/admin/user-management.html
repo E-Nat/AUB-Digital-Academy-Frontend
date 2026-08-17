@@ -12,16 +12,137 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
     <!-- Custom Admin CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <style>
+        .user-stat-card {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .user-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+        }
+        .user-stat-title {
+            font-size: 11.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--admin-text-muted);
+            margin-bottom: 2px;
+        }
+        .user-stat-number {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--admin-text-main);
+            line-height: 1.1;
+        }
+        .user-stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-dot.active { background-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        .status-dot.pending { background-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
+        .status-dot.suspended { background-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
+        .status-dot.inactive { background-color: #94a3b8; box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2); }
+
+        .profile-avatar-lg {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+        }
+        .profile-info-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--admin-text-muted);
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+        .profile-info-value {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--admin-text-main);
+        }
+        .activity-timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+        .activity-timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: #E2E8F0;
+        }
+        .activity-item {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .activity-item:last-child {
+            margin-bottom: 0;
+        }
+        .activity-dot {
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            border: 3px solid var(--admin-primary);
+        }
+        .wizard-step-btn {
+            border: none;
+            background: #F1F5F9;
+            color: var(--admin-text-muted);
+            font-weight: 600;
+            font-size: 12.5px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .wizard-step-btn.active {
+            background: var(--admin-primary);
+            color: #FFFFFF;
+        }
+        .dropdown-item i {
+            width: 18px;
+        }
+    </style>
 </head>
 <body class="admin-body">
 
     <div class="admin-wrapper">
         
         <!-- SIDEBAR -->
-        <aside class="admin-sidebar">
+        <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-brand">
                 <div class="admin-brand-header">
                     <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
@@ -43,6 +164,10 @@
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
                 </a>
+                <a href="teacher-management.html" class="admin-nav-item">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Teacher Management</span>
+                </a>
                 <a href="academic-management.html" class="admin-nav-item">
                     <i class="bi bi-mortarboard"></i>
                     <span>Academic Management</span>
@@ -56,6 +181,10 @@
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-house"></i>
+                    <span>Back to Website</span>
                 </a>
             </nav>
 
@@ -77,7 +206,7 @@
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search by name, email, University ID...">
+                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search users by name, email, or University ID...">
                     </div>
                 </div>
 
@@ -96,7 +225,7 @@
             <div class="admin-content">
                 
                 <!-- PAGE HEADER -->
-                <div class="admin-header-row">
+                <div class="admin-header-row mb-3">
                     <div>
                         <h1 class="admin-page-title">User Management</h1>
                         <p class="admin-page-subtitle">Manage student accounts, teacher credentials, and administrators.</p>
@@ -105,62 +234,158 @@
                         <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" id="exportUsersBtn" onclick="exportUsersCSV()">
                             <i class="bi bi-download"></i> Export CSV
                         </button>
-                        <button class="btn btn-primary" onclick="openCreateUserModal()">
+                        <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" onclick="openCreateUserModal()">
                             <i class="bi bi-person-plus-fill me-1"></i> Add New User
                         </button>
                     </div>
                 </div>
 
-                <!-- FILTER & CONTROLS BAR -->
+                <!-- 2. COMPACT USER STATISTICS CARDS -->
+                <div class="row g-3 mb-3">
+                    <!-- Total Users -->
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="user-stat-card">
+                            <div>
+                                <div class="user-stat-title">Total Users</div>
+                                <div class="user-stat-number" id="statTotalUsers">0</div>
+                            </div>
+                            <div class="user-stat-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Students -->
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="user-stat-card">
+                            <div>
+                                <div class="user-stat-title">Students</div>
+                                <div class="user-stat-number" id="statStudents">0</div>
+                            </div>
+                            <div class="user-stat-icon bg-info bg-opacity-10 text-info">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teachers -->
+                    <div class="col-6 col-md-4 col-xl">
+                        <div class="user-stat-card">
+                            <div>
+                                <div class="user-stat-title">Teachers</div>
+                                <div class="user-stat-number" id="statTeachers">0</div>
+                            </div>
+                            <div class="user-stat-icon bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-person-badge-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Admins -->
+                    <div class="col-6 col-md-6 col-xl">
+                        <div class="user-stat-card">
+                            <div>
+                                <div class="user-stat-title">Admins</div>
+                                <div class="user-stat-number" id="statAdmins">0</div>
+                            </div>
+                            <div class="user-stat-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Users -->
+                    <div class="col-12 col-md-6 col-xl">
+                        <div class="user-stat-card">
+                            <div>
+                                <div class="user-stat-title">Active Users</div>
+                                <div class="user-stat-number text-success" id="statActiveUsers">0</div>
+                            </div>
+                            <div class="user-stat-icon bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. SEARCH & FILTER CONTROLS BAR -->
                 <div class="admin-card mb-3 p-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="row g-3 align-items-center">
                         
                         <!-- Role Filter Pills -->
-                        <div class="d-flex flex-wrap align-items-center gap-2" id="rolePillGroup">
-                            <button class="btn btn-sm btn-filter-pill active" data-role="all">
-                                All <span class="badge bg-secondary ms-1" id="countAll">0</span>
-                            </button>
-                            <button class="btn btn-sm btn-filter-pill" data-role="STUDENT">
-                                Students <span class="badge bg-primary ms-1" id="countStudents">0</span>
-                            </button>
-                            <button class="btn btn-sm btn-filter-pill" data-role="TEACHER">
-                                Teachers <span class="badge bg-info ms-1" id="countTeachers">0</span>
-                            </button>
-                            <button class="btn btn-sm btn-filter-pill" data-role="ADMIN">
-                                Admins <span class="badge bg-warning text-dark ms-1" id="countAdmins">0</span>
-                            </button>
+                        <div class="col-xl-5 col-lg-6">
+                            <div class="d-flex flex-wrap align-items-center gap-1" id="rolePillGroup">
+                                <button class="btn btn-sm btn-filter-pill active" data-role="all">
+                                    All (<span id="countAll">0</span>)
+                                </button>
+                                <button class="btn btn-sm btn-filter-pill" data-role="STUDENT">
+                                    Students (<span id="countStudents">0</span>)
+                                </button>
+                                <button class="btn btn-sm btn-filter-pill" data-role="TEACHER">
+                                    Teachers (<span id="countTeachers">0</span>)
+                                </button>
+                                <button class="btn btn-sm btn-filter-pill" data-role="ADMIN">
+                                    Admins (<span id="countAdmins">0</span>)
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Status Filter Dropdown & Search Details -->
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="form-label mb-0 text-muted" style="font-size: 12px; white-space: nowrap;">Status:</label>
-                                <select class="form-select form-select-sm" id="userStatusFilter" style="width: 140px; font-size: 12.5px;">
-                                    <option value="all">All Statuses</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
+                        <!-- Dropdown Filters -->
+                        <div class="col-xl-7 col-lg-6">
+                            <div class="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                                
+                                <!-- Role Dropdown -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Role:</label>
+                                    <select class="form-select form-select-sm" id="userRoleFilter" style="width: 125px;">
+                                        <option value="all">All Roles</option>
+                                        <option value="STUDENT">Students</option>
+                                        <option value="TEACHER">Teachers</option>
+                                        <option value="ADMIN">Admins</option>
+                                    </select>
+                                </div>
 
-                            <button class="btn btn-light btn-sm" id="resetFiltersBtn" title="Reset all filters" onclick="resetFilters()">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
+                                <!-- Status Dropdown -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Status:</label>
+                                    <select class="form-select form-select-sm" id="userStatusFilter" style="width: 125px;">
+                                        <option value="all">All Statuses</option>
+                                        <option value="Active">🟢 Active</option>
+                                        <option value="Pending">🟠 Pending</option>
+                                        <option value="Suspended">🔴 Suspended</option>
+                                        <option value="Inactive">⚪ Inactive</option>
+                                    </select>
+                                </div>
+
+                                <!-- Department Dropdown -->
+                                <div class="d-flex align-items-center gap-1">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Dept:</label>
+                                    <select class="form-select form-select-sm" id="userDepartmentFilter" style="width: 155px;">
+                                        <option value="all">All Departments</option>
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+
+                                <button class="btn btn-light btn-sm" id="resetFiltersBtn" title="Reset all filters" onclick="resetFilters()">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- USERS TABLE CARD -->
+                <!-- 4. USERS TABLE CARD -->
                 <div class="admin-card">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-                        <span class="text-muted text-xs" id="tableRecordCount">Showing 0 users</span>
-                        <div class="text-muted text-xs" style="font-size: 11.5px;">
-                            <i class="bi bi-info-circle me-1"></i> Click on any action button to view, edit, toggle status, or delete
+                        <span class="text-muted text-xs fw-semibold" id="tableRecordCount">Showing 0 users</span>
+                        <div class="text-muted text-xs">
+                            <i class="bi bi-info-circle me-1"></i> Actions: [ 👁 View Profile ] [ ✏ Edit User ] [ ⋮ More Actions ]
                         </div>
                     </div>
 
                     <div class="admin-table-responsive">
-                        <table class="admin-table">
+                        <table class="admin-table align-middle">
                             <thead>
                                 <tr>
                                     <th>USER</th>
@@ -169,11 +394,16 @@
                                     <th>ROLE</th>
                                     <th>STATUS</th>
                                     <th>JOINED</th>
-                                    <th>ACTIONS</th>
+                                    <th class="text-end" style="width: 150px;">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
                                 <!-- Dynamically Rendered -->
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading user accounts...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -183,90 +413,225 @@
         </main>
     </div>
 
-    <!-- MODAL: Create / Edit User (Unified Structure) -->
-    <div class="modal fade" id="userModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- 6 & 7 & 8. MODAL: View Comprehensive User Profile Drawer/Modal -->
+    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="userModalTitle">Add New User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-light py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle fs-5 text-primary"></i>
+                        <h5 class="modal-title fw-bold mb-0">User Account Profile</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="userForm">
-                    <div class="modal-body p-4">
-                        <input type="hidden" id="userId">
-                        
-                        <!-- 1. Full Name -->
-                        <div class="mb-3">
-                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Full Name *</label>
-                            <input type="text" class="form-control" id="userName" placeholder="e.g. Sok Virak" required>
-                        </div>
-                        
-                        <!-- 2. Email Address -->
-                        <div class="mb-3">
-                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Email Address *</label>
-                            <input type="email" class="form-control" id="userEmail" placeholder="e.g. sok.virak@aub.edu.kh" required>
-                        </div>
-                        
-                        <!-- 3. University ID & 4. Role (2 Columns) -->
-                        <div class="row g-3 mb-3">
-                            <div class="col-6">
-                                <label class="form-label text-xs fw-bold text-uppercase text-muted">University ID *</label>
-                                <input type="text" class="form-control" id="userUniId" placeholder="e.g. 0001001" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label text-xs fw-bold text-uppercase text-muted">Role *</label>
-                                <select class="form-select" id="userRole" required>
-                                    <option value="3">STUDENT</option>
-                                    <option value="2">TEACHER</option>
-                                    <option value="1">ADMIN</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- 5. Status -->
-                        <div class="mb-3">
-                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Status</label>
-                            <select class="form-select" id="userStatus" required>
-                                <option value="Active">Active</option>
-                                <option value="Inactive">Inactive</option>
-                            </select>
-                        </div>
-
-                        <!-- 6. Password -->
-                        <div class="mb-3">
-                            <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Password *</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="userPassword" placeholder="Enter secure password">
-                                <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn" title="Toggle password visibility">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
+                <div class="modal-body p-4" id="viewUserModalBody">
+                    <!-- Dynamically Populated with Header, Overview, Academic Info, Account & Security, Activity Log -->
+                </div>
+                <div class="modal-footer bg-light justify-content-between py-2">
+                    <div id="viewModalLeftActions">
+                        <!-- Dynamic Status Action (Suspend / Activate) & Delete -->
                     </div>
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveUserBtn">Save Account</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary btn-sm px-3" id="editFromViewBtn">
+                            <i class="bi bi-pencil me-1"></i> Edit User
+                        </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: View User Details -->
-    <div class="modal fade" id="viewUserModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+    <!-- 9 & 10 & 11. MODAL: Add / Edit User (Multi-Step Form with Role-Specific Data) -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold">User Account Profile</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header bg-light py-3">
+                    <h5 class="modal-title fw-bold" id="userModalTitle">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4" id="viewUserModalBody">
-                    <!-- Dynamic Profile Card -->
+                
+                <!-- Step Indicator Buttons for Multi-Step Form -->
+                <div class="px-4 pt-3 pb-2 bg-light border-bottom d-flex gap-2" id="wizardStepHeader">
+                    <button type="button" class="wizard-step-btn active" data-step="1" id="stepBtn1">
+                        1. Basic Information
+                    </button>
+                    <button type="button" class="wizard-step-btn" data-step="2" id="stepBtn2">
+                        2. Academic Details
+                    </button>
+                    <button type="button" class="wizard-step-btn" data-step="3" id="stepBtn3">
+                        3. Account & Role
+                    </button>
                 </div>
-                <div class="modal-footer bg-light">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-sm" id="editFromViewBtn">Edit Account</button>
-                </div>
+
+                <form id="userForm">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="userId">
+                        
+                        <!-- ================= STEP 1: Basic Information ================= -->
+                        <div class="wizard-step" id="wizardStep1">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Full Name *</label>
+                                    <input type="text" class="form-control" id="userName" placeholder="e.g. Dr. Johnathan Vance" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Email Address *</label>
+                                    <input type="email" class="form-control" id="userEmail" placeholder="e.g. j.vance@aub.edu.kh" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Phone Number</label>
+                                    <input type="text" class="form-control" id="userPhone" placeholder="e.g. +855 23 999 101">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Avatar Image URL (Optional)</label>
+                                    <input type="text" class="form-control" id="userAvatarUrl" placeholder="https://...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= STEP 2: Academic Information ================= -->
+                        <div class="wizard-step d-none" id="wizardStep2">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted" id="uniIdLabel">University ID *</label>
+                                    <input type="text" class="form-control font-monospace" id="userUniId" placeholder="e.g. 0001001 or TCH-001" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Faculty / School</label>
+                                    <select class="form-select" id="userFacultySelect">
+                                        <option value="Faculty of Computer Science & IT">Faculty of Computer Science & IT</option>
+                                        <option value="Faculty of Business & Management">Faculty of Business & Management</option>
+                                        <option value="Faculty of Finance & Banking">Faculty of Finance & Banking</option>
+                                        <option value="Faculty of Law & Humanities">Faculty of Law & Humanities</option>
+                                        <option value="Faculty of Engineering">Faculty of Engineering</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Role-Specific Dynamic Fields -->
+                            <!-- A. Student Fields -->
+                            <div id="studentSpecificFields">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Major / Program</label>
+                                        <select class="form-select" id="userMajorSelect">
+                                            <option value="Computer Science">Computer Science</option>
+                                            <option value="Software Engineering">Software Engineering</option>
+                                            <option value="Cybersecurity">Cybersecurity</option>
+                                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                            <option value="Business Administration">Business Administration</option>
+                                            <option value="Finance & Banking">Finance & Banking</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Academic Year</label>
+                                        <select class="form-select" id="userAcademicYearSelect">
+                                            <option value="Year 1">Year 1</option>
+                                            <option value="Year 2">Year 2</option>
+                                            <option value="Year 3">Year 3</option>
+                                            <option value="Year 4">Year 4</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Semester</label>
+                                        <select class="form-select" id="userSemesterSelect">
+                                            <option value="Semester 1">Semester 1</option>
+                                            <option value="Semester 2">Semester 2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- B. Teacher / Faculty Fields -->
+                            <div id="teacherSpecificFields" class="d-none">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Department</label>
+                                        <select class="form-select" id="userDepartmentSelect">
+                                            <!-- Dynamically Populated -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Academic Position / Title</label>
+                                        <input type="text" class="form-control" id="teacherPositionInput" placeholder="e.g. Senior Lecturer / Associate Professor">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Specialization / Subjects</label>
+                                    <input type="text" class="form-control" id="teacherSubjectsInput" placeholder="e.g. Distributed Systems, Cloud Architecture">
+                                </div>
+                            </div>
+
+                            <!-- C. Admin Staff Fields -->
+                            <div id="adminSpecificFields" class="d-none">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Administrative Department</label>
+                                        <input type="text" class="form-control" id="adminDeptInput" placeholder="e.g. Information Technology Directorate">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Staff Position</label>
+                                        <input type="text" class="form-control" id="adminPositionInput" placeholder="e.g. Super Administrator / Registrar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= STEP 3: Account & Role ================= -->
+                        <div class="wizard-step d-none" id="wizardStep3">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Account Role *</label>
+                                    <select class="form-select" id="userRole" required>
+                                        <option value="3">STUDENT</option>
+                                        <option value="2">TEACHER</option>
+                                        <option value="1">ADMIN</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Account Status</label>
+                                    <select class="form-select" id="userStatus" required>
+                                        <option value="Active">🟢 Active</option>
+                                        <option value="Pending">🟠 Pending</option>
+                                        <option value="Suspended">🔴 Suspended</option>
+                                        <option value="Inactive">⚪ Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Initial Password (Optional / Auto-generated) -->
+                            <div class="mb-3" id="passwordGroup">
+                                <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Initial Password (Default: Password123!)</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="userPassword" placeholder="Enter secure password (min 6 chars)">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn" title="Toggle password visibility">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="text-xs text-muted mt-1">Leave blank to use default initialization password or preserve existing password.</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer bg-light justify-content-between py-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="prevStepBtn" disabled>
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary btn-sm px-3" id="nextStepBtn">
+                                Next <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                            <button type="submit" class="btn btn-success btn-sm px-4 d-none" id="saveUserBtn">
+                                <i class="bi bi-check2-circle me-1"></i> Save Account
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

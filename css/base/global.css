@@ -3,11 +3,18 @@
  * Global utility classes and layout foundations
  */
 
+html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
 body {
     background-color: var(--aub-background);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* Custom Text Colors */

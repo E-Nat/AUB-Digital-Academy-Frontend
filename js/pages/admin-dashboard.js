@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', async function () {
             animateCounter('kpiTotalTeachers', totalTeachers || 0);
             animateCounter('kpiTotalChapters', totalChapters || 0);
             animateCounter('kpiTotalEnrollments', totalEnrollments || 0);
+
+            const teacherTrendEl = document.getElementById('kpiTeacherTrend');
+            if (teacherTrendEl && metricsData.newTeachersThisMonth !== undefined) {
+                teacherTrendEl.innerHTML = `<i class="bi bi-arrow-up-right"></i> +${metricsData.newTeachersThisMonth} this month`;
+            }
         }
     }
 
