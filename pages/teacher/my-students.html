@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Submissions & Grading - Faculty Portal - AUB Digital Academy</title>
+    <title>My Students - Faculty Portal - AUB Digital Academy</title>
     <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
@@ -40,7 +40,7 @@
                     <i class="bi bi-grid-fill"></i>
                     <span>Teaching Overview</span>
                 </a>
-                <a href="my-students.html" class="admin-nav-item">
+                <a href="my-students.html" class="admin-nav-item active">
                     <i class="bi bi-mortarboard"></i>
                     <span>My Students</span>
                 </a>
@@ -52,7 +52,7 @@
                     <i class="bi bi-card-checklist"></i>
                     <span>Assignments</span>
                 </a>
-                <a href="submissions.html" class="admin-nav-item active">
+                <a href="submissions.html" class="admin-nav-item">
                     <i class="bi bi-inbox-fill"></i>
                     <span>Student Submissions</span>
                 </a>
@@ -97,7 +97,7 @@
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="submissionSearchInput" placeholder="Search student name, assignment, or submission...">
+                        <input type="text" class="admin-search-input" id="studentSearchInput" placeholder="Search student name, ID, or course...">
                     </div>
                 </div>
 
@@ -123,22 +123,27 @@
                     <div>
                         <div class="d-flex align-items-center gap-2 mb-1">
                             <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
-                                <i class="bi bi-inbox-fill me-1"></i> Evaluation Queue
+                                <i class="bi bi-people-fill me-1"></i> Student Cohort
                             </span>
-                            <span class="text-muted text-xs">Faculty Grading Panel</span>
+                            <span class="text-muted text-xs">Faculty Course Roster</span>
                         </div>
-                        <h1 class="admin-page-title">Student Submissions</h1>
-                        <p class="admin-page-subtitle">Review student deliverables, provide qualitative feedback, and assign grades.</p>
+                        <h1 class="admin-page-title">My Students</h1>
+                        <p class="admin-page-subtitle">Track enrolled students across your courses, evaluate assignment grades, and write private mentorship notes.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportStudentCohort()">
+                            <i class="bi bi-download me-1"></i> Export Roster
+                        </button>
                     </div>
                 </div>
 
                 <!-- FILTER BAR -->
                 <div class="admin-card mb-4 p-3">
                     <div class="row g-3 align-items-center">
-                        <div class="col-md-4">
+                        <div class="col-md-5">
                             <div class="d-flex align-items-center gap-2">
                                 <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Course:</label>
-                                <select class="form-select form-select-sm" id="subCourseFilter">
+                                <select class="form-select form-select-sm" id="courseFilterSelect">
                                     <option value="all">All My Courses</option>
                                     <option value="Full-Stack Web Development">Full-Stack Web Development</option>
                                     <option value="Python for Data Science & AI">Python for Data Science & AI</option>
@@ -149,28 +154,26 @@
                         <div class="col-md-4">
                             <div class="d-flex align-items-center gap-2">
                                 <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Status:</label>
-                                <select class="form-select form-select-sm" id="subStatusFilter">
+                                <select class="form-select form-select-sm" id="statusFilterSelect">
                                     <option value="all">All Statuses</option>
-                                    <option value="Pending">🟠 Pending Review</option>
-                                    <option value="Reviewed">🟢 Reviewed</option>
-                                    <option value="Returned">🔵 Returned</option>
-                                    <option value="Late">🔴 Late</option>
+                                    <option value="Active">🟢 Active</option>
+                                    <option value="Inactive">🟠 Inactive</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4 text-md-end">
-                            <button class="btn btn-light btn-sm text-xs" onclick="resetSubmissionFilters()">
+                        <div class="col-md-3 text-md-end">
+                            <button class="btn btn-light btn-sm text-xs" onclick="resetStudentFilters()">
                                 <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- SUBMISSIONS TABLE (Requirement 8) -->
+                <!-- STUDENTS TABLE (Requirement 6) -->
                 <div class="admin-card">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-                        <span class="text-muted text-xs fw-semibold" id="submissionQueueCount">Showing student submissions...</span>
-                        <span class="text-xs text-muted"><i class="bi bi-shield-check text-success me-1"></i> Real-time grading queue</span>
+                        <span class="text-muted text-xs fw-semibold" id="studentRosterCount">Showing students...</span>
+                        <span class="text-xs text-muted"><i class="bi bi-info-circle me-1"></i> Faculty view: Academic & submission records only</span>
                     </div>
 
                     <div class="admin-table-responsive">
@@ -178,16 +181,17 @@
                             <thead>
                                 <tr>
                                     <th>STUDENT</th>
-                                    <th>ASSIGNMENT</th>
+                                    <th>UNIVERSITY ID</th>
+                                    <th>EMAIL</th>
                                     <th>COURSE</th>
-                                    <th>SUBMITTED</th>
+                                    <th>PROGRESS</th>
+                                    <th>LAST ACTIVITY</th>
                                     <th>STATUS</th>
-                                    <th>SCORE</th>
-                                    <th class="text-end" style="width: 140px;">ACTION</th>
+                                    <th class="text-end" style="width: 140px;">ACTIONS</th>
                                 </tr>
                             </thead>
-                            <tbody id="submissionsTableBody">
-                                <!-- Populated dynamically by JS -->
+                            <tbody id="teacherStudentsTableBody">
+                                <!-- Rendered dynamically -->
                             </tbody>
                         </table>
                     </div>
@@ -197,85 +201,22 @@
         </main>
     </div>
 
-    <!-- MODAL: Clean 2-Panel Grading UI (Requirement 9) -->
-    <div class="modal fade" id="gradingModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+    <!-- MODAL: Academic Profile & Mentorship Drawer (Requirement 6) -->
+    <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                
                 <div class="modal-header bg-light py-3">
-                    <div>
-                        <h5 class="modal-title fw-bold mb-0" id="gradingModalTitle">Grade Submission</h5>
-                        <div class="text-xs text-muted" id="gradingModalSubtitle">Reviewing Student Deliverable</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-person-circle fs-5 text-primary"></i>
+                        <h5 class="modal-title fw-bold mb-0">Student Academic Profile</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
-                <div class="modal-body p-4">
-                    <div class="grading-split-container">
-                        
-                        <!-- LEFT PANEL: STUDENT SUBMISSION (Requirement 9) -->
-                        <div class="grading-submission-pane" id="gradingLeftPane">
-                            <!-- Populated dynamically with student deliverables -->
-                        </div>
-
-                        <!-- RIGHT PANEL: GRADING CONTROLS (Requirement 9) -->
-                        <div class="grading-control-pane">
-                            <div>
-                                <h6 class="fw-bold text-dark mb-3 d-flex align-items-center">
-                                    <i class="bi bi-pencil-square text-primary me-2"></i> Faculty Evaluation
-                                </h6>
-
-                                <!-- Score Input & Quick Presets -->
-                                <div class="mb-3">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Grade Score (/100) *</label>
-                                    <div class="input-group mb-2">
-                                        <input type="number" class="form-control form-control-lg fw-bold text-primary font-monospace" id="gradeScoreInput" min="0" max="100" placeholder="e.g. 95">
-                                        <span class="input-group-text bg-light text-muted fw-bold">/ 100</span>
-                                    </div>
-                                    
-                                    <!-- Quick Score Presets -->
-                                    <div class="d-flex gap-1 flex-wrap">
-                                        <span class="score-preset-pill" onclick="setPresetScore(100)">100%</span>
-                                        <span class="score-preset-pill" onclick="setPresetScore(95)">95%</span>
-                                        <span class="score-preset-pill" onclick="setPresetScore(90)">90%</span>
-                                        <span class="score-preset-pill" onclick="setPresetScore(85)">85%</span>
-                                        <span class="score-preset-pill" onclick="setPresetScore(80)">80%</span>
-                                        <span class="score-preset-pill" onclick="setPresetScore(75)">75%</span>
-                                    </div>
-                                </div>
-
-                                <!-- Feedback for Student -->
-                                <div class="mb-3">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Feedback to Student</label>
-                                    <textarea class="form-control text-sm" id="gradeFeedbackInput" rows="4" placeholder="Provide constructive feedback, suggestions for improvement, or praise..."></textarea>
-                                </div>
-
-                                <!-- Private Teacher Note -->
-                                <div class="mb-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label class="form-label text-xs fw-bold text-uppercase text-muted mb-0">Private Faculty Note</label>
-                                        <span class="text-muted" style="font-size: 10px;">Internal Only</span>
-                                    </div>
-                                    <textarea class="form-control text-xs" id="gradePrivateNoteInput" rows="2" placeholder="Notes for your own reference or term evaluation..."></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Buttons: Save Draft & Return -->
-                            <div class="d-flex gap-2 pt-3 border-top">
-                                <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" onclick="saveGradingDraft()">
-                                    <i class="bi bi-save me-1"></i> Save Draft
-                                </button>
-                                <button type="button" class="btn btn-success btn-sm flex-fill" onclick="submitGradedWork()">
-                                    <i class="bi bi-check2-circle me-1"></i> Return to Student
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
+                <div class="modal-body p-4" id="studentDetailModalBody">
+                    <!-- Populated dynamically -->
                 </div>
-
                 <div class="modal-footer bg-light py-2">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -287,6 +228,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/components/teacher-sidebar.js"></script>
-    <script src="../../js/pages/teacher-submissions.js"></script>
+    <script src="../../js/pages/teacher-students.js"></script>
 </body>
 </html>

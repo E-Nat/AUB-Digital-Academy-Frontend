@@ -1,1 +1,366 @@
-<!-- my-courses.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Courses & Curriculum - Faculty Portal - AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Teacher Portal CSS -->
+    <link href="../../css/layouts/teacher.css" rel="stylesheet">
+    <style>
+        .nav-tabs-custom .nav-link {
+            font-weight: 600;
+            font-size: 13px;
+            color: #64748B;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 10px 16px;
+        }
+        .nav-tabs-custom .nav-link.active {
+            color: #2563EB;
+            border-bottom: 2px solid #2563EB;
+            background: transparent;
+        }
+        .lesson-draggable-item {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            transition: all 0.15s ease;
+        }
+        .lesson-draggable-item:hover {
+            border-color: #93C5FD;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <div class="admin-wrapper">
+        
+        <!-- TEACHER SIDEBAR -->
+        <aside class="admin-sidebar" id="teacherSidebar">
+            <div class="admin-sidebar-brand">
+                <div class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Faculty Portal</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">Teaching & Learning</div>
+                <a href="dashboard.html" class="admin-nav-item">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Teaching Overview</span>
+                </a>
+                <a href="my-students.html" class="admin-nav-item">
+                    <i class="bi bi-mortarboard"></i>
+                    <span>My Students</span>
+                </a>
+                <a href="my-courses.html" class="admin-nav-item active">
+                    <i class="bi bi-book"></i>
+                    <span>My Courses</span>
+                </a>
+                <a href="assignments.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Assignments</span>
+                </a>
+                <a href="submissions.html" class="admin-nav-item">
+                    <i class="bi bi-inbox-fill"></i>
+                    <span>Student Submissions</span>
+                </a>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-person-video3"></i>
+                    <span>1-on-1 Consultations</span>
+                </a>
+
+                <div class="admin-sidebar-label">Account</div>
+                <a href="profile.html" class="admin-nav-item">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-house"></i>
+                    <span>Back to Website</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="logoutTeacher()">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+                <div class="admin-user-card" onclick="window.location.href='profile.html'" style="cursor: pointer;">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Teacher" class="teacher-avatar-display">
+                    <div class="admin-user-info">
+                        <div class="name teacher-name-display">Dr. Sarah Johnson</div>
+                        <div class="role teacher-role-display">Lead Instructor</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW -->
+        <main class="admin-main">
+            
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="admin-search-input" id="courseSearchInput" placeholder="Search my courses, curriculum modules...">
+                    </div>
+                </div>
+
+                <div class="admin-topbar-actions">
+                    <button class="admin-notification-btn" id="teacherNotificationBtn" aria-label="Notifications">
+                        <i class="bi bi-bell-fill"></i>
+                        <span class="admin-notification-badge">4</span>
+                    </button>
+                    <div class="admin-topbar-profile" onclick="window.location.href='profile.html'">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Teacher" class="teacher-avatar-display">
+                        <div class="d-none d-md-block text-start lh-1">
+                            <div class="name teacher-name-display">Dr. Sarah Johnson</div>
+                            <div class="role teacher-role-display">Lead Instructor</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                
+                <!-- PAGE HEADER -->
+                <div class="admin-header-row mb-4">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
+                                <i class="bi bi-book-half me-1"></i> Assigned Courses
+                            </span>
+                            <span class="text-muted text-xs">Faculty Course Management</span>
+                        </div>
+                        <h1 class="admin-page-title">My Courses</h1>
+                        <p class="admin-page-subtitle">Manage curriculum modules, upload lecture materials, and monitor student enrollment.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="assignments.html" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Create Assignment
+                        </a>
+                    </div>
+                </div>
+
+                <!-- COURSES GRID -->
+                <div class="row g-4 mb-4" id="coursesListGrid">
+                    <!-- Dynamic Course Cards Injected by JS -->
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Course Management Drawer/Modal (Requirement 5) -->
+    <div class="modal fade" id="courseManageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow">
+                
+                <div class="modal-header bg-light py-3">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="modalCourseTitle">Full-Stack Web Development</h5>
+                        <div class="text-xs text-muted" id="modalCourseSubtitle">Category: Technology &bull; 1,250 Enrolled Students</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- TABS (Overview, Students, Lessons, Assignments, Materials, Submissions) -->
+                <div class="px-4 pt-2 bg-light border-bottom">
+                    <ul class="nav nav-tabs nav-tabs-custom" id="courseManagementTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-course-overview">
+                                <i class="bi bi-info-circle me-1"></i> Overview
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-course-lessons">
+                                <i class="bi bi-journal-text me-1"></i> Lessons & Syllabus
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-course-assignments">
+                                <i class="bi bi-card-checklist me-1"></i> Course Assignments
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-course-materials">
+                                <i class="bi bi-folder-fill me-1"></i> Learning Materials
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-course-students">
+                                <i class="bi bi-people-fill me-1"></i> Enrolled Students
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="modal-body p-4" id="courseModalBody">
+                    <div class="tab-content" id="courseTabContent">
+                        
+                        <!-- 1. OVERVIEW TAB -->
+                        <div class="tab-pane fade show active" id="tab-course-overview">
+                            <div class="row g-4">
+                                <div class="col-lg-8">
+                                    <h6 class="fw-bold text-dark mb-2">Course Summary & Syllabus Scope</h6>
+                                    <p class="text-muted text-sm" id="courseDescContent">
+                                        Comprehensive curriculum covering modern web application architecture, RESTful API design, database modeling, and interactive frontend development.
+                                    </p>
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-sm-4">
+                                            <div class="p-3 bg-light rounded-3 text-center">
+                                                <div class="text-xs text-muted text-uppercase fw-bold">Active Students</div>
+                                                <div class="fs-4 fw-bold text-primary" id="courseActiveStudents">1,250</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="p-3 bg-light rounded-3 text-center">
+                                                <div class="text-xs text-muted text-uppercase fw-bold">Total Lessons</div>
+                                                <div class="fs-4 fw-bold text-dark" id="courseTotalLessons">12</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="p-3 bg-light rounded-3 text-center">
+                                                <div class="text-xs text-muted text-uppercase fw-bold">Course Rating</div>
+                                                <div class="fs-4 fw-bold text-warning" id="courseRating">4.9 ⭐</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold text-xs text-uppercase text-muted mb-3">Quick Faculty Actions</h6>
+                                        <div class="d-flex flex-column gap-2">
+                                            <button class="btn btn-outline-primary btn-sm text-start" onclick="openAddLessonModal()">
+                                                <i class="bi bi-plus-circle me-1"></i> Add New Lesson
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm text-start" onclick="openUploadMaterialModal()">
+                                                <i class="bi bi-upload me-1"></i> Upload Slide / Document
+                                            </button>
+                                            <a href="assignments.html" class="btn btn-outline-secondary btn-sm text-start">
+                                                <i class="bi bi-card-checklist me-1"></i> Create Assignment
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. LESSONS TAB -->
+                        <div class="tab-pane fade" id="tab-course-lessons">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0">Modules & Learning Lessons</h6>
+                                    <span class="text-xs text-muted">Drag or use controls to reorder syllabus structure</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="openAddLessonModal()">
+                                    <i class="bi bi-plus-circle me-1"></i> Add Lesson
+                                </button>
+                            </div>
+                            <div id="lessonsListContainer">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- 3. ASSIGNMENTS TAB -->
+                        <div class="tab-pane fade" id="tab-course-assignments">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0">Coursework & Homework Assignments</h6>
+                                    <span class="text-xs text-muted">Active projects assigned to students</span>
+                                </div>
+                                <a href="assignments.html" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i> New Assignment
+                                </a>
+                            </div>
+                            <div id="courseAssignmentsList">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- 4. MATERIALS TAB -->
+                        <div class="tab-pane fade" id="tab-course-materials">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0">Lectures & Learning Materials</h6>
+                                    <span class="text-xs text-muted">Downloadable slide decks, code snippets, and PDF notes</span>
+                                </div>
+                                <button class="btn btn-primary btn-sm" onclick="openUploadMaterialModal()">
+                                    <i class="bi bi-upload me-1"></i> Upload Material
+                                </button>
+                            </div>
+                            <div id="courseMaterialsList">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- 5. STUDENTS TAB -->
+                        <div class="tab-pane fade" id="tab-course-students">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h6 class="fw-bold text-dark mb-0">Enrolled Students in this Course</h6>
+                                <a href="my-students.html" class="btn btn-outline-secondary btn-sm text-xs">
+                                    Open Full Student Directory
+                                </a>
+                            </div>
+                            <div class="admin-table-responsive">
+                                <table class="admin-table align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>STUDENT</th>
+                                            <th>STUDENT ID</th>
+                                            <th>PROGRESS</th>
+                                            <th>LAST ACTIVITY</th>
+                                            <th class="text-end">ACTION</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="courseStudentsTableBody">
+                                        <!-- Rendered dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
+    <script src="../../js/components/teacher-sidebar.js"></script>
+    <script src="../../js/pages/teacher-courses.js"></script>
+</body>
+</html>
