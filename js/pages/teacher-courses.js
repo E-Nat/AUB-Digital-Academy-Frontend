@@ -1,17 +1,9 @@
 /**
- * AUB Digital Academy - Teacher Courses & Curriculum Controller
- * Handles course listings, lesson creation, materials management, and syllabus reordering.
+ * AUB Digital Academy - Teacher Courses Controller
+ * LMS Faculty view: Course cards with "Open Course", lesson syllabus, and learning materials.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
-    const isLocal = window.location.hostname === 'localhost' || 
-                    window.location.hostname === '127.0.0.1' || 
-                    window.location.protocol === 'file:';
-    const API_BASE = (isLocal && window.location.port !== '5000') 
-        ? 'http://localhost:5000/api' 
-        : '/api';
-
-    // Mock Courses
     const coursesData = [
         {
             id: 1,
@@ -22,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
             pending_reviews: 8,
             rating: 4.9,
             status: 'Active',
-            description: 'Master frontend architecture, backend REST APIs, relational databases, and enterprise authentication.',
+            description: 'Comprehensive curriculum covering modern web application architecture, RESTful API design, database modeling, and interactive frontend development.',
             banner: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600',
             lessons: [
                 { id: 1, order: 1, title: 'Course Overview & Dev Environment Setup', duration: '45 mins', is_free: 1 },
@@ -45,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         {
             id: 2,
             title: 'Python for Data Science & AI',
-            category: 'Data Science',
+            category: 'Technology',
             students_count: 820,
             lessons_count: 10,
             pending_reviews: 4,
@@ -68,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         {
             id: 3,
-            title: 'Cloud Infrastructure & DevOps',
-            category: 'Engineering',
-            students_count: 450,
+            title: 'Cloud DevOps',
+            category: 'Technology',
+            students_count: 540,
             lessons_count: 8,
             pending_reviews: 2,
             rating: 4.9,
@@ -94,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const courseManageModalEl = document.getElementById('courseManageModal');
     const courseManageModal = courseManageModalEl ? new bootstrap.Modal(courseManageModalEl) : null;
 
-    // 1. Render Courses Grid
+    // 1. Render Courses Grid (Requirement 5: Clean cards with [ Open Course ])
     function renderCoursesGrid(courses) {
         const grid = document.getElementById('coursesListGrid');
         if (!grid) return;
@@ -107,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span class="badge bg-dark bg-opacity-75 text-white text-xs">${course.category}</span>
                         </div>
                         <div class="position-absolute top-0 end-0 p-3 z-1">
-                            <span class="badge bg-warning text-dark text-xs fw-bold"><i class="bi bi-star-fill me-1"></i> ${course.rating}</span>
+                            <span class="badge bg-warning text-dark text-xs fw-bold"><i class="bi bi-star-fill me-1"></i> ${course.rating} ★</span>
                         </div>
                         <div class="position-absolute bottom-0 start-0 p-3 z-1 text-white">
                             <h5 class="fw-bold mb-0 text-white">${course.title}</h5>
@@ -115,35 +107,35 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
 
                     <div class="teacher-course-body">
-                        <p class="text-muted text-xs mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <p class="text-muted text-xs mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                             ${course.description}
                         </p>
 
-                        <div class="teacher-course-meta-grid">
+                        <div class="teacher-course-meta-grid mb-3">
                             <div class="teacher-meta-item">
                                 <span>Students</span>
-                                <strong>${course.students_count.toLocaleString()}</strong>
+                                <strong>${course.students_count.toLocaleString()} Students</strong>
                             </div>
                             <div class="teacher-meta-item">
                                 <span>Lessons</span>
-                                <strong>${course.lessons_count} Modules</strong>
+                                <strong>${course.lessons_count} Lessons</strong>
+                            </div>
+                            <div class="teacher-meta-item">
+                                <span>Rating</span>
+                                <strong class="text-warning">${course.rating} ★</strong>
                             </div>
                             <div class="teacher-meta-item">
                                 <span>Pending</span>
                                 <strong class="text-warning">${course.pending_reviews} to review</strong>
                             </div>
-                            <div class="teacher-meta-item">
-                                <span>Status</span>
-                                <strong class="text-success"><i class="bi bi-check-circle-fill me-1"></i> ${course.status}</strong>
-                            </div>
                         </div>
 
                         <div class="d-flex gap-2 mt-auto pt-2">
-                            <button type="button" class="btn btn-primary btn-sm flex-fill" onclick="openCourseManageModal(${course.id})">
-                                <i class="bi bi-sliders me-1"></i> Manage Content
+                            <button type="button" class="btn btn-primary btn-sm flex-fill fw-semibold" onclick="openCourseDetails(${course.id})">
+                                Open Course <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                             <a href="my-students.html?course=${course.id}" class="btn btn-outline-secondary btn-sm flex-fill">
-                                <i class="bi bi-people me-1"></i> View Students
+                                Students
                             </a>
                         </div>
                     </div>
@@ -152,8 +144,8 @@ document.addEventListener('DOMContentLoaded', function () {
         `).join('');
     }
 
-    // 2. Open Course Management Modal (Requirement 5)
-    window.openCourseManageModal = function (courseId) {
+    // 2. Open Course Details & Syllabus (Requirement 6)
+    window.openCourseDetails = function (courseId) {
         const course = coursesData.find(c => c.id === courseId) || coursesData[0];
         currentSelectedCourse = course;
 
@@ -162,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseDescContent').textContent = course.description;
         document.getElementById('courseActiveStudents').textContent = course.students_count.toLocaleString();
         document.getElementById('courseTotalLessons').textContent = course.lessons.length;
-        document.getElementById('courseRating').textContent = `${course.rating} ⭐`;
+        document.getElementById('courseRating').textContent = `${course.rating} ★`;
 
         renderLessonsTab(course);
         renderMaterialsTab(course);
@@ -191,9 +183,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button class="btn btn-outline-secondary btn-sm py-1 px-2" title="Move Down" onclick="moveLesson(${course.id}, ${idx}, 1)">
                         <i class="bi bi-arrow-down"></i>
                     </button>
-                    <button class="btn btn-outline-primary btn-sm py-1 px-2" title="Edit Lesson" onclick="editLesson(${course.id}, ${lesson.id})">
-                        <i class="bi bi-pencil"></i>
-                    </button>
                 </div>
             </div>
         `).join('');
@@ -218,9 +207,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <button class="btn btn-outline-secondary btn-sm text-xs" onclick="Swal.fire({ icon: 'info', title: 'Downloading file...' })">
                         <i class="bi bi-download"></i> Download
                     </button>
-                    <button class="btn btn-outline-danger btn-sm text-xs" onclick="deleteMaterial(${course.id}, ${mat.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
                 </div>
             </div>
         `).join('');
@@ -238,7 +224,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="fw-bold text-dark text-sm">${st.name}</span>
                     </div>
                 </td>
-                <td><span class="badge bg-light text-dark border font-monospace text-xs">${st.id}</span></td>
                 <td>
                     <div class="d-flex align-items-center gap-2" style="width: 140px;">
                         <div class="progress flex-grow-1" style="height: 6px;">
@@ -250,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td class="text-muted text-xs">${st.last}</td>
                 <td class="text-end">
                     <a href="my-students.html" class="btn btn-outline-primary btn-sm py-1 px-2 text-xs">
-                        <i class="bi bi-eye me-1"></i> Profile
+                        <i class="bi bi-eye me-1"></i> View Progress
                     </a>
                 </td>
             </tr>
@@ -259,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.openAddLessonModal = async function () {
         const { value: formValues } = await Swal.fire({
-            title: 'Add New Lesson',
+            title: 'Add Lesson',
             html: `
                 <div class="text-start">
                     <div class="mb-3">
@@ -269,10 +254,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="mb-3">
                         <label class="form-label text-xs fw-bold text-muted">Duration Estimate</label>
                         <input type="text" id="swalLessonDuration" class="form-control form-control-sm" value="60 mins">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="swalLessonFree">
-                        <label class="form-check-label text-xs text-muted" for="swalLessonFree">Allow free public preview</label>
                     </div>
                 </div>
             `,
@@ -284,8 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!title) { Swal.showValidationMessage('Lesson title is required'); return false; }
                 return {
                     title: title,
-                    duration: document.getElementById('swalLessonDuration').value.trim() || '45 mins',
-                    is_free: document.getElementById('swalLessonFree').checked ? 1 : 0
+                    duration: document.getElementById('swalLessonDuration').value.trim() || '45 mins'
                 };
             }
         });
@@ -297,7 +277,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 order: nextOrder,
                 title: formValues.title,
                 duration: formValues.duration,
-                is_free: formValues.is_free
+                is_free: 0
             });
             renderLessonsTab(currentSelectedCourse);
             Swal.fire({ icon: 'success', title: 'Lesson Added', timer: 1400, showConfirmButton: false });
@@ -306,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.openUploadMaterialModal = async function () {
         const { value: title } = await Swal.fire({
-            title: 'Upload Learning Material',
+            title: 'Upload Material',
             input: 'text',
             inputLabel: 'Document / Slide Title',
             inputPlaceholder: 'e.g. Lecture 4 Architecture Slides.pdf',
@@ -341,13 +321,12 @@ document.addEventListener('DOMContentLoaded', function () {
         renderLessonsTab(course);
     };
 
-    window.deleteMaterial = function (courseId, matId) {
-        const course = coursesData.find(c => c.id === courseId);
-        if (!course) return;
-
-        course.materials = course.materials.filter(m => m.id !== matId);
-        renderMaterialsTab(course);
-    };
+    // Check URL parameters for direct course open
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('id');
+    if (targetId) {
+        setTimeout(() => openCourseDetails(parseInt(targetId)), 200);
+    }
 
     // Initialize
     renderCoursesGrid(coursesData);

@@ -35,7 +35,7 @@
             </div>
 
             <nav class="admin-sidebar-menu">
-                <div class="admin-sidebar-label">Teaching & Learning</div>
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid-fill"></i>
                     <span>Teaching Overview</span>
@@ -61,7 +61,7 @@
                     <span>1-on-1 Consultations</span>
                 </a>
 
-                <div class="admin-sidebar-label">Account</div>
+                <div class="admin-sidebar-label">ACCOUNT</div>
                 <a href="profile.html" class="admin-nav-item">
                     <i class="bi bi-person-circle"></i>
                     <span>My Profile</span>
@@ -97,7 +97,7 @@
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="studentSearchInput" placeholder="Search student name, ID, or course...">
+                        <input type="text" class="admin-search-input" id="studentSearchInput" placeholder="Search student name, course, or progress...">
                     </div>
                 </div>
 
@@ -118,62 +118,27 @@
 
             <div class="admin-content">
                 
-                <!-- PAGE HEADER -->
+                <!-- PAGE HEADER (Requirement 7: My Students) -->
                 <div class="admin-header-row mb-4">
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
-                                <i class="bi bi-people-fill me-1"></i> Student Cohort
-                            </span>
-                            <span class="text-muted text-xs">Faculty Course Roster</span>
-                        </div>
                         <h1 class="admin-page-title">My Students</h1>
-                        <p class="admin-page-subtitle">Track enrolled students across your courses, evaluate assignment grades, and write private mentorship notes.</p>
+                        <p class="admin-page-subtitle">Students currently enrolled in your courses.</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="exportStudentCohort()">
-                            <i class="bi bi-download me-1"></i> Export Roster
-                        </button>
+                        <select class="form-select form-select-sm" id="courseFilterSelect" style="width: 240px;">
+                            <option value="all">All My Courses</option>
+                            <option value="Full-Stack Web Development">Full-Stack Web Development</option>
+                            <option value="Python for Data Science & AI">Python for Data Science & AI</option>
+                            <option value="Cloud DevOps">Cloud DevOps</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- FILTER BAR -->
-                <div class="admin-card mb-4 p-3">
-                    <div class="row g-3 align-items-center">
-                        <div class="col-md-5">
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Course:</label>
-                                <select class="form-select form-select-sm" id="courseFilterSelect">
-                                    <option value="all">All My Courses</option>
-                                    <option value="Full-Stack Web Development">Full-Stack Web Development</option>
-                                    <option value="Python for Data Science & AI">Python for Data Science & AI</option>
-                                    <option value="Cloud Infrastructure & DevOps">Cloud Infrastructure & DevOps</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Status:</label>
-                                <select class="form-select form-select-sm" id="statusFilterSelect">
-                                    <option value="all">All Statuses</option>
-                                    <option value="Active">🟢 Active</option>
-                                    <option value="Inactive">🟠 Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-md-end">
-                            <button class="btn btn-light btn-sm text-xs" onclick="resetStudentFilters()">
-                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filters
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STUDENTS TABLE (Requirement 6) -->
+                <!-- STUDENTS TABLE (Requirement 7: Student, Course, Progress, Last Activity, Status, Actions) -->
                 <div class="admin-card">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-                        <span class="text-muted text-xs fw-semibold" id="studentRosterCount">Showing students...</span>
-                        <span class="text-xs text-muted"><i class="bi bi-info-circle me-1"></i> Faculty view: Academic & submission records only</span>
+                        <span class="text-muted text-xs fw-semibold" id="studentRosterCount">Enrolled Students</span>
+                        <span class="text-xs text-muted"><i class="bi bi-mortarboard me-1"></i> Course enrollment list</span>
                     </div>
 
                     <div class="admin-table-responsive">
@@ -181,17 +146,15 @@
                             <thead>
                                 <tr>
                                     <th>STUDENT</th>
-                                    <th>UNIVERSITY ID</th>
-                                    <th>EMAIL</th>
                                     <th>COURSE</th>
                                     <th>PROGRESS</th>
                                     <th>LAST ACTIVITY</th>
                                     <th>STATUS</th>
-                                    <th class="text-end" style="width: 140px;">ACTIONS</th>
+                                    <th class="text-end" style="width: 240px;">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody id="teacherStudentsTableBody">
-                                <!-- Rendered dynamically -->
+                                <!-- Rendered dynamically by JS -->
                             </tbody>
                         </table>
                     </div>
@@ -201,19 +164,19 @@
         </main>
     </div>
 
-    <!-- MODAL: Academic Profile & Mentorship Drawer (Requirement 6) -->
+    <!-- MODAL: Student Academic Profile (Requirement 8) -->
     <div class="modal fade" id="studentDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light py-3">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-person-circle fs-5 text-primary"></i>
+                        <i class="bi bi-mortarboard-fill fs-5 text-primary"></i>
                         <h5 class="modal-title fw-bold mb-0">Student Academic Profile</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4" id="studentDetailModalBody">
-                    <!-- Populated dynamically -->
+                    <!-- Populated dynamically with academic information only -->
                 </div>
                 <div class="modal-footer bg-light py-2">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>

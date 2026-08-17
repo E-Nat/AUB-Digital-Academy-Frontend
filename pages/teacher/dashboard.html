@@ -35,7 +35,7 @@
             </div>
 
             <nav class="admin-sidebar-menu">
-                <div class="admin-sidebar-label">Teaching & Learning</div>
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item active">
                     <i class="bi bi-grid-fill"></i>
                     <span>Teaching Overview</span>
@@ -61,7 +61,7 @@
                     <span>1-on-1 Consultations</span>
                 </a>
 
-                <div class="admin-sidebar-label">Account</div>
+                <div class="admin-sidebar-label">ACCOUNT</div>
                 <a href="profile.html" class="admin-nav-item">
                     <i class="bi bi-person-circle"></i>
                     <span>My Profile</span>
@@ -104,7 +104,7 @@
                 <div class="admin-topbar-actions">
                     <button class="admin-notification-btn" id="teacherNotificationBtn" aria-label="Notifications">
                         <i class="bi bi-bell-fill"></i>
-                        <span class="admin-notification-badge" id="notifBadge">4</span>
+                        <span class="admin-notification-badge">4</span>
                     </button>
                     <div class="admin-topbar-profile" onclick="window.location.href='profile.html'">
                         <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Teacher" class="teacher-avatar-display">
@@ -118,15 +118,9 @@
 
             <div class="admin-content">
                 
-                <!-- 1. PAGE HEADER -->
+                <!-- PAGE HEADER (Requirement 9) -->
                 <div class="admin-header-row mb-4">
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
-                                <i class="bi bi-mortarboard-fill me-1"></i> Faculty Workspace
-                            </span>
-                            <span class="text-muted text-xs">Computer Science & IT Directorate</span>
-                        </div>
                         <h1 class="admin-page-title">Teaching Overview</h1>
                         <p class="admin-page-subtitle">Manage your courses, support your students, and track learning progress.</p>
                     </div>
@@ -140,7 +134,7 @@
                     </div>
                 </div>
 
-                <!-- 2. 4 TEACHER SUMMARY CARDS (Requirement 3) -->
+                <!-- 4 SUMMARY CARDS (Requirement 9) -->
                 <div class="row g-3 mb-4">
                     <!-- 1. Active Students -->
                     <div class="col-6 col-lg-3">
@@ -153,7 +147,7 @@
                                 </div>
                             </div>
                             <div class="teacher-stat-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
+                                <i class="bi bi-mortarboard-fill"></i>
                             </div>
                         </div>
                     </div>
@@ -165,7 +159,7 @@
                                 <div class="teacher-stat-label">My Courses</div>
                                 <div class="teacher-stat-value text-info" id="statTeacherCourses">3</div>
                                 <div class="text-xs text-muted fw-semibold mt-1">
-                                    Active Curriculum
+                                    Assigned Tracks
                                 </div>
                             </div>
                             <div class="teacher-stat-icon bg-info bg-opacity-10 text-info">
@@ -181,7 +175,7 @@
                                 <div class="teacher-stat-label">Pending Reviews</div>
                                 <div class="teacher-stat-value text-warning" id="statPendingReviews">14</div>
                                 <div class="text-xs text-warning fw-semibold mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i> Requires Grading
+                                    <i class="bi bi-exclamation-circle me-1"></i> Awaiting Grading
                                 </div>
                             </div>
                             <div class="teacher-stat-icon bg-warning bg-opacity-10 text-warning">
@@ -197,7 +191,7 @@
                                 <div class="teacher-stat-label">Upcoming Consultations</div>
                                 <div class="teacher-stat-value" style="color: #6366F1;" id="statConsultations">5</div>
                                 <div class="text-xs text-muted fw-semibold mt-1">
-                                    Scheduled this week
+                                    1-on-1 Sessions
                                 </div>
                             </div>
                             <div class="teacher-stat-icon bg-opacity-10" style="background: rgba(99, 102, 241, 0.1); color: #6366F1;">
@@ -207,55 +201,42 @@
                     </div>
                 </div>
 
-                <!-- 3. MAIN DASHBOARD CONTENT (Priority Sections) -->
+                <!-- MAIN DASHBOARD CONTENT -->
                 <div class="row g-4">
                     
-                    <!-- Left Column: Pending Submissions & Active Courses -->
+                    <!-- Left Column: Pending Reviews & My Courses -->
                     <div class="col-lg-8">
                         
-                        <!-- PENDING SUBMISSIONS FOR REVIEW (Priority 1) -->
+                        <!-- PENDING REVIEWS (Requirement 9) -->
                         <div class="admin-card mb-4">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
                                     <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                                        <i class="bi bi-inbox-fill text-warning"></i> Pending Student Submissions
+                                        <i class="bi bi-inbox-fill text-warning"></i> Pending Reviews
                                     </h5>
-                                    <span class="text-xs text-muted">Submissions awaiting faculty review and feedback</span>
+                                    <span class="text-xs text-muted">Assignments waiting for grading and feedback</span>
                                 </div>
                                 <a href="submissions.html" class="btn btn-outline-secondary btn-sm text-xs">
-                                    View All (<span id="pendingSubCount">14</span>)
+                                    View All
                                 </a>
                             </div>
 
-                            <div class="admin-table-responsive">
-                                <table class="admin-table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>STUDENT</th>
-                                            <th>ASSIGNMENT</th>
-                                            <th>COURSE</th>
-                                            <th>SUBMITTED</th>
-                                            <th class="text-end">ACTION</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="pendingSubmissionsTableBody">
-                                        <!-- Rendered dynamically -->
-                                    </tbody>
-                                </table>
+                            <div class="d-flex flex-column gap-2" id="pendingReviewsCardList">
+                                <!-- Populated dynamically with clean pending cards -->
                             </div>
                         </div>
 
-                        <!-- MY ACTIVE COURSES (Priority 3) -->
+                        <!-- MY COURSES (Requirement 5 & 9) -->
                         <div class="admin-card">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div>
                                     <h5 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                                        <i class="bi bi-journal-bookmark-fill text-primary"></i> My Assigned Courses
+                                        <i class="bi bi-journal-bookmark-fill text-primary"></i> My Courses
                                     </h5>
-                                    <span class="text-xs text-muted">Active courses you are currently lecturing</span>
+                                    <span class="text-xs text-muted">Curriculum and modules you currently instruct</span>
                                 </div>
                                 <a href="my-courses.html" class="btn btn-outline-secondary btn-sm text-xs">
-                                    Manage Content
+                                    All Courses
                                 </a>
                             </div>
 
@@ -266,10 +247,10 @@
 
                     </div>
 
-                    <!-- Right Column: Upcoming 1-on-1s & Recent Student Progress -->
+                    <!-- Right Column: Upcoming Consultations & Recent Student Activity -->
                     <div class="col-lg-4">
                         
-                        <!-- UPCOMING 1-ON-1 CONSULTATIONS (Priority 2) -->
+                        <!-- UPCOMING CONSULTATIONS (Requirement 9) -->
                         <div class="admin-card mb-4">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
@@ -279,21 +260,21 @@
                             </div>
 
                             <div class="d-flex flex-column gap-3" id="upcomingConsultationsList">
-                                <!-- Injected dynamically -->
+                                <!-- Populated dynamically -->
                             </div>
                         </div>
 
-                        <!-- RECENT STUDENT PROGRESS (Priority 4) -->
+                        <!-- RECENT STUDENT ACTIVITY (Requirement 9) -->
                         <div class="admin-card">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                                    <i class="bi bi-graph-up-arrow text-success"></i> Student Activity Feed
+                                    <i class="bi bi-lightning-charge-fill text-success"></i> Recent Student Activity
                                 </h6>
-                                <a href="my-students.html" class="text-xs text-primary text-decoration-none fw-semibold">All Students</a>
+                                <a href="my-students.html" class="text-xs text-primary text-decoration-none fw-semibold">My Students</a>
                             </div>
 
                             <div class="d-flex flex-column gap-3" id="studentActivityFeed">
-                                <!-- Injected dynamically -->
+                                <!-- Populated dynamically -->
                             </div>
                         </div>
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faculty Profile - AUB Digital Academy</title>
+    <title>My Profile - Faculty Portal - AUB Digital Academy</title>
     <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
@@ -17,6 +17,68 @@
     
     <!-- Teacher Portal CSS -->
     <link href="../../css/layouts/teacher.css" rel="stylesheet">
+    <style>
+        .profile-hero-card {
+            background: linear-gradient(135deg, #0B1733 0%, #1E3A8A 100%);
+            border-radius: 16px;
+            padding: 32px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .profile-hero-card::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(79, 156, 249, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .teaching-stat-pill {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px 20px;
+            text-align: center;
+            flex: 1;
+            min-width: 130px;
+        }
+        .teaching-stat-pill .num {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+        }
+        .teaching-stat-pill .lbl {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        .course-card-teaching {
+            background: #ffffff;
+            border: 1px solid var(--admin-border);
+            border-radius: 14px;
+            padding: 22px;
+            transition: all 0.2s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .course-card-teaching:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            border-color: #93C5FD;
+        }
+    </style>
 </head>
 <body class="admin-body">
 
@@ -35,7 +97,7 @@
             </div>
 
             <nav class="admin-sidebar-menu">
-                <div class="admin-sidebar-label">Teaching & Learning</div>
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid-fill"></i>
                     <span>Teaching Overview</span>
@@ -61,7 +123,7 @@
                     <span>1-on-1 Consultations</span>
                 </a>
 
-                <div class="admin-sidebar-label">Account</div>
+                <div class="admin-sidebar-label">ACCOUNT</div>
                 <a href="profile.html" class="admin-nav-item active">
                     <i class="bi bi-person-circle"></i>
                     <span>My Profile</span>
@@ -97,7 +159,7 @@
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" placeholder="Search portal...">
+                        <input type="text" class="admin-search-input" placeholder="Search students, courses, submissions...">
                     </div>
                 </div>
 
@@ -118,130 +180,223 @@
 
             <div class="admin-content">
                 
-                <!-- PAGE HEADER -->
+                <!-- PAGE HEADER (Requirement 2) -->
                 <div class="admin-header-row mb-4">
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
-                                <i class="bi bi-person-badge-fill me-1"></i> Faculty Profile
-                            </span>
-                            <span class="text-muted text-xs">AUB Digital Academy</span>
-                        </div>
-                        <h1 class="admin-page-title">Faculty Profile & Settings</h1>
-                        <p class="admin-page-subtitle">Manage your public academic bio, research specializations, office room, and student consultation preferences.</p>
+                        <h1 class="admin-page-title">My Profile</h1>
+                        <p class="admin-page-subtitle">Manage your teaching profile and professional information.</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-primary btn-sm" onclick="openEditProfileModal()">
-                            <i class="bi bi-pencil me-1"></i> Edit Profile
+                        <button class="btn btn-primary btn-sm px-3" onclick="openEditProfileModal()">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Profile
                         </button>
+                    </div>
+                </div>
+
+                <!-- 1. PERSONAL FACULTY HERO CARD (Requirement 2 & 3) -->
+                <div class="profile-hero-card mb-4">
+                    <div class="row align-items-center g-4">
+                        <div class="col-auto">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250" 
+                                 class="rounded-circle object-fit-cover shadow teacher-avatar-display" 
+                                 style="width: 104px; height: 104px; border: 3px solid rgba(255, 255, 255, 0.85);" 
+                                 alt="Profile Photo">
+                        </div>
+                        <div class="col">
+                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                <h2 class="fw-bold mb-0 text-white teacher-name-display">Dr. Sarah Johnson</h2>
+                                <span class="badge bg-warning text-dark fw-bold px-2 py-1 text-xs">Faculty Member</span>
+                            </div>
+                            <div class="text-white text-opacity-90 fw-semibold text-sm mb-2">
+                                <span class="teacher-role-display">Lead Instructor</span> &bull; Computer Science & IT
+                            </div>
+                            <p class="text-white text-opacity-75 text-xs mb-0" style="max-width: 680px;">
+                                Higher education educator and full-stack software engineer dedicated to empowering undergraduate and postgraduate students in modern software architecture, cloud orchestration, and responsive interfaces.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. TEACHING SNAPSHOT (Requirement 4: MY TEACHING) -->
+                <div class="admin-card mb-4 p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold text-dark text-uppercase text-xs mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-bar-chart-fill text-primary"></i> My Teaching
+                        </h6>
+                        <span class="text-xs text-muted">Current Academic Term</span>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="teaching-stat-pill bg-primary bg-opacity-10 border-primary border-opacity-25">
+                            <div class="num text-primary">3</div>
+                            <div class="lbl text-muted">Courses</div>
+                        </div>
+                        <div class="teaching-stat-pill bg-success bg-opacity-10 border-success border-opacity-25">
+                            <div class="num text-success">1,250+</div>
+                            <div class="lbl text-muted">Students</div>
+                        </div>
+                        <div class="teaching-stat-pill bg-warning bg-opacity-10 border-warning border-opacity-25">
+                            <div class="num text-dark">4.9 <i class="bi bi-star-fill text-warning fs-6"></i></div>
+                            <div class="lbl text-muted">Average Rating</div>
+                        </div>
+                        <div class="teaching-stat-pill bg-info bg-opacity-10 border-info border-opacity-25">
+                            <div class="num text-info">14</div>
+                            <div class="lbl text-muted">Pending Reviews</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="row g-4">
                     
-                    <!-- Left: Profile Card & Stats (Requirement 11) -->
-                    <div class="col-lg-4">
-                        <div class="admin-card text-center p-4 mb-4">
-                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=250" class="rounded-circle object-fit-cover shadow-sm mb-3 teacher-avatar-display" style="width: 100px; height: 100px; border: 3px solid #FFFFFF;">
-                            <h4 class="fw-bold text-dark mb-0 teacher-name-display">Dr. Sarah Johnson</h4>
-                            <div class="text-xs text-primary fw-semibold mb-2 teacher-role-display">Lead Instructor</div>
-                            <div class="text-xs text-muted mb-3">
-                                <i class="bi bi-building me-1"></i> Department of Computer Science & IT
+                    <!-- Left: Professional Information (Requirement 3) -->
+                    <div class="col-lg-6">
+                        <div class="admin-card h-100">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="fw-bold text-dark mb-0">Professional Information</h5>
+                                <button class="btn btn-outline-secondary btn-sm py-1 px-2 text-xs" onclick="openEditProfileModal()">
+                                    <i class="bi bi-pencil me-1"></i> Edit
+                                </button>
                             </div>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1">🟢 Active Faculty</span>
-                        </div>
 
-                        <!-- Statistics -->
-                        <div class="admin-card p-3">
-                            <h6 class="fw-bold text-dark text-xs text-uppercase mb-3">Teaching Statistics</h6>
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                <span class="text-muted text-xs">Courses Taught</span>
-                                <span class="fw-bold text-dark text-sm">3 Courses</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                                <span class="text-muted text-xs">Total Students</span>
-                                <span class="fw-bold text-primary text-sm">1,250+</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center py-2">
-                                <span class="text-muted text-xs">Average Faculty Rating</span>
-                                <span class="fw-bold text-warning text-sm">4.9 / 5.0 ⭐</span>
+                            <div class="d-flex flex-column gap-3">
+                                <div>
+                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Teaching Department</div>
+                                    <div class="fw-semibold text-dark text-sm" id="profDept">Computer Science & IT</div>
+                                </div>
+
+                                <div>
+                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Teaching Role</div>
+                                    <div class="fw-semibold text-dark text-sm" id="profPos">Lead Instructor & Senior Lecturer</div>
+                                </div>
+
+                                <div>
+                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Specialization</div>
+                                    <div class="fw-semibold text-dark text-sm" id="profSpec">
+                                        Enterprise Web Architecture, Cloud Infrastructure, Distributed Database Systems
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Office / Consultation Location</div>
+                                    <div class="fw-semibold text-dark text-sm" id="profOffice">Building A &bull; Room 304</div>
+                                </div>
+
+                                <div>
+                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Professional Bio</div>
+                                    <p class="text-muted text-sm mb-0" id="profBio">
+                                        Dr. Sarah Johnson has over 8 years of university teaching and industry software engineering experience. She specializes in full-stack web frameworks, scalable microservice architectures, and modern cloud deployment pipelines.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right: Professional Information -->
-                    <div class="col-lg-8">
-                        <div class="admin-card mb-4">
-                            <h5 class="fw-bold text-dark mb-3">Academic Information</h5>
-                            
-                            <div class="row g-3 mb-4">
-                                <div class="col-md-6">
-                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Faculty Department</div>
-                                    <div class="fw-semibold text-dark text-sm" id="profDept">Computer Science & Information Technology</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Teacher Code / ID</div>
-                                    <div class="fw-bold text-primary font-monospace text-sm" id="profCode">T001</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Academic Position</div>
-                                    <div class="fw-semibold text-dark text-sm" id="profPos">Lead Instructor & Senior Lecturer</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="text-xs text-muted text-uppercase fw-bold mb-1">Office Room</div>
-                                    <div class="fw-semibold text-dark text-sm" id="profOffice">Building A &bull; Room 304</div>
-                                </div>
+                    <!-- Right: MY COURSES (Requirement 5) -->
+                    <div class="col-lg-6">
+                        <div class="admin-card h-100">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5 class="fw-bold text-dark mb-0">My Courses</h5>
+                                <a href="my-courses.html" class="text-xs text-primary text-decoration-none fw-semibold">View All</a>
                             </div>
 
-                            <div class="mb-4">
-                                <div class="text-xs text-muted text-uppercase fw-bold mb-1">Specialization & Research Focus</div>
-                                <div class="p-3 bg-light rounded-3 border text-sm text-dark" id="profSpec">
-                                    Enterprise Web Architecture, Cloud Infrastructure, Distributed Database Systems, and Asynchronous JavaScript Engines.
+                            <div class="d-flex flex-column gap-3">
+                                
+                                <!-- Course 1 -->
+                                <div class="course-card-teaching">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <h6 class="fw-bold text-dark mb-0">Full-Stack Web Development</h6>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary text-xs">Technology</span>
+                                        </div>
+                                        <div class="text-xs text-muted mb-3">
+                                            1,250 Students &bull; 12 Lessons &bull; <span class="text-warning fw-bold">4.9 ★</span>
+                                        </div>
+                                    </div>
+                                    <a href="my-courses.html?id=1" class="btn btn-outline-primary btn-sm align-self-start text-xs fw-semibold">
+                                        Open Course <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
                                 </div>
-                            </div>
 
-                            <div>
-                                <div class="text-xs text-muted text-uppercase fw-bold mb-1">Short Biography</div>
-                                <p class="text-muted text-sm" id="profBio">
-                                    Dr. Sarah Johnson has over 8 years of higher education teaching and industry software engineering experience. She leads the Full-Stack Web Development and Cloud DevOps tracks at AUB Digital Academy, helping students master scalable backend APIs and modern frontend interfaces.
-                                </p>
+                                <!-- Course 2 -->
+                                <div class="course-card-teaching">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <h6 class="fw-bold text-dark mb-0">Python for Data Science & AI</h6>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary text-xs">Technology</span>
+                                        </div>
+                                        <div class="text-xs text-muted mb-3">
+                                            820 Students &bull; 10 Lessons &bull; <span class="text-warning fw-bold">4.8 ★</span>
+                                        </div>
+                                    </div>
+                                    <a href="my-courses.html?id=2" class="btn btn-outline-primary btn-sm align-self-start text-xs fw-semibold">
+                                        Open Course <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+
+                                <!-- Course 3 -->
+                                <div class="course-card-teaching">
+                                    <div>
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <h6 class="fw-bold text-dark mb-0">Cloud DevOps</h6>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary text-xs">Technology</span>
+                                        </div>
+                                        <div class="text-xs text-muted mb-3">
+                                            540 Students &bull; 8 Lessons &bull; <span class="text-warning fw-bold">4.9 ★</span>
+                                        </div>
+                                    </div>
+                                    <a href="my-courses.html?id=3" class="btn btn-outline-primary btn-sm align-self-start text-xs fw-semibold">
+                                        Open Course <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+
                             </div>
                         </div>
-
-                        <!-- Courses Lectured -->
-                        <div class="admin-card">
-                            <h5 class="fw-bold text-dark mb-3">Courses Lectured This Academic Year</h5>
-                            <div class="list-group list-group-flush">
-                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                    <div>
-                                        <div class="fw-bold text-dark text-sm">Full-Stack Web Development</div>
-                                        <div class="text-xs text-muted">1,250 Students &bull; Rating: 4.9 ⭐</div>
-                                    </div>
-                                    <a href="my-courses.html" class="btn btn-outline-primary btn-sm text-xs">Manage Course</a>
-                                </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                    <div>
-                                        <div class="fw-bold text-dark text-sm">Python for Data Science & AI</div>
-                                        <div class="text-xs text-muted">820 Students &bull; Rating: 4.8 ⭐</div>
-                                    </div>
-                                    <a href="my-courses.html" class="btn btn-outline-primary btn-sm text-xs">Manage Course</a>
-                                </div>
-                                <div class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                    <div>
-                                        <div class="fw-bold text-dark text-sm">Cloud Infrastructure & DevOps</div>
-                                        <div class="text-xs text-muted">450 Students &bull; Rating: 4.9 ⭐</div>
-                                    </div>
-                                    <a href="my-courses.html" class="btn btn-outline-primary btn-sm text-xs">Manage Course</a>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                 </div>
 
             </div>
         </main>
+    </div>
+
+    <!-- MODAL: Edit Faculty Profile -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light py-3">
+                    <h5 class="modal-title fw-bold mb-0">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Teaching Department</label>
+                        <input type="text" class="form-control form-control-sm" id="editDeptInput" value="Computer Science & IT">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Teaching Role</label>
+                        <input type="text" class="form-control form-control-sm" id="editRoleInput" value="Lead Instructor & Senior Lecturer">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Specialization</label>
+                        <input type="text" class="form-control form-control-sm" id="editSpecInput" value="Enterprise Web Architecture, Cloud Infrastructure, Distributed Database Systems">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Office / Consultation Location</label>
+                        <input type="text" class="form-control form-control-sm" id="editOfficeInput" value="Building A • Room 304">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Professional Bio</label>
+                        <textarea class="form-control form-control-sm" id="editBioInput" rows="3">Dr. Sarah Johnson has over 8 years of university teaching and industry software engineering experience. She specializes in full-stack web frameworks, scalable microservice architectures, and modern cloud deployment pipelines.</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm px-3" onclick="saveProfileChanges()">
+                        <i class="bi bi-check2 me-1"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap 5 JS -->
@@ -251,50 +406,35 @@
     <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/components/teacher-sidebar.js"></script>
     <script>
-        window.openEditProfileModal = async function () {
-            const { value: formValues } = await Swal.fire({
-                title: 'Edit Faculty Profile',
-                html: `
-                    <div class="text-start text-xs">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted">Academic Specialization</label>
-                            <input type="text" id="swalSpec" class="form-control form-control-sm" value="Enterprise Web Architecture, Cloud Infrastructure, Distributed Systems">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted">Office Room</label>
-                            <input type="text" id="swalOffice" class="form-control form-control-sm" value="Building A • Room 304">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-muted">Short Biography</label>
-                            <textarea id="swalBio" class="form-control form-control-sm" rows="3">Dr. Sarah Johnson has over 8 years of higher education teaching and industry software engineering experience.</textarea>
-                        </div>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: 'Save Changes',
-                confirmButtonColor: '#2563eb',
-                preConfirm: () => {
-                    return {
-                        spec: document.getElementById('swalSpec').value,
-                        office: document.getElementById('swalOffice').value,
-                        bio: document.getElementById('swalBio').value
-                    };
-                }
+        const editModalEl = document.getElementById('editProfileModal');
+        const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
+
+        window.openEditProfileModal = function () {
+            if (editModal) editModal.show();
+        };
+
+        window.saveProfileChanges = function () {
+            const dept = document.getElementById('editDeptInput').value.trim();
+            const role = document.getElementById('editRoleInput').value.trim();
+            const spec = document.getElementById('editSpecInput').value.trim();
+            const office = document.getElementById('editOfficeInput').value.trim();
+            const bio = document.getElementById('editBioInput').value.trim();
+
+            if (dept) document.getElementById('profDept').textContent = dept;
+            if (role) document.getElementById('profPos').textContent = role;
+            if (spec) document.getElementById('profSpec').textContent = spec;
+            if (office) document.getElementById('profOffice').textContent = office;
+            if (bio) document.getElementById('profBio').textContent = bio;
+
+            if (editModal) editModal.hide();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Profile Updated',
+                text: 'Your teaching information has been saved successfully.',
+                timer: 1500,
+                showConfirmButton: false
             });
-
-            if (formValues) {
-                document.getElementById('profSpec').textContent = formValues.spec;
-                document.getElementById('profOffice').textContent = formValues.office;
-                document.getElementById('profBio').textContent = formValues.bio;
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Profile Updated',
-                    text: 'Your faculty information has been updated successfully.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            }
         };
     </script>
 </body>

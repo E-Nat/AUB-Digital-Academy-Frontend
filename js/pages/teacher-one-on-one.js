@@ -164,10 +164,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             <div class="d-flex justify-content-between align-items-center">
                                 <button class="btn btn-outline-secondary btn-sm text-xs" onclick="rescheduleConsultation(${item.id})">
-                                    <i class="bi bi-calendar3 me-1"></i> Reschedule
+                                    <i class="bi bi-eye me-1"></i> View Session
                                 </button>
                                 <button class="btn btn-primary btn-sm px-3 text-xs fw-bold" onclick="joinMeetingRoom('${item.student_name}')">
-                                    <i class="bi bi-camera-video-fill me-1"></i> Launch Live Classroom
+                                    <i class="bi bi-camera-video-fill me-1"></i> Start Consultation
                                 </button>
                             </div>
                         </div>
