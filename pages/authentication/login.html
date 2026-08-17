@@ -3,132 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AUB Digital Academy</title>
+    <title>Sign In - AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
-    <!-- Core Design System -->
-    <link href="../../css/base/variables.css" rel="stylesheet">
-    <link href="../../css/base/reset.css" rel="stylesheet">
-    <link href="../../css/base/typography.css" rel="stylesheet">
-    <link href="../../css/base/global.css" rel="stylesheet">
-    
-    <!-- Components -->
-    <link href="../../css/components/button.css" rel="stylesheet">
-    <link href="../../css/components/input.css" rel="stylesheet">
-    
-    <!-- Layout & Page CSS -->
+    <!-- Authentication CSS -->
     <link href="../../css/layouts/authentication.css" rel="stylesheet">
-    <link href="../../css/pages/login.css" rel="stylesheet">
 </head>
 <body>
 
     <main class="auth-layout">
         
-        <!-- Left Panel: Branding -->
+        <!-- LEFT PANEL: UNIVERSITY BRAND SHOWCASE -->
         <section class="auth-panel-brand">
-            <div class="auth-decor"></div>
-            <div class="auth-brand-content">
-                <!-- Replace with actual logo later -->
-                <div class="mb-5 d-flex align-items-center gap-2">
-                    <div class="bg-surface rounded p-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                        <i class="bi bi-mortarboard-fill text-primary fs-4"></i>
+            <div class="auth-decor-glow"></div>
+            <div class="auth-decor-glow-bottom"></div>
+
+            <!-- Top Brand -->
+            <div class="auth-brand-top">
+                <a href="../../welcomepage.html" class="auth-brand-logo-wrap" title="Return to AUB Digital Academy Homepage">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Seal" class="auth-brand-logo-img">
+                    <div>
+                        <div class="auth-brand-name">AUB Digital Academy</div>
+                        <div class="auth-brand-tagline">American University of Phnom Penh</div>
                     </div>
-                    <span class="fs-4 fw-bold">AUB Digital</span>
+                </a>
+            </div>
+
+            <!-- Middle Value Proposition -->
+            <div class="auth-brand-middle">
+                <h1 class="auth-hero-heading">
+                    Empowering Future Leaders in <span class="gold-highlight">Digital Excellence</span>.
+                </h1>
+                <p class="auth-hero-subtext">
+                    Access your personalized academic workspace, interactive coursework, live consultations, and university administrative portal.
+                </p>
+
+                <!-- Value Highlights -->
+                <div class="auth-feature-list">
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <div class="auth-feature-title">Accredited Academic Programs</div>
+                            <div class="auth-feature-desc">Industry-standard curriculum & international certifications</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon gold">
+                            <i class="bi bi-person-video3"></i>
+                        </div>
+                        <div>
+                            <div class="auth-feature-title">1-on-1 Faculty Mentorship</div>
+                            <div class="auth-feature-desc">Direct consultation sessions with expert university professors</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-feature-item">
+                        <div class="auth-feature-icon green">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <div class="auth-feature-title">Secure Unified Access</div>
+                            <div class="auth-feature-desc">Role-based student, faculty, and administration workspaces</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="auth-brand-content mt-auto">
-                <h1 class="display-5 fw-bold">Welcome to AUB Digital Academy</h1>
-                <p class="mt-3">A modern digital learning platform designed for students, teachers, and administrators to excel.</p>
+
+            <!-- Bottom Live Status -->
+            <div class="auth-brand-bottom">
+                <div class="auth-status-pill">
+                    <span class="auth-status-indicator"></span>
+                    <span>All Academic Systems Operational &bull; 2026/27</span>
+                </div>
+                <a href="../../welcomepage.html" class="text-white text-opacity-75 text-xs text-decoration-none hover-white">
+                    <i class="bi bi-arrow-left me-1"></i> Website
+                </a>
             </div>
         </section>
 
-        <!-- Right Panel: Form -->
+        <!-- RIGHT PANEL: SIGN IN FORM -->
         <section class="auth-panel-form">
-            <div class="auth-form-wrapper fade-up">
+            <div class="auth-form-wrapper">
                 
-                <div class="auth-form-header">
-                    <h2>Sign In</h2>
-                    <p>Enter your credentials to access your account.</p>
+                <!-- Mobile Brand Header -->
+                <div class="auth-mobile-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="auth-mobile-logo">
+                    <div>
+                        <div class="fw-bold text-dark fs-5">AUB Digital Academy</div>
+                        <div class="text-muted text-xs">University Gateway</div>
+                    </div>
                 </div>
 
-                <!-- Replace with actual Google icon later -->
-                <button class="google-btn mb-4" type="button">
-                    <i class="bi bi-google text-danger"></i>
-                    Continue with Google
+                <!-- Form Header -->
+                <div class="auth-form-header">
+                    <h2>Sign In</h2>
+                    <p>Enter your institutional credentials to access your portal.</p>
+                </div>
+
+                <!-- Role Selector Segmented Tabs -->
+                <div class="auth-role-tabs" id="roleTabs">
+                    <button type="button" class="auth-role-tab active" data-role="STUDENT">
+                        <i class="bi bi-mortarboard"></i> Student
+                    </button>
+                    <button type="button" class="auth-role-tab" data-role="TEACHER">
+                        <i class="bi bi-person-badge"></i> Faculty
+                    </button>
+                    <button type="button" class="auth-role-tab" data-role="ADMIN">
+                        <i class="bi bi-shield-lock"></i> Admin
+                    </button>
+                </div>
+
+                <!-- Google SSO Button -->
+                <button class="google-sso-btn" type="button" id="googleSsoBtn">
+                    <svg class="google-sso-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    Continue with University Google SSO
                 </button>
 
-                <div class="auth-divider">or sign in with email</div>
+                <div class="auth-divider">or sign in with credentials</div>
 
-                <form action="login-success.html" method="GET">
+                <!-- Credential Sign In Form -->
+                <form id="loginForm">
                     
-                    <div class="mb-3">
-                        <label for="loginId" class="form-label">University ID or Email</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-surface border-end-0 text-muted">
-                                <i class="bi bi-person"></i>
-                            </span>
-                            <input type="text" class="form-control border-start-0 ps-0" id="loginId" placeholder="e.g. 10293847" required>
+                    <!-- Identifier -->
+                    <div class="auth-input-group">
+                        <label for="loginId" class="auth-input-label" id="loginIdLabel">Student ID or University Email</label>
+                        <input type="text" class="auth-input-control" id="loginId" placeholder="e.g. 202401234 or sreyneang@aub.edu.kh" required autocomplete="username">
+                        <i class="bi bi-person auth-input-icon"></i>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="auth-input-group">
+                        <div class="auth-input-label">
+                            <span>Password</span>
+                            <a href="forgot-password.html" class="text-decoration-none text-primary" style="font-size: 11.5px; font-weight: 600;">Forgot password?</a>
+                        </div>
+                        <input type="password" class="auth-input-control" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                        <i class="bi bi-lock auth-input-icon"></i>
+                        <button class="auth-password-toggle" type="button" id="togglePassword" title="Toggle password visibility">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                            <label class="form-check-label text-xs text-muted" for="rememberMe">
+                                Keep me signed in for 30 days
+                            </label>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label for="password" class="form-label mb-0">Password</label>
-                            <a href="forgot-password.html" class="text-sm fw-medium text-accent">Forgot password?</a>
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text bg-surface border-end-0 text-muted">
-                                <i class="bi bi-lock"></i>
-                            </span>
-                            <input type="password" class="form-control border-start-0 border-end-0 px-0" id="password" placeholder="Enter your password" required>
-                            <button class="btn border border-start-0 text-muted" type="button" id="togglePassword">
-                                <i class="bi bi-eye-slash"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-check mb-4">
-                        <input class="form-check-input" type="checkbox" id="rememberMe">
-                        <label class="form-check-label text-sm text-secondary" for="rememberMe">
-                            Remember me for 30 days
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
-                        Sign In
+                    <!-- Submit Button -->
+                    <button type="submit" class="auth-submit-btn" id="submitBtn">
+                        <span>Sign In to Workspace</span>
+                        <i class="bi bi-arrow-right"></i>
                     </button>
 
-                    <!-- Quick Demo Credentials Picker -->
-                    <div class="pt-3 border-top">
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2 text-center">Quick Demo Login</div>
-                        <div class="d-flex flex-column gap-2">
-                            <button type="button" class="btn btn-outline-primary btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('admin@aub.edu.com', 'admin123')">
-                                <div>
-                                    <div class="fw-bold text-xs"><i class="bi bi-shield-lock-fill me-1"></i> Admin Account</div>
-                                    <div class="text-muted" style="font-size: 11px;">admin@aub.edu.com / admin123</div>
-                                </div>
-                                <span class="badge bg-primary text-white">Fill & Sign In</span>
+                    <!-- Quick Demo Accounts One-Click Picker -->
+                    <div class="auth-demo-box">
+                        <div class="auth-demo-header">
+                            <span><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Demo Logins</span>
+                            <span class="text-muted" style="font-size: 10px;">1-Click Autofill</span>
+                        </div>
+                        <div class="auth-demo-grid">
+                            <button type="button" class="auth-demo-btn student" onclick="fillCredentials('sreyneang@aub.edu.kh', 'student123')">
+                                <i class="bi bi-mortarboard-fill"></i>
+                                <span>Student</span>
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('sarah.johnson@aub.edu.kh', 'teacher123')">
-                                <div>
-                                    <div class="fw-bold text-xs"><i class="bi bi-person-badge-fill me-1"></i> Teacher / Faculty</div>
-                                    <div class="text-muted" style="font-size: 11px;">sarah.johnson@aub.edu.kh / teacher123</div>
-                                </div>
-                                <span class="badge bg-secondary text-white">Fill</span>
+                            <button type="button" class="auth-demo-btn teacher" onclick="fillCredentials('sarah.johnson@aub.edu.kh', 'teacher123')">
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>Faculty</span>
                             </button>
-                            <button type="button" class="btn btn-outline-success btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('sok.virak@student.aub.edu.kh', 'student123')">
-                                <div>
-                                    <div class="fw-bold text-xs"><i class="bi bi-mortarboard-fill me-1"></i> Student Account</div>
-                                    <div class="text-muted" style="font-size: 11px;">sok.virak@student.aub.edu.kh / student123</div>
-                                </div>
-                                <span class="badge bg-success text-white">Fill</span>
+                            <button type="button" class="auth-demo-btn admin" onclick="fillCredentials('admin@aub.edu.com', 'admin123')">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                <span>Admin</span>
                             </button>
                         </div>
+                    </div>
+
+                    <!-- Security & Helpdesk Footer -->
+                    <div class="auth-security-footer">
+                        <div class="auth-security-badge">
+                            <i class="bi bi-shield-lock text-success"></i>
+                            <span>256-Bit SSL Encrypted</span>
+                        </div>
+                        <a href="../../welcomepage.html" class="text-muted text-decoration-none hover-primary">
+                            AUB Home
+                        </a>
                     </div>
                     
                 </form>
@@ -138,6 +217,11 @@
 
     </main>
 
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/pages/login.js"></script>
 </body>
 </html>

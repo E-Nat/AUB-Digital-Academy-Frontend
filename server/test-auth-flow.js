@@ -75,6 +75,7 @@ async function verifyAuthFlow() {
 
     // 2. Submit Test User (The exact user from the prompt)
     console.log('\nSubmitting "Add New User" form with Authorization header...');
+    await dbAsync.run(`DELETE FROM users WHERE email = ?`, ['soknyenat1@gmail.com']);
     const testUser = {
         full_name: 'test',
         email: 'soknyenat1@gmail.com',
@@ -90,7 +91,7 @@ async function verifyAuthFlow() {
     console.log('Create User response status:', createRes.status);
     console.log('Create User response body:', createRes.body);
 
-    if (createRes.status === 200 && createRes.body.success) {
+    if ((createRes.status === 200 || createRes.status === 201) && createRes.body.success) {
         console.log(`[PASS] 3. Backend accepted token and created user (ID: ${createRes.body.id})`);
     } else {
         console.error('[FAIL] 3. User creation failed:', createRes);

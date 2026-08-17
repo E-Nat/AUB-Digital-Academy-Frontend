@@ -1,47 +1,99 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-        ? 'http://localhost:5000/api'
-        : 'http://localhost:5000/api'; // default to port 5000 backend
+/**
+ * AUB Digital Academy - Authentication & Login Controller
+ * Handles credentials verification, JWT sessions, role tabs, and redirection.
+ */
 
-    // 1. Toggle Password Visibility
+document.addEventListener('DOMContentLoaded', function () {
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.protocol === 'file:';
+    const API_BASE = (isLocal && window.location.port !== '5000') 
+        ? 'http://localhost:5000/api' 
+        : '/api';
+
+    // 1. Password Visibility Toggle
     const togglePasswordBtn = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
 
     if (togglePasswordBtn && passwordInput) {
         togglePasswordBtn.addEventListener('click', function () {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
             
             const icon = this.querySelector('i');
             if (icon) {
-                icon.classList.toggle('bi-eye');
-                icon.classList.toggle('bi-eye-slash');
+                icon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
             }
         });
     }
 
-    // 2. Demo Account Quick Selector / Autofill
-    window.fillCredentials = function(loginId, password, autoSubmit = true) {
+    // 2. Role Tabs Switching
+    const roleTabs = document.getElementById('roleTabs');
+    const loginIdLabel = document.getElementById('loginIdLabel');
+    const loginIdInput = document.getElementById('loginId');
+
+    if (roleTabs && loginIdLabel && loginIdInput) {
+        roleTabs.addEventListener('click', function (e) {
+            const tabBtn = e.target.closest('.auth-role-tab');
+            if (!tabBtn) return;
+
+            roleTabs.querySelectorAll('.auth-role-tab').forEach(b => b.classList.remove('active'));
+            tabBtn.classList.add('active');
+
+            const role = tabBtn.getAttribute('data-role');
+            if (role === 'STUDENT') {
+                loginIdLabel.textContent = 'Student ID or University Email';
+                loginIdInput.setAttribute('placeholder', 'e.g. 202401234 or sreyneang@aub.edu.kh');
+            } else if (role === 'TEACHER') {
+                loginIdLabel.textContent = 'Faculty ID or University Email';
+                loginIdInput.setAttribute('placeholder', 'e.g. T001 or sarah.johnson@aub.edu.kh');
+            } else if (role === 'ADMIN') {
+                loginIdLabel.textContent = 'Administrator Email or Staff ID';
+                loginIdInput.setAttribute('placeholder', 'e.g. admin@aub.edu.com');
+            }
+        });
+    }
+
+    // 3. Google SSO Simulation
+    const googleSsoBtn = document.getElementById('googleSsoBtn');
+    if (googleSsoBtn) {
+        googleSsoBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'University Google SSO',
+                text: 'Connecting to AUB Google Workspace Directory...',
+                icon: 'info',
+                showConfirmButton: false,
+                timer: 1400
+            }).then(() => {
+                // Auto-fill student session
+                fillCredentials('sreyneang@aub.edu.kh', 'student123', true);
+            });
+        });
+    }
+
+    // 4. Quick Demo Account Autofill
+    window.fillCredentials = function (loginId, password, autoSubmit = true) {
         const idInput = document.getElementById('loginId');
         const passInput = document.getElementById('password');
         if (idInput) idInput.value = loginId;
         if (passInput) passInput.value = password;
+
         if (autoSubmit) {
-            const form = document.querySelector('form');
+            const form = document.getElementById('loginForm');
             if (form) {
                 form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
             }
         }
     };
 
-    // 3. Built-in Fallback Demo Accounts (in case backend node server is not currently running)
+    // 5. Fallback Demo Accounts Store
     const fallbackAccounts = [
         {
-            loginIds: ['admin@aub.edu.com', 'admin@aub.edu.kh', '10293847', 'admin'],
+            loginIds: ['admin@aub.edu.com', 'admin@aub.edu.kh', '10293847', 'admin', '0001000'],
             password: 'admin123',
             user: {
                 id: 1,
-                full_name: 'Admin System',
+                full_name: 'Dr. Johnathan Vance',
                 email: 'admin@aub.edu.com',
                 university_id: '10293847',
                 role: 'ADMIN',
@@ -50,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
             redirect: '../admin/dashboard.html'
         },
         {
-            loginIds: ['sarah.johnson@aub.edu.kh', 't001', 'teacher123'],
+            loginIds: ['sarah.johnson@aub.edu.kh', 't001', 'teacher123', 'teacher'],
             password: 'teacher123',
             user: {
                 id: 7,
@@ -63,15 +115,15 @@ document.addEventListener('DOMContentLoaded', function() {
             redirect: '../teacher/dashboard.html'
         },
         {
-            loginIds: ['sok.virak@student.aub.edu.kh', '0001001', 'student123'],
+            loginIds: ['sreyneang@aub.edu.kh', '202401234', 'student123', 'sok.virak@student.aub.edu.kh', '0001001', 'student'],
             password: 'student123',
             user: {
                 id: 2,
-                full_name: 'Sok Virak',
-                email: 'sok.virak@student.aub.edu.kh',
-                university_id: '0001001',
+                full_name: 'Sreyneang Sok',
+                email: 'sreyneang@aub.edu.kh',
+                university_id: '202401234',
                 role: 'STUDENT',
-                avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150'
+                avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'
             },
             redirect: '../student/dashboard.html'
         }
@@ -85,9 +137,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return matched || null;
     }
 
-    // 4. Form Authentication Handler
-    const loginForm = document.querySelector('form');
-    const loginIdInput = document.getElementById('loginId');
+    // 6. Form Submission Handler
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
 
     if (loginForm && loginIdInput && passwordInput) {
         loginForm.addEventListener('submit', async function (e) {
@@ -95,24 +147,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const loginId = loginIdInput.value.trim();
             const password = passwordInput.value;
-            const submitBtn = loginForm.querySelector('button[type="submit"]');
 
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing In...';
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Signing In...`;
             }
 
-            // Attempt Backend Server Login first
             let serverSuccess = false;
+
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3500);
 
                 const res = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ loginId, password }),
                     signal: controller.signal
                 });
@@ -122,48 +171,70 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (res.ok && data.success && data.token) {
                     serverSuccess = true;
-                    // Store session token and user profile
                     localStorage.setItem('aub_auth_token', data.token);
                     localStorage.setItem('token', data.token);
                     sessionStorage.setItem('aub_auth_token', data.token);
                     sessionStorage.setItem('token', data.token);
                     localStorage.setItem('aub_user', JSON.stringify(data.user));
 
-                    // Role-Based Redirection
-                    if (data.user.role === 'ADMIN') {
-                        window.location.href = '../admin/dashboard.html';
-                    } else if (data.user.role === 'TEACHER') {
-                        window.location.href = '../teacher/dashboard.html';
-                    } else {
-                        window.location.href = '../student/dashboard.html';
-                    }
+                    showSuccessToast(data.user);
                     return;
                 } else {
-                    // Check fallback before alerting error
                     const fallback = authenticateFallback(loginId, password);
                     if (fallback) {
                         applyFallbackSession(fallback);
                         return;
                     }
-                    alert(data.message || 'Invalid credentials. Please verify your ID/Email and password.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Authentication Failed',
+                        text: data.message || 'Invalid institutional credentials. Please check your ID and password.',
+                        confirmButtonColor: '#2563eb'
+                    });
                 }
             } catch (err) {
-                console.warn('Backend server unavailable or network timeout, trying local auth fallback:', err);
-                
-                // Fallback login so user is never blocked
                 const fallback = authenticateFallback(loginId, password);
                 if (fallback) {
                     applyFallbackSession(fallback);
                     return;
-                } else {
-                    alert('Invalid credentials. For Admin, please use:\nEmail: admin@aub.edu.com\nPassword: admin123');
                 }
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Credentials',
+                    html: `
+                        <div class="text-sm text-muted text-start">
+                            Please use one of the university demo accounts:
+                            <ul class="mt-2 text-dark font-monospace" style="font-size: 12px;">
+                                <li><b>Admin</b>: admin@aub.edu.com / admin123</li>
+                                <li><b>Faculty</b>: sarah.johnson@aub.edu.kh / teacher123</li>
+                                <li><b>Student</b>: sreyneang@aub.edu.kh / student123</li>
+                            </ul>
+                        </div>
+                    `,
+                    confirmButtonColor: '#2563eb'
+                });
             } finally {
                 if (!serverSuccess && submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Sign In';
+                    submitBtn.innerHTML = `<span>Sign In to Workspace</span> <i class="bi bi-arrow-right"></i>`;
                 }
             }
+        });
+    }
+
+    function showSuccessToast(user) {
+        let redirectUrl = '../student/dashboard.html';
+        if (user.role === 'ADMIN') redirectUrl = '../admin/dashboard.html';
+        else if (user.role === 'TEACHER') redirectUrl = '../teacher/dashboard.html';
+
+        Swal.fire({
+            icon: 'success',
+            title: `Welcome back, ${user.full_name || 'User'}!`,
+            text: `Signing in to ${user.role || 'University'} Workspace...`,
+            timer: 1200,
+            showConfirmButton: false
+        }).then(() => {
+            window.location.href = redirectUrl;
         });
     }
 
@@ -174,6 +245,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.setItem('aub_auth_token', dummyToken);
         sessionStorage.setItem('token', dummyToken);
         localStorage.setItem('aub_user', JSON.stringify(fallback.user));
-        window.location.href = fallback.redirect;
+        showSuccessToast(fallback.user);
     }
 });
