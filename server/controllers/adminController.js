@@ -563,7 +563,8 @@ exports.getAllUsers = async (req, res) => {
             SELECT 
                 u.id, u.full_name, u.email, u.university_id, u.avatar_url, u.status, u.created_at, u.updated_at,
                 u.phone, u.faculty, u.department_name, u.position, u.academic_year, u.semester, u.enrollment_status,
-                u.two_factor_enabled, u.email_verified, u.last_login_at,
+                u.academic_status, u.enrollment_date, u.expected_graduation_date, u.dob, u.gender, u.address,
+                u.two_factor_enabled, u.email_verified, u.last_login_at, u.last_profile_update,
                 r.name as role, r.id as role_id, 
                 p.title as major_title,
                 d.name as teacher_department, d.code as teacher_department_code,
@@ -590,7 +591,8 @@ exports.getUserById = async (req, res) => {
             SELECT 
                 u.id, u.full_name, u.email, u.university_id, u.avatar_url, u.status, u.created_at, u.updated_at,
                 u.phone, u.faculty, u.department_name, u.position, u.academic_year, u.semester, u.enrollment_status,
-                u.two_factor_enabled, u.email_verified, u.last_login_at,
+                u.academic_status, u.enrollment_date, u.expected_graduation_date, u.dob, u.gender, u.address,
+                u.two_factor_enabled, u.email_verified, u.last_login_at, u.last_profile_update,
                 r.name as role, r.id as role_id, 
                 p.title as major_title,
                 d.name as teacher_department, d.code as teacher_department_code,
@@ -651,7 +653,9 @@ exports.createUser = async (req, res) => {
         const { 
             full_name, email, university_id, password = 'password123', role_id = 3, major_id, status = 'Active',
             phone = '', faculty = '', department_name = '', position = '', academic_year = 'Year 1',
-            semester = 'Semester 1', enrollment_status = 'Full-Time', avatar_url = ''
+            semester = 'Semester 1', enrollment_status = 'Active', academic_status = 'Currently Enrolled',
+            enrollment_date = null, expected_graduation_date = null, dob = null, gender = 'Not Specified',
+            address = '', email_verified = 1, avatar_url = ''
         } = req.body;
 
         if (!full_name || !email) {
@@ -677,11 +681,13 @@ exports.createUser = async (req, res) => {
         const result = await dbAsync.run(
             `INSERT INTO users (
                 full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status,
-                phone, faculty, department_name, position, academic_year, semester, enrollment_status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                phone, faculty, department_name, position, academic_year, semester, enrollment_status,
+                academic_status, enrollment_date, expected_graduation_date, dob, gender, address, email_verified
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 full_name, email, university_id || null, password_hash, role_id, major_id || null, avatar, status,
-                phone, faculty, department_name, position, academic_year, semester, enrollment_status
+                phone, faculty, department_name, position, academic_year, semester, enrollment_status,
+                academic_status, enrollment_date || null, expected_graduation_date || null, dob || null, gender, address, email_verified
             ]
         );
 
@@ -707,7 +713,7 @@ exports.createUser = async (req, res) => {
         await dbAsync.run(`
             INSERT INTO user_activity_logs (user_id, action, details, performed_by)
             VALUES (?, 'Account Created', ?, ?)
-        `, [newUserId, `Account created with role ${parseInt(role_id) === 1 ? 'ADMIN' : parseInt(role_id) === 2 ? 'TEACHER' : 'STUDENT'}`, req.user ? req.user.id : null]);
+        `, [newUserId, `Account registered with role ${parseInt(role_id) === 1 ? 'ADMIN' : parseInt(role_id) === 2 ? 'TEACHER' : 'STUDENT'} (ID: ${university_id || newUserId})`, req.user ? req.user.id : null]);
 
         res.status(201).json({ 
             success: true, 
@@ -731,7 +737,8 @@ exports.updateUser = async (req, res) => {
 
         const { 
             full_name, email, university_id, role_id, status, password, avatar_url,
-            phone, faculty, department_name, position, academic_year, semester, enrollment_status, major_id
+            phone, faculty, department_name, position, academic_year, semester, enrollment_status, major_id,
+            academic_status, enrollment_date, expected_graduation_date, dob, gender, address, email_verified
         } = req.body;
 
         if (!full_name || !email) {
@@ -776,9 +783,17 @@ exports.updateUser = async (req, res) => {
                 academic_year = COALESCE(?, academic_year),
                 semester = COALESCE(?, semester),
                 enrollment_status = COALESCE(?, enrollment_status),
+                academic_status = COALESCE(?, academic_status),
+                enrollment_date = COALESCE(?, enrollment_date),
+                expected_graduation_date = COALESCE(?, expected_graduation_date),
+                dob = COALESCE(?, dob),
+                gender = COALESCE(?, gender),
+                address = COALESCE(?, address),
+                email_verified = COALESCE(?, email_verified),
                 major_id = COALESCE(?, major_id),
                 password_hash = ?,
-                updated_at = CURRENT_TIMESTAMP
+                updated_at = CURRENT_TIMESTAMP,
+                last_profile_update = CURRENT_TIMESTAMP
             WHERE id = ?`,
             [
                 full_name || null,
@@ -794,6 +809,13 @@ exports.updateUser = async (req, res) => {
                 academic_year !== undefined ? academic_year : null,
                 semester !== undefined ? semester : null,
                 enrollment_status !== undefined ? enrollment_status : null,
+                academic_status !== undefined ? academic_status : null,
+                enrollment_date !== undefined ? enrollment_date : null,
+                expected_graduation_date !== undefined ? expected_graduation_date : null,
+                dob !== undefined ? dob : null,
+                gender !== undefined ? gender : null,
+                address !== undefined ? address : null,
+                email_verified !== undefined ? email_verified : null,
                 major_id !== undefined ? major_id : null,
                 password_hash,
                 id

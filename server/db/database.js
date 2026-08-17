@@ -106,10 +106,17 @@ async function initSchema() {
         'position TEXT DEFAULT ""',
         'academic_year TEXT DEFAULT "Year 1"',
         'semester TEXT DEFAULT "Semester 1"',
-        'enrollment_status TEXT DEFAULT "Full-Time"',
+        'enrollment_status TEXT DEFAULT "Active"',
+        'academic_status TEXT DEFAULT "Currently Enrolled"',
+        'enrollment_date DATE',
+        'expected_graduation_date DATE',
+        'dob DATE',
+        'gender TEXT DEFAULT "Not Specified"',
+        'address TEXT DEFAULT ""',
         'two_factor_enabled INTEGER DEFAULT 0',
         'email_verified INTEGER DEFAULT 1',
-        'last_login_at DATETIME'
+        'last_login_at DATETIME',
+        'last_profile_update DATETIME'
     ];
     for (const col of userColumnsToAdd) {
         try {

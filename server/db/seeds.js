@@ -138,63 +138,138 @@ async function seedDatabase() {
         },
         {
             id: 2,
-            full_name: 'Sok Virak',
-            email: 'sok.virak@student.aub.edu.kh',
-            university_id: '0001001',
+            full_name: 'Sreyneang Sok',
+            email: 'sreyneang@aub.edu.kh',
+            university_id: '202401234',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 1, // Computer Science & Engineering
-            avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150',
+            major_id: 1, // Computer Science
+            faculty: 'Information Technology',
+            department_name: 'Computer Science & IT',
+            position: 'Undergraduate Student',
+            academic_year: 'Year 2',
+            semester: 'Semester 1',
+            enrollment_status: 'Active',
+            academic_status: 'Currently Enrolled',
+            enrollment_date: '2024-09-01',
+            expected_graduation_date: '2028-07-15',
+            dob: '2004-05-14',
+            gender: 'Female',
+            address: 'Khan Toul Kork, Phnom Penh, Cambodia',
+            phone: '+855 12 888 101',
+            email_verified: 1,
+            two_factor_enabled: 0,
+            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
             status: 'Active',
-            created_at: new Date(Date.now() - 5 * 86400000).toISOString()
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         },
         {
             id: 3,
             full_name: 'Chanthou Meas',
             email: 'chanthou.meas@student.aub.edu.kh',
-            university_id: '0001002',
+            university_id: '202401235',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 2, // Information Technology
+            faculty: 'Information Technology',
+            department_name: 'Information Technology',
+            position: 'Undergraduate Student',
+            academic_year: 'Year 2',
+            semester: 'Semester 2',
+            enrollment_status: 'Active',
+            academic_status: 'Currently Enrolled',
+            enrollment_date: '2024-09-01',
+            expected_graduation_date: '2028-07-15',
+            dob: '2004-11-20',
+            gender: 'Female',
+            address: 'Khan Daun Penh, Phnom Penh, Cambodia',
+            phone: '+855 12 888 102',
+            email_verified: 1,
+            two_factor_enabled: 1,
             avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150',
             status: 'Active',
-            created_at: new Date(Date.now() - 10 * 86400000).toISOString()
+            created_at: new Date(Date.now() - 50 * 86400000).toISOString()
         },
         {
             id: 4,
             full_name: 'Dara Keo',
             email: 'dara.keo@student.aub.edu.kh',
-            university_id: '0001003',
+            university_id: '202401236',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 5, // Business Administration
+            faculty: 'Business & Management',
+            department_name: 'Business Administration',
+            position: 'Undergraduate Student',
+            academic_year: 'Year 3',
+            semester: 'Semester 1',
+            enrollment_status: 'Active',
+            academic_status: 'Currently Enrolled',
+            enrollment_date: '2023-09-01',
+            expected_graduation_date: '2027-07-15',
+            dob: '2003-08-12',
+            gender: 'Male',
+            address: 'Khan Chamkarmon, Phnom Penh, Cambodia',
+            phone: '+855 12 888 103',
+            email_verified: 1,
+            two_factor_enabled: 0,
             avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150',
             status: 'Active',
-            created_at: new Date(Date.now() - 15 * 86400000).toISOString()
+            created_at: new Date(Date.now() - 40 * 86400000).toISOString()
         },
         {
             id: 5,
             full_name: 'Kanha Rath',
             email: 'kanha.rath@student.aub.edu.kh',
-            university_id: '0001004',
+            university_id: '202401237',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 2, // Information Technology
+            faculty: 'Information Technology',
+            department_name: 'Information Technology',
+            position: 'Undergraduate Student',
+            academic_year: 'Year 1',
+            semester: 'Semester 1',
+            enrollment_status: 'Pending',
+            academic_status: 'Registration Pending',
+            enrollment_date: '2026-08-01',
+            expected_graduation_date: '2030-07-15',
+            dob: '2006-02-18',
+            gender: 'Female',
+            address: 'Khan Sen Sok, Phnom Penh, Cambodia',
+            phone: '+855 12 888 104',
+            email_verified: 0,
+            two_factor_enabled: 0,
             avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150',
-            status: 'Active',
-            created_at: new Date(Date.now() - 25 * 86400000).toISOString()
+            status: 'Pending',
+            created_at: new Date(Date.now() - 15 * 86400000).toISOString()
         },
         {
             id: 6,
             full_name: 'Vibol Pen',
             email: 'vibol.pen@student.aub.edu.kh',
-            university_id: '0001005',
+            university_id: '202401238',
             password_hash: studentPasswordHash,
             role_id: 3,
             major_id: 1, // Computer Science & Engineering
+            faculty: 'Information Technology',
+            department_name: 'Computer Science',
+            position: 'Undergraduate Student',
+            academic_year: 'Year 4',
+            semester: 'Semester 2',
+            enrollment_status: 'Graduated',
+            academic_status: 'Alumni / Graduated',
+            enrollment_date: '2022-09-01',
+            expected_graduation_date: '2026-07-15',
+            dob: '2002-09-30',
+            gender: 'Male',
+            address: 'Khan Chbar Ampov, Phnom Penh, Cambodia',
+            phone: '+855 12 888 105',
+            email_verified: 1,
+            two_factor_enabled: 0,
             avatar_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150',
-            status: 'Active',
-            created_at: new Date(Date.now() - 35 * 86400000).toISOString()
+            status: 'Inactive',
+            created_at: new Date(Date.now() - 70 * 86400000).toISOString()
         },
         {
             id: 7,
@@ -224,10 +299,42 @@ async function seedDatabase() {
 
     for (const u of users) {
         await dbAsync.run(
-            `INSERT INTO users (id, full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET full_name = excluded.full_name, email = excluded.email, university_id = excluded.university_id, password_hash = excluded.password_hash, role_id = excluded.role_id, major_id = excluded.major_id, status = excluded.status, created_at = excluded.created_at`,
-            [u.id, u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status, u.created_at]
+            `INSERT INTO users (
+                id, full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status, created_at,
+                phone, faculty, department_name, position, academic_year, semester, enrollment_status, academic_status,
+                enrollment_date, expected_graduation_date, dob, gender, address, email_verified, two_factor_enabled
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET 
+                full_name = excluded.full_name, 
+                email = excluded.email, 
+                university_id = excluded.university_id, 
+                password_hash = excluded.password_hash, 
+                role_id = excluded.role_id, 
+                major_id = excluded.major_id, 
+                status = excluded.status, 
+                created_at = excluded.created_at,
+                phone = excluded.phone,
+                faculty = excluded.faculty,
+                department_name = excluded.department_name,
+                position = excluded.position,
+                academic_year = excluded.academic_year,
+                semester = excluded.semester,
+                enrollment_status = excluded.enrollment_status,
+                academic_status = excluded.academic_status,
+                enrollment_date = excluded.enrollment_date,
+                expected_graduation_date = excluded.expected_graduation_date,
+                dob = excluded.dob,
+                gender = excluded.gender,
+                address = excluded.address,
+                email_verified = excluded.email_verified,
+                two_factor_enabled = excluded.two_factor_enabled`,
+            [
+                u.id, u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status, u.created_at,
+                u.phone || '', u.faculty || '', u.department_name || '', u.position || '', u.academic_year || 'Year 1',
+                u.semester || 'Semester 1', u.enrollment_status || 'Active', u.academic_status || 'Currently Enrolled',
+                u.enrollment_date || null, u.expected_graduation_date || null, u.dob || null, u.gender || 'Not Specified',
+                u.address || '', u.email_verified !== undefined ? u.email_verified : 1, u.two_factor_enabled || 0
+            ]
         );
     }
 

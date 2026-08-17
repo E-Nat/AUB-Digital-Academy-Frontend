@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management - AUB Digital Academy</title>
+    <title>User & Student Management - AUB Digital Academy</title>
     <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
@@ -66,10 +66,12 @@
         .status-dot.pending { background-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2); }
         .status-dot.suspended { background-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
         .status-dot.inactive { background-color: #94a3b8; box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2); }
+        .status-dot.graduated { background-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+        .status-dot.withdrawn { background-color: #334155; box-shadow: 0 0 0 2px rgba(51, 65, 85, 0.2); }
 
         .profile-avatar-lg {
-            width: 76px;
-            height: 76px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #ffffff;
@@ -134,6 +136,19 @@
         }
         .dropdown-item i {
             width: 18px;
+        }
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--admin-text-muted);
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 10px 16px;
+        }
+        .nav-tabs .nav-link.active {
+            color: var(--admin-primary);
+            border-bottom: 2px solid var(--admin-primary);
+            background: transparent;
         }
     </style>
 </head>
@@ -206,7 +221,7 @@
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search users by name, email, or University ID...">
+                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search by name, student ID, email, faculty, major...">
                     </div>
                 </div>
 
@@ -227,98 +242,41 @@
                 <!-- PAGE HEADER -->
                 <div class="admin-header-row mb-3">
                     <div>
-                        <h1 class="admin-page-title">User Management</h1>
-                        <p class="admin-page-subtitle">Manage student accounts, teacher credentials, and administrators.</p>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded" id="pageSectionBadge">
+                                <i class="bi bi-people-fill me-1"></i> User Directory
+                            </span>
+                            <span class="text-muted text-xs">AUB Digital Academy Administration</span>
+                        </div>
+                        <h1 class="admin-page-title" id="pageMainHeading">User Management</h1>
+                        <p class="admin-page-subtitle" id="pageMainSubtitle">Manage student accounts, teacher credentials, and administrators.</p>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" id="exportUsersBtn" onclick="exportUsersCSV()">
                             <i class="bi bi-download"></i> Export CSV
                         </button>
                         <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" onclick="openCreateUserModal()">
-                            <i class="bi bi-person-plus-fill me-1"></i> Add New User
+                            <i class="bi bi-person-plus-fill me-1"></i> <span id="addBtnLabel">Add New User</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- 2. COMPACT USER STATISTICS CARDS -->
-                <div class="row g-3 mb-3">
-                    <!-- Total Users -->
-                    <div class="col-6 col-md-4 col-xl">
-                        <div class="user-stat-card">
-                            <div>
-                                <div class="user-stat-title">Total Users</div>
-                                <div class="user-stat-number" id="statTotalUsers">0</div>
-                            </div>
-                            <div class="user-stat-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-people-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Students -->
-                    <div class="col-6 col-md-4 col-xl">
-                        <div class="user-stat-card">
-                            <div>
-                                <div class="user-stat-title">Students</div>
-                                <div class="user-stat-number" id="statStudents">0</div>
-                            </div>
-                            <div class="user-stat-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-mortarboard-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Teachers -->
-                    <div class="col-6 col-md-4 col-xl">
-                        <div class="user-stat-card">
-                            <div>
-                                <div class="user-stat-title">Teachers</div>
-                                <div class="user-stat-number" id="statTeachers">0</div>
-                            </div>
-                            <div class="user-stat-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-person-badge-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Admins -->
-                    <div class="col-6 col-md-6 col-xl">
-                        <div class="user-stat-card">
-                            <div>
-                                <div class="user-stat-title">Admins</div>
-                                <div class="user-stat-number" id="statAdmins">0</div>
-                            </div>
-                            <div class="user-stat-icon bg-warning bg-opacity-10 text-warning">
-                                <i class="bi bi-shield-lock-fill"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Users -->
-                    <div class="col-12 col-md-6 col-xl">
-                        <div class="user-stat-card">
-                            <div>
-                                <div class="user-stat-title">Active Users</div>
-                                <div class="user-stat-number text-success" id="statActiveUsers">0</div>
-                            </div>
-                            <div class="user-stat-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-check-circle-fill"></i>
-                            </div>
-                        </div>
-                    </div>
+                <!-- 2. COMPACT STATISTICS SECTION (Adapts dynamically between All Users vs Student Specific) -->
+                <div class="row g-3 mb-3" id="statsCardsRow">
+                    <!-- Dynamic Statistics Injected by JS -->
                 </div>
 
-                <!-- 3. SEARCH & FILTER CONTROLS BAR -->
+                <!-- 3. SEARCH & DYNAMIC FILTER CONTROLS BAR -->
                 <div class="admin-card mb-3 p-3">
                     <div class="row g-3 align-items-center">
                         
                         <!-- Role Filter Pills -->
-                        <div class="col-xl-5 col-lg-6">
+                        <div class="col-xl-4 col-lg-5">
                             <div class="d-flex flex-wrap align-items-center gap-1" id="rolePillGroup">
                                 <button class="btn btn-sm btn-filter-pill active" data-role="all">
                                     All (<span id="countAll">0</span>)
                                 </button>
-                                <button class="btn btn-sm btn-filter-pill" data-role="STUDENT">
+                                <button class="btn btn-sm btn-filter-pill" data-role="STUDENT" id="studentTabPill">
                                     Students (<span id="countStudents">0</span>)
                                 </button>
                                 <button class="btn btn-sm btn-filter-pill" data-role="TEACHER">
@@ -330,39 +288,71 @@
                             </div>
                         </div>
 
-                        <!-- Dropdown Filters -->
-                        <div class="col-xl-7 col-lg-6">
-                            <div class="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                        <!-- Dropdown Filters (Synchronized & Contextual) -->
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="d-flex flex-wrap align-items-center justify-content-lg-end gap-2" id="filterDropdownsContainer">
                                 
-                                <!-- Role Dropdown -->
+                                <!-- Faculty / Department Dropdown -->
                                 <div class="d-flex align-items-center gap-1">
-                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Role:</label>
-                                    <select class="form-select form-select-sm" id="userRoleFilter" style="width: 125px;">
-                                        <option value="all">All Roles</option>
-                                        <option value="STUDENT">Students</option>
-                                        <option value="TEACHER">Teachers</option>
-                                        <option value="ADMIN">Admins</option>
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap" id="facultyDeptLabel">Faculty:</label>
+                                    <select class="form-select form-select-sm" id="userFacultyFilter" style="width: 150px;">
+                                        <option value="all">All Faculties</option>
+                                        <option value="Information Technology">Information Technology</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Business & Management">Business & Management</option>
+                                        <option value="Finance & Banking">Finance & Banking</option>
+                                        <option value="Engineering">Engineering</option>
+                                        <option value="Law & Humanities">Law & Humanities</option>
                                     </select>
                                 </div>
 
-                                <!-- Status Dropdown -->
+                                <!-- Major Dropdown (Visible in Student View) -->
+                                <div class="d-flex align-items-center gap-1" id="majorFilterGroup">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Major:</label>
+                                    <select class="form-select form-select-sm" id="userMajorFilter" style="width: 140px;">
+                                        <option value="all">All Majors</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Information Technology">Information Technology</option>
+                                        <option value="Business Administration">Business Admin</option>
+                                        <option value="Software Engineering">Software Eng</option>
+                                        <option value="Cybersecurity">Cybersecurity</option>
+                                    </select>
+                                </div>
+
+                                <!-- Academic Year Dropdown -->
+                                <div class="d-flex align-items-center gap-1" id="yearFilterGroup">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Year:</label>
+                                    <select class="form-select form-select-sm" id="userYearFilter" style="width: 110px;">
+                                        <option value="all">All Years</option>
+                                        <option value="Year 1">Year 1</option>
+                                        <option value="Year 2">Year 2</option>
+                                        <option value="Year 3">Year 3</option>
+                                        <option value="Year 4">Year 4</option>
+                                    </select>
+                                </div>
+
+                                <!-- Enrollment Status Dropdown -->
+                                <div class="d-flex align-items-center gap-1" id="enrollmentFilterGroup">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Enrollment:</label>
+                                    <select class="form-select form-select-sm" id="userEnrollmentFilter" style="width: 130px;">
+                                        <option value="all">All Statuses</option>
+                                        <option value="Active">🟢 Active</option>
+                                        <option value="Pending">🟠 Pending</option>
+                                        <option value="Suspended">🔴 Suspended</option>
+                                        <option value="Graduated">⚪ Graduated</option>
+                                        <option value="Withdrawn">⚫ Withdrawn</option>
+                                    </select>
+                                </div>
+
+                                <!-- Account Status Dropdown -->
                                 <div class="d-flex align-items-center gap-1">
-                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Status:</label>
-                                    <select class="form-select form-select-sm" id="userStatusFilter" style="width: 125px;">
+                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Account:</label>
+                                    <select class="form-select form-select-sm" id="userStatusFilter" style="width: 120px;">
                                         <option value="all">All Statuses</option>
                                         <option value="Active">🟢 Active</option>
                                         <option value="Pending">🟠 Pending</option>
                                         <option value="Suspended">🔴 Suspended</option>
                                         <option value="Inactive">⚪ Inactive</option>
-                                    </select>
-                                </div>
-
-                                <!-- Department Dropdown -->
-                                <div class="d-flex align-items-center gap-1">
-                                    <label class="form-label mb-0 text-muted text-xs text-uppercase fw-bold text-nowrap">Dept:</label>
-                                    <select class="form-select form-select-sm" id="userDepartmentFilter" style="width: 155px;">
-                                        <option value="all">All Departments</option>
-                                        <!-- Populated dynamically -->
                                     </select>
                                 </div>
 
@@ -375,33 +365,24 @@
                     </div>
                 </div>
 
-                <!-- 4. USERS TABLE CARD -->
+                <!-- 4. USERS / STUDENTS TABLE CARD -->
                 <div class="admin-card">
                     <div class="d-flex align-items-center justify-content-between mb-3 px-1">
-                        <span class="text-muted text-xs fw-semibold" id="tableRecordCount">Showing 0 users</span>
+                        <span class="text-muted text-xs fw-semibold" id="tableRecordCount">Showing 0 records</span>
                         <div class="text-muted text-xs">
-                            <i class="bi bi-info-circle me-1"></i> Actions: [ 👁 View Profile ] [ ✏ Edit User ] [ ⋮ More Actions ]
+                            <i class="bi bi-info-circle me-1"></i> Actions: [ 👁 View Profile ] [ ✏ Edit ] [ ⋮ More Actions ]
                         </div>
                     </div>
 
                     <div class="admin-table-responsive">
-                        <table class="admin-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>USER</th>
-                                    <th>UNIVERSITY ID</th>
-                                    <th>EMAIL</th>
-                                    <th>ROLE</th>
-                                    <th>STATUS</th>
-                                    <th>JOINED</th>
-                                    <th class="text-end" style="width: 150px;">ACTIONS</th>
-                                </tr>
+                        <table class="admin-table align-middle" id="mainAdminTable">
+                            <thead id="tableHeadRow">
+                                <!-- Dynamically Rendered Header based on View Mode -->
                             </thead>
                             <tbody id="usersTableBody">
-                                <!-- Dynamically Rendered -->
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
-                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading user accounts...
+                                    <td colspan="10" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div> Loading directory...
                                     </td>
                                 </tr>
                             </tbody>
@@ -413,19 +394,19 @@
         </main>
     </div>
 
-    <!-- 6 & 7 & 8. MODAL: View Comprehensive User Profile Drawer/Modal -->
+    <!-- MODAL: View Comprehensive User / Student Profile Drawer/Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light py-3">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-person-circle fs-5 text-primary"></i>
-                        <h5 class="modal-title fw-bold mb-0">User Account Profile</h5>
+                        <h5 class="modal-title fw-bold mb-0" id="viewModalTitle">Student Profile</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4" id="viewUserModalBody">
-                    <!-- Dynamically Populated with Header, Overview, Academic Info, Account & Security, Activity Log -->
+                    <!-- Dynamically Populated with Header Banner & 5 Structured Tabs/Sections -->
                 </div>
                 <div class="modal-footer bg-light justify-content-between py-2">
                     <div id="viewModalLeftActions">
@@ -434,7 +415,7 @@
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary btn-sm px-3" id="editFromViewBtn">
-                            <i class="bi bi-pencil me-1"></i> Edit User
+                            <i class="bi bi-pencil me-1"></i> Edit Profile
                         </button>
                     </div>
                 </div>
@@ -442,25 +423,28 @@
         </div>
     </div>
 
-    <!-- 9 & 10 & 11. MODAL: Add / Edit User (Multi-Step Form with Role-Specific Data) -->
+    <!-- MODAL: Add / Edit User & Student (4-Step Multi-Step Flow) -->
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light py-3">
-                    <h5 class="modal-title fw-bold" id="userModalTitle">Add New User</h5>
+                    <h5 class="modal-title fw-bold" id="userModalTitle">Add New Student</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <!-- Step Indicator Buttons for Multi-Step Form -->
-                <div class="px-4 pt-3 pb-2 bg-light border-bottom d-flex gap-2" id="wizardStepHeader">
+                <!-- Step Indicator Buttons -->
+                <div class="px-4 pt-3 pb-2 bg-light border-bottom d-flex flex-wrap gap-2" id="wizardStepHeader">
                     <button type="button" class="wizard-step-btn active" data-step="1" id="stepBtn1">
-                        1. Basic Information
+                        1. Personal Info
                     </button>
                     <button type="button" class="wizard-step-btn" data-step="2" id="stepBtn2">
                         2. Academic Details
                     </button>
                     <button type="button" class="wizard-step-btn" data-step="3" id="stepBtn3">
-                        3. Account & Role
+                        3. Enrollment
+                    </button>
+                    <button type="button" class="wizard-step-btn" data-step="4" id="stepBtn4">
+                        4. Account & Security
                     </button>
                 </div>
 
@@ -468,27 +452,46 @@
                     <div class="modal-body p-4">
                         <input type="hidden" id="userId">
                         
-                        <!-- ================= STEP 1: Basic Information ================= -->
+                        <!-- ================= STEP 1: Personal Information ================= -->
                         <div class="wizard-step" id="wizardStep1">
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label text-xs fw-bold text-uppercase text-muted">Full Name *</label>
-                                    <input type="text" class="form-control" id="userName" placeholder="e.g. Dr. Johnathan Vance" required>
+                                    <input type="text" class="form-control" id="userName" placeholder="e.g. Sreyneang Sok" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Email Address *</label>
-                                    <input type="email" class="form-control" id="userEmail" placeholder="e.g. j.vance@aub.edu.kh" required>
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">University Email *</label>
+                                    <input type="email" class="form-control" id="userEmail" placeholder="e.g. sreyneang@aub.edu.kh" required>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Phone Number</label>
+                                    <input type="text" class="form-control" id="userPhone" placeholder="e.g. +855 12 888 101">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Date of Birth</label>
+                                    <input type="date" class="form-control" id="userDob" value="2004-05-14">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Gender</label>
+                                    <select class="form-select" id="userGender">
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Phone Number</label>
-                                    <input type="text" class="form-control" id="userPhone" placeholder="e.g. +855 23 999 101">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Residential Address</label>
+                                    <input type="text" class="form-control" id="userAddress" placeholder="e.g. Khan Toul Kork, Phnom Penh, Cambodia">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Avatar Image URL (Optional)</label>
-                                    <input type="text" class="form-control" id="userAvatarUrl" placeholder="https://...">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Profile Photo URL (Optional)</label>
+                                    <input type="text" class="form-control" id="userAvatarUrl" placeholder="https://images.unsplash.com/...">
                                 </div>
                             </div>
                         </div>
@@ -497,29 +500,30 @@
                         <div class="wizard-step d-none" id="wizardStep2">
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted" id="uniIdLabel">University ID *</label>
-                                    <input type="text" class="form-control font-monospace" id="userUniId" placeholder="e.g. 0001001 or TCH-001" required>
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted" id="uniIdLabel">Student ID *</label>
+                                    <input type="text" class="form-control font-monospace" id="userUniId" placeholder="e.g. 202401234" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Faculty / School</label>
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Faculty *</label>
                                     <select class="form-select" id="userFacultySelect">
-                                        <option value="Faculty of Computer Science & IT">Faculty of Computer Science & IT</option>
-                                        <option value="Faculty of Business & Management">Faculty of Business & Management</option>
-                                        <option value="Faculty of Finance & Banking">Faculty of Finance & Banking</option>
-                                        <option value="Faculty of Law & Humanities">Faculty of Law & Humanities</option>
-                                        <option value="Faculty of Engineering">Faculty of Engineering</option>
+                                        <option value="Information Technology">Information Technology</option>
+                                        <option value="Computer Science & Systems">Computer Science & Systems</option>
+                                        <option value="Business & Management">Business & Management</option>
+                                        <option value="Finance & Banking">Finance & Banking</option>
+                                        <option value="Law & Humanities">Law & Humanities</option>
+                                        <option value="Engineering">Engineering</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <!-- Role-Specific Dynamic Fields -->
-                            <!-- A. Student Fields -->
+                            <!-- Role-Specific Fields Container -->
                             <div id="studentSpecificFields">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Major / Program</label>
+                                        <label class="form-label text-xs fw-bold text-uppercase text-muted">Major / Degree Program</label>
                                         <select class="form-select" id="userMajorSelect">
                                             <option value="Computer Science">Computer Science</option>
+                                            <option value="Information Technology">Information Technology</option>
                                             <option value="Software Engineering">Software Engineering</option>
                                             <option value="Cybersecurity">Cybersecurity</option>
                                             <option value="Artificial Intelligence">Artificial Intelligence</option>
@@ -531,7 +535,7 @@
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Academic Year</label>
                                         <select class="form-select" id="userAcademicYearSelect">
                                             <option value="Year 1">Year 1</option>
-                                            <option value="Year 2">Year 2</option>
+                                            <option value="Year 2" selected>Year 2</option>
                                             <option value="Year 3">Year 3</option>
                                             <option value="Year 4">Year 4</option>
                                         </select>
@@ -539,71 +543,102 @@
                                     <div class="col-md-3">
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Semester</label>
                                         <select class="form-select" id="userSemesterSelect">
-                                            <option value="Semester 1">Semester 1</option>
+                                            <option value="Semester 1" selected>Semester 1</option>
                                             <option value="Semester 2">Semester 2</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- B. Teacher / Faculty Fields -->
                             <div id="teacherSpecificFields" class="d-none">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Department</label>
                                         <select class="form-select" id="userDepartmentSelect">
-                                            <!-- Dynamically Populated -->
+                                            <!-- Injected dynamically -->
                                         </select>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Academic Position / Title</label>
-                                        <input type="text" class="form-control" id="teacherPositionInput" placeholder="e.g. Senior Lecturer / Associate Professor">
+                                        <input type="text" class="form-control" id="teacherPositionInput" placeholder="e.g. Senior Lecturer">
                                     </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Specialization / Subjects</label>
-                                    <input type="text" class="form-control" id="teacherSubjectsInput" placeholder="e.g. Distributed Systems, Cloud Architecture">
                                 </div>
                             </div>
 
-                            <!-- C. Admin Staff Fields -->
                             <div id="adminSpecificFields" class="d-none">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Administrative Department</label>
-                                        <input type="text" class="form-control" id="adminDeptInput" placeholder="e.g. Information Technology Directorate">
+                                        <input type="text" class="form-control" id="adminDeptInput" placeholder="e.g. IT Directorate">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label text-xs fw-bold text-uppercase text-muted">Staff Position</label>
-                                        <input type="text" class="form-control" id="adminPositionInput" placeholder="e.g. Super Administrator / Registrar">
+                                        <input type="text" class="form-control" id="adminPositionInput" placeholder="e.g. Administrator">
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ================= STEP 3: Account & Role ================= -->
+                        <!-- ================= STEP 3: Enrollment Details ================= -->
                         <div class="wizard-step d-none" id="wizardStep3">
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Enrollment Status</label>
+                                    <select class="form-select" id="userEnrollmentStatusSelect">
+                                        <option value="Active" selected>🟢 Active</option>
+                                        <option value="Pending">🟠 Pending</option>
+                                        <option value="Suspended">🔴 Suspended</option>
+                                        <option value="Graduated">⚪ Graduated</option>
+                                        <option value="Withdrawn">⚫ Withdrawn</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Academic Standing / Status</label>
+                                    <input type="text" class="form-control" id="userAcademicStatusInput" value="Currently Enrolled">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Enrollment Date</label>
+                                    <input type="date" class="form-control" id="userEnrollmentDate" value="2024-09-01">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Expected Graduation Date</label>
+                                    <input type="date" class="form-control" id="userGraduationDate" value="2028-07-15">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================= STEP 4: Account & Security ================= -->
+                        <div class="wizard-step d-none" id="wizardStep4">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
                                     <label class="form-label text-xs fw-bold text-uppercase text-muted">Account Role *</label>
                                     <select class="form-select" id="userRole" required>
-                                        <option value="3">STUDENT</option>
+                                        <option value="3" selected>STUDENT</option>
                                         <option value="2">TEACHER</option>
                                         <option value="1">ADMIN</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label class="form-label text-xs fw-bold text-uppercase text-muted">Account Status</label>
                                     <select class="form-select" id="userStatus" required>
-                                        <option value="Active">🟢 Active</option>
+                                        <option value="Active" selected>🟢 Active</option>
                                         <option value="Pending">🟠 Pending</option>
                                         <option value="Suspended">🔴 Suspended</option>
                                         <option value="Inactive">⚪ Inactive</option>
                                     </select>
                                 </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted">Email Verification</label>
+                                    <select class="form-select" id="userEmailVerified">
+                                        <option value="1" selected>✓ Verified</option>
+                                        <option value="0">Unverified</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Initial Password (Optional / Auto-generated) -->
                             <div class="mb-3" id="passwordGroup">
                                 <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Initial Password (Default: Password123!)</label>
                                 <div class="input-group">
@@ -612,7 +647,7 @@
                                         <i class="bi bi-eye"></i>
                                     </button>
                                 </div>
-                                <div class="text-xs text-muted mt-1">Leave blank to use default initialization password or preserve existing password.</div>
+                                <div class="text-xs text-muted mt-1">Leave blank to use default initialization password.</div>
                             </div>
                         </div>
 
@@ -627,7 +662,7 @@
                                 Next <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                             <button type="submit" class="btn btn-success btn-sm px-4 d-none" id="saveUserBtn">
-                                <i class="bi bi-check2-circle me-1"></i> Save Account
+                                <i class="bi bi-check2-circle me-1"></i> Create Student
                             </button>
                         </div>
                     </div>
