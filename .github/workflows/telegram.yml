@@ -21,6 +21,7 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_URL: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+
         run: |
           MESSAGE="🚀 New Push
 
@@ -33,7 +34,11 @@ jobs:
 
           🔗 ${COMMIT_URL}"
 
-          curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          RESPONSE=$(curl -s -X POST \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT_ID}" \
-            -d message_thread_id="24" \
-            --data-urlencode text="${MESSAGE}"
+            -d message_thread_id="77" \
+            --data-urlencode text="${MESSAGE}")
+
+          echo "Telegram response:"
+          echo "$RESPONSE"
