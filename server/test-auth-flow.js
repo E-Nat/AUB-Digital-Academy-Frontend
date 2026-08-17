@@ -59,9 +59,9 @@ async function verifyAuthFlow() {
     });
 
     // 1. Admin Login
-    console.log('Logging in as Admin (admin@aub.edu.kh)...');
+    console.log('Logging in as Admin (admin@aub.edu.com)...');
     const loginRes = await request('POST', '/auth/login', {
-        loginId: 'admin@aub.edu.kh',
+        loginId: 'admin@aub.edu.com',
         password: 'admin123'
     });
 

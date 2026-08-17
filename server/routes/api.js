@@ -4,6 +4,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const publicController = require('../controllers/publicController');
 const adminController = require('../controllers/adminController');
+const consultationController = require('../controllers/consultationController');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // ==========================================
@@ -68,5 +69,15 @@ router.delete('/admin/users/:id', authenticateToken, requireAdmin, adminControll
 router.get('/admin/enrollments', authenticateToken, requireAdmin, adminController.getAllEnrollments);
 router.put('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.updateEnrollmentStatus);
 router.delete('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.deleteEnrollment);
+
+// ==========================================
+// 4. 1-ON-1 MENTORSHIP & CONSULTATIONS ROUTES
+// ==========================================
+router.get('/consultations/teachers', authenticateToken, consultationController.getTeachers);
+router.get('/consultations/my-sessions', authenticateToken, consultationController.getMyConsultations);
+router.get('/consultations/stats', authenticateToken, consultationController.getConsultationStats);
+router.post('/consultations/book', authenticateToken, consultationController.bookConsultation);
+router.patch('/consultations/:id/status', authenticateToken, consultationController.updateConsultationStatus);
+router.patch('/consultations/:id/notes', authenticateToken, consultationController.updateConsultationNotes);
 
 module.exports = router;

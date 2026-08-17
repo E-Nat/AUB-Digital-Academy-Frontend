@@ -66,7 +66,7 @@ async function runFullAdminFlow() {
     // 1. ADMIN LOGIN
     console.log('\n--- 1. AUTHENTICATION & LOGIN ---');
     const loginRes = await request('POST', '/auth/login', {
-        loginId: 'admin@aub.edu.kh',
+        loginId: 'admin@aub.edu.com',
         password: 'admin123'
     });
 
@@ -94,13 +94,20 @@ async function runFullAdminFlow() {
 
     const statsRes = await request('GET', '/admin/dashboard/stats?timeframe=this_month', null, authHeaders);
     console.log(`[PASS] Enrollment Distribution: ${statsRes.body.data.enrollmentStatistics.categories.length} categories`);
-    console.log(`[PASS] Students by Major: ${statsRes.body.data.studentsByMajor.length} majors`);
+    const majorsCount = Array.isArray(statsRes.body.data.studentsByMajor) ? statsRes.body.data.studentsByMajor.length : (statsRes.body.data.studentsByMajor.majors || []).length;
+    console.log(`[PASS] Students by Major: ${majorsCount} majors`);
 
     // 3. USER MANAGEMENT CRUD
     console.log('\n--- 3. USER MANAGEMENT CRUD ---');
     // List Users
     const usersListRes = await request('GET', '/admin/users', null, authHeaders);
     console.log(`[PASS] Listed ${usersListRes.body.data.length} users from SQLite database.`);
+
+    // Clean up any existing leftover test user
+    const existing = usersListRes.body.data ? usersListRes.body.data.find(u => u.email === 'test.student@aub.edu.kh' || u.university_id === '0009999') : null;
+    if (existing) {
+        await request('DELETE', `/admin/users/${existing.id}`, null, authHeaders);
+    }
 
     // Create User
     const createUserRes = await request('POST', '/admin/users', {
@@ -112,8 +119,8 @@ async function runFullAdminFlow() {
         password: 'Password123!'
     }, authHeaders);
 
-    if (createUserRes.status === 200 && createUserRes.body.id) {
-        testUserId = createUserRes.body.id;
+    if ((createUserRes.status === 200 || createUserRes.status === 201) && (createUserRes.body.id || (createUserRes.body.data && createUserRes.body.data.id))) {
+        testUserId = createUserRes.body.id || createUserRes.body.data.id;
         console.log(`[PASS] Created user ID: ${testUserId}`);
     } else {
         console.error('[FAIL] User creation failed:', createUserRes);
@@ -162,7 +169,7 @@ async function runFullAdminFlow() {
         is_published: 1
     }, authHeaders);
 
-    testProgramId = createProgRes.body.id;
+    testProgramId = createProgRes.body.id || (createProgRes.body.data && createProgRes.body.data.id);
     console.log(`[PASS] Created Program ID: ${testProgramId}`);
 
     // Update Program
@@ -203,7 +210,7 @@ async function runFullAdminFlow() {
         is_published: 1
     }, authHeaders);
 
-    testCourseId = createCourseRes.body.id;
+    testCourseId = createCourseRes.body.id || (createCourseRes.body.data && createCourseRes.body.data.id);
     console.log(`[PASS] Created Course ID: ${testCourseId}`);
 
     // Delete Course

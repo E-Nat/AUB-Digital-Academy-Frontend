@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-on-1 Mentorship & Consultations - AUB Digital Academy</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <style>
+        .consultation-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--admin-border);
+            padding: 18px;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .consultation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+            border-color: #CBD5E1;
+        }
+        .time-slot-pill {
+            cursor: pointer;
+            padding: 8px 14px;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            background: #ffffff;
+            color: var(--admin-text-secondary);
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .time-slot-pill:hover {
+            border-color: var(--admin-primary);
+            color: var(--admin-primary);
+            background: var(--admin-primary-light);
+        }
+        .time-slot-pill.active {
+            background: var(--admin-primary);
+            color: #ffffff;
+            border-color: var(--admin-primary);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+        .teacher-select-card {
+            cursor: pointer;
+            border: 2px solid var(--admin-border);
+            border-radius: 10px;
+            padding: 12px;
+            transition: all 0.15s ease;
+        }
+        .teacher-select-card:hover {
+            border-color: #93C5FD;
+            background: #F8FAFC;
+        }
+        .teacher-select-card.selected {
+            border-color: var(--admin-primary);
+            background: var(--admin-primary-light);
+        }
+        .filter-tab-btn {
+            border: none;
+            background: transparent;
+            color: var(--admin-text-muted);
+            font-weight: 600;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+        .filter-tab-btn.active {
+            background: #ffffff;
+            color: var(--admin-primary);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+        }
+        .meeting-type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #F1F5F9;
+            color: #475569;
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
+                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <div class="title">AUB DIGITAL</div>
+                        <div class="subtitle">STUDENT PORTAL</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="admin-sidebar-menu">
+                <a href="dashboard.html" class="admin-nav-item">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>My Learning</span>
+                </a>
+                <a href="one-on-one.html" class="admin-nav-item active">
+                    <i class="bi bi-people-fill"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+                <a href="my-courses.html" class="admin-nav-item">
+                    <i class="bi bi-journal-check"></i>
+                    <span>Enrolled Courses</span>
+                </a>
+                <a href="assignment.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Assignments</span>
+                </a>
+                <a href="grades.html" class="admin-nav-item">
+                    <i class="bi bi-award"></i>
+                    <span>Grades & Certificates</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-house"></i>
+                    <span>Back to Website</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+                <div class="admin-user-card">
+                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="studentAvatar">
+                    <div class="admin-user-info">
+                        <div class="name" id="studentName">Sok Virak</div>
+                        <div class="role" id="studentIdDisplay">ID: 0001001</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main View -->
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <div class="admin-search-wrapper">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="admin-search-input" id="searchConsultations" placeholder="Search sessions by topic or teacher...">
+                </div>
+                <div class="admin-topbar-actions">
+                    <div class="admin-topbar-profile">
+                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="topbarAvatar">
+                        <div class="d-none d-md-block text-start lh-1">
+                            <div class="fw-bold text-sm" id="topbarStudentName">Sok Virak</div>
+                            <div class="text-xs text-muted">Student</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <!-- Page Title Row -->
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">Faculty Guidance</span>
+                            <span class="text-muted text-xs">Direct 1:1 Booking</span>
+                        </div>
+                        <h1 class="admin-page-title fs-3 fw-bold mb-1">1-on-1 Faculty Mentorship</h1>
+                        <p class="admin-page-subtitle">Schedule dedicated 1-on-1 consultation sessions with university professors for capstone projects, coding help, or academic advising.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary d-flex align-items-center gap-2 px-3 py-2 rounded-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#bookConsultationModal">
+                            <i class="bi bi-calendar-plus-fill"></i>
+                            <span>Book 1-on-1 Session</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon blue"><i class="bi bi-camera-video-fill"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Upcoming Sessions</div>
+                                <div class="admin-kpi-value" id="kpiUpcoming">1</div>
+                                <div class="admin-kpi-trend positive"><i class="bi bi-check-circle me-1"></i> Confirmed</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon amber"><i class="bi bi-hourglass-split"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Pending Approval</div>
+                                <div class="admin-kpi-value" id="kpiPending">1</div>
+                                <div class="admin-kpi-trend neutral"><i class="bi bi-clock me-1"></i> Awaiting instructor</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon green"><i class="bi bi-award-fill"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Completed Sessions</div>
+                                <div class="admin-kpi-value" id="kpiCompleted">1</div>
+                                <div class="admin-kpi-trend positive"><i class="bi bi-chat-left-text me-1"></i> Notes available</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="admin-kpi-card">
+                            <div class="admin-kpi-icon purple"><i class="bi bi-person-badge-fill"></i></div>
+                            <div class="admin-kpi-info">
+                                <div class="admin-kpi-label">Faculty Mentors</div>
+                                <div class="admin-kpi-value" id="kpiMentors">2</div>
+                                <div class="admin-kpi-trend positive"><i class="bi bi-broadcast me-1"></i> Available online</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sessions List Container -->
+                <div class="admin-card">
+                    <div class="admin-card-header d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <!-- Filter Tabs -->
+                        <div class="d-flex align-items-center gap-1 p-1 bg-light rounded-3">
+                            <button class="filter-tab-btn active" data-filter="all">All (<span id="countAll">0</span>)</button>
+                            <button class="filter-tab-btn" data-filter="Confirmed">Upcoming (<span id="countUpcoming">0</span>)</button>
+                            <button class="filter-tab-btn" data-filter="Pending">Pending (<span id="countPending">0</span>)</button>
+                            <button class="filter-tab-btn" data-filter="Completed">Completed (<span id="countCompleted">0</span>)</button>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <select class="form-select form-select-sm" id="typeFilter" style="width: auto;">
+                                <option value="">All Formats</option>
+                                <option value="Online Video">Online Video</option>
+                                <option value="In-Person Office">In-Person Office</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sessions Grid -->
+                    <div class="row g-3" id="consultationsGrid">
+                        <!-- Rendered by JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="text-center py-5 d-none">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                            <i class="bi bi-calendar2-x text-muted fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">No 1-on-1 sessions found</h5>
+                        <p class="text-muted text-sm mb-3">You don't have any consultation sessions in this category yet.</p>
+                        <button class="btn btn-primary btn-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#bookConsultationModal">
+                            <i class="bi bi-plus-lg me-1"></i> Book a Session Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Book 1-on-1 Consultation -->
+    <div class="modal fade" id="bookConsultationModal" tabindex="-1" aria-labelledby="bookConsultationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary text-white p-2 rounded-3 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                            <i class="bi bi-calendar-plus-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold fs-6 mb-0" id="bookConsultationModalLabel">Book 1-on-1 Faculty Mentorship</h5>
+                            <span class="text-muted text-xs">Choose a professor and time for your personalized session</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="bookConsultationForm">
+                    <div class="modal-body p-4">
+                        <!-- 1. Select Instructor -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-sm d-flex align-items-center justify-content-between">
+                                <span>1. Select Faculty Mentor / Professor <span class="text-danger">*</span></span>
+                                <span class="text-xs text-muted">Click to select</span>
+                            </label>
+                            <input type="hidden" id="selectedTeacherId" required>
+                            <div class="row g-2" id="teachersSelectionList">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+
+                        <!-- 2. Topic & Subject -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-7">
+                                <label for="consultationTopic" class="form-label fw-bold text-sm">2. Consultation Topic / Agenda <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="consultationTopic" placeholder="e.g. Capstone Architecture Review, SQL Debugging, Career Guidance" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="consultationCourse" class="form-label fw-bold text-sm">Related Course (Optional)</label>
+                                <select class="form-select" id="consultationCourse">
+                                    <option value="">General / Capstone Advising</option>
+                                    <option value="1">Full-Stack Web Development</option>
+                                    <option value="2">Advanced UI/UX Design</option>
+                                    <option value="3">Cyber Security Essentials</option>
+                                    <option value="4">Python for Data Science</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 3. Date & Time -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-5">
+                                <label for="sessionDate" class="form-label fw-bold text-sm">3. Preferred Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="sessionDate" required>
+                            </div>
+                            <div class="col-md-7">
+                                <label class="form-label fw-bold text-sm">Select Time Slot <span class="text-danger">*</span></label>
+                                <input type="hidden" id="selectedStartTime" value="10:00 AM" required>
+                                <div class="d-flex flex-wrap gap-2" id="timeSlotsContainer">
+                                    <div class="time-slot-pill active" data-time="09:00 AM">09:00 AM</div>
+                                    <div class="time-slot-pill" data-time="10:00 AM">10:00 AM</div>
+                                    <div class="time-slot-pill" data-time="11:30 AM">11:30 AM</div>
+                                    <div class="time-slot-pill" data-time="02:00 PM">02:00 PM</div>
+                                    <div class="time-slot-pill" data-time="03:30 PM">03:30 PM</div>
+                                    <div class="time-slot-pill" data-time="04:30 PM">04:30 PM</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Format & Notes -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="meetingType" class="form-label fw-bold text-sm">4. Meeting Format <span class="text-danger">*</span></label>
+                                <select class="form-select" id="meetingType" required>
+                                    <option value="Online Video">📹 Online Video (Google Meet / Zoom)</option>
+                                    <option value="In-Person Office">🏢 In-Person (Faculty Building Office)</option>
+                                    <option value="Audio Call">📞 Audio Conference Call</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="durationSelect" class="form-label fw-bold text-sm">Estimated Duration</label>
+                                <select class="form-select" id="durationSelect">
+                                    <option value="30 mins">30 Minutes</option>
+                                    <option value="45 mins" selected>45 Minutes</option>
+                                    <option value="60 mins">60 Minutes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label for="studentNotes" class="form-label fw-bold text-sm">5. Detailed Questions / What do you want to cover?</label>
+                            <textarea class="form-control" id="studentNotes" rows="3" placeholder="Provide background context or specific questions to help the instructor prepare for your session..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light px-4 py-3 rounded-bottom-4">
+                        <button type="button" class="btn btn-light border px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold" id="submitBookBtn">
+                            <i class="bi bi-send-fill me-1"></i> Submit Booking Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Session Details & Notes -->
+    <div class="modal fade" id="sessionDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+                    <h5 class="modal-title fw-bold fs-6">Session Details & Mentor Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="sessionDetailsBody">
+                    <!-- Loaded dynamically -->
+                </div>
+                <div class="modal-footer bg-light px-4 py-2">
+                    <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/pages/student-one-on-one.js"></script>
+</body>
+</html>

@@ -127,7 +127,7 @@ async function seedDatabase() {
         {
             id: 1,
             full_name: 'Admin System',
-            email: 'admin@aub.edu.kh',
+            email: 'admin@aub.edu.com',
             university_id: '10293847',
             password_hash: adminPasswordHash,
             role_id: 1,
@@ -226,7 +226,7 @@ async function seedDatabase() {
         await dbAsync.run(
             `INSERT INTO users (id, full_name, email, university_id, password_hash, role_id, major_id, avatar_url, status, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET major_id = excluded.major_id, created_at = excluded.created_at`,
+             ON CONFLICT(id) DO UPDATE SET full_name = excluded.full_name, email = excluded.email, university_id = excluded.university_id, password_hash = excluded.password_hash, role_id = excluded.role_id, major_id = excluded.major_id, status = excluded.status, created_at = excluded.created_at`,
             [u.id, u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status, u.created_at]
         );
     }
@@ -499,6 +499,87 @@ async function seedDatabase() {
             `INSERT OR IGNORE INTO notifications (id, title, message, type, link_url, is_read)
              VALUES (?, ?, ?, ?, ?, ?)`,
             [n.id, n.title, n.message, n.type, n.link_url, n.is_read]
+        );
+    }
+
+    // 13. Seed 1-on-1 Consultations
+    console.log('Seeding 1-on-1 Consultations...');
+    const consultations = [
+        {
+            id: 1,
+            student_id: 2, // Sok Virak
+            teacher_id: 7, // Dr. Sarah Johnson
+            course_id: 1,  // Full-Stack Web Development
+            topic: 'Capstone Project Architecture & REST API Review',
+            description: 'Discuss database schema normalization and JWT authentication flow for the digital academy portal.',
+            session_date: '2026-08-20',
+            start_time: '10:00 AM',
+            end_time: '10:45 AM',
+            meeting_type: 'Online Video',
+            meeting_link: 'https://meet.google.com/aub-sok-virak',
+            location_room: 'Online Virtual Room A',
+            status: 'Confirmed',
+            student_notes: 'I have prepared my API endpoints diagram and database ER diagram.',
+            teacher_notes: 'Approved. Please bring your Postman test collections.'
+        },
+        {
+            id: 2,
+            student_id: 2, // Sok Virak
+            teacher_id: 8, // Prof. Alex Chen
+            course_id: 2,  // UI/UX Design
+            topic: 'Portfolio Design Feedback & Accessibility Audit',
+            description: 'Seeking mentorship on contrast ratios, responsive grid systems, and mobile typography.',
+            session_date: '2026-08-22',
+            start_time: '02:00 PM',
+            end_time: '02:30 PM',
+            meeting_type: 'In-Person Office',
+            meeting_link: '',
+            location_room: 'Faculty Building 3, Room 304',
+            status: 'Pending',
+            student_notes: 'Will bring Figma prototype on laptop.',
+            teacher_notes: ''
+        },
+        {
+            id: 3,
+            student_id: 3, // Chanthou Meas
+            teacher_id: 7, // Dr. Sarah Johnson
+            course_id: 3,  // Cyber Security Essentials
+            topic: 'Ethical Hacking Lab Setup Assistance',
+            description: 'Need guidance setting up virtual environments and penetration testing tools.',
+            session_date: '2026-08-18',
+            start_time: '03:30 PM',
+            end_time: '04:15 PM',
+            meeting_type: 'Online Video',
+            meeting_link: 'https://meet.google.com/aub-sec-lab',
+            location_room: 'Online Virtual Room B',
+            status: 'Confirmed',
+            student_notes: 'Kali Linux VM is installed.',
+            teacher_notes: 'Ensure Docker is running prior to the call.'
+        },
+        {
+            id: 4,
+            student_id: 2, // Sok Virak
+            teacher_id: 7, // Dr. Sarah Johnson
+            course_id: 1,  // Full-Stack Web Development
+            topic: 'Midterm Code Review & Performance Optimization',
+            description: 'Reviewed indexing on SQL queries and asynchronous event loop performance.',
+            session_date: '2026-08-10',
+            start_time: '11:00 AM',
+            end_time: '11:45 AM',
+            meeting_type: 'Online Video',
+            meeting_link: 'https://meet.google.com/aub-completed-1',
+            location_room: 'Online Virtual Room A',
+            status: 'Completed',
+            student_notes: 'Understood SQLite query optimization techniques.',
+            teacher_notes: 'Great work! Excellent implementation of foreign key constraints and async/await error handling.'
+        }
+    ];
+
+    for (const c of consultations) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO consultations (id, student_id, teacher_id, course_id, topic, description, session_date, start_time, end_time, meeting_type, meeting_link, location_room, status, student_notes, teacher_notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [c.id, c.student_id, c.teacher_id, c.course_id, c.topic, c.description, c.session_date, c.start_time, c.end_time, c.meeting_type, c.meeting_link, c.location_room, c.status, c.student_notes, c.teacher_notes]
         );
     }
 

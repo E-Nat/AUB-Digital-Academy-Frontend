@@ -99,9 +99,37 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-4">
+                    <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
                         Sign In
                     </button>
+
+                    <!-- Quick Demo Credentials Picker -->
+                    <div class="pt-3 border-top">
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2 text-center">Quick Demo Login</div>
+                        <div class="d-flex flex-column gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('admin@aub.edu.com', 'admin123')">
+                                <div>
+                                    <div class="fw-bold text-xs"><i class="bi bi-shield-lock-fill me-1"></i> Admin Account</div>
+                                    <div class="text-muted" style="font-size: 11px;">admin@aub.edu.com / admin123</div>
+                                </div>
+                                <span class="badge bg-primary text-white">Fill & Sign In</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('sarah.johnson@aub.edu.kh', 'teacher123')">
+                                <div>
+                                    <div class="fw-bold text-xs"><i class="bi bi-person-badge-fill me-1"></i> Teacher / Faculty</div>
+                                    <div class="text-muted" style="font-size: 11px;">sarah.johnson@aub.edu.kh / teacher123</div>
+                                </div>
+                                <span class="badge bg-secondary text-white">Fill</span>
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm py-2 d-flex align-items-center justify-content-between text-start" onclick="fillCredentials('sok.virak@student.aub.edu.kh', 'student123')">
+                                <div>
+                                    <div class="fw-bold text-xs"><i class="bi bi-mortarboard-fill me-1"></i> Student Account</div>
+                                    <div class="text-muted" style="font-size: 11px;">sok.virak@student.aub.edu.kh / student123</div>
+                                </div>
+                                <span class="badge bg-success text-white">Fill</span>
+                            </button>
+                        </div>
+                    </div>
                     
                 </form>
 

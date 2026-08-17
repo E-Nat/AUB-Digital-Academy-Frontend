@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - AUB Digital Academy</title>
+    <title>Settings & System - AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -22,13 +23,11 @@
         <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-brand">
-                <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
-                <div class="admin-brand-text-wrapper">
-                    <span class="admin-brand-aub">AUB</span>
-                    <span class="admin-brand-divider"></span>
-                    <div class="admin-brand-titles">
-                        <div class="admin-brand-digital">DIGITAL</div>
-                        <div class="admin-brand-academy">ACADEMY</div>
+                <div class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Administration Portal</div>
                     </div>
                 </div>
             </div>
@@ -38,6 +37,8 @@
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
+
+                <div class="admin-sidebar-label">Management</div>
                 <a href="user-management.html" class="admin-nav-item">
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
@@ -50,6 +51,8 @@
                     <i class="bi bi-person-check"></i>
                     <span>Enrollment Management</span>
                 </a>
+
+                <div class="admin-sidebar-label">System</div>
                 <a href="settings.html" class="admin-nav-item active">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
@@ -57,7 +60,7 @@
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" id="logoutBtn">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
@@ -68,17 +71,22 @@
         <main class="admin-main">
             
             <header class="admin-topbar">
-                <div class="admin-search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search settings...">
+                <div class="admin-topbar-left">
+                    <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="admin-search-input" placeholder="Search settings & preferences...">
+                    </div>
                 </div>
 
                 <div class="admin-topbar-actions">
-                    <button class="admin-notification-btn"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge">3</span></button>
+                    <button class="admin-notification-btn" aria-label="Notifications" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge" id="notificationBadge">3</span></button>
                     <div class="admin-topbar-profile">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
                         <div class="d-none d-md-block text-start lh-1">
-                            <div class="name">Admin</div>
+                            <div class="name" id="topbarAdminName">Admin</div>
                             <div class="role">System Administrator</div>
                         </div>
                     </div>
@@ -88,53 +96,336 @@
             <div class="admin-content">
                 <div class="admin-header-row">
                     <div>
-                        <h1 class="admin-page-title">Settings</h1>
-                        <p class="admin-page-subtitle">Configure system parameters and platform preferences.</p>
+                        <h1 class="admin-page-title">Settings & System Preferences</h1>
+                        <p class="admin-page-subtitle">Configure administrator profile, security credentials, academy preferences, and mock database backups.</p>
                     </div>
                 </div>
 
-                <div class="row g-4">
-                    <div class="col-lg-6">
-                        <div class="admin-card">
-                            <h3 class="admin-card-title mb-3">Administrator Profile</h3>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Display Name</label>
-                                <input type="text" class="form-control" value="Admin System" readonly>
+                <!-- SETTINGS TABS -->
+                <div class="admin-card p-0 mb-3 overflow-hidden">
+                    <ul class="nav admin-tabs" id="settingsTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="admin-tab-btn active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-pane" type="button">
+                                <i class="bi bi-person-gear"></i> Admin Profile
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="admin-tab-btn" id="security-tab" data-bs-toggle="tab" data-bs-target="#security-pane" type="button">
+                                <i class="bi bi-shield-lock"></i> Security & Credentials
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="admin-tab-btn" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences-pane" type="button">
+                                <i class="bi bi-sliders"></i> Platform Preferences
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="admin-tab-btn" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-pane" type="button">
+                                <i class="bi bi-database"></i> Data & Backup
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- TAB CONTENT -->
+                <div class="tab-content" id="settingsTabContent">
+                    
+                    <!-- 1. PROFILE PANE -->
+                    <div class="tab-pane fade show active" id="profile-pane" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-lg-7">
+                                <div class="admin-card">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">Edit Administrator Profile</h3>
+                                    </div>
+                                    <form id="adminProfileForm">
+                                        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" class="rounded-circle object-fit-cover border shadow-sm" style="width: 64px; height: 64px;" id="settingsAvatarPreview">
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 15px;" id="settingsDisplayName">Dr. Johnathan Vance</div>
+                                                <div class="text-muted" style="font-size: 12.5px;" id="settingsDisplayEmail">admin@aub.edu.com</div>
+                                                <span class="admin-role-badge admin mt-1">SUPER ADMINISTRATOR</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Full Name *</label>
+                                                <input type="text" class="form-control" id="settingsFullName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Email Address *</label>
+                                                <input type="email" class="form-control" id="settingsEmail" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Staff / University ID</label>
+                                                <input type="text" class="form-control" id="settingsUniId" readonly>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="text" class="form-control" id="settingsPhone" placeholder="+855 23 999 101">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Avatar Image URL</label>
+                                                <input type="text" class="form-control" id="settingsAvatarUrl" placeholder="https://images.unsplash.com/...">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Bio / Academic Title</label>
+                                                <textarea class="form-control" id="settingsBio" rows="3" placeholder="Lead System Administrator & Academic Technology Director..."></textarea>
+                                            </div>
+                                            <div class="col-12 text-end mt-3">
+                                                <button type="submit" class="btn btn-primary px-4">
+                                                    <i class="bi bi-check2 me-1"></i> Save Profile Changes
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Email Address</label>
-                                <input type="email" class="form-control" value="admin@aub.edu.kh" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Role</label>
-                                <input type="text" class="form-control" value="System Administrator" readonly>
+
+                            <div class="col-lg-5">
+                                <div class="admin-card">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">System Role Permissions</h3>
+                                    </div>
+                                    <div class="d-flex flex-column gap-3 py-2">
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-people-fill text-primary fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">User & Role Control</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Create, edit, and deactivate accounts</div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Granted</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-mortarboard-fill text-info fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">Curriculum & Courses</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Publish degree programs and syllabus</div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Granted</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-person-check-fill text-success fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">Enrollment Oversight</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Approve and monitor course registrations</div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Granted</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-database-fill text-warning fs-5"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">Database & Backups</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Export data and execute system snapshots</div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">Granted</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-6">
-                        <div class="admin-card">
-                            <h3 class="admin-card-title mb-3">Platform Information</h3>
-                            <div class="d-flex flex-column gap-2 text-sm">
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">Platform Name</span>
-                                    <span class="fw-bold text-dark">AUB Digital Academy</span>
+                    <!-- 2. SECURITY PANE -->
+                    <div class="tab-pane fade" id="security-pane" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-lg-6">
+                                <div class="admin-card">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">Change Password</h3>
+                                    </div>
+                                    <form id="changePasswordForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Current Password *</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="currentPass" placeholder="Enter current password" required>
+                                                <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="currentPass">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">New Password *</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="newPass" placeholder="Enter at least 6 characters" required minlength="6">
+                                                <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="newPass">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="form-label">Confirm New Password *</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control" id="confirmNewPass" placeholder="Re-type new password" required minlength="6">
+                                                <button class="btn btn-outline-secondary toggle-pass-btn" type="button" data-target="confirmNewPass">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary px-4">
+                                                <i class="bi bi-shield-check me-1"></i> Update Password
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">Database Engine</span>
-                                    <span class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i> SQLite3 (Normalized Relational)</span>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="admin-card mb-3">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">Two-Factor Authentication</h3>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between py-2">
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 13px;">Enable 2FA Verification</div>
+                                            <div class="text-muted" style="font-size: 12px;">Require authenticator code on each administrative sign-in</div>
+                                        </div>
+                                        <div class="form-check form-switch fs-5">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorSwitch">
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">API Status</span>
-                                    <span class="fw-bold text-success"><i class="bi bi-broadcast me-1"></i> REST API Active</span>
-                                </div>
-                                <div class="d-flex justify-content-between py-2">
-                                    <span class="text-muted">Authentication</span>
-                                    <span class="fw-bold text-dark">JWT + Bcrypt Hashing</span>
+
+                                <div class="admin-card">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">Active Admin Sessions</h3>
+                                    </div>
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-laptop fs-5 text-primary"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">Windows Desktop (Chrome)</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Phnom Penh, Cambodia &bull; Current Session</div>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary">Active Now</span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi bi-phone fs-5 text-secondary"></i>
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 12.5px;">iOS Mobile Portal (Safari)</div>
+                                                    <div class="text-muted" style="font-size: 11px;">Last active 2 hours ago</div>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size: 11px;" onclick="revokeSession()">Revoke</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 3. PLATFORM PREFERENCES PANE -->
+                    <div class="tab-pane fade" id="preferences-pane" role="tabpanel">
+                        <div class="admin-card">
+                            <div class="admin-card-header">
+                                <h3 class="admin-card-title">Platform & Academic Preferences</h3>
+                            </div>
+                            <form id="preferencesForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Academy Brand Name</label>
+                                        <input type="text" class="form-control" id="prefAcademyName" value="AUB Digital Academy">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Administration Portal Title</label>
+                                        <input type="text" class="form-control" id="prefPortalTitle" value="Administration Portal">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Contact / Support Email</label>
+                                        <input type="email" class="form-control" id="prefContactEmail" value="administration@aub.edu.kh">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Active Academic Semester</label>
+                                        <input type="text" class="form-control" id="prefSemester" value="Spring / Summer 2026">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 13px;">Maintenance Mode</div>
+                                                    <div class="text-muted" style="font-size: 11.5px;">Restrict student portal access during system maintenance</div>
+                                                </div>
+                                                <div class="form-check form-switch fs-5">
+                                                    <input class="form-check-input" type="checkbox" id="prefMaintenanceSwitch">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 bg-light rounded-2 border">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <div class="fw-bold text-dark" style="font-size: 13px;">Email Notification Alerts</div>
+                                                    <div class="text-muted" style="font-size: 11.5px;">Send automated email digests for enrollments & user signups</div>
+                                                </div>
+                                                <div class="form-check form-switch fs-5">
+                                                    <input class="form-check-input" type="checkbox" id="prefEmailNotifSwitch" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 text-end mt-3">
+                                        <button type="submit" class="btn btn-primary px-4">
+                                            <i class="bi bi-save me-1"></i> Save Platform Preferences
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- 4. DATA & BACKUP PANE -->
+                    <div class="tab-pane fade" id="data-pane" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="admin-card h-100">
+                                    <div class="admin-card-header">
+                                        <h3 class="admin-card-title">Backup & Export Mock Database</h3>
+                                    </div>
+                                    <p class="text-muted text-sm mb-3" style="font-size: 12.5px;">
+                                        Download a complete JSON snapshot of all current users, courses, chapters, programs, instructors, and enrollments.
+                                    </p>
+                                    <button class="btn btn-outline-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" onclick="exportDatabaseJSON()">
+                                        <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                        Export Complete Academy Database (JSON)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="admin-card h-100 border-danger border-opacity-25">
+                                    <div class="admin-card-header border-danger border-opacity-25">
+                                        <h3 class="admin-card-title text-danger">Reset to Factory Mock State</h3>
+                                    </div>
+                                    <p class="text-muted text-sm mb-3" style="font-size: 12.5px;">
+                                        Restores all users, courses, chapters, programs, and statistics back to clean default demonstration data.
+                                    </p>
+                                    <button class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center gap-2" onclick="resetMockDataToDefaults()">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        Reset All Data to Demo Defaults
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -142,5 +433,10 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
+    <script src="../../js/components/sidebar.js"></script>
+    <script src="../../js/pages/settings.js"></script>
 </body>
 </html>

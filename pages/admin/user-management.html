@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management - AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -22,13 +23,11 @@
         <!-- SIDEBAR -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-brand">
-                <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
-                <div class="admin-brand-text-wrapper">
-                    <span class="admin-brand-aub">AUB</span>
-                    <span class="admin-brand-divider"></span>
-                    <div class="admin-brand-titles">
-                        <div class="admin-brand-digital">DIGITAL</div>
-                        <div class="admin-brand-academy">ACADEMY</div>
+                <div class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Administration Portal</div>
                     </div>
                 </div>
             </div>
@@ -38,6 +37,8 @@
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
+
+                <div class="admin-sidebar-label">Management</div>
                 <a href="user-management.html" class="admin-nav-item active">
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
@@ -50,6 +51,8 @@
                     <i class="bi bi-person-check"></i>
                     <span>Enrollment Management</span>
                 </a>
+
+                <div class="admin-sidebar-label">System</div>
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
@@ -57,7 +60,7 @@
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" id="logoutBtn">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
@@ -68,17 +71,22 @@
         <main class="admin-main">
             
             <header class="admin-topbar">
-                <div class="admin-search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search by name, email, ID...">
+                <div class="admin-topbar-left">
+                    <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="admin-search-input" id="userSearchInput" placeholder="Search by name, email, University ID...">
+                    </div>
                 </div>
 
                 <div class="admin-topbar-actions">
-                    <button class="admin-notification-btn"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge">3</span></button>
+                    <button class="admin-notification-btn" aria-label="Notifications" onclick="window.location.href='dashboard.html'"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge" id="notificationBadge">3</span></button>
                     <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
                         <div class="d-none d-md-block text-start lh-1">
-                            <div class="name">Admin</div>
+                            <div class="name" id="topbarAdminName">Admin</div>
                             <div class="role">System Administrator</div>
                         </div>
                     </div>
@@ -86,17 +94,71 @@
             </header>
 
             <div class="admin-content">
+                
+                <!-- PAGE HEADER -->
                 <div class="admin-header-row">
                     <div>
                         <h1 class="admin-page-title">User Management</h1>
                         <p class="admin-page-subtitle">Manage student accounts, teacher credentials, and administrators.</p>
                     </div>
-                    <button class="btn btn-primary rounded-pill px-4 fw-semibold" onclick="openCreateUserModal()">
-                        <i class="bi bi-person-plus-fill me-2"></i> Add New User
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" id="exportUsersBtn" onclick="exportUsersCSV()">
+                            <i class="bi bi-download"></i> Export CSV
+                        </button>
+                        <button class="btn btn-primary" onclick="openCreateUserModal()">
+                            <i class="bi bi-person-plus-fill me-1"></i> Add New User
+                        </button>
+                    </div>
                 </div>
 
+                <!-- FILTER & CONTROLS BAR -->
+                <div class="admin-card mb-3 p-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        
+                        <!-- Role Filter Pills -->
+                        <div class="d-flex flex-wrap align-items-center gap-2" id="rolePillGroup">
+                            <button class="btn btn-sm btn-filter-pill active" data-role="all">
+                                All <span class="badge bg-secondary ms-1" id="countAll">0</span>
+                            </button>
+                            <button class="btn btn-sm btn-filter-pill" data-role="STUDENT">
+                                Students <span class="badge bg-primary ms-1" id="countStudents">0</span>
+                            </button>
+                            <button class="btn btn-sm btn-filter-pill" data-role="TEACHER">
+                                Teachers <span class="badge bg-info ms-1" id="countTeachers">0</span>
+                            </button>
+                            <button class="btn btn-sm btn-filter-pill" data-role="ADMIN">
+                                Admins <span class="badge bg-warning text-dark ms-1" id="countAdmins">0</span>
+                            </button>
+                        </div>
+
+                        <!-- Status Filter Dropdown & Search Details -->
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-muted" style="font-size: 12px; white-space: nowrap;">Status:</label>
+                                <select class="form-select form-select-sm" id="userStatusFilter" style="width: 140px; font-size: 12.5px;">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-light btn-sm" id="resetFiltersBtn" title="Reset all filters" onclick="resetFilters()">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- USERS TABLE CARD -->
                 <div class="admin-card">
+                    <div class="d-flex align-items-center justify-content-between mb-3 px-1">
+                        <span class="text-muted text-xs" id="tableRecordCount">Showing 0 users</span>
+                        <div class="text-muted text-xs" style="font-size: 11.5px;">
+                            <i class="bi bi-info-circle me-1"></i> Click on any action button to view, edit, toggle status, or delete
+                        </div>
+                    </div>
+
                     <div class="admin-table-responsive">
                         <table class="admin-table">
                             <thead>
@@ -111,299 +173,110 @@
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <!-- Dynamically Rendered from SQLite -->
+                                <!-- Dynamically Rendered -->
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
 
-    <!-- MODAL: Create / Edit User -->
+    <!-- MODAL: Create / Edit User (Unified Structure) -->
     <div class="modal fade" id="userModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 px-4 pt-4">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
                     <h5 class="modal-title fw-bold" id="userModalTitle">Add New User</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="userForm">
-                    <input type="hidden" id="userId">
-                    <div class="modal-body px-4">
+                    <div class="modal-body p-4">
+                        <input type="hidden" id="userId">
+                        
+                        <!-- 1. Full Name -->
                         <div class="mb-3">
-                            <label class="form-label text-sm fw-semibold">Full Name *</label>
-                            <input type="text" class="form-control" id="userName" required placeholder="e.g. Somnang Sok">
+                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Full Name *</label>
+                            <input type="text" class="form-control" id="userName" placeholder="e.g. Sok Virak" required>
                         </div>
+                        
+                        <!-- 2. Email Address -->
                         <div class="mb-3">
-                            <label class="form-label text-sm fw-semibold">Email Address *</label>
-                            <input type="email" class="form-control" id="userEmail" required placeholder="e.g. somnang@aub.edu.kh">
+                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Email Address *</label>
+                            <input type="email" class="form-control" id="userEmail" placeholder="e.g. sok.virak@aub.edu.kh" required>
                         </div>
-                        <div class="row g-2 mb-3">
+                        
+                        <!-- 3. University ID & 4. Role (2 Columns) -->
+                        <div class="row g-3 mb-3">
                             <div class="col-6">
-                                <label class="form-label text-sm fw-semibold">University ID</label>
-                                <input type="text" class="form-control" id="userUniId" placeholder="e.g. 0001009">
+                                <label class="form-label text-xs fw-bold text-uppercase text-muted">University ID *</label>
+                                <input type="text" class="form-control" id="userUniId" placeholder="e.g. 0001001" required>
                             </div>
                             <div class="col-6">
-                                <label class="form-label text-sm fw-semibold">Role *</label>
-                                <select class="form-select" id="userRole">
-                                    <option value="3">Student</option>
-                                    <option value="2">Teacher</option>
-                                    <option value="1">Admin</option>
+                                <label class="form-label text-xs fw-bold text-uppercase text-muted">Role *</label>
+                                <select class="form-select" id="userRole" required>
+                                    <option value="3">STUDENT</option>
+                                    <option value="2">TEACHER</option>
+                                    <option value="1">ADMIN</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <label class="form-label text-sm fw-semibold">Status</label>
-                                <select class="form-select" id="userStatus">
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label text-sm fw-semibold" id="passwordLabel">Password *</label>
-                                <input type="password" class="form-control" id="userPassword" placeholder="Enter password">
+
+                        <!-- 5. Status -->
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Status</label>
+                            <select class="form-select" id="userStatus" required>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+
+                        <!-- 6. Password -->
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Password *</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="userPassword" placeholder="Enter secure password">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn" title="Toggle password visibility">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" id="submitUserBtn">Save Account</button>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveUserBtn">Save Account</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: View User Details -->
+    <div class="modal fade" id="viewUserModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">User Account Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="viewUserModalBody">
+                    <!-- Dynamic Profile Card -->
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="editFromViewBtn">Edit Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async function () {
-            const isLocal = window.location.hostname === 'localhost' || 
-                            window.location.hostname === '127.0.0.1' || 
-                            window.location.protocol === 'file:';
-            const API_BASE = (isLocal && window.location.port !== '5000') 
-                ? 'http://localhost:5000/api' 
-                : '/api';
-
-            function getAuthToken() {
-                return localStorage.getItem('aub_auth_token') || 
-                       localStorage.getItem('token') || 
-                       sessionStorage.getItem('aub_auth_token') || 
-                       sessionStorage.getItem('token') || '';
-            }
-
-            function getHeaders() {
-                const token = getAuthToken();
-                const headers = { 'Content-Type': 'application/json' };
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                return headers;
-            }
-
-            let allUsers = [];
-            const userModalEl = document.getElementById('userModal');
-            const userModal = new bootstrap.Modal(userModalEl);
-
-            async function loadUsers() {
-                const token = getAuthToken();
-                if (!token) {
-                    console.warn('No active JWT session found. Redirecting to login.');
-                    window.location.href = '../authentication/login.html';
-                    return;
-                }
-
-                try {
-                    const res = await fetch(`${API_BASE}/admin/users`, { headers: getHeaders() });
-                    if (res.status === 401 || res.status === 403) {
-                        localStorage.clear();
-                        window.location.href = '../authentication/login.html';
-                        return;
-                    }
-                    const data = await res.json();
-                    if (data.success && data.data) {
-                        allUsers = data.data;
-                        renderUsers(allUsers);
-                    }
-                } catch (e) {
-                    console.error('Error loading users:', e);
-                }
-            }
-
-            function renderUsers(users) {
-                const tbody = document.getElementById('usersTableBody');
-                if (!tbody) return;
-
-                if (users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No users found</td></tr>`;
-                    return;
-                }
-
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="${u.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover" style="width: 38px; height: 38px;">
-                                <div class="fw-bold text-dark">${escapeHtml(u.full_name)}</div>
-                            </div>
-                        </td>
-                        <td class="text-muted fw-semibold">${escapeHtml(u.university_id || 'N/A')}</td>
-                        <td class="text-muted">${escapeHtml(u.email)}</td>
-                        <td>
-                            <span class="badge ${u.role === 'ADMIN' ? 'bg-danger' : u.role === 'TEACHER' ? 'bg-primary' : 'bg-success'} px-3 py-1 rounded-pill">
-                                ${u.role}
-                            </span>
-                        </td>
-                        <td><span class="admin-status-badge ${(u.status || 'active').toLowerCase()}">${u.status || 'Active'}</span></td>
-                        <td class="text-muted text-xs">${formatDate(u.created_at)}</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="action-btn" title="Edit User" onclick="openEditUserModal(${JSON.stringify(u).replace(/"/g, '&quot;')})">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="action-btn delete" title="Delete User" onclick="deleteUser(${u.id})">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            const search = document.getElementById('userSearchInput');
-            if (search) {
-                search.addEventListener('input', function (e) {
-                    const q = e.target.value.toLowerCase();
-                    const filtered = allUsers.filter(u => 
-                        u.full_name.toLowerCase().includes(q) ||
-                        u.email.toLowerCase().includes(q) ||
-                        (u.university_id && u.university_id.toLowerCase().includes(q))
-                    );
-                    renderUsers(filtered);
-                });
-            }
-
-            window.openCreateUserModal = function () {
-                document.getElementById('userForm').reset();
-                document.getElementById('userId').value = '';
-                document.getElementById('userModalTitle').textContent = 'Add New User';
-                document.getElementById('passwordLabel').textContent = 'Password *';
-                document.getElementById('userPassword').required = true;
-                userModal.show();
-            };
-
-            window.openEditUserModal = function (u) {
-                document.getElementById('userId').value = u.id;
-                document.getElementById('userName').value = u.full_name;
-                document.getElementById('userEmail').value = u.email;
-                document.getElementById('userUniId').value = u.university_id || '';
-                document.getElementById('userRole').value = u.role_id || (u.role === 'ADMIN' ? 1 : u.role === 'TEACHER' ? 2 : 3);
-                document.getElementById('userStatus').value = u.status || 'Active';
-                document.getElementById('userPassword').value = '';
-                document.getElementById('userPassword').required = false;
-                document.getElementById('passwordLabel').textContent = 'Password (leave blank to keep current)';
-                document.getElementById('userModalTitle').textContent = 'Edit User Account';
-                userModal.show();
-            };
-
-            const form = document.getElementById('userForm');
-            if (form) {
-                form.addEventListener('submit', async function (e) {
-                    e.preventDefault();
-
-                    const token = getAuthToken();
-                    if (!token) {
-                        alert('Authentication required: Please log in as an administrator.');
-                        window.location.href = '../authentication/login.html';
-                        return;
-                    }
-
-                    const id = document.getElementById('userId').value;
-                    const payload = {
-                        full_name: document.getElementById('userName').value.trim(),
-                        email: document.getElementById('userEmail').value.trim(),
-                        university_id: document.getElementById('userUniId').value.trim(),
-                        role_id: parseInt(document.getElementById('userRole').value),
-                        status: document.getElementById('userStatus').value,
-                        password: document.getElementById('userPassword').value
-                    };
-
-                    const submitBtn = document.getElementById('submitUserBtn');
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.textContent = 'Saving...';
-                    }
-
-                    const url = id ? `${API_BASE}/admin/users/${id}` : `${API_BASE}/admin/users`;
-                    const method = id ? 'PUT' : 'POST';
-
-                    try {
-                        const res = await fetch(url, {
-                            method,
-                            headers: getHeaders(),
-                            body: JSON.stringify(payload)
-                        });
-
-                        const result = await res.json();
-                        if (res.ok && result.success) {
-                            userModal.hide();
-                            form.reset();
-                            loadUsers();
-                        } else {
-                            alert(result.message || 'Failed to save user.');
-                        }
-                    } catch (err) {
-                        console.error('Save user error:', err);
-                        alert('Error saving user: ' + err.message);
-                    } finally {
-                        if (submitBtn) {
-                            submitBtn.disabled = false;
-                            submitBtn.textContent = 'Save Account';
-                        }
-                    }
-                });
-            }
-
-            window.deleteUser = async function (id) {
-                const token = getAuthToken();
-                if (!token) {
-                    alert('Please log in as an administrator first.');
-                    return;
-                }
-
-                if (!confirm('Are you sure you want to delete this user?')) return;
-                try {
-                    const res = await fetch(`${API_BASE}/admin/users/${id}`, {
-                        method: 'DELETE',
-                        headers: getHeaders()
-                    });
-                    const result = await res.json();
-                    if (result.success) {
-                        loadUsers();
-                    } else {
-                        alert(result.message || 'Failed to delete user.');
-                    }
-                } catch (e) {
-                    console.error(e);
-                }
-            };
-
-            function formatDate(dateStr) {
-                if (!dateStr) return '2026-05-24';
-                return dateStr.split(' ')[0] || dateStr.split('T')[0];
-            }
-
-            function escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            loadUsers();
-        });
-    </script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
+    <script src="../../js/components/sidebar.js"></script>
+    <script src="../../js/pages/user-management.js"></script>
 </body>
 </html>

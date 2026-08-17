@@ -43,89 +43,103 @@ exports.getDashboardStats = async (req, res) => {
         const majorTf = req.query.majorTimeframe || req.query.timeframe || 'this_month';
 
         // 1. Real SQL Date Filter for Enrollments
+        let enrollmentJoinClause = "";
         let enrollmentDateClause = "";
         if (enrollmentTf === 'this_month') {
+            enrollmentJoinClause = "AND strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now')";
             enrollmentDateClause = "WHERE strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now')";
         } else if (enrollmentTf === 'last_month') {
+            enrollmentJoinClause = "AND strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now', '-1 month')";
             enrollmentDateClause = "WHERE strftime('%Y-%m', e.enrollment_date) = strftime('%Y-%m', 'now', '-1 month')";
         } else if (enrollmentTf === 'last_3_months') {
+            enrollmentJoinClause = "AND e.enrollment_date >= date('now', 'start of month', '-2 months')";
             enrollmentDateClause = "WHERE e.enrollment_date >= date('now', 'start of month', '-2 months')";
         } else if (enrollmentTf === 'this_year') {
+            enrollmentJoinClause = "AND strftime('%Y', e.enrollment_date) = strftime('%Y', 'now')";
             enrollmentDateClause = "WHERE strftime('%Y', e.enrollment_date) = strftime('%Y', 'now')";
         } else {
             // all_time
+            enrollmentJoinClause = "";
             enrollmentDateClause = "";
         }
-
-        // Query Category Breakdown
-        const categoryEnrollments = await dbAsync.all(`
-            SELECT COALESCE(cat.name, 'General') as name, COUNT(e.id) as count
-            FROM enrollments e
-            LEFT JOIN courses c ON e.course_id = c.id
-            LEFT JOIN categories cat ON c.category_id = cat.id
-            ${enrollmentDateClause}
-            GROUP BY cat.name
-            ORDER BY count DESC
-        `);
 
         // Total Enrollments in this timeframe
         const totalEnrollmentCountRow = await dbAsync.get(`
             SELECT COUNT(*) as total FROM enrollments e ${enrollmentDateClause}
         `);
-        const totalEnrollments = totalEnrollmentCountRow.total || 0;
+        const totalEnrollments = totalEnrollmentCountRow ? (totalEnrollmentCountRow.total || 0) : 0;
 
-        // Palette for chart
-        const colors = ['#0B1F4D', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
+        // Query All Categories from SQLite with their matching enrollments
+        const categoryEnrollments = await dbAsync.all(`
+            SELECT cat.id, cat.name, COUNT(e.id) as count
+            FROM categories cat
+            LEFT JOIN courses c ON c.category_id = cat.id
+            LEFT JOIN enrollments e ON e.course_id = c.id ${enrollmentJoinClause}
+            WHERE cat.is_active = 1
+            GROUP BY cat.id, cat.name
+            ORDER BY count DESC, cat.order_num ASC
+        `);
+
+        // Distinct Palette for categories
+        const colors = ['#0B1F4D', '#2563EB', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#64748B'];
         const formattedEnrollmentCategories = categoryEnrollments.map((cat, idx) => {
             const percentage = totalEnrollments > 0 ? Math.round((cat.count / totalEnrollments) * 100) : 0;
             return {
                 name: cat.name,
-                count: cat.count,
-                percentage: percentage,
+                count: cat.count || 0,
+                percentage: isNaN(percentage) ? 0 : percentage,
                 color: colors[idx % colors.length]
             };
         });
 
         // 2. Real SQL Date Filter for Students by Major
+        let studentJoinClause = "";
         let studentDateClause = "";
         if (majorTf === 'this_month') {
+            studentJoinClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now')";
             studentDateClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now')";
         } else if (majorTf === 'last_month') {
+            studentJoinClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now', '-1 month')";
             studentDateClause = "AND strftime('%Y-%m', u.created_at) = strftime('%Y-%m', 'now', '-1 month')";
         } else if (majorTf === 'last_3_months') {
+            studentJoinClause = "AND u.created_at >= date('now', 'start of month', '-2 months')";
             studentDateClause = "AND u.created_at >= date('now', 'start of month', '-2 months')";
         } else if (majorTf === 'this_year') {
+            studentJoinClause = "AND strftime('%Y', u.created_at) = strftime('%Y', 'now')";
             studentDateClause = "AND strftime('%Y', u.created_at) = strftime('%Y', 'now')";
         } else {
             // all_time
+            studentJoinClause = "";
             studentDateClause = "";
         }
 
-        // Query distinct students grouped by their chosen major
-        const studentsByMajorQuery = await dbAsync.all(`
-            SELECT COALESCE(p.title, 'Undeclared') as major, COUNT(u.id) as student_count
-            FROM users u
-            JOIN roles r ON u.role_id = r.id
-            LEFT JOIN programs p ON u.major_id = p.id
-            WHERE r.name = 'STUDENT' ${studentDateClause}
-            GROUP BY p.title
-            ORDER BY student_count DESC
-        `);
-
+        // Total Students in this timeframe
         const totalStudentsRow = await dbAsync.get(`
             SELECT COUNT(*) as total FROM users u
             JOIN roles r ON u.role_id = r.id
             WHERE r.name = 'STUDENT' ${studentDateClause}
         `);
-        const totalStudents = totalStudentsRow.total || 0;
+        const totalStudents = totalStudentsRow ? (totalStudentsRow.total || 0) : 0;
 
+        // Query all academic programs and count matching students
+        const studentsByMajorQuery = await dbAsync.all(`
+            SELECT p.id, p.title as major, COUNT(u.id) as student_count
+            FROM programs p
+            LEFT JOIN users u ON u.major_id = p.id AND u.role_id = (SELECT id FROM roles WHERE name = 'STUDENT') ${studentJoinClause}
+            WHERE p.is_published = 1
+            GROUP BY p.id, p.title
+            ORDER BY student_count DESC, p.order_num ASC
+        `);
+
+        // Palette for major progress bars
+        const majorColors = ['#2563EB', '#06B6D4', '#10B981', '#F59E0B', '#8B5CF6', '#F43F5E', '#3B82F6'];
         const formattedStudentsByMajor = studentsByMajorQuery.map((item, idx) => {
             const percentage = totalStudents > 0 ? Math.round((item.student_count / totalStudents) * 100) : 0;
             return {
                 major: item.major,
-                count: item.student_count,
-                percentage: percentage,
-                color: colors[idx % colors.length]
+                count: item.student_count || 0,
+                percentage: isNaN(percentage) ? 0 : percentage,
+                color: majorColors[idx % majorColors.length]
             };
         });
 
@@ -568,7 +582,7 @@ exports.createUser = async (req, res) => {
             [full_name, email, university_id || null, password_hash, role_id || 3, major_id || null, status || 'Active']
         );
 
-        res.json({ success: true, message: 'User created successfully.', id: result.lastID });
+        res.status(201).json({ success: true, message: 'User created successfully.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
         console.error('Create user error:', error);
         res.status(500).json({ success: false, message: 'Failed to create user. Email or University ID might already exist.' });

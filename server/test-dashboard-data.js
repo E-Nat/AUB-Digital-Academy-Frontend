@@ -53,7 +53,7 @@ async function testDashboardData() {
         try {
             // 1. Admin Login
             const loginRes = await request('POST', '/auth/login', {
-                loginId: 'admin@aub.edu.kh',
+                loginId: 'admin@aub.edu.com',
                 password: 'admin123'
             });
             const token = loginRes.body.token;

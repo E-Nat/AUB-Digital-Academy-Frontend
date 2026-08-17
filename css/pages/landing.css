@@ -6,9 +6,9 @@
 /* Hero Section */
 .hero-section {
     position: relative;
-    padding-top: 76px;
-    padding-bottom: 80px;
-    min-height: 90vh;
+    padding-top: 110px;
+    padding-bottom: 130px;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -374,22 +374,24 @@
 
 .wave-divider {
     position: absolute;
-    bottom: -1px;
+    bottom: 0;
     left: 0;
     width: 100%;
     overflow: hidden;
     line-height: 0;
+    z-index: 2;
+    pointer-events: none;
 }
 
 .wave-divider svg {
     position: relative;
     display: block;
     width: calc(100% + 1.3px);
-    height: 90px;
+    height: 75px;
 }
 
 .wave-divider .shape-fill {
-    fill: #f8fafc; /* Match body background */
+    fill: #FFFFFF;
 }
 
 .filter-pill-container {
@@ -780,11 +782,9 @@
 }
 
 
-/* CSS Scroll Snap Setup */
+/* Smooth Scrolling & Section Layout */
 html {
-    scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
-    overflow-y: scroll;
 }
 
 body {
@@ -792,39 +792,13 @@ body {
 }
 
 section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    height: 100vh;
-    overflow: hidden;
     position: relative;
-    padding-top: 76px; /* Avoid navbar overlap */
     box-sizing: border-box;
-    /* Vertically center content */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-/* Keep Hero perfectly intact */
-.hero-section {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
 }
 
 .landing-footer {
     scroll-snap-align: end;
 }
-
-
-
-
-
-
-
-
-
 
 .hover-scale {
     transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -840,19 +814,17 @@ section {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-
-
 /* Category Marquee */
 .category-marquee-container {
     width: 100%;
     overflow: hidden;
     white-space: nowrap;
-    position: absolute;
-    top: 76px; /* Below the navbar */
+    position: relative;
+    top: 0;
     left: 0;
     z-index: 5;
-    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%);
-    padding: 15px 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.9) 100%);
+    padding: 24px 0 10px 0;
 }
 
 .marquee-track {

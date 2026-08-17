@@ -240,6 +240,32 @@ async function initSchema() {
         );
     `);
 
+    // 13. 1-on-1 Mentorship & Consultations
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS consultations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            teacher_id INTEGER NOT NULL,
+            course_id INTEGER,
+            topic TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            session_date TEXT NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            meeting_type TEXT DEFAULT 'Online Video',
+            meeting_link TEXT DEFAULT '',
+            location_room TEXT DEFAULT '',
+            status TEXT DEFAULT 'Pending',
+            student_notes TEXT DEFAULT '',
+            teacher_notes TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
+        );
+    `);
+
     console.log('Database schema verified & tables initialized successfully.');
 }
 

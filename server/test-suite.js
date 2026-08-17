@@ -64,7 +64,7 @@ async function runTests() {
     // STEP 2: Verify Admin Authentication
     try {
         const res = await request('POST', '/auth/login', {
-            loginId: 'admin@aub.edu.kh',
+            loginId: 'admin@aub.edu.com',
             password: 'admin123'
         });
 
@@ -98,7 +98,8 @@ async function runTests() {
         const res = await request('GET', '/admin/dashboard/stats?timeframe=this_month', null, authHeader);
         const s = res.body.data;
         console.log(`[PASS] 4. Students by Major (Actual distinct student counts from DB):`);
-        s.studentsByMajor.forEach(m => {
+        const majors = Array.isArray(s.studentsByMajor) ? s.studentsByMajor : (s.studentsByMajor.majors || []);
+        majors.forEach(m => {
             console.log(`       - Major: ${m.major} | Count: ${m.count} students (${m.percentage}%)`);
         });
 
