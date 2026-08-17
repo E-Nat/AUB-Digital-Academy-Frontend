@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node db/seeds.js"
+    "seed": "node db/seeds.js",
+    "test": "node test-comprehensive-20-points.js",
+    "test:all": "node test-comprehensive-20-points.js && node test-user-management-suite.js && node test-student-management-suite.js && node test-teacher-suite.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
