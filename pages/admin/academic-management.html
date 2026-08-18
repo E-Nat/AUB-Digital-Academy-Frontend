@@ -33,12 +33,13 @@
             </div>
 
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">Management</div>
+                <div class="admin-sidebar-label">MANAGEMENT</div>
                 <a href="user-management.html" class="admin-nav-item">
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
@@ -56,7 +57,7 @@
                     <span>Enrollment Management</span>
                 </a>
 
-                <div class="admin-sidebar-label">System</div>
+                <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
@@ -113,17 +114,17 @@
                     <ul class="nav admin-tabs" id="academicTabs" role="tablist">
                         <li class="nav-item">
                             <button class="admin-tab-btn active" id="courses-tab" data-bs-toggle="tab" data-bs-target="#courses-pane" type="button">
-                                <i class="bi bi-journal-text"></i> Specialized Courses & Chapters
+                                <i class="bi bi-journal-text"></i> Courses & Modules
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="admin-tab-btn" id="programs-tab" data-bs-toggle="tab" data-bs-target="#programs-pane" type="button">
-                                <i class="bi bi-grid"></i> Featured Programs
+                                <i class="bi bi-mortarboard"></i> Degree Programs
                             </button>
                         </li>
                         <li class="nav-item">
                             <button class="admin-tab-btn" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories-pane" type="button">
-                                <i class="bi bi-tags"></i> Categories
+                                <i class="bi bi-tags"></i> Categories / Disciplines
                             </button>
                         </li>
                         <li class="nav-item">
@@ -405,6 +406,12 @@
                                 <label class="form-label">Course Description *</label>
                                 <textarea class="form-control" id="courseDesc" rows="3" required placeholder="Comprehensive course description, syllabus overview, and expected outcomes..."></textarea>
                             </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" id="coursePublished" checked>
+                                    <label class="form-check-label text-sm fw-semibold ms-2" for="coursePublished">Published (Visible in Catalog)</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
@@ -546,7 +553,15 @@
                 </div>
                 <form id="instructorForm">
                     <input type="hidden" id="instructorId">
+                    <input type="hidden" id="instructorUserId">
                     <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label">Connect to Faculty Account (Optional)</label>
+                            <select class="form-select" id="instructorUserSelect">
+                                <option value="">-- Create or Enter Details Manually --</option>
+                            </select>
+                            <div class="form-text text-muted" style="font-size: 11px;">Connect directly to an existing Teacher account to avoid duplicate records.</div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Instructor Name *</label>
                             <input type="text" class="form-control" id="instructorName" required placeholder="e.g. Dr. Sokha Chan">

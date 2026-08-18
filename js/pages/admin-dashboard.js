@@ -151,9 +151,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const activeCats = categories.filter(c => c.count > 0);
 
                 if (total === 0 || activeCats.length === 0) {
-                    donutSvg.innerHTML = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>`;
+                    donutSvg.innerHTML = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.2"></circle>`;
                 } else {
-                    let svgContent = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>`;
+                    let svgContent = `<circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.2"></circle>`;
                     let currentOffset = 0;
                     activeCats.forEach(c => {
                         const pct = isNaN(c.percentage) ? 0 : c.percentage;
@@ -161,8 +161,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                         svgContent += `
                             <circle cx="18" cy="18" r="15.915" fill="transparent" 
                                     stroke="${c.color || '#2563EB'}" stroke-width="3.2" 
+                                    stroke-linecap="round"
                                     stroke-dasharray="${strokeDash}" stroke-dashoffset="${-currentOffset}"
-                                    style="transition: stroke-dasharray 0.5s ease;">
+                                    style="transition: stroke-dasharray 0.4s ease, stroke-dashoffset 0.4s ease;">
                             </circle>
                         `;
                         currentOffset += pct;
@@ -183,12 +184,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const count = c.count || 0;
                         const pct = total > 0 ? Math.round((count / total) * 100) : 0;
                         return `
-                            <div class="d-flex align-items-center justify-content-between py-1 border-bottom border-light">
-                                <div class="d-flex align-items-center gap-2">
+                            <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-light">
+                                <div class="d-flex align-items-center gap-2 min-w-0" style="min-width: 0;">
                                     <span class="rounded-circle flex-shrink-0" style="width: 8px; height: 8px; background: ${c.color || '#2563EB'};"></span>
-                                    <span class="text-secondary fw-medium" style="font-size: 12.5px;">${escapeHtml(c.name)}</span>
+                                    <span class="fw-medium long-text" style="font-size: 13px; color: #334155;">${escapeHtml(c.name)}</span>
                                 </div>
-                                <span class="fw-bold text-dark" style="font-size: 12.5px;">${count} <span class="text-muted fw-normal" style="font-size: 11px;">(${pct}%)</span></span>
+                                <span class="fw-bold text-dark flex-shrink-0 ms-2" style="font-size: 13px; font-variant-numeric: tabular-nums;">
+                                    ${count} <span class="text-muted fw-normal" style="font-size: 12px;">(${pct}%)</span>
+                                </span>
                             </div>
                         `;
                     }).join('');
@@ -207,13 +210,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const count = m.count || 0;
                         const pct = totalStudents > 0 ? Math.round((count / totalStudents) * 100) : 0;
                         return `
-                            <div class="py-1 mb-1">
+                            <div class="py-2 mb-1">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <span class="fw-medium text-secondary" style="font-size: 12.5px;">${escapeHtml(m.major)}</span>
-                                    <span class="fw-bold text-dark" style="font-size: 12.5px;">${count} <span class="text-muted fw-normal" style="font-size: 11px;">(${pct}%)</span></span>
+                                    <span class="fw-medium long-text" style="font-size: 13px; color: #334155;">${escapeHtml(m.major)}</span>
+                                    <span class="fw-bold text-dark flex-shrink-0 ms-2" style="font-size: 13px; font-variant-numeric: tabular-nums;">
+                                        ${count} <span class="text-muted fw-normal" style="font-size: 12px;">(${pct}%)</span>
+                                    </span>
                                 </div>
-                                <div class="progress" style="height: 6px; background: #F1F5F9; border-radius: 6px; overflow: hidden;">
-                                    <div class="progress-bar" role="progressbar" style="width: ${pct}%; background: ${m.color || '#2563EB'}; border-radius: 6px; transition: width 0.5s ease;"></div>
+                                <div class="progress" style="height: 7px; background: #F1F5F9; border-radius: 999px; overflow: hidden;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${pct}%; background: ${m.color || '#2563EB'}; border-radius: 999px; transition: width 0.4s ease;"></div>
                                 </div>
                             </div>
                         `;
@@ -260,33 +265,38 @@ document.addEventListener('DOMContentLoaded', async function () {
             tbody.innerHTML = enrollments.slice(0, 6).map(e => `
                 <tr>
                     <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <img src="${e.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover shadow-sm" style="width: 32px; height: 32px; border: 1px solid #E2E8F0;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
-                            <div>
-                                <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(e.student_name || 'Student')}</div>
-                                <div class="text-muted" style="font-size: 11px;">${escapeHtml(e.student_uni_id || e.student_email || '')}</div>
+                        <div class="d-flex align-items-center gap-3" style="min-width: 0;">
+                            <div class="position-relative flex-shrink-0">
+                                <img src="${e.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover shadow-xs" style="width: 36px; height: 36px; border: 1px solid #E5EAF1;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
+                                <span class="position-absolute bottom-0 end-0 rounded-circle" style="width: 8px; height: 8px; background: #10B981; border: 1.5px solid #FFFFFF;"></span>
+                            </div>
+                            <div class="min-w-0" style="min-width: 0;">
+                                <div class="fw-semibold text-dark long-text" style="font-size: 13.5px;">${escapeHtml(e.student_name || 'Student')}</div>
+                                <div class="text-muted text-truncate" style="font-size: 12px; max-width: 170px;">${escapeHtml(e.student_uni_id || e.student_email || '')}</div>
                             </div>
                         </div>
                     </td>
-                    <td><span class="fw-semibold text-primary" style="font-size: 12.5px;">${escapeHtml(e.course_title || 'Academic Course')}</span></td>
-                    <td class="text-muted" style="font-size: 11.5px;">${formatDate(e.enrollment_date)}</td>
-                    <td style="width: 140px;">
+                    <td class="long-text">
+                        <span class="fw-medium text-primary" style="font-size: 13.5px;">${escapeHtml(e.course_title || 'Academic Course')}</span>
+                    </td>
+                    <td class="text-muted text-nowrap" style="font-size: 13px;">${formatDate(e.enrollment_date)}</td>
+                    <td style="width: 140px; min-width: 120px;">
                         <div class="d-flex align-items-center gap-2">
-                            <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 4px;">
-                                <div class="progress-bar ${e.progress_percentage === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${e.progress_percentage || 0}%; border-radius: 4px;"></div>
+                            <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 999px;">
+                                <div class="progress-bar ${e.progress_percentage === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${e.progress_percentage || 0}%; border-radius: 999px;"></div>
                             </div>
-                            <span class="fw-bold text-muted" style="font-size: 11px;">${e.progress_percentage || 0}%</span>
+                            <span class="fw-semibold text-secondary" style="font-size: 12px; font-variant-numeric: tabular-nums;">${e.progress_percentage || 0}%</span>
                         </div>
                     </td>
-                    <td>
+                    <td class="text-nowrap">
                         <span class="admin-status-badge ${(e.status || 'active').toLowerCase()}">
-                            <i class="bi ${e.status === 'Completed' ? 'bi-check2-all' : e.status === 'Pending' ? 'bi-clock' : 'bi-check-circle-fill'} me-1"></i>
+                            <span class="status-dot"></span>
                             ${escapeHtml(e.status || 'Active')}
                         </span>
                     </td>
-                    <td>
+                    <td class="text-nowrap text-end">
                         <a href="enrollment-management.html" class="action-btn" title="View in Enrollment Management">
-                            <i class="bi bi-arrow-right-circle"></i>
+                            <i class="bi bi-arrow-right"></i>
                         </a>
                     </td>
                 </tr>

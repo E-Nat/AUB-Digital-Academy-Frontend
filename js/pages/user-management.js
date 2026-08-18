@@ -148,6 +148,30 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     /**
+     * 1.1 Load Academic Majors / Programs
+     */
+    async function loadMajors() {
+        let progs = [];
+        if (window.AdminStore) {
+            progs = window.AdminStore.getPrograms();
+        }
+
+        const userMajorSelect = document.getElementById('userMajorSelect');
+        if (userMajorSelect && progs.length > 0) {
+            userMajorSelect.innerHTML = progs.map(p => `
+                <option value="${p.title}" data-faculty="${escapeHtml(p.faculty || 'Information Technology')}">${escapeHtml(p.title)}</option>
+            `).join('');
+        }
+
+        const userMajorFilter = document.getElementById('userMajorFilter');
+        if (userMajorFilter && progs.length > 0) {
+            userMajorFilter.innerHTML = `<option value="all">All Majors</option>` + progs.map(p => `
+                <option value="${p.title}">${escapeHtml(p.title)}</option>
+            `).join('');
+        }
+    }
+
+    /**
      * 2. Load Users
      */
     async function loadUsers() {
@@ -1463,44 +1487,55 @@ document.addEventListener('DOMContentLoaded', async function () {
      */
     window.deleteUser = async function (userId) {
         const u = allUsers.find(user => user.id === userId);
-        const name = u ? u.full_name : 'this student';
+        const name = u ? u.full_name : 'this user';
 
         const result = await Swal.fire({
-            title: 'Delete Student Account?',
+            title: 'Delete User Account?',
             html: `Are you sure you want to delete <b>"${escapeHtml(name)}"</b>?<br><br><span class="text-danger fw-semibold">This action cannot be undone.</span>`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
-            confirmButtonText: 'Yes, Delete Student',
+            confirmButtonText: 'Yes, Delete Account',
             cancelButtonText: 'Cancel'
         });
 
         if (result.isConfirmed) {
             try {
+                if (window.AdminStore) {
+                    window.AdminStore.deleteUser(userId);
+                    allUsers = window.AdminStore.getUsers();
+                }
+
                 const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
                     method: 'DELETE',
                     headers: getHeaders()
                 });
 
-                if (res.ok) {
-                    if (viewUserModal) viewUserModal.hide();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Student Deleted',
-                        text: `Record for "${name}" has been permanently removed.`,
-                        timer: 1800,
-                        showConfirmButton: false
-                    });
-                    loadUsers();
-                    return;
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    if (errData.message) {
+                        throw new Error(errData.message);
+                    }
                 }
-            } catch (e) {}
 
-            allUsers = allUsers.filter(user => user.id !== userId);
-            if (viewUserModal) viewUserModal.hide();
-            renderStatistics();
-            applyFilters();
+                if (viewUserModal) viewUserModal.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'User Deleted',
+                    text: `Record for "${name}" has been permanently removed.`,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+                loadUsers();
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Action Prohibited',
+                    text: err.message || 'Cannot delete this user account.'
+                });
+                loadUsers();
+            }
         }
     };
 
@@ -1565,6 +1600,238 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     };
 
+    // 16. Account Provisioning Method Switcher
+    const authMethodRadios = document.querySelectorAll('input[name="authProvisionMethod"]');
+    const manualPasswordContainer = document.getElementById('manualPasswordContainer');
+    authMethodRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (manualPasswordContainer) {
+                if (this.value === 'manual') {
+                    manualPasswordContainer.classList.remove('d-none');
+                } else {
+                    manualPasswordContainer.classList.add('d-none');
+                }
+            }
+        });
+    });
+
+    // 17. Bulk CSV/Excel User Import
+    const bulkImportModalEl = document.getElementById('bulkImportModal');
+    const bulkImportModal = bulkImportModalEl ? new bootstrap.Modal(bulkImportModalEl) : null;
+    let parsedImportData = [];
+
+    window.openBulkImportModal = function() {
+        parsedImportData = [];
+        const fileInput = document.getElementById('bulkImportFileInput');
+        if (fileInput) fileInput.value = '';
+        const fileNameEl = document.getElementById('importFileName');
+        if (fileNameEl) fileNameEl.textContent = 'No file selected';
+        const previewCont = document.getElementById('importPreviewContainer');
+        if (previewCont) previewCont.style.display = 'none';
+        const execBtn = document.getElementById('executeImportBtn');
+        if (execBtn) execBtn.disabled = true;
+        if (bulkImportModal) bulkImportModal.show();
+    };
+
+    window.downloadSampleCSVTemplate = function() {
+        const headers = ['Full Name', 'University Email', 'Student/Employee ID', 'Role', 'Faculty', 'Major', 'Academic Year', 'Semester'];
+        const sampleRows = [
+            ['"Sokha Heng"', '"sokha.heng@aub.edu.kh"', '"202409812"', '"STUDENT"', '"Information Technology"', '"Software Engineering"', '"Year 1"', '"Semester 1"'],
+            ['"Pisey Chan"', '"pisey.chan@aub.edu.kh"', '"202409813"', '"STUDENT"', '"Information Technology"', '"Cybersecurity"', '"Year 2"', '"Semester 1"'],
+            ['"Dr. Robert Evans"', '"robert.evans@aub.edu.kh"', '"FAC202408"', '"TEACHER"', '"Computer Science"', '""', '""', '""']
+        ];
+        const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...sampleRows.map(r => r.join(','))].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'AUB_Bulk_User_Import_Template.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const bulkFileInput = document.getElementById('bulkImportFileInput');
+    if (bulkFileInput) {
+        bulkFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            handleImportFile(file);
+        });
+    }
+
+    const dropZone = document.getElementById('importDropZone');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('bg-white'); });
+        dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('bg-white'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-white');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleImportFile(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    function handleImportFile(file) {
+        const fileNameEl = document.getElementById('importFileName');
+        if (fileNameEl) fileNameEl.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            processCSVContent(text);
+        };
+        reader.readAsText(file);
+    }
+
+    function processCSVContent(csvText) {
+        const lines = csvText.split(/\r\n|\n/).map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length <= 1) {
+            Swal.fire({ icon: 'warning', title: 'Empty File', text: 'The selected CSV file does not contain any user records.' });
+            return;
+        }
+
+        const dataRows = lines.slice(1);
+        const existingEmails = new Set(allUsers.map(u => (u.email || '').toLowerCase()));
+        const existingIds = new Set(allUsers.map(u => (u.university_id || '').toLowerCase()));
+        const fileEmails = new Set();
+
+        parsedImportData = [];
+        let validCount = 0;
+        let duplicateCount = 0;
+
+        const tableBody = document.getElementById('importPreviewTableBody');
+        if (tableBody) tableBody.innerHTML = '';
+
+        dataRows.forEach((line, idx) => {
+            const cols = [];
+            let inQuote = false;
+            let currentStr = '';
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"' || char === "'") {
+                    inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) {
+                    cols.push(currentStr.trim());
+                    currentStr = '';
+                } else {
+                    currentStr += char;
+                }
+            }
+            cols.push(currentStr.trim());
+
+            const name = (cols[0] || `Student #${idx + 1}`).replace(/^["']|["']$/g, '');
+            const email = (cols[1] || `user${Date.now()}_${idx}@aub.edu.kh`).replace(/^["']|["']$/g, '').toLowerCase();
+            const uniId = (cols[2] || `2024${Math.floor(10000 + Math.random() * 90000)}`).replace(/^["']|["']$/g, '');
+            const role = (cols[3] || 'STUDENT').replace(/^["']|["']$/g, '').toUpperCase();
+            const faculty = (cols[4] || 'Information Technology').replace(/^["']|["']$/g, '');
+            const major = (cols[5] || 'Computer Science').replace(/^["']|["']$/g, '');
+            const year = (cols[6] || 'Year 1').replace(/^["']|["']$/g, '');
+            const semester = (cols[7] || 'Semester 1').replace(/^["']|["']$/g, '');
+
+            let validationStatus = 'Valid';
+            let statusBadge = '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Ready</span>';
+
+            if (existingEmails.has(email)) {
+                validationStatus = 'Duplicate Email';
+                statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Duplicate Email</span>';
+                duplicateCount++;
+            } else if (existingIds.has(uniId)) {
+                validationStatus = 'Duplicate ID';
+                statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Duplicate ID</span>';
+                duplicateCount++;
+            } else if (fileEmails.has(email)) {
+                validationStatus = 'Duplicate in File';
+                statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Duplicate in File</span>';
+                duplicateCount++;
+            } else {
+                validCount++;
+                fileEmails.add(email);
+            }
+
+            const rowData = {
+                id: Date.now() + idx,
+                full_name: name,
+                email: email,
+                university_id: uniId,
+                role: role,
+                role_id: role === 'ADMIN' ? 1 : role === 'TEACHER' ? 2 : 3,
+                faculty: faculty,
+                major: major,
+                major_title: major,
+                academic_year: year,
+                semester: semester,
+                status: 'Active',
+                enrollment_status: 'Active',
+                email_verified: 1,
+                created_at: new Date().toISOString(),
+                validationStatus: validationStatus
+            };
+
+            parsedImportData.push(rowData);
+
+            if (tableBody && idx < 20) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="fw-semibold text-dark">${escapeHtml(name)}</td>
+                    <td class="text-muted font-monospace">${escapeHtml(email)}</td>
+                    <td class="text-muted font-monospace">${escapeHtml(uniId)}</td>
+                    <td><span class="badge bg-light text-dark border text-xs">${escapeHtml(role)}</span></td>
+                    <td>${statusBadge}</td>
+                `;
+                tableBody.appendChild(tr);
+            }
+        });
+
+        document.getElementById('importTotalRows').textContent = dataRows.length;
+        document.getElementById('importValidRows').textContent = validCount;
+        document.getElementById('importDuplicateRows').textContent = duplicateCount;
+        document.getElementById('importPreviewContainer').style.display = 'block';
+
+        const execBtn = document.getElementById('executeImportBtn');
+        if (execBtn) {
+            execBtn.disabled = validCount === 0;
+            execBtn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Import ${validCount} Users`;
+        }
+    }
+
+    window.executeBulkImport = async function() {
+        const validUsers = parsedImportData.filter(u => u.validationStatus === 'Valid');
+
+        if (validUsers.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'No Valid Records', text: 'There are no valid, non-duplicate records to import.' });
+            return;
+        }
+
+        const execBtn = document.getElementById('executeImportBtn');
+        if (execBtn) {
+            execBtn.disabled = true;
+            execBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Importing ${validUsers.length} records...`;
+        }
+
+        if (window.AdminStore) {
+            validUsers.forEach(u => {
+                window.AdminStore.createUser(u);
+            });
+            allUsers = window.AdminStore.getUsers();
+        } else {
+            allUsers.unshift(...validUsers);
+        }
+
+        if (bulkImportModal) bulkImportModal.hide();
+        renderStatistics();
+        renderTableStructure();
+        applyFilters();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Bulk Import Successful',
+            html: `Successfully imported <b>${validUsers.length}</b> institutional user accounts.<br><span class="text-muted text-xs">Profiles provisioned and ready in administration directory.</span>`,
+            timer: 2400,
+            showConfirmButton: false
+        });
+    };
+
     function formatDate(dateStr) {
         if (!dateStr) return 'N/A';
         try {
@@ -1583,5 +1850,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Initialize View
     await loadDepartments();
+    await loadMajors();
     await loadUsers();
 });

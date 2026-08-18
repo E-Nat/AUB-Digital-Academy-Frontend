@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const addEnrollmentForm = document.getElementById('addEnrollmentForm');
     if (addEnrollmentForm) {
-        addEnrollmentForm.addEventListener('submit', function (e) {
+        addEnrollmentForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const studentId = parseInt(document.getElementById('enrollStudentSelect').value);
@@ -246,15 +246,42 @@ document.addEventListener('DOMContentLoaded', async function () {
                 progress_percentage: progress
             };
 
-            if (window.AdminStore) {
-                const newEnr = window.AdminStore.createEnrollment(payload);
-                allEnrollments = window.AdminStore.getEnrollments();
+            try {
+                let newEnr = null;
+                if (window.AdminStore) {
+                    newEnr = window.AdminStore.createEnrollment(payload);
+                    allEnrollments = window.AdminStore.getEnrollments();
+                }
+
                 if (addModal) addModal.hide();
                 applyFilters();
-                window.AdminStore.constructor.notifySuccess(
-                    'Student Enrolled',
-                    `${newEnr.student_name} has been enrolled into "${newEnr.course_title}".`
-                );
+
+                if (window.AdminStore && newEnr) {
+                    window.AdminStore.constructor.notifySuccess(
+                        'Student Enrolled',
+                        `${newEnr.student_name} has been enrolled into "${newEnr.course_title}".`
+                    );
+                }
+
+                const res = await fetch(`${API_BASE}/admin/enrollments`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    if (errData.message) {
+                        throw new Error(errData.message);
+                    }
+                }
+            } catch (err) {
+                if (window.AdminStore) {
+                    window.AdminStore.constructor.notifyError('Enrollment Prohibited', err.message || 'Duplicate enrollment or error occurred.');
+                } else {
+                    alert(err.message || 'Failed to create enrollment.');
+                }
+                loadEnrollments();
             }
         });
     }

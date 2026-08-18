@@ -169,12 +169,13 @@
             </div>
 
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">Management</div>
+                <div class="admin-sidebar-label">MANAGEMENT</div>
                 <a href="user-management.html" class="admin-nav-item active">
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
@@ -192,14 +193,10 @@
                     <span>Enrollment Management</span>
                 </a>
 
-                <div class="admin-sidebar-label">System</div>
+                <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
-                </a>
-                <a href="../../welcomepage.html" class="admin-nav-item">
-                    <i class="bi bi-house"></i>
-                    <span>Back to Website</span>
                 </a>
             </nav>
 
@@ -252,6 +249,9 @@
                         <p class="admin-page-subtitle" id="pageMainSubtitle">Manage student accounts, teacher credentials, and administrators.</p>
                     </div>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" onclick="openBulkImportModal()">
+                            <i class="bi bi-file-earmark-arrow-up"></i> Bulk Import CSV
+                        </button>
                         <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" id="exportUsersBtn" onclick="exportUsersCSV()">
                             <i class="bi bi-download"></i> Export CSV
                         </button>
@@ -639,15 +639,42 @@
                                 </div>
                             </div>
 
-                            <div class="mb-3" id="passwordGroup">
-                                <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Initial Password (Default: Password123!)</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="userPassword" placeholder="Enter secure password (min 6 chars)">
-                                    <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn" title="Toggle password visibility">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
+                            <div class="mb-3 p-3 bg-light rounded-3 border">
+                                <label class="form-label text-xs fw-bold text-uppercase text-muted mb-2">Account Provisioning & Authentication Method</label>
+                                <div class="d-flex flex-column gap-2 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="authProvisionMethod" id="authMethodInvite" value="invite" checked>
+                                        <label class="form-check-label text-xs fw-semibold" for="authMethodInvite">
+                                            Send Institutional Invitation & Verification Link <span class="text-muted fw-normal">(Student sets their password securely)</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="authProvisionMethod" id="authMethodSSO" value="sso">
+                                        <label class="form-check-label text-xs fw-semibold" for="authMethodSSO">
+                                            Institutional Google SSO Verification <span class="text-muted fw-normal">(@aub.edu.kh credentials)</span>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="authProvisionMethod" id="authMethodManual" value="manual">
+                                        <label class="form-check-label text-xs fw-semibold" for="authMethodManual">
+                                            Assign Temporary Administrative Password
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="text-xs text-muted mt-1">Leave blank to use default initialization password.</div>
+
+                                <div id="manualPasswordContainer" class="mt-2 pt-2 border-top d-none">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-muted" id="passwordLabel">Temporary Password</label>
+                                    <div class="input-group mb-2">
+                                        <input type="password" class="form-control" id="userPassword" placeholder="Enter temporary password (min 6 chars)">
+                                        <button class="btn btn-outline-secondary" type="button" id="toggleUserPasswordBtn" title="Toggle password visibility">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="forcePasswordReset" checked>
+                                        <label class="form-check-label text-xs text-muted" for="forcePasswordReset">Require password change upon first login</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -667,6 +694,109 @@
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Bulk User Import (CSV / Excel) -->
+    <div class="modal fade" id="bulkImportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-arrow-up text-primary fs-5"></i>
+                        <h5 class="modal-title fw-bold mb-0">Bulk User Import (CSV / Excel)</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-start gap-2" style="font-size: 12.5px; border-radius: 8px;">
+                        <i class="bi bi-info-circle-fill text-primary flex-shrink-0 mt-1"></i>
+                        <div>
+                            <strong>Scalable University Batch Import:</strong> Upload batches of hundreds or thousands of students, faculty, or staff. The system automatically detects duplicates and verifies institutional formats.
+                        </div>
+                    </div>
+
+                    <!-- File Drop / Upload Zone -->
+                    <div class="p-4 border border-dashed rounded-3 text-center mb-3 bg-light" id="importDropZone" style="border-width: 2px !important; cursor: pointer;">
+                        <i class="bi bi-cloud-arrow-up-fill text-primary mb-2 d-block" style="font-size: 2.2rem;"></i>
+                        <div class="fw-bold mb-1" style="font-size: 13.5px;">Drag and drop your CSV file here, or click to browse</div>
+                        <div class="text-muted text-xs mb-3">Supported formats: .CSV, .TXT (Comma-separated UTF-8)</div>
+                        <input type="file" id="bulkImportFileInput" accept=".csv, text/csv, text/plain" class="d-none">
+                        <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="document.getElementById('bulkImportFileInput').click()">
+                            <i class="bi bi-folder2-open me-1"></i> Choose CSV File
+                        </button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-muted text-xs" id="importFileName">No file selected</span>
+                        <button type="button" class="btn btn-link btn-sm p-0 text-primary" onclick="downloadSampleCSVTemplate()" style="font-size: 11.5px; text-decoration: none;">
+                            <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Sample CSV Template
+                        </button>
+                    </div>
+
+                    <!-- Validation & Duplicate Detection Summary -->
+                    <div id="importPreviewContainer" style="display: none;">
+                        <div class="row g-2 mb-3">
+                            <div class="col-4">
+                                <div class="p-2 border rounded-2 bg-white text-center">
+                                    <div class="text-xs text-muted fw-bold text-uppercase">Total Rows</div>
+                                    <div class="fs-5 fw-bold text-dark" id="importTotalRows">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded-2 bg-white text-center">
+                                    <div class="text-xs text-success fw-bold text-uppercase">Valid to Import</div>
+                                    <div class="fs-5 fw-bold text-success" id="importValidRows">0</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 border rounded-2 bg-white text-center">
+                                    <div class="text-xs text-danger fw-bold text-uppercase">Duplicates / Errors</div>
+                                    <div class="fs-5 fw-bold text-danger" id="importDuplicateRows">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="admin-table-responsive border rounded-2 mb-3" style="max-height: 180px;">
+                            <table class="admin-table mb-0" style="font-size: 11.5px;">
+                                <thead>
+                                    <tr>
+                                        <th>NAME</th>
+                                        <th>EMAIL</th>
+                                        <th>ID</th>
+                                        <th>ROLE</th>
+                                        <th>VALIDATION</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="importPreviewTableBody">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 pt-2 border-top">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" id="importSendInvites" checked>
+                                <label class="form-check-label text-xs fw-semibold" for="importSendInvites">Auto-send verification / invitation email</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch mb-1">
+                                <input class="form-check-input" type="checkbox" id="importSkipDuplicates" checked>
+                                <label class="form-check-label text-xs fw-semibold" for="importSkipDuplicates">Skip existing duplicate emails/IDs safely</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm px-4" id="executeImportBtn" disabled onclick="executeBulkImport()">
+                        <i class="bi bi-check2-circle me-1"></i> Import Users
+                    </button>
+                </div>
             </div>
         </div>
     </div>

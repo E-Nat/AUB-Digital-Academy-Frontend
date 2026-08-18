@@ -21,15 +21,16 @@ async function seedDatabase() {
     }
 
     // 2. Seed Programs
-    console.log('Seeding Programs...');
+    console.log('Seeding Degree Programs...');
     const programs = [
         {
             id: 1,
-            title: 'Computer Science & Engineering',
-            slug: 'computer-science-engineering',
+            title: 'Computer Science & Software Engineering',
+            slug: 'computer-science-software-engineering',
             degree_type: 'BACHELOR DEGREE',
+            faculty: 'Information Technology Faculty',
             duration: '4 Years',
-            description: 'Master software engineering, algorithms, AI architectures, and modern cloud systems.',
+            description: 'Comprehensive 4-year undergraduate curriculum covering modern computing foundations, distributed architecture, and software design.',
             icon_class: 'bi-laptop',
             theme_class: 'theme-blue',
             detail_url: '#',
@@ -39,13 +40,14 @@ async function seedDatabase() {
         },
         {
             id: 2,
-            title: 'Information Technology',
-            slug: 'information-technology',
+            title: 'Artificial Intelligence & Machine Learning',
+            slug: 'artificial-intelligence-machine-learning',
             degree_type: 'BACHELOR DEGREE',
+            faculty: 'Information Technology Faculty',
             duration: '4 Years',
-            description: 'Network architecture, cybersecurity, and enterprise systems administration.',
-            icon_class: 'bi-hdd-network',
-            theme_class: 'theme-cyan',
+            description: 'Rigorous engineering program focusing on modern generative AI, neural networks, natural language processing, and computer vision.',
+            icon_class: 'bi-cpu',
+            theme_class: 'theme-purple',
             detail_url: '#',
             order_num: 2,
             is_featured: 1,
@@ -53,13 +55,14 @@ async function seedDatabase() {
         },
         {
             id: 3,
-            title: 'Finance & Banking',
-            slug: 'finance-banking',
+            title: 'Cybersecurity & Information Defense',
+            slug: 'cybersecurity-information-defense',
             degree_type: 'BACHELOR DEGREE',
+            faculty: 'Information Technology Faculty',
             duration: '4 Years',
-            description: 'Corporate finance, investment analysis, digital fintech, and banking regulations.',
-            icon_class: 'bi-bank',
-            theme_class: 'theme-emerald',
+            description: 'Hands-on offensive & defensive security curriculum covering cloud vulnerability defense, penetration testing, and digital forensics.',
+            icon_class: 'bi-shield-check',
+            theme_class: 'theme-green',
             detail_url: '#',
             order_num: 3,
             is_featured: 1,
@@ -67,13 +70,14 @@ async function seedDatabase() {
         },
         {
             id: 4,
-            title: 'Accounting',
-            slug: 'accounting',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Financial reporting, managerial accounting, auditing standards, and tax frameworks.',
-            icon_class: 'bi-calculator',
-            theme_class: 'theme-amber',
+            title: 'Data Science & Predictive Analytics',
+            slug: 'data-science-predictive-analytics',
+            degree_type: 'MASTER DEGREE',
+            faculty: 'Information Technology Faculty',
+            duration: '2 Years',
+            description: 'Postgraduate curriculum in big data pipelines, statistical modeling, machine learning at scale, and business intelligence.',
+            icon_class: 'bi-graph-up',
+            theme_class: 'theme-cyan',
             detail_url: '#',
             order_num: 4,
             is_featured: 1,
@@ -81,29 +85,16 @@ async function seedDatabase() {
         },
         {
             id: 5,
-            title: 'Business Administration',
-            slug: 'business-administration',
+            title: 'Business Information Technology',
+            slug: 'business-information-technology',
             degree_type: 'BACHELOR DEGREE',
+            faculty: 'Business & Management Faculty',
             duration: '4 Years',
-            description: 'Strategic management, organizational leadership, entrepreneurship, and commerce.',
+            description: 'Blending technology leadership with financial strategy, enterprise ERP systems, and modern digital commerce solutions.',
             icon_class: 'bi-briefcase',
-            theme_class: 'theme-purple',
+            theme_class: 'theme-gold',
             detail_url: '#',
             order_num: 5,
-            is_featured: 1,
-            is_published: 1
-        },
-        {
-            id: 6,
-            title: 'Marketing & Digital Media',
-            slug: 'marketing-digital-media',
-            degree_type: 'BACHELOR DEGREE',
-            duration: '4 Years',
-            description: 'Digital brand strategy, consumer behavior, market analytics, and social campaigns.',
-            icon_class: 'bi-megaphone',
-            theme_class: 'theme-rose',
-            detail_url: '#',
-            order_num: 6,
             is_featured: 1,
             is_published: 1
         }
@@ -111,9 +102,14 @@ async function seedDatabase() {
 
     for (const p of programs) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO programs (id, title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [p.id, p.title, p.slug, p.degree_type, p.duration, p.description, p.icon_class, p.theme_class, p.detail_url, p.order_num, p.is_featured, p.is_published]
+            `INSERT INTO programs (id, title, slug, degree_type, faculty, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET 
+                title = excluded.title, slug = excluded.slug, degree_type = excluded.degree_type,
+                faculty = excluded.faculty, duration = excluded.duration, description = excluded.description,
+                icon_class = excluded.icon_class, theme_class = excluded.theme_class, detail_url = excluded.detail_url,
+                order_num = excluded.order_num, is_featured = excluded.is_featured, is_published = excluded.is_published`,
+            [p.id, p.title, p.slug, p.degree_type, p.faculty, p.duration, p.description, p.icon_class, p.theme_class, p.detail_url, p.order_num, p.is_featured, p.is_published]
         );
     }
 
@@ -126,7 +122,7 @@ async function seedDatabase() {
     const users = [
         {
             id: 1,
-            full_name: 'Admin System',
+            full_name: 'Dr. Johnathan Vance',
             email: 'admin@aub.edu.com',
             university_id: '10293847',
             password_hash: adminPasswordHash,
@@ -138,12 +134,12 @@ async function seedDatabase() {
         },
         {
             id: 2,
-            full_name: 'Sreyneang Sok',
-            email: 'sreyneang@aub.edu.kh',
+            full_name: 'Sok Virak',
+            email: 'sok.virak@student.aub.edu.kh',
             university_id: '202401234',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 1, // Computer Science
+            major_id: 1, // Computer Science & Software Engineering
             faculty: 'Information Technology',
             department_name: 'Computer Science & IT',
             position: 'Undergraduate Student',
@@ -154,12 +150,12 @@ async function seedDatabase() {
             enrollment_date: '2024-09-01',
             expected_graduation_date: '2028-07-15',
             dob: '2004-05-14',
-            gender: 'Female',
+            gender: 'Male',
             address: 'Khan Toul Kork, Phnom Penh, Cambodia',
             phone: '+855 12 888 101',
             email_verified: 1,
             two_factor_enabled: 0,
-            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
+            avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150',
             status: 'Active',
             created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         },
@@ -170,9 +166,9 @@ async function seedDatabase() {
             university_id: '202401235',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 2, // Information Technology
+            major_id: 1, // Computer Science & Software Engineering
             faculty: 'Information Technology',
-            department_name: 'Information Technology',
+            department_name: 'Software Engineering',
             position: 'Undergraduate Student',
             academic_year: 'Year 2',
             semester: 'Semester 2',
@@ -197,9 +193,9 @@ async function seedDatabase() {
             university_id: '202401236',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 5, // Business Administration
-            faculty: 'Business & Management',
-            department_name: 'Business Administration',
+            major_id: 3, // Cybersecurity & Information Defense
+            faculty: 'Information Technology',
+            department_name: 'Cybersecurity',
             position: 'Undergraduate Student',
             academic_year: 'Year 3',
             semester: 'Semester 1',
@@ -224,24 +220,24 @@ async function seedDatabase() {
             university_id: '202401237',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 2, // Information Technology
+            major_id: 2, // Artificial Intelligence & Machine Learning
             faculty: 'Information Technology',
-            department_name: 'Information Technology',
+            department_name: 'Artificial Intelligence',
             position: 'Undergraduate Student',
             academic_year: 'Year 1',
             semester: 'Semester 1',
-            enrollment_status: 'Pending',
-            academic_status: 'Registration Pending',
+            enrollment_status: 'Active',
+            academic_status: 'Currently Enrolled',
             enrollment_date: '2026-08-01',
             expected_graduation_date: '2030-07-15',
             dob: '2006-02-18',
             gender: 'Female',
             address: 'Khan Sen Sok, Phnom Penh, Cambodia',
             phone: '+855 12 888 104',
-            email_verified: 0,
+            email_verified: 1,
             two_factor_enabled: 0,
             avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150',
-            status: 'Pending',
+            status: 'Active',
             created_at: new Date(Date.now() - 15 * 86400000).toISOString()
         },
         {
@@ -251,13 +247,13 @@ async function seedDatabase() {
             university_id: '202401238',
             password_hash: studentPasswordHash,
             role_id: 3,
-            major_id: 1, // Computer Science & Engineering
-            faculty: 'Information Technology',
-            department_name: 'Computer Science',
+            major_id: 5, // Business Information Technology
+            faculty: 'Business & Management',
+            department_name: 'Business IT',
             position: 'Undergraduate Student',
             academic_year: 'Year 4',
             semester: 'Semester 2',
-            enrollment_status: 'Graduated',
+            enrollment_status: 'Inactive',
             academic_status: 'Alumni / Graduated',
             enrollment_date: '2022-09-01',
             expected_graduation_date: '2026-07-15',
@@ -279,6 +275,9 @@ async function seedDatabase() {
             password_hash: teacherPasswordHash,
             role_id: 2,
             major_id: null,
+            faculty: 'Information Technology',
+            department_name: 'Computer Science',
+            position: 'Associate Professor',
             avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150',
             status: 'Active',
             created_at: new Date(Date.now() - 60 * 86400000).toISOString()
@@ -291,7 +290,55 @@ async function seedDatabase() {
             password_hash: teacherPasswordHash,
             role_id: 2,
             major_id: null,
+            faculty: 'Information Technology',
+            department_name: 'Software Engineering',
+            position: 'Head of Software Engineering',
             avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
+        },
+        {
+            id: 9,
+            full_name: 'Dr. Michael Chang',
+            email: 'michael.chang@aub.edu.kh',
+            university_id: 'T003',
+            password_hash: teacherPasswordHash,
+            role_id: 2,
+            major_id: null,
+            faculty: 'Information Technology',
+            department_name: 'Artificial Intelligence',
+            position: 'Lead AI Researcher',
+            avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150',
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
+        },
+        {
+            id: 10,
+            full_name: 'Emily Carter',
+            email: 'emily.carter@aub.edu.kh',
+            university_id: 'T004',
+            password_hash: teacherPasswordHash,
+            role_id: 2,
+            major_id: null,
+            faculty: 'Information Technology',
+            department_name: 'Design & Interaction',
+            position: 'Senior UX Instructor',
+            avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150',
+            status: 'Active',
+            created_at: new Date(Date.now() - 60 * 86400000).toISOString()
+        },
+        {
+            id: 11,
+            full_name: 'Dr. Sokha Chan',
+            email: 'sokha.chan@aub.edu.kh',
+            university_id: 'T005',
+            password_hash: teacherPasswordHash,
+            role_id: 2,
+            major_id: null,
+            faculty: 'Information Technology',
+            department_name: 'Cybersecurity',
+            position: 'Cybersecurity Chair',
+            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
             status: 'Active',
             created_at: new Date(Date.now() - 60 * 86400000).toISOString()
         }
@@ -330,10 +377,10 @@ async function seedDatabase() {
                 two_factor_enabled = excluded.two_factor_enabled`,
             [
                 u.id, u.full_name, u.email, u.university_id, u.password_hash, u.role_id, u.major_id, u.avatar_url, u.status, u.created_at,
-                u.phone || '', u.faculty || '', u.department_name || '', u.position || '', u.academic_year || 'Year 1',
+                u.phone || '+855 12 888 100', u.faculty || 'Information Technology', u.department_name || '', u.position || '', u.academic_year || 'Year 1',
                 u.semester || 'Semester 1', u.enrollment_status || 'Active', u.academic_status || 'Currently Enrolled',
                 u.enrollment_date || null, u.expected_graduation_date || null, u.dob || null, u.gender || 'Not Specified',
-                u.address || '', u.email_verified !== undefined ? u.email_verified : 1, u.two_factor_enabled || 0
+                u.address || 'Phnom Penh, Cambodia', u.email_verified !== undefined ? u.email_verified : 1, u.two_factor_enabled || 0
             ]
         );
     }
@@ -341,22 +388,20 @@ async function seedDatabase() {
     // 4. Seed Categories
     console.log('Seeding Categories...');
     const categories = [
-        { id: 1, name: 'Technology', slug: 'technology', icon: 'bi-laptop', type: 'general', order_num: 1 },
-        { id: 2, name: 'Business Administration', slug: 'business', icon: 'bi-briefcase', type: 'general', order_num: 2 },
-        { id: 3, name: 'Design', slug: 'design', icon: 'bi-palette', type: 'general', order_num: 3 },
-        { id: 4, name: 'Security', slug: 'security', icon: 'bi-shield-check', type: 'general', order_num: 4 },
-        { id: 5, name: 'Data Science', slug: 'data', icon: 'bi-graph-up-arrow', type: 'general', order_num: 5 },
-        { id: 6, name: 'Engineering', slug: 'engineering', icon: 'bi-gear', type: 'general', order_num: 6 },
-        { id: 7, name: 'Finance & Banking', slug: 'finance', icon: 'bi-bank', type: 'general', order_num: 7 },
-        { id: 8, name: 'Accounting', slug: 'accounting', icon: 'bi-calculator', type: 'general', order_num: 8 },
-        { id: 9, name: 'Marketing', slug: 'marketing', icon: 'bi-megaphone', type: 'general', order_num: 9 }
+        { id: 1, name: 'Computer Science', slug: 'computer-science', icon: 'bi-laptop', type: 'general', color: '#2563EB', order_num: 1 },
+        { id: 2, name: 'Software Engineering', slug: 'software-engineering', icon: 'bi-code-slash', type: 'general', color: '#0891B2', order_num: 2 },
+        { id: 3, name: 'Artificial Intelligence', slug: 'artificial-intelligence', icon: 'bi-cpu', type: 'general', color: '#7C3AED', order_num: 3 },
+        { id: 4, name: 'Cybersecurity', slug: 'cybersecurity', icon: 'bi-shield-check', type: 'general', color: '#059669', order_num: 4 },
+        { id: 5, name: 'Data Science & Analytics', slug: 'data-science-analytics', icon: 'bi-graph-up-arrow', type: 'general', color: '#D97706', order_num: 5 },
+        { id: 6, name: 'Business Information Technology', slug: 'business-information-technology', icon: 'bi-briefcase', type: 'general', color: '#4F46E5', order_num: 6 }
     ];
 
     for (const c of categories) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO categories (id, name, slug, icon, type, order_num)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [c.id, c.name, c.slug, c.icon, c.type, c.order_num]
+            `INSERT INTO categories (id, name, slug, icon, type, color, order_num)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET name = excluded.name, slug = excluded.slug, icon = excluded.icon, type = excluded.type, color = excluded.color, order_num = excluded.order_num`,
+            [c.id, c.name, c.slug, c.icon, c.type, c.color, c.order_num]
         );
     }
 
@@ -365,47 +410,67 @@ async function seedDatabase() {
     const instructors = [
         {
             id: 1,
+            user_id: 7,
             name: 'Dr. Sarah Johnson',
-            title: 'Lead Software Architect & AI Researcher',
-            bio: 'Over 12 years of industry experience in full-stack architecture and AI systems at top tech companies.',
+            title: 'Associate Professor',
+            bio: 'Over 12 years of industry experience in software algorithms, web systems, and data structures.',
             avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300',
             email: 'sarah.johnson@aub.edu.kh',
-            expertise: 'Web Development, Artificial Intelligence, Distributed Systems'
+            expertise: 'Algorithms, Data Structures, Web Systems',
+            faculty: 'Information Technology'
         },
         {
             id: 2,
-            name: 'Michael Chang',
-            title: 'Principal Design System Specialist',
-            bio: 'Former senior UX designer with a passion for scalable design systems, micro-interactions, and UX strategy.',
-            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300',
-            email: 'michael.chang@aub.edu.kh',
-            expertise: 'Product Design, UI/UX, Design Systems, Design Sprint'
+            user_id: 8,
+            name: 'Prof. Alex Chen',
+            title: 'Head of Software Engineering',
+            bio: 'Specialist in full-stack architecture, microservices, cloud deployments, and reactive state systems.',
+            avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300',
+            email: 'alex.chen@aub.edu.kh',
+            expertise: 'Full-Stack Web, Cloud Architecture, DevOps',
+            faculty: 'Information Technology'
         },
         {
             id: 3,
-            name: 'David Roberts',
-            title: 'Chief Information Security Officer',
-            bio: 'Cybersecurity veteran specializing in ethical hacking, cryptography, security auditing, and cloud defense.',
-            avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300',
-            email: 'david.roberts@aub.edu.kh',
-            expertise: 'Network Defense, Ethical Hacking, Threat Analysis'
+            user_id: 9,
+            name: 'Dr. Michael Chang',
+            title: 'Lead AI Researcher',
+            bio: 'Machine learning specialist focusing on deep neural networks, computer vision, and transformer models.',
+            avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=300',
+            email: 'michael.chang@aub.edu.kh',
+            expertise: 'Deep Learning, Neural Networks, Computer Vision',
+            faculty: 'Information Technology'
         },
         {
             id: 4,
-            name: 'Elena Rostova',
-            title: 'Senior Data Scientist & ML Engineer',
-            bio: 'Machine learning consultant helping enterprise clients build robust predictive models and data pipelines.',
+            user_id: 10,
+            name: 'Emily Carter',
+            title: 'Senior UX Instructor',
+            bio: 'Product designer focusing on accessible user interfaces, design systems, and user journey mapping.',
             avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300',
-            email: 'elena.rostova@aub.edu.kh',
-            expertise: 'Big Data, Python, Machine Learning, Statistical Modeling'
+            email: 'emily.carter@aub.edu.kh',
+            expertise: 'User Experience, Design Systems, Figma',
+            faculty: 'Information Technology'
+        },
+        {
+            id: 5,
+            user_id: 11,
+            name: 'Dr. Sokha Chan',
+            title: 'Cybersecurity Chair',
+            bio: 'Cybersecurity veteran specializing in ethical hacking, cryptography, security auditing, and zero-trust defense.',
+            avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300',
+            email: 'sokha.chan@aub.edu.kh',
+            expertise: 'Network Defense, Ethical Hacking, Cryptography',
+            faculty: 'Information Technology'
         }
     ];
 
     for (const inst of instructors) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO instructors (id, name, title, bio, avatar_url, email, expertise)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [inst.id, inst.name, inst.title, inst.bio, inst.avatar_url, inst.email, inst.expertise]
+            `INSERT INTO instructors (id, user_id, name, title, bio, avatar_url, email, expertise, faculty)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET user_id = excluded.user_id, name = excluded.name, title = excluded.title, bio = excluded.bio, avatar_url = excluded.avatar_url, email = excluded.email, expertise = excluded.expertise, faculty = excluded.faculty`,
+            [inst.id, inst.user_id, inst.name, inst.title, inst.bio, inst.avatar_url, inst.email, inst.expertise, inst.faculty]
         );
     }
 
@@ -414,73 +479,109 @@ async function seedDatabase() {
     const courses = [
         {
             id: 1,
-            title: 'Full-Stack Web Development',
-            slug: 'full-stack-web-development',
-            description: 'Build enterprise web applications with modern HTML5, CSS3, JavaScript, Node.js, and SQL.',
-            category_id: 1, // Technology
-            instructor_id: 1,
+            title: 'Full-Stack Modern Web Architecture',
+            slug: 'full-stack-modern-web-architecture',
+            description: 'Master frontend engineering with component architectures, reactive state management, asynchronous REST APIs, and containerized deployment.',
+            category_id: 2, // Software Engineering
+            instructor_id: 2, // Prof. Alex Chen
             thumbnail_url: 'assets/images/course_webdev.jpg',
             rating: 4.9,
-            difficulty: 'Beginner',
-            duration_hours: '8 Hours',
-            lesson_count: 12,
-            enrolled_students_count: 1250,
-            badge_text: 'Technology',
+            difficulty: 'Intermediate',
+            duration_hours: '12 Weeks',
+            lesson_count: 6,
+            enrolled_students_count: 2,
+            badge_text: 'Popular',
             order_num: 1,
             is_popular: 1,
             is_published: 1
         },
         {
             id: 2,
-            title: 'Advanced UI/UX Design',
-            slug: 'advanced-ui-ux-design',
-            description: 'Master Figma and design user-centered digital experiences for mobile and web.',
-            category_id: 3, // Design
-            instructor_id: 2,
-            thumbnail_url: 'assets/images/course_uiux.jpg',
+            title: 'Applied Programming & Algorithms',
+            slug: 'applied-programming-algorithms',
+            description: 'Fundamental algorithmic techniques, asymptotic analysis, graph algorithms, dynamic programming, and computational complexity.',
+            category_id: 1, // Computer Science
+            instructor_id: 1, // Dr. Sarah Johnson
+            thumbnail_url: 'assets/images/digital_learning_graphic.jpg',
             rating: 4.8,
-            difficulty: 'Intermediate',
-            duration_hours: '6 Hours',
-            lesson_count: 10,
-            enrolled_students_count: 980,
-            badge_text: 'Design',
+            difficulty: 'Beginner',
+            duration_hours: '8 Weeks',
+            lesson_count: 5,
+            enrolled_students_count: 2,
+            badge_text: 'Core Subject',
             order_num: 2,
             is_popular: 1,
             is_published: 1
         },
         {
             id: 3,
-            title: 'Cyber Security Essentials',
-            slug: 'cyber-security-essentials',
-            description: 'Protect digital assets and infrastructure against evolving global cyber threats.',
-            category_id: 4, // Security
-            instructor_id: 3,
-            thumbnail_url: 'assets/images/course_cybersecurity.jpg',
-            rating: 4.9,
-            difficulty: 'Advanced',
-            duration_hours: '12 Hours',
-            lesson_count: 15,
-            enrolled_students_count: 450,
-            badge_text: 'Security',
+            title: 'Database Systems & Cloud Architecture',
+            slug: 'database-systems-cloud-architecture',
+            description: 'Relational data modeling, SQL optimization, query indexing, transactions, and distributed cloud database deployments.',
+            category_id: 2, // Software Engineering
+            instructor_id: 2, // Prof. Alex Chen
+            thumbnail_url: 'assets/images/course_datascience.jpg',
+            rating: 4.85,
+            difficulty: 'Intermediate',
+            duration_hours: '10 Weeks',
+            lesson_count: 5,
+            enrolled_students_count: 0,
+            badge_text: 'Essential',
             order_num: 3,
             is_popular: 1,
             is_published: 1
         },
         {
             id: 4,
-            title: 'Data Science Fundamentals',
-            slug: 'data-science-fundamentals',
-            description: 'Analyze complex datasets and generate actionable business insights.',
-            category_id: 5, // Data Science
-            instructor_id: 4,
-            thumbnail_url: 'assets/images/course_datascience.jpg',
-            rating: 4.7,
+            title: 'Cybersecurity Fundamentals & Network Defense',
+            slug: 'cybersecurity-fundamentals-network-defense',
+            description: 'Enterprise zero-trust architecture, identity and access management, cryptography, network firewalls, and incident response.',
+            category_id: 4, // Cybersecurity
+            instructor_id: 5, // Dr. Sokha Chan
+            thumbnail_url: 'assets/images/course_cybersecurity.jpg',
+            rating: 4.9,
             difficulty: 'Intermediate',
-            duration_hours: '10 Hours',
-            lesson_count: 14,
-            enrolled_students_count: 620,
-            badge_text: 'Recommended',
+            duration_hours: '10 Weeks',
+            lesson_count: 5,
+            enrolled_students_count: 2,
+            badge_text: 'Security',
             order_num: 4,
+            is_popular: 1,
+            is_published: 1
+        },
+        {
+            id: 5,
+            title: 'Artificial Intelligence & Machine Learning',
+            slug: 'artificial-intelligence-machine-learning',
+            description: 'Supervised and unsupervised learning, deep neural networks, convolutional networks, transformers, and deployment pipelines.',
+            category_id: 3, // Artificial Intelligence
+            instructor_id: 3, // Dr. Michael Chang
+            thumbnail_url: 'assets/images/hero_digital_learning.jpg',
+            rating: 4.95,
+            difficulty: 'Advanced',
+            duration_hours: '14 Weeks',
+            lesson_count: 5,
+            enrolled_students_count: 1,
+            badge_text: 'Featured',
+            order_num: 5,
+            is_popular: 1,
+            is_published: 1
+        },
+        {
+            id: 6,
+            title: 'Data Science & Analytics',
+            slug: 'data-science-analytics',
+            description: 'Data wrangling with Python, exploratory data analysis, statistical modeling, and interactive executive dashboards.',
+            category_id: 5, // Data Science
+            instructor_id: 3, // Dr. Michael Chang
+            thumbnail_url: 'assets/images/course_datascience.jpg',
+            rating: 4.75,
+            difficulty: 'Intermediate',
+            duration_hours: '10 Weeks',
+            lesson_count: 4,
+            enrolled_students_count: 0,
+            badge_text: 'Recommended',
+            order_num: 6,
             is_popular: 1,
             is_published: 1
         }
@@ -488,73 +589,130 @@ async function seedDatabase() {
 
     for (const c of courses) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO courses (id, title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, enrolled_students_count, badge_text, order_num, is_popular, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO courses (id, title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, enrolled_students_count, badge_text, order_num, is_popular, is_published)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET 
+                title = excluded.title, slug = excluded.slug, description = excluded.description,
+                category_id = excluded.category_id, instructor_id = excluded.instructor_id,
+                thumbnail_url = excluded.thumbnail_url, rating = excluded.rating, difficulty = excluded.difficulty,
+                duration_hours = excluded.duration_hours, lesson_count = excluded.lesson_count,
+                enrolled_students_count = excluded.enrolled_students_count, badge_text = excluded.badge_text,
+                order_num = excluded.order_num, is_popular = excluded.is_popular, is_published = excluded.is_published`,
             [c.id, c.title, c.slug, c.description, c.category_id, c.instructor_id, c.thumbnail_url, c.rating, c.difficulty, c.duration_hours, c.lesson_count, c.enrolled_students_count, c.badge_text, c.order_num, c.is_popular, c.is_published]
         );
     }
 
-    // 7. Seed Modules & Lessons
-    console.log('Seeding Course Modules & Lessons...');
+    // 7. Seed Modules / Chapters
+    console.log('Seeding Course Modules / Chapters...');
     const modules = [
-        { id: 1, course_id: 1, title: 'Module 1: Introduction to Web Architecture & HTML5', order_num: 1 },
-        { id: 2, course_id: 1, title: 'Module 2: Advanced CSS & Responsive Layouts', order_num: 2 },
-        { id: 3, course_id: 1, title: 'Module 3: JavaScript Programming & DOM Manipulation', order_num: 3 },
-        { id: 4, course_id: 2, title: 'Module 1: UI/UX Principles & User Journey Mapping', order_num: 1 },
-        { id: 5, course_id: 2, title: 'Module 2: Wireframing and Prototyping in Figma', order_num: 2 },
-        { id: 6, course_id: 3, title: 'Module 1: Network Fundamentals & Threat Surfaces', order_num: 1 },
-        { id: 7, course_id: 4, title: 'Module 1: Python for Data Analysis & Pandas', order_num: 1 }
+        // Course 1: Full-Stack Web Architecture
+        { id: 1, course_id: 1, title: 'Introduction to Web Standards & Modern JavaScript', description: 'Foundations of semantic HTML5, CSS layout trees, and the event-driven JavaScript browser runtime.', duration: '2 Hours', order_num: 1, lesson_count: 4, quiz_count: 1 },
+        { id: 2, course_id: 1, title: 'HTML5 Semantic Layouts & Advanced Responsive CSS', description: 'CSS Grid, Flexbox layouts, responsive design tokens, and CSS variables.', duration: '3 Hours', order_num: 2, lesson_count: 4, quiz_count: 1 },
+        { id: 3, course_id: 1, title: 'React Component Architecture & State Management', description: 'Breaking down interfaces into atomic components, handling one-way state transitions, and hooks.', duration: '3.5 Hours', order_num: 3, lesson_count: 4, quiz_count: 1 },
+        { id: 4, course_id: 1, title: 'Node.js REST API Design & Express Middleware', description: 'Asynchronous fetch pipelines, token headers, interceptors, optimistic updates, and REST endpoints.', duration: '3 Hours', order_num: 4, lesson_count: 4, quiz_count: 1 },
+        { id: 5, course_id: 1, title: 'Database Systems & SQL Modeling with SQLite', description: 'Relational data modeling, indexing, ACID transactions, and foreign key relationships.', duration: '2.5 Hours', order_num: 5, lesson_count: 4, quiz_count: 1 },
+        { id: 6, course_id: 1, title: 'Production Deployment, CI/CD & Containerization', description: 'Code bundling, static caching headers, Docker containerization, and automated deployment.', duration: '2.5 Hours', order_num: 6, lesson_count: 4, quiz_count: 1 },
+
+        // Course 2: Applied Programming & Algorithms
+        { id: 7, course_id: 2, title: 'Introduction to Algorithmic Complexity (Big-O)', description: 'Asymptotic analysis, time and space complexity, recurrence relations.', duration: '2 Hours', order_num: 1, lesson_count: 4, quiz_count: 1 },
+        { id: 8, course_id: 2, title: 'Linear Data Structures: Arrays, Lists, Stacks, Queues', description: 'Implementation and operations on linear data collections.', duration: '3 Hours', order_num: 2, lesson_count: 4, quiz_count: 1 },
+        { id: 9, course_id: 2, title: 'Trees, Heaps & Priority Queues', description: 'Binary search trees, AVL balancing, and binary heaps.', duration: '3.5 Hours', order_num: 3, lesson_count: 4, quiz_count: 1 },
+        { id: 10, course_id: 2, title: 'Graph Traversal: BFS, DFS & Shortest Path', description: 'Graph representations, breadth-first search, depth-first search, Dijkstra algorithm.', duration: '3 Hours', order_num: 4, lesson_count: 4, quiz_count: 1 },
+        { id: 11, course_id: 2, title: 'Dynamic Programming & Greedy Approaches', description: 'Memoization, tabulation, knapsack problems, and optimal substructure.', duration: '3.5 Hours', order_num: 5, lesson_count: 4, quiz_count: 1 },
+
+        // Course 3: Database Systems & Cloud Architecture
+        { id: 12, course_id: 3, title: 'Relational Database Concepts & Normalization', description: '1NF, 2NF, 3NF, BCNF, ER diagrams, and relational algebra.', duration: '2.5 Hours', order_num: 1, lesson_count: 4, quiz_count: 1 },
+        { id: 13, course_id: 3, title: 'Advanced SQL Queries, Joins & Subqueries', description: 'Complex joins, window functions, CTEs, and aggregation grouping.', duration: '3 Hours', order_num: 2, lesson_count: 4, quiz_count: 1 },
+        { id: 14, course_id: 3, title: 'Indexing Strategies & Query Performance', description: 'B-tree indexes, execution query plans, and EXPLAIN ANALYZE optimization.', duration: '2.5 Hours', order_num: 3, lesson_count: 4, quiz_count: 1 },
+        { id: 15, course_id: 3, title: 'Transactions, ACID Compliance & Concurrency', description: 'Transaction isolation levels, deadlock handling, write-ahead logging.', duration: '3 Hours', order_num: 4, lesson_count: 4, quiz_count: 1 },
+        { id: 16, course_id: 3, title: 'Cloud Database Deployment & Replication', description: 'Managed cloud DBs, read replicas, automated snapshots, and failover.', duration: '2 Hours', order_num: 5, lesson_count: 4, quiz_count: 1 },
+
+        // Course 4: Cybersecurity Fundamentals
+        { id: 17, course_id: 4, title: 'Security Principles, Threats & Vulnerability Surfaces', description: 'CIA triad, threat modeling, attack vectors, and security postures.', duration: '2.5 Hours', order_num: 1, lesson_count: 3, quiz_count: 1 },
+        { id: 18, course_id: 4, title: 'Cryptography, Hashing & Public Key Infrastructure', description: 'Symmetric/asymmetric encryption, SHA-256, TLS certificates, and PKI.', duration: '3 Hours', order_num: 2, lesson_count: 4, quiz_count: 1 },
+        { id: 19, course_id: 4, title: 'Network Defense, Firewalls & Intrusion Detection', description: 'Packet filtering, IDS/IPS configuration, Wireshark packet analysis.', duration: '3 Hours', order_num: 3, lesson_count: 4, quiz_count: 1 },
+        { id: 20, course_id: 4, title: 'Web Application Security & OWASP Top 10', description: 'SQL injection, XSS, CSRF, insecure direct object references, mitigation.', duration: '3.5 Hours', order_num: 4, lesson_count: 4, quiz_count: 1 },
+        { id: 21, course_id: 4, title: 'Identity Management & Zero-Trust Architecture', description: 'OAuth2, JWT authentication, RBAC, and zero-trust microsegmentation.', duration: '2.5 Hours', order_num: 5, lesson_count: 4, quiz_count: 1 },
+
+        // Course 5: Artificial Intelligence & Machine Learning
+        { id: 22, course_id: 5, title: 'Mathematical Foundations of Machine Learning', description: 'Linear algebra, vector calculus, gradient descent optimization.', duration: '3 Hours', order_num: 1, lesson_count: 5, quiz_count: 1 },
+        { id: 23, course_id: 5, title: 'Supervised Learning: Regression & Classification', description: 'Linear/logistic regression, decision trees, random forests, SVMs.', duration: '3.5 Hours', order_num: 2, lesson_count: 5, quiz_count: 1 },
+        { id: 24, course_id: 5, title: 'Neural Networks & Deep Learning Foundations', description: 'Multilayer perceptrons, activation functions, backpropagation calculus.', duration: '4 Hours', order_num: 3, lesson_count: 5, quiz_count: 1 },
+        { id: 25, course_id: 5, title: 'Convolutional & Recurrent Architectures', description: 'Spatial convolutions, pooling, RNNs, LSTMs, and sequence models.', duration: '3.5 Hours', order_num: 4, lesson_count: 5, quiz_count: 1 },
+        { id: 26, course_id: 5, title: 'Transformer Models & Generative AI Applications', description: 'Attention mechanisms, BERT, GPT transformer encoders, and fine-tuning.', duration: '4 Hours', order_num: 5, lesson_count: 4, quiz_count: 1 }
     ];
+
     for (const m of modules) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO modules (id, course_id, title, order_num) VALUES (?, ?, ?, ?)`,
-            [m.id, m.course_id, m.title, m.order_num]
+            `INSERT INTO modules (id, course_id, title, description, duration, order_num, lesson_count, quiz_count, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET 
+                course_id = excluded.course_id, title = excluded.title, description = excluded.description,
+                duration = excluded.duration, order_num = excluded.order_num, lesson_count = excluded.lesson_count,
+                quiz_count = excluded.quiz_count, status = excluded.status`,
+            [m.id, m.course_id, m.title, m.description, m.duration, m.order_num, m.lesson_count, m.quiz_count, 'Published']
         );
     }
 
-    // 8. Seed Enrollments (Realistic active dates)
+    // 8. Seed Enrollments (Realistic, Deduplicated, Unique student-course pairs)
     console.log('Seeding Enrollments...');
     const now = Date.now();
     const enrollments = [
         { 
             id: 1, 
-            user_id: 2, 
-            course_id: 1, 
-            enrollment_date: new Date(now - 2 * 86400000).toISOString(), // 2 days ago (Technology)
-            status: 'Active', 
-            progress_percentage: 65.0 
-        },
-        { 
-            id: 2, 
-            user_id: 3, 
-            course_id: 1, 
-            enrollment_date: new Date(now - 4 * 86400000).toISOString(), // 4 days ago (Technology)
-            status: 'Active', 
-            progress_percentage: 40.0 
-        },
-        { 
-            id: 3, 
-            user_id: 4, 
-            course_id: 2, 
-            enrollment_date: new Date(now - 6 * 86400000).toISOString(), // 6 days ago (Design)
+            user_id: 2, // Sok Virak
+            course_id: 1, // Full-Stack Modern Web Architecture
+            enrollment_date: new Date(now - 4 * 86400000).toISOString(),
             status: 'Active', 
             progress_percentage: 85.0 
         },
         { 
-            id: 4, 
-            user_id: 5, 
-            course_id: 3, 
-            enrollment_date: new Date(now - 8 * 86400000).toISOString(), // 8 days ago (Security)
+            id: 2, 
+            user_id: 3, // Chanthou Meas
+            course_id: 1, // Full-Stack Modern Web Architecture
+            enrollment_date: new Date(now - 6 * 86400000).toISOString(),
             status: 'Active', 
-            progress_percentage: 20.0 
+            progress_percentage: 60.0 
+        },
+        { 
+            id: 3, 
+            user_id: 4, // Dara Keo
+            course_id: 4, // Cybersecurity Fundamentals
+            enrollment_date: new Date(now - 10 * 86400000).toISOString(),
+            status: 'Completed', 
+            progress_percentage: 100.0 
+        },
+        { 
+            id: 4, 
+            user_id: 5, // Kanha Rath
+            course_id: 5, // Artificial Intelligence & Machine Learning
+            enrollment_date: new Date(now - 2 * 86400000).toISOString(),
+            status: 'Active', 
+            progress_percentage: 40.0 
         },
         { 
             id: 5, 
-            user_id: 6, 
-            course_id: 1, 
-            enrollment_date: new Date(now - 12 * 86400000).toISOString(), // 12 days ago (Technology)
+            user_id: 6, // Vibol Pen
+            course_id: 2, // Applied Programming & Algorithms
+            enrollment_date: new Date(now - 14 * 86400000).toISOString(),
             status: 'Active', 
             progress_percentage: 95.0 
+        },
+        { 
+            id: 6, 
+            user_id: 2, // Sok Virak
+            course_id: 2, // Applied Programming & Algorithms
+            enrollment_date: new Date(now - 8 * 86400000).toISOString(),
+            status: 'Active', 
+            progress_percentage: 50.0 
+        },
+        { 
+            id: 7, 
+            user_id: 3, // Chanthou Meas
+            course_id: 4, // Cybersecurity Fundamentals
+            enrollment_date: new Date(now - 5 * 86400000).toISOString(),
+            status: 'Active', 
+            progress_percentage: 30.0 
         }
     ];
 
@@ -578,7 +736,7 @@ async function seedDatabase() {
         {
             id: 1,
             title: 'New Student Enrollment',
-            message: 'Sok Virak enrolled in Full-Stack Web Development',
+            message: 'Sok Virak enrolled in Full-Stack Modern Web Architecture',
             type: 'enrollment',
             link_url: 'enrollment-management.html',
             is_read: 0

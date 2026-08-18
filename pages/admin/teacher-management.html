@@ -63,27 +63,26 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
-                    </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">Administration Portal</div>
+                <div class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Administration Portal</div>
                     </div>
                 </div>
             </div>
 
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">Management</div>
+                <div class="admin-sidebar-label">MANAGEMENT</div>
                 <a href="user-management.html" class="admin-nav-item">
                     <i class="bi bi-people"></i>
-                    <span>User Accounts</span>
+                    <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item active">
                     <i class="bi bi-person-badge"></i>
@@ -98,14 +97,10 @@
                     <span>Enrollment Management</span>
                 </a>
 
-                <div class="admin-sidebar-label">System</div>
+                <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
-                </a>
-                <a href="../../welcomepage.html" class="admin-nav-item">
-                    <i class="bi bi-house"></i>
-                    <span>Back to Website</span>
                 </a>
             </nav>
 
@@ -434,6 +429,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/components/sidebar.js"></script>
     <script src="../../js/pages/teacher-management.js"></script>
 </body>
 </html>

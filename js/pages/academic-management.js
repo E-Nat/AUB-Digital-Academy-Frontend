@@ -234,19 +234,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!confirmed) return;
 
-        if (window.AdminStore) {
-            window.AdminStore.deleteProgram(id);
-            allPrograms = window.AdminStore.getPrograms();
-        }
-        renderProgramsTable(allPrograms);
-
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`Program "${name}" deleted`, 'success');
-        }
-
         try {
-            await fetch(`${API_BASE}/admin/programs/${id}`, { method: 'DELETE', headers: getHeaders() });
-        } catch (e) {}
+            if (window.AdminStore) {
+                window.AdminStore.deleteProgram(id);
+                allPrograms = window.AdminStore.getPrograms();
+            }
+
+            const res = await fetch(`${API_BASE}/admin/programs/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.message) {
+                    throw new Error(errData.message);
+                }
+            }
+
+            renderProgramsTable(allPrograms);
+            if (window.AdminStore) {
+                window.AdminStore.constructor.toast(`Program "${name}" deleted`, 'success');
+            }
+        } catch (err) {
+            if (window.AdminStore) {
+                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete program with registered students.');
+            } else {
+                alert(err.message || 'Cannot delete program.');
+            }
+            // Reload to restore state
+            loadPrograms();
+        }
     };
 
     // ==========================================
@@ -474,6 +488,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.openCreateCourseModal = function () {
         document.getElementById('courseForm').reset();
         document.getElementById('courseId').value = '';
+        const pubSwitch = document.getElementById('coursePublished');
+        if (pubSwitch) pubSwitch.checked = true;
         document.getElementById('courseModalTitle').textContent = 'Add New Specialized Course';
         populateCourseSelects();
         if (courseModal) courseModal.show();
@@ -493,6 +509,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseLessons').value = c.lesson_count || 12;
         document.getElementById('courseBadge').value = c.badge || '';
         document.getElementById('courseDesc').value = c.description || '';
+        const pubSwitch = document.getElementById('coursePublished');
+        if (pubSwitch) pubSwitch.checked = (c.is_published === 1);
         document.getElementById('courseModalTitle').textContent = 'Edit Specialized Course';
 
         if (courseModal) courseModal.show();
@@ -509,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const insSelect = document.getElementById('courseInstructorSelect');
         if (insSelect && allInstructors.length > 0) {
             insSelect.innerHTML = allInstructors.map(ins => `
-                <option value="${ins.id}">${escapeHtml(ins.name)} (${escapeHtml(ins.title || 'Faculty')})</option>
+                <option value="${ins.id}">${escapeHtml(ins.name)} (${escapeHtml(ins.title || 'Faculty Lead')})</option>
             `).join('');
         }
     }
@@ -521,16 +539,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const id = document.getElementById('courseId').value;
             const title = document.getElementById('courseTitle').value.trim();
+            const pubSwitch = document.getElementById('coursePublished');
+            const isPublished = pubSwitch ? (pubSwitch.checked ? 1 : 0) : 1;
+
             const payload = {
                 title: title,
                 category_id: parseInt(document.getElementById('courseCategorySelect').value) || 1,
                 instructor_id: parseInt(document.getElementById('courseInstructorSelect').value) || 1,
                 difficulty: document.getElementById('courseDifficulty').value,
-                duration: document.getElementById('courseDuration').value.trim(),
+                duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
                 lesson_count: parseInt(document.getElementById('courseLessons').value) || 12,
                 badge: document.getElementById('courseBadge').value.trim(),
                 description: document.getElementById('courseDesc').value.trim(),
-                is_published: 1
+                is_published: isPublished
             };
 
             if (id) {
@@ -610,19 +631,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!confirmed) return;
 
-        if (window.AdminStore) {
-            window.AdminStore.deleteCourse(id);
-            allCourses = window.AdminStore.getCourses();
-        }
-        applyCourseFilters();
-
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`Course "${name}" deleted`, 'success');
-        }
-
         try {
-            await fetch(`${API_BASE}/admin/courses/${id}`, { method: 'DELETE', headers: getHeaders() });
-        } catch (e) {}
+            if (window.AdminStore) {
+                window.AdminStore.deleteCourse(id);
+                allCourses = window.AdminStore.getCourses();
+            }
+
+            const res = await fetch(`${API_BASE}/admin/courses/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.message) {
+                    throw new Error(errData.message);
+                }
+            }
+
+            applyCourseFilters();
+            if (window.AdminStore) {
+                window.AdminStore.constructor.toast(`Course "${name}" deleted`, 'success');
+            }
+        } catch (err) {
+            if (window.AdminStore) {
+                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete course with active enrollments.');
+            } else {
+                alert(err.message || 'Cannot delete course.');
+            }
+            loadCourses();
+        }
     };
 
     // ==========================================
@@ -718,7 +752,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const chapterForm = document.getElementById('chapterForm');
     if (chapterForm) {
-        chapterForm.addEventListener('submit', function (e) {
+        chapterForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const chapterId = document.getElementById('chapterFormId').value;
@@ -750,6 +784,12 @@ document.addEventListener('DOMContentLoaded', function () {
             renderChaptersList(courseId);
             allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
             applyCourseFilters();
+
+            try {
+                const url = chapterId ? `${API_BASE}/admin/chapters/${chapterId}` : `${API_BASE}/admin/chapters`;
+                const method = chapterId ? 'PUT' : 'POST';
+                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
+            } catch (err) {}
         });
     }
 
@@ -775,6 +815,10 @@ document.addEventListener('DOMContentLoaded', function () {
             allCourses = window.AdminStore.getCourses();
             applyCourseFilters();
         }
+
+        try {
+            await fetch(`${API_BASE}/admin/chapters/${chapterId}`, { method: 'DELETE', headers: getHeaders() });
+        } catch (e) {}
     };
 
     // ==========================================
@@ -844,6 +888,16 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('categoryForm').reset();
         document.getElementById('categoryId').value = '';
         document.getElementById('categoryModalTitle').textContent = 'Add New Category';
+        
+        // Dynamic slug auto-population
+        const nameInput = document.getElementById('categoryName');
+        const slugInput = document.getElementById('categorySlug');
+        if (nameInput && slugInput) {
+            nameInput.oninput = function() {
+                slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            };
+        }
+
         if (categoryModal) categoryModal.show();
     };
 
@@ -853,26 +907,33 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
 
             const name = document.getElementById('categoryName').value.trim();
+            const slug = document.getElementById('categorySlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
             const payload = {
                 name: name,
-                slug: document.getElementById('categorySlug').value.trim(),
-                icon: document.getElementById('categoryIcon').value.trim(),
+                slug: slug,
+                icon: document.getElementById('categoryIcon').value.trim() || 'bi-laptop',
                 order_num: parseInt(document.getElementById('categoryOrder').value) || 1
             };
 
-            if (window.AdminStore) {
-                window.AdminStore.createCategory(payload);
-                allCategories = window.AdminStore.getCategories();
-            }
-
-            if (categoryModal) categoryModal.hide();
-            renderCategoriesTable(allCategories);
-            populateCategoryFilterOptions();
-            if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
-
             try {
+                if (window.AdminStore) {
+                    window.AdminStore.createCategory(payload);
+                    allCategories = window.AdminStore.getCategories();
+                }
+
+                if (categoryModal) categoryModal.hide();
+                renderCategoriesTable(allCategories);
+                populateCategoryFilterOptions();
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
+
                 await fetch(`${API_BASE}/admin/categories`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {}
+            } catch (err) {
+                if (window.AdminStore) {
+                    window.AdminStore.constructor.notifyError('Failed to Create Category', err.message);
+                } else {
+                    alert(err.message);
+                }
+            }
         });
     }
 
@@ -894,20 +955,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!confirmed) return;
 
-        if (window.AdminStore) {
-            window.AdminStore.deleteCategory(id);
-            allCategories = window.AdminStore.getCategories();
-        }
-        renderCategoriesTable(allCategories);
-        populateCategoryFilterOptions();
-
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`Category "${name}" deleted`, 'success');
-        }
-
         try {
-            await fetch(`${API_BASE}/admin/categories/${id}`, { method: 'DELETE', headers: getHeaders() });
-        } catch (e) {}
+            if (window.AdminStore) {
+                window.AdminStore.deleteCategory(id);
+                allCategories = window.AdminStore.getCategories();
+            }
+
+            const res = await fetch(`${API_BASE}/admin/categories/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.message) {
+                    throw new Error(errData.message);
+                }
+            }
+
+            renderCategoriesTable(allCategories);
+            populateCategoryFilterOptions();
+
+            if (window.AdminStore) {
+                window.AdminStore.constructor.toast(`Category "${name}" deleted`, 'success');
+            }
+        } catch (err) {
+            if (window.AdminStore) {
+                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete category: assigned to courses.');
+            } else {
+                alert(err.message || 'Cannot delete category.');
+            }
+            loadCategories();
+        }
     };
 
     // ==========================================
@@ -968,9 +1043,35 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.openCreateInstructorModal = function () {
-        document.getElementById('instructorForm').reset();
+        const form = document.getElementById('instructorForm');
+        if (form) form.reset();
         document.getElementById('instructorId').value = '';
+        document.getElementById('instructorUserId').value = '';
         document.getElementById('instructorModalTitle').textContent = 'Add New Instructor';
+
+        // Populate faculty user accounts dropdown
+        const userSelect = document.getElementById('instructorUserSelect');
+        if (userSelect && window.AdminStore) {
+            const teachers = window.AdminStore.getUsers().filter(u => u.role === 'TEACHER');
+            userSelect.innerHTML = `<option value="">-- Create or Enter Details Manually --</option>` + teachers.map(t => `
+                <option value="${t.id}" data-name="${escapeHtml(t.full_name)}" data-email="${escapeHtml(t.email)}" data-avatar="${escapeHtml(t.avatar_url || '')}">
+                    ${escapeHtml(t.full_name)} (${escapeHtml(t.university_id || t.email)})
+                </option>
+            `).join('');
+
+            userSelect.onchange = function () {
+                const selectedOpt = userSelect.options[userSelect.selectedIndex];
+                if (selectedOpt && selectedOpt.value) {
+                    document.getElementById('instructorUserId').value = selectedOpt.value;
+                    document.getElementById('instructorName').value = selectedOpt.getAttribute('data-name') || '';
+                    document.getElementById('instructorEmail').value = selectedOpt.getAttribute('data-email') || '';
+                    document.getElementById('instructorTitle').value = 'Faculty Instructor';
+                } else {
+                    document.getElementById('instructorUserId').value = '';
+                }
+            };
+        }
+
         if (instructorModal) instructorModal.show();
     };
 
@@ -980,26 +1081,35 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
 
             const name = document.getElementById('instructorName').value.trim();
+            const userId = parseInt(document.getElementById('instructorUserId')?.value) || null;
             const payload = {
+                user_id: userId,
                 name: name,
-                title: document.getElementById('instructorTitle').value.trim(),
+                title: document.getElementById('instructorTitle').value.trim() || 'Faculty Member',
                 email: document.getElementById('instructorEmail').value.trim(),
-                expertise: document.getElementById('instructorExpertise').value.trim(),
+                expertise: document.getElementById('instructorExpertise').value.trim() || 'Computer Science & Technology',
                 avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
             };
 
-            if (window.AdminStore) {
-                window.AdminStore.createInstructor(payload);
-                allInstructors = window.AdminStore.getInstructors();
-            }
-
-            if (instructorModal) instructorModal.hide();
-            renderInstructorsTable(allInstructors);
-            if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Added', `${name} has been added to academic faculty.`);
-
             try {
+                if (window.AdminStore) {
+                    window.AdminStore.createInstructor(payload);
+                    allInstructors = window.AdminStore.getInstructors();
+                }
+
+                if (instructorModal) instructorModal.hide();
+                renderInstructorsTable(allInstructors);
+                populateCourseSelects();
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Added', `${name} is connected to academic faculty.`);
+
                 await fetch(`${API_BASE}/admin/instructors`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {}
+            } catch (err) {
+                if (window.AdminStore) {
+                    window.AdminStore.constructor.notifyError('Failed to Create Instructor', err.message);
+                } else {
+                    alert(err.message);
+                }
+            }
         });
     }
 
@@ -1021,19 +1131,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!confirmed) return;
 
-        if (window.AdminStore) {
-            window.AdminStore.deleteInstructor(id);
-            allInstructors = window.AdminStore.getInstructors();
-        }
-        renderInstructorsTable(allInstructors);
-
-        if (window.AdminStore) {
-            window.AdminStore.constructor.toast(`Instructor "${name}" deleted`, 'success');
-        }
-
         try {
-            await fetch(`${API_BASE}/admin/instructors/${id}`, { method: 'DELETE', headers: getHeaders() });
-        } catch (e) {}
+            if (window.AdminStore) {
+                window.AdminStore.deleteInstructor(id);
+                allInstructors = window.AdminStore.getInstructors();
+            }
+
+            const res = await fetch(`${API_BASE}/admin/instructors/${id}`, { method: 'DELETE', headers: getHeaders() });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                if (errData.message) {
+                    throw new Error(errData.message);
+                }
+            }
+
+            renderInstructorsTable(allInstructors);
+
+            if (window.AdminStore) {
+                window.AdminStore.constructor.toast(`Instructor "${name}" deleted`, 'success');
+            }
+        } catch (err) {
+            if (window.AdminStore) {
+                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'This instructor is assigned to courses. Please reassign these courses before deleting.');
+            } else {
+                alert(err.message || 'Cannot delete instructor.');
+            }
+            loadInstructors();
+        }
     };
 
     function escapeHtml(text) {

@@ -65,6 +65,7 @@ async function initSchema() {
             title TEXT NOT NULL,
             slug TEXT UNIQUE NOT NULL,
             degree_type TEXT DEFAULT 'BACHELOR DEGREE',
+            faculty TEXT DEFAULT 'Information Technology Faculty',
             duration TEXT DEFAULT '4 Years',
             description TEXT NOT NULL,
             icon_class TEXT DEFAULT 'bi-laptop',
@@ -77,6 +78,10 @@ async function initSchema() {
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     `);
+
+    try {
+        await dbAsync.run(`ALTER TABLE programs ADD COLUMN faculty TEXT DEFAULT 'Information Technology Faculty';`);
+    } catch (e) {}
 
     // 3. Users
     await dbAsync.run(`
@@ -147,25 +152,44 @@ async function initSchema() {
             slug TEXT UNIQUE NOT NULL,
             icon TEXT DEFAULT 'bi-tag',
             type TEXT DEFAULT 'general',
+            color TEXT DEFAULT '#2563EB',
             order_num INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     `);
 
+    try {
+        await dbAsync.run(`ALTER TABLE categories ADD COLUMN color TEXT DEFAULT '#2563EB';`);
+    } catch (e) {}
+
     // 5. Instructors
     await dbAsync.run(`
         CREATE TABLE IF NOT EXISTS instructors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             name TEXT NOT NULL,
             title TEXT,
             bio TEXT,
             avatar_url TEXT,
             email TEXT,
             expertise TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            faculty TEXT DEFAULT 'Information Technology',
+            status TEXT DEFAULT 'Active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
         );
     `);
+
+    try {
+        await dbAsync.run(`ALTER TABLE instructors ADD COLUMN user_id INTEGER REFERENCES users(id);`);
+    } catch (e) {}
+    try {
+        await dbAsync.run(`ALTER TABLE instructors ADD COLUMN faculty TEXT DEFAULT 'Information Technology';`);
+    } catch (e) {}
+    try {
+        await dbAsync.run(`ALTER TABLE instructors ADD COLUMN status TEXT DEFAULT 'Active';`);
+    } catch (e) {}
 
     // 6. Program Categories
     await dbAsync.run(`
@@ -204,17 +228,35 @@ async function initSchema() {
         );
     `);
 
-    // 8. Modules
+    // 8. Modules (Chapters)
     await dbAsync.run(`
         CREATE TABLE IF NOT EXISTS modules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             course_id INTEGER NOT NULL,
             title TEXT NOT NULL,
+            description TEXT DEFAULT '',
+            duration TEXT DEFAULT '2 Hours',
             order_num INTEGER DEFAULT 0,
+            lesson_count INTEGER DEFAULT 4,
+            quiz_count INTEGER DEFAULT 1,
+            status TEXT DEFAULT 'Published',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
         );
     `);
+
+    const moduleCols = [
+        'description TEXT DEFAULT ""',
+        'duration TEXT DEFAULT "2 Hours"',
+        'lesson_count INTEGER DEFAULT 4',
+        'quiz_count INTEGER DEFAULT 1',
+        'status TEXT DEFAULT "Published"'
+    ];
+    for (const mc of moduleCols) {
+        try {
+            await dbAsync.run(`ALTER TABLE modules ADD COLUMN ${mc};`);
+        } catch (e) {}
+    }
 
     // 9. Lessons
     await dbAsync.run(`
@@ -260,6 +302,13 @@ async function initSchema() {
             FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL,
             FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL
         );
+    `);
+
+    // Enforce Unique Enrollment Constraint: student cannot be enrolled in the same course twice
+    await dbAsync.run(`
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_user_course_enrollment 
+        ON enrollments(user_id, course_id) 
+        WHERE course_id IS NOT NULL;
     `);
 
     // 12. Notifications

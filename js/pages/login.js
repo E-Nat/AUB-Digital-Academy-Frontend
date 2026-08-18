@@ -1,6 +1,6 @@
 /**
  * AUB Digital Academy - Authentication & Login Controller
- * Handles credentials verification, JWT sessions, role tabs, and redirection.
+ * Handles credentials verification, JWT sessions, role tabs, and direct redirection.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -58,16 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const googleSsoBtn = document.getElementById('googleSsoBtn');
     if (googleSsoBtn) {
         googleSsoBtn.addEventListener('click', function () {
-            Swal.fire({
-                title: 'University Google SSO',
-                text: 'Connecting to AUB Google Workspace Directory...',
-                icon: 'info',
-                showConfirmButton: false,
-                timer: 1400
-            }).then(() => {
-                // Auto-fill student session
-                fillCredentials('sreyneang@aub.edu.kh', 'student123', true);
-            });
+            // Immediately fill student credentials and authenticate directly
+            fillCredentials('sreyneang@aub.edu.kh', 'student123', true);
         });
     }
 
@@ -77,6 +69,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const passInput = document.getElementById('password');
         if (idInput) idInput.value = loginId;
         if (passInput) passInput.value = password;
+
+        hideError();
 
         if (autoSubmit) {
             const form = document.getElementById('loginForm');
@@ -130,12 +124,55 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     function authenticateFallback(inputLoginId, inputPassword) {
-        const cleanId = inputLoginId.toLowerCase().trim();
+        const cleanId = (inputLoginId || '').toLowerCase().trim();
         const matched = fallbackAccounts.find(acc => 
             acc.loginIds.some(id => id.toLowerCase() === cleanId) && acc.password === inputPassword
         );
         return matched || null;
     }
+
+    // Role-based dashboard URL resolution
+    function getDashboardUrl(role) {
+        const r = (role || '').toUpperCase();
+        if (r === 'ADMIN') {
+            return '../admin/dashboard.html';
+        } else if (r === 'TEACHER' || r === 'FACULTY') {
+            return '../teacher/dashboard.html';
+        } else {
+            return '../student/dashboard.html';
+        }
+    }
+
+    // Direct immediate redirect with zero post-login modal/delay
+    function redirectToDashboard(user) {
+        const redirectUrl = getDashboardUrl(user?.role);
+        window.location.href = redirectUrl;
+    }
+
+    // Inline error helper
+    function showError(message) {
+        const alertEl = document.getElementById('loginAlert');
+        const alertText = document.getElementById('loginAlertText');
+        const msg = message || 'Invalid email or password.';
+
+        if (alertEl && alertText) {
+            alertText.textContent = msg;
+            alertEl.classList.remove('d-none');
+            alertEl.classList.add('d-flex');
+        }
+    }
+
+    function hideError() {
+        const alertEl = document.getElementById('loginAlert');
+        if (alertEl) {
+            alertEl.classList.add('d-none');
+            alertEl.classList.remove('d-flex');
+        }
+    }
+
+    // Clear inline error when the user edits fields
+    if (loginIdInput) loginIdInput.addEventListener('input', hideError);
+    if (passwordInput) passwordInput.addEventListener('input', hideError);
 
     // 6. Form Submission Handler
     const loginForm = document.getElementById('loginForm');
@@ -144,13 +181,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (loginForm && loginIdInput && passwordInput) {
         loginForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            hideError();
 
             const loginId = loginIdInput.value.trim();
             const password = passwordInput.value;
 
+            if (!loginId || !password) {
+                showError('Invalid email or password.');
+                return;
+            }
+
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Signing In...`;
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> <span>Signing in...</span>`;
             }
 
             let serverSuccess = false;
@@ -171,70 +214,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (res.ok && data.success && data.token) {
                     serverSuccess = true;
-                    localStorage.setItem('aub_auth_token', data.token);
-                    localStorage.setItem('token', data.token);
+                    const rememberMe = document.getElementById('rememberMe');
+                    const storage = (rememberMe && !rememberMe.checked) ? sessionStorage : localStorage;
+
+                    storage.setItem('aub_auth_token', data.token);
+                    storage.setItem('token', data.token);
                     sessionStorage.setItem('aub_auth_token', data.token);
                     sessionStorage.setItem('token', data.token);
+                    localStorage.setItem('aub_auth_token', data.token);
+                    localStorage.setItem('token', data.token);
                     localStorage.setItem('aub_user', JSON.stringify(data.user));
+                    sessionStorage.setItem('aub_user', JSON.stringify(data.user));
 
-                    showSuccessToast(data.user);
+                    // Immediately navigate to role dashboard
+                    redirectToDashboard(data.user);
                     return;
                 } else {
                     const fallback = authenticateFallback(loginId, password);
                     if (fallback) {
+                        serverSuccess = true;
                         applyFallbackSession(fallback);
                         return;
                     }
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Authentication Failed',
-                        text: data.message || 'Invalid institutional credentials. Please check your ID and password.',
-                        confirmButtonColor: '#2563eb'
-                    });
+                    showError(data.message || 'Invalid email or password.');
                 }
             } catch (err) {
                 const fallback = authenticateFallback(loginId, password);
                 if (fallback) {
+                    serverSuccess = true;
                     applyFallbackSession(fallback);
                     return;
                 }
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Credentials',
-                    html: `
-                        <div class="text-sm text-muted text-start">
-                            Please use one of the university demo accounts:
-                            <ul class="mt-2 text-dark font-monospace" style="font-size: 12px;">
-                                <li><b>Admin</b>: admin@aub.edu.com / admin123</li>
-                                <li><b>Faculty</b>: sarah.johnson@aub.edu.kh / teacher123</li>
-                                <li><b>Student</b>: sreyneang@aub.edu.kh / student123</li>
-                            </ul>
-                        </div>
-                    `,
-                    confirmButtonColor: '#2563eb'
-                });
+                showError('Invalid email or password.');
             } finally {
                 if (!serverSuccess && submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = `<span>Sign In to Workspace</span> <i class="bi bi-arrow-right"></i>`;
                 }
             }
-        });
-    }
-
-    function showSuccessToast(user) {
-        let redirectUrl = '../student/dashboard.html';
-        if (user.role === 'ADMIN') redirectUrl = '../admin/dashboard.html';
-        else if (user.role === 'TEACHER') redirectUrl = '../teacher/dashboard.html';
-
-        Swal.fire({
-            icon: 'success',
-            title: `Welcome back, ${user.full_name || 'User'}!`,
-            text: `Signing in to ${user.role || 'University'} Workspace...`,
-            timer: 1200,
-            showConfirmButton: false
-        }).then(() => {
-            window.location.href = redirectUrl;
         });
     }
 
@@ -245,6 +262,9 @@ document.addEventListener('DOMContentLoaded', function () {
         sessionStorage.setItem('aub_auth_token', dummyToken);
         sessionStorage.setItem('token', dummyToken);
         localStorage.setItem('aub_user', JSON.stringify(fallback.user));
-        showSuccessToast(fallback.user);
+        sessionStorage.setItem('aub_user', JSON.stringify(fallback.user));
+
+        // Immediately navigate to role dashboard
+        redirectToDashboard(fallback.user);
     }
 });

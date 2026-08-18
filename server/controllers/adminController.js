@@ -15,7 +15,17 @@ exports.getDashboardMetrics = async (req, res) => {
             WHERE r.name = 'STUDENT'
         `);
         const totalTeachersRow = await dbAsync.get(`
-            SELECT COUNT(*) as count FROM teachers WHERE deleted_at IS NULL
+            SELECT COUNT(*) as count FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.name = 'TEACHER'
+        `);
+        const totalAdminsRow = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM users u
+            JOIN roles r ON u.role_id = r.id
+            WHERE r.name = 'ADMIN'
+        `);
+        const activeUsersRow = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM users WHERE status = 'Active'
         `);
         const newTeachersThisMonthRow = await dbAsync.get(`
             SELECT COUNT(*) as count FROM teachers 
@@ -32,6 +42,8 @@ exports.getDashboardMetrics = async (req, res) => {
                 totalCourses: totalCoursesRow ? totalCoursesRow.count : 0,
                 totalStudents: totalStudentsRow ? totalStudentsRow.count : 0,
                 totalTeachers: totalTeachersRow ? totalTeachersRow.count : 0,
+                totalAdmins: totalAdminsRow ? totalAdminsRow.count : 0,
+                activeUsers: activeUsersRow ? activeUsersRow.count : 0,
                 newTeachersThisMonth: newTeachersThisMonthRow ? newTeachersThisMonthRow.count : 0,
                 totalChapters: totalChaptersRow ? totalChaptersRow.count : 0,
                 totalEnrollments: totalEnrollmentsRow ? totalEnrollmentsRow.count : 0
@@ -323,7 +335,7 @@ exports.createProgram = async (req, res) => {
             ]
         );
 
-        res.json({ success: true, message: 'Program created successfully.', id: result.lastID });
+        res.status(201).json({ success: true, message: 'Program created successfully.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
         console.error('Create program error:', error);
         res.status(500).json({ success: false, message: 'Failed to create program.' });
@@ -353,6 +365,13 @@ exports.updateProgram = async (req, res) => {
 exports.deleteProgram = async (req, res) => {
     try {
         const { id } = req.params;
+        const studentCount = await dbAsync.get(`SELECT COUNT(*) as count FROM users WHERE major_id = ?`, [id]);
+        if (studentCount && studentCount.count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot delete program: ${studentCount.count} registered student(s) are in this degree program. Please reassign students before deleting.`
+            });
+        }
         await dbAsync.run(`DELETE FROM programs WHERE id = ?`, [id]);
         res.json({ success: true, message: 'Program deleted successfully.' });
     } catch (error) {
@@ -417,7 +436,7 @@ exports.createCourse = async (req, res) => {
                 rating || 4.8,
                 difficulty || 'Beginner',
                 duration_hours || '8 Hours',
-                lesson_count || 12,
+                lesson_count || 0,
                 badge_text || null,
                 order_num || 0,
                 is_popular !== undefined ? is_popular : 1,
@@ -425,7 +444,7 @@ exports.createCourse = async (req, res) => {
             ]
         );
 
-        res.json({ success: true, message: 'Course created successfully.', id: result.lastID });
+        res.status(201).json({ success: true, message: 'Course created successfully.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
         console.error('Create course error:', error);
         res.status(500).json({ success: false, message: 'Failed to create course.' });
@@ -441,7 +460,7 @@ exports.updateCourse = async (req, res) => {
             `UPDATE courses
              SET title = ?, slug = ?, description = ?, category_id = ?, instructor_id = ?,
                  thumbnail_url = ?, rating = ?, difficulty = ?, duration_hours = ?,
-                 lesson_count = ?, badge_text = ?, order_num = ?, is_popular = ?,
+                 lesson_count = COALESCE(?, lesson_count), badge_text = ?, order_num = ?, is_popular = ?,
                  is_published = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
             [title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published, id]
@@ -456,6 +475,14 @@ exports.updateCourse = async (req, res) => {
 exports.deleteCourse = async (req, res) => {
     try {
         const { id } = req.params;
+        const activeEnrollments = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?`, [id]);
+        if (activeEnrollments && activeEnrollments.count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot delete course: ${activeEnrollments.count} student(s) are currently enrolled in this course. Please unenroll or complete students before deleting.`
+            });
+        }
+        await dbAsync.run(`DELETE FROM modules WHERE course_id = ?`, [id]);
         await dbAsync.run(`DELETE FROM courses WHERE id = ?`, [id]);
         res.json({ success: true, message: 'Course deleted successfully.' });
     } catch (error) {
@@ -479,6 +506,85 @@ exports.toggleCoursePublish = async (req, res) => {
 };
 
 // ==========================================
+// 5B. CHAPTERS / MODULES CRUD
+// ==========================================
+
+exports.getCourseChapters = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const chapters = await dbAsync.all(
+            `SELECT * FROM modules WHERE course_id = ? ORDER BY order_num ASC, id ASC`,
+            [courseId]
+        );
+        res.json({ success: true, data: chapters });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch course chapters.' });
+    }
+};
+
+exports.createChapter = async (req, res) => {
+    try {
+        const { course_id, title, description = '', duration = '2 Hours', order_num = 1, status = 'Published' } = req.body;
+        if (!course_id || !title) {
+            return res.status(400).json({ success: false, message: 'Course ID and chapter title are required.' });
+        }
+
+        const result = await dbAsync.run(
+            `INSERT INTO modules (course_id, title, description, duration, order_num, status)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [course_id, title, description, duration, order_num, status]
+        );
+
+        // Recalculate lesson_count for course
+        const countRow = await dbAsync.get(`SELECT COUNT(*) as count FROM modules WHERE course_id = ?`, [course_id]);
+        await dbAsync.run(`UPDATE courses SET lesson_count = ? WHERE id = ?`, [countRow.count, course_id]);
+
+        res.status(201).json({ success: true, message: 'Chapter created successfully.', id: result.lastID, data: { id: result.lastID } });
+    } catch (error) {
+        console.error('Create chapter error:', error);
+        res.status(500).json({ success: false, message: 'Failed to create chapter.' });
+    }
+};
+
+exports.updateChapter = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, duration, order_num, status } = req.body;
+        await dbAsync.run(
+            `UPDATE modules SET
+                title = COALESCE(?, title),
+                description = COALESCE(?, description),
+                duration = COALESCE(?, duration),
+                order_num = COALESCE(?, order_num),
+                status = COALESCE(?, status)
+             WHERE id = ?`,
+            [title, description, duration, order_num, status, id]
+        );
+        res.json({ success: true, message: 'Chapter updated successfully.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to update chapter.' });
+    }
+};
+
+exports.deleteChapter = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const chapter = await dbAsync.get(`SELECT course_id FROM modules WHERE id = ?`, [id]);
+        if (!chapter) return res.status(404).json({ success: false, message: 'Chapter not found.' });
+
+        await dbAsync.run(`DELETE FROM modules WHERE id = ?`, [id]);
+
+        // Recalculate lesson count for course
+        const countRow = await dbAsync.get(`SELECT COUNT(*) as count FROM modules WHERE course_id = ?`, [chapter.course_id]);
+        await dbAsync.run(`UPDATE courses SET lesson_count = ? WHERE id = ?`, [countRow.count, chapter.course_id]);
+
+        res.json({ success: true, message: 'Chapter deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete chapter.' });
+    }
+};
+
+// ==========================================
 // 6. CATEGORIES CRUD
 // ==========================================
 
@@ -493,14 +599,21 @@ exports.getAllCategories = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name, slug, icon, type, order_num } = req.body;
-        const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const { name, slug, icon, type, color, order_num } = req.body;
+        if (!name) return res.status(400).json({ success: false, message: 'Category name is required.' });
+
+        const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const existing = await dbAsync.get(`SELECT id FROM categories WHERE name = ? OR slug = ?`, [name, finalSlug]);
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'A category with this name or slug already exists.' });
+        }
 
         const result = await dbAsync.run(
-            `INSERT INTO categories (name, slug, icon, type, order_num) VALUES (?, ?, ?, ?, ?)`,
-            [name, finalSlug, icon || 'bi-tag', type || 'general', order_num || 0]
+            `INSERT INTO categories (name, slug, icon, type, color, order_num) VALUES (?, ?, ?, ?, ?, ?)`,
+            [name, finalSlug, icon || 'bi-tag', type || 'general', color || '#2563EB', order_num || 0]
         );
-        res.json({ success: true, message: 'Category created.', id: result.lastID });
+        res.status(201).json({ success: true, message: 'Category created.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to create category.' });
     }
@@ -509,6 +622,13 @@ exports.createCategory = async (req, res) => {
 exports.deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
+        const assignedCourses = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE category_id = ?`, [id]);
+        if (assignedCourses && assignedCourses.count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot delete category: assigned to ${assignedCourses.count} course(s). Please reassign courses to another category first.`
+            });
+        }
         await dbAsync.run(`DELETE FROM categories WHERE id = ?`, [id]);
         res.json({ success: true, message: 'Category deleted.' });
     } catch (error) {
@@ -531,13 +651,15 @@ exports.getAllInstructors = async (req, res) => {
 
 exports.createInstructor = async (req, res) => {
     try {
-        const { name, title, bio, avatar_url, email, expertise } = req.body;
+        const { name, title, bio, avatar_url, email, expertise, faculty } = req.body;
+        if (!name) return res.status(400).json({ success: false, message: 'Instructor name is required.' });
+
         const result = await dbAsync.run(
-            `INSERT INTO instructors (name, title, bio, avatar_url, email, expertise)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [name, title, bio, avatar_url || '', email || '', expertise || '']
+            `INSERT INTO instructors (name, title, bio, avatar_url, email, expertise, faculty)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [name, title, bio, avatar_url || '', email || '', expertise || '', faculty || 'Information Technology']
         );
-        res.json({ success: true, message: 'Instructor created.', id: result.lastID });
+        res.status(201).json({ success: true, message: 'Instructor created.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to create instructor.' });
     }
@@ -546,6 +668,13 @@ exports.createInstructor = async (req, res) => {
 exports.deleteInstructor = async (req, res) => {
     try {
         const { id } = req.params;
+        const assignedCourses = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE instructor_id = ?`, [id]);
+        if (assignedCourses && assignedCourses.count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `This instructor is assigned to ${assignedCourses.count} course(s). Please reassign these courses before deleting.`
+            });
+        }
         await dbAsync.run(`DELETE FROM instructors WHERE id = ?`, [id]);
         res.json({ success: true, message: 'Instructor deleted.' });
     } catch (error) {
@@ -655,11 +784,17 @@ exports.createUser = async (req, res) => {
             phone = '', faculty = '', department_name = '', position = '', academic_year = 'Year 1',
             semester = 'Semester 1', enrollment_status = 'Active', academic_status = 'Currently Enrolled',
             enrollment_date = null, expected_graduation_date = null, dob = null, gender = 'Not Specified',
-            address = '', email_verified = 1, avatar_url = ''
+            address = '', email_verified = 1, avatar_url = '', initial_course_id = null
         } = req.body;
 
         if (!full_name || !email) {
             return res.status(400).json({ success: false, message: 'Full name and email are required.' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
         }
 
         // Check duplicates
@@ -671,7 +806,7 @@ exports.createUser = async (req, res) => {
         if (university_id) {
             const existingUni = await dbAsync.get('SELECT id FROM users WHERE university_id = ?', [university_id]);
             if (existingUni) {
-                return res.status(400).json({ success: false, message: 'University ID is already assigned.' });
+                return res.status(400).json({ success: false, message: 'Student / University ID is already assigned.' });
             }
         }
 
@@ -693,7 +828,7 @@ exports.createUser = async (req, res) => {
 
         const newUserId = result.lastID;
 
-        // If Role is Teacher, create corresponding teacher profile record
+        // If Role is Teacher, create corresponding teacher profile record & instructor
         if (parseInt(role_id) === 2) {
             await dbAsync.run(`
                 INSERT OR IGNORE INTO teachers (user_id, teacher_code, specialization, employment_type, office_room, phone, status)
@@ -707,6 +842,35 @@ exports.createUser = async (req, res) => {
                 phone,
                 status
             ]);
+
+            await dbAsync.run(`
+                INSERT OR IGNORE INTO instructors (user_id, name, title, bio, avatar_url, email, expertise, faculty)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                newUserId,
+                full_name,
+                position || 'Faculty Lecturer',
+                'Academic faculty member at AUB Digital Academy.',
+                avatar,
+                email,
+                position || department_name || 'Academic Systems',
+                faculty || 'Information Technology'
+            ]);
+        }
+
+        // If Role is Student and initial course selected, create separate enrollment record
+        if (parseInt(role_id) === 3 && initial_course_id) {
+            try {
+                await dbAsync.run(`
+                    INSERT OR IGNORE INTO enrollments (user_id, course_id, enrollment_date, status, progress_percentage)
+                    VALUES (?, ?, CURRENT_TIMESTAMP, 'Active', 0.0)
+                `, [newUserId, initial_course_id]);
+
+                const countRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?`, [initial_course_id]);
+                await dbAsync.run(`UPDATE courses SET enrolled_students_count = ? WHERE id = ?`, [countRow.count, initial_course_id]);
+            } catch (enrErr) {
+                console.error('Initial course enrollment error:', enrErr);
+            }
         }
 
         // Record Activity Log
@@ -755,7 +919,7 @@ exports.updateUser = async (req, res) => {
         if (university_id) {
             const existingUni = await dbAsync.get('SELECT id FROM users WHERE university_id = ? AND id != ?', [university_id, id]);
             if (existingUni) {
-                return res.status(400).json({ success: false, message: 'University ID is already assigned to another user.' });
+                return res.status(400).json({ success: false, message: 'Student / University ID is already assigned to another user.' });
             }
         }
 
@@ -822,30 +986,6 @@ exports.updateUser = async (req, res) => {
             ]
         );
 
-        // Check role change
-        if (role_id && role_id !== currentUser.role_id) {
-            const oldRole = currentUser.role_id === 1 ? 'ADMIN' : currentUser.role_id === 2 ? 'TEACHER' : 'STUDENT';
-            const newRole = parseInt(role_id) === 1 ? 'ADMIN' : parseInt(role_id) === 2 ? 'TEACHER' : 'STUDENT';
-            await dbAsync.run(`
-                INSERT INTO user_activity_logs (user_id, action, details, performed_by)
-                VALUES (?, 'Role Changed', ?, ?)
-            `, [id, `Role changed from ${oldRole} to ${newRole}`, req.user ? req.user.id : null]);
-        }
-
-        // Check status change
-        if (status && status !== currentUser.status) {
-            await dbAsync.run(`
-                INSERT INTO user_activity_logs (user_id, action, details, performed_by)
-                VALUES (?, 'Status Updated', ?, ?)
-            `, [id, `Account status changed to ${status}`, req.user ? req.user.id : null]);
-        }
-
-        // Log Profile update
-        await dbAsync.run(`
-            INSERT INTO user_activity_logs (user_id, action, details, performed_by)
-            VALUES (?, 'Profile Updated', 'User profile information updated by administrator', ?)
-        `, [id, req.user ? req.user.id : null]);
-
         res.json({ success: true, message: 'User updated successfully.' });
     } catch (error) {
         console.error('Update user error:', error);
@@ -856,9 +996,23 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
-        if (parseInt(id) === req.user.id) {
+        if (req.user && parseInt(id) === req.user.id) {
             return res.status(400).json({ success: false, message: 'You cannot delete your own admin account.' });
         }
+
+        const teacherCourses = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM courses c
+            LEFT JOIN instructors i ON c.instructor_id = i.id
+            WHERE c.instructor_id = ? OR i.user_id = ?
+        `, [id, id]);
+        if (teacherCourses && teacherCourses.count > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Cannot delete user: This teacher is assigned to ${teacherCourses.count} course(s). Please reassign courses before deleting.`
+            });
+        }
+
+        await dbAsync.run(`DELETE FROM enrollments WHERE user_id = ?`, [id]);
         await dbAsync.run(`DELETE FROM users WHERE id = ?`, [id]);
         res.json({ success: true, message: 'User deleted successfully.' });
     } catch (error) {
@@ -952,17 +1106,61 @@ exports.getUserActivity = async (req, res) => {
 exports.getAllEnrollments = async (req, res) => {
     try {
         const enrollments = await dbAsync.all(`
-            SELECT e.*, u.full_name as student_name, u.university_id as student_id, u.email as student_email,
+            SELECT e.*, u.full_name as student_name, u.university_id as student_id, u.email as student_email, u.avatar_url,
                    c.title as course_title, p.title as program_title
             FROM enrollments e
             JOIN users u ON e.user_id = u.id
             LEFT JOIN courses c ON e.course_id = c.id
             LEFT JOIN programs p ON e.program_id = p.id
-            ORDER BY e.enrollment_date DESC
+            ORDER BY e.enrollment_date DESC, e.id DESC
         `);
         res.json({ success: true, data: enrollments });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch enrollments.' });
+    }
+};
+
+exports.createEnrollment = async (req, res) => {
+    try {
+        const { user_id, course_id, program_id, enrollment_date, status = 'Active', progress_percentage = 0.0 } = req.body;
+        if (!user_id || (!course_id && !program_id)) {
+            return res.status(400).json({ success: false, message: 'Student and Course/Program selection are required.' });
+        }
+
+        // Check for duplicate enrollment
+        if (course_id) {
+            const existing = await dbAsync.get(
+                `SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?`,
+                [user_id, course_id]
+            );
+            if (existing) {
+                return res.status(400).json({ success: false, message: 'This student is already enrolled in this course.' });
+            }
+        }
+
+        const result = await dbAsync.run(
+            `INSERT INTO enrollments (user_id, course_id, program_id, enrollment_date, status, progress_percentage)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                user_id,
+                course_id || null,
+                program_id || null,
+                enrollment_date || new Date().toISOString(),
+                status,
+                progress_percentage || 0.0
+            ]
+        );
+
+        // Update course enrolled count
+        if (course_id) {
+            const countRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?`, [course_id]);
+            await dbAsync.run(`UPDATE courses SET enrolled_students_count = ? WHERE id = ?`, [countRow.count, course_id]);
+        }
+
+        res.status(201).json({ success: true, message: 'Enrollment created successfully.', id: result.lastID });
+    } catch (error) {
+        console.error('Create enrollment error:', error);
+        res.status(500).json({ success: false, message: 'Failed to create enrollment.' });
     }
 };
 
@@ -987,7 +1185,15 @@ exports.updateEnrollmentStatus = async (req, res) => {
 exports.deleteEnrollment = async (req, res) => {
     try {
         const { id } = req.params;
+        const enrollment = await dbAsync.get(`SELECT course_id FROM enrollments WHERE id = ?`, [id]);
+        
         await dbAsync.run(`DELETE FROM enrollments WHERE id = ?`, [id]);
+
+        if (enrollment && enrollment.course_id) {
+            const countRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments WHERE course_id = ?`, [enrollment.course_id]);
+            await dbAsync.run(`UPDATE courses SET enrolled_students_count = ? WHERE id = ?`, [countRow.count, enrollment.course_id]);
+        }
+
         res.json({ success: true, message: 'Enrollment deleted.' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to delete enrollment.' });

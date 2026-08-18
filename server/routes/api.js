@@ -49,6 +49,12 @@ router.put('/admin/courses/:id', authenticateToken, requireAdmin, adminControlle
 router.delete('/admin/courses/:id', authenticateToken, requireAdmin, adminController.deleteCourse);
 router.patch('/admin/courses/:id/toggle-publish', authenticateToken, requireAdmin, adminController.toggleCoursePublish);
 
+// Course Chapters CRUD
+router.get('/admin/courses/:courseId/chapters', authenticateToken, requireAdmin, adminController.getCourseChapters);
+router.post('/admin/chapters', authenticateToken, requireAdmin, adminController.createChapter);
+router.put('/admin/chapters/:id', authenticateToken, requireAdmin, adminController.updateChapter);
+router.delete('/admin/chapters/:id', authenticateToken, requireAdmin, adminController.deleteChapter);
+
 // Categories CRUD
 router.get('/admin/categories', authenticateToken, requireAdmin, adminController.getAllCategories);
 router.post('/admin/categories', authenticateToken, requireAdmin, adminController.createCategory);
@@ -71,6 +77,7 @@ router.get('/admin/users/:id/activity', authenticateToken, requireAdmin, adminCo
 
 // Enrollments CRUD
 router.get('/admin/enrollments', authenticateToken, requireAdmin, adminController.getAllEnrollments);
+router.post('/admin/enrollments', authenticateToken, requireAdmin, adminController.createEnrollment);
 router.put('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.updateEnrollmentStatus);
 router.delete('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.deleteEnrollment);
 

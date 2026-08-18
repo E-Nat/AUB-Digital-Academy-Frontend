@@ -33,12 +33,13 @@
             </div>
 
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item active">
                     <i class="bi bi-grid"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">Management</div>
+                <div class="admin-sidebar-label">MANAGEMENT</div>
                 <a href="user-management.html" class="admin-nav-item">
                     <i class="bi bi-people"></i>
                     <span>User Management</span>
@@ -56,7 +57,7 @@
                     <span>Enrollment Management</span>
                 </a>
 
-                <div class="admin-sidebar-label">System</div>
+                <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>
@@ -120,7 +121,7 @@
                 <div class="admin-header-row">
                     <div>
                         <h1 class="admin-page-title">Dashboard</h1>
-                        <p class="admin-page-subtitle">Welcome back, Admin! Here's what's happening in your academy.</p>
+                        <p class="admin-page-subtitle">Welcome back! Here is an overview of your academic operations.</p>
                     </div>
                     <div class="admin-date-badge">
                         <i class="bi bi-calendar3"></i>
@@ -129,25 +130,25 @@
                 </div>
 
                 <!-- QUICK ACTIONS BAR -->
-                <div class="admin-quick-actions-bar mb-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-2 bg-white rounded-3 border shadow-xs">
-                        <div class="d-flex align-items-center gap-2 px-2">
-                            <span class="text-xs fw-bold text-uppercase text-muted" style="letter-spacing: 0.05em; font-size: 11px;">
+                <div class="admin-quick-actions-bar mb-4">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 border shadow-xs" style="border-radius: 12px !important; border-color: var(--admin-border) !important;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-xs fw-bold text-uppercase text-muted" style="letter-spacing: 0.05em; font-size: 11.5px;">
                                 <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Actions:
                             </span>
                         </div>
                         <div class="d-flex flex-wrap align-items-center gap-2">
-                            <a href="user-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-1 px-3" style="font-size: 12px; border-radius: 8px;">
-                                <i class="bi bi-person-plus-fill"></i> Add User
+                            <a href="user-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 py-1.5 px-3" style="font-size: 13px; font-weight: 600; border-radius: 8px;">
+                                <i class="bi bi-person-plus-fill" style="font-size: 14px;"></i> Add User
                             </a>
-                            <a href="academic-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-1 px-3" style="font-size: 12px; border-radius: 8px;">
-                                <i class="bi bi-journal-plus"></i> Add Course
+                            <a href="academic-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 py-1.5 px-3" style="font-size: 13px; font-weight: 600; border-radius: 8px;">
+                                <i class="bi bi-journal-plus" style="font-size: 14px;"></i> Add Course
                             </a>
-                            <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-1 px-3" style="font-size: 12px; border-radius: 8px;">
-                                <i class="bi bi-person-check-fill"></i> Enroll Student
+                            <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 py-1.5 px-3" style="font-size: 13px; font-weight: 600; border-radius: 8px;">
+                                <i class="bi bi-person-check-fill" style="font-size: 14px;"></i> Enroll Student
                             </a>
-                            <a href="settings.html" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1 py-1 px-3" style="font-size: 12px; border-radius: 8px;">
-                                <i class="bi bi-gear-fill text-secondary"></i> Settings
+                            <a href="settings.html" class="btn btn-sm btn-light border d-inline-flex align-items-center gap-1.5 py-1.5 px-3" style="font-size: 13px; font-weight: 600; border-radius: 8px; border-color: var(--admin-border);">
+                                <i class="bi bi-gear-fill text-secondary" style="font-size: 14px;"></i> Settings
                             </a>
                         </div>
                     </div>
@@ -157,98 +158,98 @@
                 <div class="admin-kpi-grid">
                     <!-- Total Users -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='user-management.html'" title="Click to open User Management">
-                        <div class="admin-kpi-icon blue">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Users</div>
                             <div class="admin-kpi-value" id="kpiTotalUsers">0</div>
                             <div class="admin-kpi-trend positive">
-                                <i class="bi bi-arrow-up-right"></i> +12% this month
+                                <i class="bi bi-arrow-up-short"></i> +12% this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon blue">
+                            <i class="bi bi-people-fill"></i>
                         </div>
                     </div>
 
                     <!-- Total Courses -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='academic-management.html'" title="Click to open Academic Management">
-                        <div class="admin-kpi-icon indigo">
-                            <i class="bi bi-mortarboard-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Courses</div>
                             <div class="admin-kpi-value" id="kpiTotalCourses">0</div>
                             <div class="admin-kpi-trend positive">
-                                <i class="bi bi-arrow-up-right"></i> +8% this month
+                                <i class="bi bi-arrow-up-short"></i> +8% this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon purple">
+                            <i class="bi bi-mortarboard-fill"></i>
                         </div>
                     </div>
 
                     <!-- Total Students -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='user-management.html'" title="Click to open Student list">
-                        <div class="admin-kpi-icon green">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Students</div>
                             <div class="admin-kpi-value" id="kpiTotalStudents">0</div>
                             <div class="admin-kpi-trend positive">
-                                <i class="bi bi-arrow-up-right"></i> +15% this month
+                                <i class="bi bi-arrow-up-short"></i> +15% this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon green">
+                            <i class="bi bi-person-fill"></i>
                         </div>
                     </div>
 
                     <!-- Total Teachers -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='teacher-management.html'" title="Click to open Teacher Directory">
-                        <div class="admin-kpi-icon purple">
-                            <i class="bi bi-person-badge-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Teachers</div>
                             <div class="admin-kpi-value" id="kpiTotalTeachers">0</div>
                             <div class="admin-kpi-trend positive" id="kpiTeacherTrend">
-                                <i class="bi bi-arrow-up-right"></i> +2 this month
+                                <i class="bi bi-arrow-up-short"></i> +2 this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon purple">
+                            <i class="bi bi-person-badge-fill"></i>
                         </div>
                     </div>
 
                     <!-- Total Chapters -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='academic-management.html'" title="Click to view Syllabus Modules">
-                        <div class="admin-kpi-icon amber">
-                            <i class="bi bi-book-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Total Chapters</div>
                             <div class="admin-kpi-value" id="kpiTotalChapters">0</div>
                             <div class="admin-kpi-trend positive">
-                                <i class="bi bi-arrow-up-right"></i> +10% this month
+                                <i class="bi bi-arrow-up-short"></i> +10% this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon amber">
+                            <i class="bi bi-book-fill"></i>
                         </div>
                     </div>
 
                     <!-- Total Enrollments -->
                     <div class="admin-kpi-card interactive" onclick="window.location.href='enrollment-management.html'" title="Click to open Enrollment Management">
-                        <div class="admin-kpi-icon cyan">
-                            <i class="bi bi-grid-3x3-gap-fill"></i>
-                        </div>
                         <div class="admin-kpi-info">
                             <div class="admin-kpi-label">Enrollments</div>
                             <div class="admin-kpi-value" id="kpiTotalEnrollments">0</div>
                             <div class="admin-kpi-trend positive">
-                                <i class="bi bi-arrow-up-right"></i> +18% this month
+                                <i class="bi bi-arrow-up-short"></i> +18% this month
                             </div>
+                        </div>
+                        <div class="admin-kpi-icon cyan">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- MIDDLE ROW: 2 STAT WIDGETS -->
-                <div class="row g-3 mb-3">
+                <div class="row g-3 mb-4">
                     <!-- Enrollment by Discipline / Category Donut -->
                     <div class="col-lg-6">
                         <div class="admin-card h-100 mb-0">
                             <div class="admin-card-header">
                                 <div>
                                     <h3 class="admin-card-title">Enrollment by Discipline</h3>
-                                    <p class="text-muted mb-0" style="font-size: 11.5px;">Student distribution across academic course categories</p>
+                                    <p class="text-muted mb-0" style="font-size: 13px;">Student distribution across academic course categories</p>
                                 </div>
                                 <select class="admin-dropdown-select" id="enrollmentTimeframeSelect">
                                     <option value="this_month">This Month</option>
@@ -259,14 +260,16 @@
                                 </select>
                             </div>
                             <div class="row align-items-center">
-                                <div class="col-sm-5 text-center position-relative py-2">
-                                    <svg viewBox="0 0 36 36" class="donut-chart" style="width: 120px; height: 120px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.2"></circle>
-                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3.2" stroke-dasharray="100 0" stroke-dashoffset="0"></circle>
-                                    </svg>
-                                    <div class="position-absolute top-50 start-50 translate-middle text-center lh-1">
-                                        <div class="text-muted mb-1" style="font-size: 10.5px; font-weight: 500;">Total</div>
-                                        <div class="fw-bold text-dark" style="font-size: 18px;" id="donutTotalNumber">0</div>
+                                <div class="col-sm-5 text-center position-relative py-3">
+                                    <div class="donut-chart-container">
+                                        <svg viewBox="0 0 36 36" class="donut-chart" style="width: 130px; height: 130px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
+                                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.2"></circle>
+                                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1F4D" stroke-width="3.2" stroke-dasharray="100 0" stroke-linecap="round"></circle>
+                                        </svg>
+                                        <div class="position-absolute top-50 start-50 translate-middle text-center lh-1" style="pointer-events: none;">
+                                            <div class="text-muted mb-1" style="font-size: 11px; font-weight: 500;">Total</div>
+                                            <div class="fw-bold text-dark" style="font-size: 22px; font-variant-numeric: tabular-nums;" id="donutTotalNumber">0</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-sm-7 ps-sm-3">
@@ -282,7 +285,7 @@
                             <div class="admin-card-header">
                                 <div>
                                     <h3 class="admin-card-title">Students by Major</h3>
-                                    <p class="text-muted mb-0" style="font-size: 11.5px;">Active student headcounts by primary degree specialization</p>
+                                    <p class="text-muted mb-0" style="font-size: 13px;">Active student headcounts by primary degree specialization</p>
                                 </div>
                                 <select class="admin-dropdown-select" id="majorTimeframeSelect">
                                     <option value="this_month">This Month</option>
@@ -302,13 +305,13 @@
                     <div class="admin-card-header">
                         <div>
                             <h3 class="admin-card-title">Recent Enrollments</h3>
-                            <p class="text-muted mb-0" style="font-size: 12px;">Latest course registrations from active students.</p>
+                            <p class="text-muted mb-0" style="font-size: 13px;">Latest course registrations from active students.</p>
                         </div>
-                        <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 11.5px; font-weight: 600;">
+                        <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 12.5px; font-weight: 600;">
                             View All <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     </div>
-                    <div class="admin-table-responsive">
+                    <div class="table-container admin-table-responsive">
                         <table class="admin-table">
                             <thead>
                                 <tr>
