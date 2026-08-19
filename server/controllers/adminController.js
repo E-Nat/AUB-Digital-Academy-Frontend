@@ -1784,8 +1784,20 @@ exports.createEnrollment = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Student and Course/Program selection are required.' });
         }
 
-        // Check for duplicate enrollment
+        // Check for course enrollment deadline and duplicate enrollment
         if (course_id) {
+            const course = await dbAsync.get(`SELECT id, title, enrollment_deadline FROM courses WHERE id = ?`, [course_id]);
+            if (course && course.enrollment_deadline) {
+                const today = new Date().toISOString().split('T')[0];
+                const deadline = String(course.enrollment_deadline).split('T')[0];
+                if (today > deadline) {
+                    return res.status(400).json({ 
+                        success: false, 
+                        message: `Cannot enroll student: The enrollment deadline for "${course.title}" expired on ${deadline}.` 
+                    });
+                }
+            }
+
             const existing = await dbAsync.get(
                 `SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?`,
                 [user_id, course_id]

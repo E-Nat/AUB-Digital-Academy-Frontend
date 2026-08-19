@@ -1835,6 +1835,15 @@
             const studentId = Number(enrData.student_id);
             const courseId = Number(enrData.course_id);
 
+            const course = this.getCourseById(courseId);
+            if (course && course.enrollment_deadline) {
+                const today = new Date().toISOString().split('T')[0];
+                const deadline = String(course.enrollment_deadline).split('T')[0];
+                if (today > deadline) {
+                    throw new Error(`Cannot enroll student: The enrollment deadline for "${course.title}" expired on ${deadline}.`);
+                }
+            }
+
             // Unique student-course check
             const exists = this.state.enrollments.some(e => e.student_id === studentId && e.course_id === courseId);
             if (exists) {
@@ -1846,7 +1855,6 @@
                 : 101;
 
             const student = this.getUserById(studentId);
-            const course = this.getCourseById(courseId);
 
             const newEnrollment = {
                 id: nextId,
