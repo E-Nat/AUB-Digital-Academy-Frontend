@@ -35,31 +35,55 @@
             <nav class="admin-sidebar-menu">
                 <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid"></i>
+                    <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">MANAGEMENT</div>
+                <div class="admin-sidebar-label">ACADEMIC</div>
+                <a href="academic-management.html" class="admin-nav-item active">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Course Management</span>
+                </a>
+                <a href="exam-management.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Exam & Quiz</span>
+                </a>
+                <a href="schedule-management.html" class="admin-nav-item">
+                    <i class="bi bi-calendar-week-fill"></i>
+                    <span>Academic Schedule</span>
+                </a>
+
+                <div class="admin-sidebar-label">STUDENTS & FACULTY</div>
                 <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people-fill"></i>
                     <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge-fill"></i>
                     <span>Teacher Management</span>
                 </a>
-                <a href="academic-management.html" class="admin-nav-item active">
-                    <i class="bi bi-mortarboard"></i>
-                    <span>Academic Management</span>
-                </a>
                 <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check"></i>
+                    <i class="bi bi-person-check-fill"></i>
                     <span>Enrollment Management</span>
                 </a>
 
+                <div class="admin-sidebar-label">FINANCE</div>
+                <a href="payment-management.html" class="admin-nav-item">
+                    <i class="bi bi-credit-card-2-front-fill"></i>
+                    <span>Payments & Invoices</span>
+                </a>
+                <a href="payroll-management.html" class="admin-nav-item">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Teacher Payroll</span>
+                </a>
+
                 <div class="admin-sidebar-label">SYSTEM</div>
+                <a href="reports.html" class="admin-nav-item">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Reports & Analytics</span>
+                </a>
                 <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
                 </a>
             </nav>
@@ -80,6 +104,9 @@
                 <div class="admin-topbar-left">
                     <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
                         <i class="bi bi-list"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light border d-none d-lg-inline-flex align-items-center justify-content-center me-1" id="sidebarCollapseToggle" title="Toggle Compact Sidebar" style="width: 36px; height: 36px; border-radius: 8px;">
+                        <i class="bi bi-layout-sidebar-inset"></i>
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
@@ -282,72 +309,115 @@
     </div>
 
     <!-- MODAL: Create / Edit Program -->
-    <div class="modal fade" id="createProgramModal" tabindex="-1">
+    <div class="modal fade" id="createProgramModal" tabindex="-1" aria-labelledby="programModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title fw-bold" id="programModalTitle">Add New Featured Program</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="programForm">
+                <form id="programForm" novalidate>
                     <input type="hidden" id="programId">
                     <div class="modal-body p-4">
                         <div class="row g-3">
+                            <!-- 1. Program Title * -->
                             <div class="col-md-8">
-                                <label class="form-label">Program Title *</label>
-                                <input type="text" class="form-control" id="programTitle" required placeholder="e.g. Computer Science & Software Engineering">
+                                <label class="form-label fw-semibold" for="programTitle">Program Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="programTitle" placeholder="e.g. Computer Science & Software Engineering" required>
+                                <div class="invalid-feedback" id="programTitleFeedback">Program Title is required (minimum 3 characters).</div>
                             </div>
+
+                            <!-- 2. Degree Type * -->
                             <div class="col-md-4">
-                                <label class="form-label">Degree Type *</label>
+                                <label class="form-label fw-semibold" for="programDegree">Degree Type <span class="text-danger">*</span></label>
                                 <select class="form-select" id="programDegree" required>
+                                    <option value="">-- Select Degree Type --</option>
                                     <option value="BACHELOR DEGREE">BACHELOR DEGREE</option>
                                     <option value="MASTER DEGREE">MASTER DEGREE</option>
                                     <option value="DOCTORATE (Ph.D.)">DOCTORATE (Ph.D.)</option>
+                                    <option value="ASSOCIATE DEGREE">ASSOCIATE DEGREE</option>
                                     <option value="DIPLOMA / CERTIFICATE">DIPLOMA / CERTIFICATE</option>
                                 </select>
+                                <div class="invalid-feedback" id="programDegreeFeedback">Please select a valid degree type.</div>
                             </div>
+
+                            <!-- 3. Duration * -->
                             <div class="col-md-4">
-                                <label class="form-label">Duration *</label>
-                                <input type="text" class="form-control" id="programDuration" value="4 Years" required>
+                                <label class="form-label fw-semibold" for="programDuration">Duration <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="programDuration" placeholder="e.g. 4 Years or 2 Years" value="4 Years" required>
+                                <div class="invalid-feedback" id="programDurationFeedback">Duration is required (e.g. 4 Years).</div>
                             </div>
+
+                            <!-- 4. Icon -->
                             <div class="col-md-4">
-                                <label class="form-label">Icon Class (Bootstrap Icons)</label>
-                                <input type="text" class="form-control" id="programIcon" value="bi-laptop" required placeholder="bi-laptop">
+                                <label class="form-label fw-semibold" for="programIcon">Icon Class</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0" id="programIconPreviewWrapper" style="width: 42px; justify-content: center;">
+                                        <i class="bi bi-laptop text-primary" id="programIconPreview"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="programIcon" value="bi-laptop" placeholder="bi-laptop, bi-cpu...">
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 11px;">Bootstrap Icons class (e.g. bi-laptop, bi-cpu).</div>
                             </div>
+
+                            <!-- 5. Theme Color -->
                             <div class="col-md-4">
-                                <label class="form-label">Theme Color</label>
-                                <select class="form-select" id="programTheme">
-                                    <option value="theme-blue">Blue (#2563eb)</option>
-                                    <option value="theme-cyan">Cyan (#0891b2)</option>
-                                    <option value="theme-green">Green (#16a34a)</option>
-                                    <option value="theme-purple">Purple (#9333ea)</option>
-                                    <option value="theme-gold">Gold (#d97706)</option>
-                                    <option value="theme-orange">Orange (#ea580c)</option>
-                                </select>
+                                <label class="form-label fw-semibold" for="programTheme">Theme Color</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0" style="width: 42px; justify-content: center;">
+                                        <span id="programThemePreviewDot" style="width: 14px; height: 14px; border-radius: 50%; background-color: #2563eb; display: inline-block; box-shadow: 0 0 0 1px rgba(0,0,0,0.15);"></span>
+                                    </span>
+                                    <select class="form-select" id="programTheme">
+                                        <option value="theme-blue" data-color="#2563eb">Blue (#2563eb)</option>
+                                        <option value="theme-cyan" data-color="#0891b2">Cyan (#0891b2)</option>
+                                        <option value="theme-green" data-color="#16a34a">Green (#16a34a)</option>
+                                        <option value="theme-purple" data-color="#9333ea">Purple (#9333ea)</option>
+                                        <option value="theme-gold" data-color="#d97706">Gold (#d97706)</option>
+                                        <option value="theme-orange" data-color="#ea580c">Orange (#ea580c)</option>
+                                        <option value="theme-rose" data-color="#e11d48">Rose (#e11d48)</option>
+                                        <option value="theme-indigo" data-color="#4f46e5">Indigo (#4f46e5)</option>
+                                    </select>
+                                </div>
                             </div>
+
+                            <!-- 6. Description * -->
                             <div class="col-12">
-                                <label class="form-label">Description *</label>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label fw-semibold" for="programDesc">Description <span class="text-danger">*</span></label>
+                                    <span class="text-muted text-xs" id="programDescCharCount" style="font-size: 11px;">Min 10 characters</span>
+                                </div>
                                 <textarea class="form-control" id="programDesc" rows="3" required placeholder="Comprehensive overview of the academic program curriculum..."></textarea>
+                                <div class="invalid-feedback" id="programDescFeedback">Program Description is required (minimum 10 characters).</div>
                             </div>
+
+                            <!-- 7. Detail URL -->
                             <div class="col-md-6">
-                                <label class="form-label">Detail URL</label>
-                                <input type="text" class="form-control" id="programUrl" placeholder="pages/programs/cs.html">
+                                <label class="form-label fw-semibold" for="programUrl">Detail URL</label>
+                                <input type="text" class="form-control" id="programUrl" placeholder="pages/programs/cs.html or #">
+                                <div class="form-text text-muted" style="font-size: 11px;">Optional link to full syllabus or program landing page.</div>
                             </div>
+
+                            <!-- 8. Sort Order -->
                             <div class="col-md-3">
-                                <label class="form-label">Sort Order</label>
-                                <input type="number" class="form-control" id="programOrder" value="1" min="1">
+                                <label class="form-label fw-semibold" for="programOrder">Sort Order</label>
+                                <input type="number" class="form-control" id="programOrder" value="1" min="0" step="1">
+                                <div class="invalid-feedback" id="programOrderFeedback">Sort order must be 0 or greater.</div>
                             </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <div class="form-check form-switch mb-2">
+
+                            <!-- 9. Published -->
+                            <div class="col-md-3 d-flex align-items-center">
+                                <div class="form-check form-switch mt-3 pt-1">
                                     <input class="form-check-input" type="checkbox" id="programPublished" checked>
-                                    <label class="form-check-label text-sm fw-semibold">Published</label>
+                                    <label class="form-check-label fw-semibold ms-1" for="programPublished">Published</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4">Save Program</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveProgramBtn">
+                            <i class="bi bi-check2 me-1"></i> Save Program
+                        </button>
                     </div>
                 </form>
             </div>
@@ -359,64 +429,126 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="courseModalTitle">Add New Course</h5>
+                    <h5 class="modal-title fw-bold" id="courseModalTitle">Specialized Course</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="courseForm">
+                <form id="courseForm" novalidate>
                     <input type="hidden" id="courseId">
                     <div class="modal-body p-4">
                         <div class="row g-3">
+                            <!-- 1. Course Title * -->
                             <div class="col-md-8">
-                                <label class="form-label">Course Title *</label>
+                                <label class="form-label fw-semibold">Course Title <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="courseTitle" required placeholder="e.g. Full-Stack Modern Web Architecture">
+                                <div class="invalid-feedback" id="courseTitleFeedback">Course Title is required (min 3 chars).</div>
                             </div>
+                            <!-- 2. Difficulty * -->
                             <div class="col-md-4">
-                                <label class="form-label">Difficulty *</label>
-                                <select class="form-select" id="courseDifficulty">
+                                <label class="form-label fw-semibold">Difficulty <span class="text-danger">*</span></label>
+                                <select class="form-select" id="courseDifficulty" required>
                                     <option value="Beginner">Beginner</option>
                                     <option value="Intermediate">Intermediate</option>
                                     <option value="Advanced">Advanced</option>
                                 </select>
                             </div>
+                            <!-- 3. Category * -->
                             <div class="col-md-6">
-                                <label class="form-label">Category *</label>
+                                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
                                 <select class="form-select" id="courseCategorySelect" required>
                                     <!-- Dynamic -->
                                 </select>
+                                <div class="invalid-feedback">Please select a category.</div>
                             </div>
+                            <!-- 4. Instructor * -->
                             <div class="col-md-6">
-                                <label class="form-label">Instructor *</label>
+                                <label class="form-label fw-semibold">Instructor <span class="text-danger">*</span></label>
                                 <select class="form-select" id="courseInstructorSelect" required>
                                     <!-- Dynamic -->
                                 </select>
+                                <div class="invalid-feedback">Please select an instructor.</div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Estimated Duration</label>
+                            <!-- 5. Duration -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Estimated Duration</label>
                                 <input type="text" class="form-control" id="courseDuration" value="8 Weeks" placeholder="e.g. 8 Weeks">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Lessons Count</label>
+                            <!-- 6. Lessons Count -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Lessons Count</label>
                                 <input type="number" class="form-control" id="courseLessons" value="12" min="1">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Badge (Optional)</label>
-                                <input type="text" class="form-control" id="courseBadge" placeholder="e.g. Popular, Featured">
+                            <!-- 7. Course Price ($) -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Course Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="coursePrice" value="0.00" min="0" step="0.01" placeholder="0.00">
+                                </div>
                             </div>
+                            <!-- 8. Badge -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Badge</label>
+                                <input type="text" class="form-control" id="courseBadge" placeholder="e.g. Popular, Featured, New">
+                            </div>
+
+                            <!-- Deadlines Section -->
+                            <div class="col-12 mt-3">
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-calendar-event text-primary me-2 fs-5"></i>
+                                        <span class="fw-bold text-dark">Course Deadlines & Lifecycle Dates</span>
+                                    </div>
+                                    <div class="row g-3">
+                                        <!-- 9. Enrollment Start Date -->
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Enrollment Opens</label>
+                                            <input type="date" class="form-control form-control-sm" id="courseEnrollmentStart">
+                                        </div>
+                                        <!-- 10. Enrollment Deadline -->
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Enrollment Deadline</label>
+                                            <input type="date" class="form-control form-control-sm" id="courseEnrollmentDeadline">
+                                            <div class="invalid-feedback small" id="courseDeadlineFeedback">Deadline must be after start.</div>
+                                        </div>
+                                        <!-- 11. Course Start Date -->
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Course Starts</label>
+                                            <input type="date" class="form-control form-control-sm" id="courseStartDate">
+                                        </div>
+                                        <!-- 12. Course End Date -->
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-semibold">Course Ends</label>
+                                            <input type="date" class="form-control form-control-sm" id="courseEndDate">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2" id="courseStatusPreviewContainer">
+                                        <span class="small text-muted">Computed Status Preview:</span>
+                                        <span class="badge bg-primary ms-1" id="courseStatusPreviewBadge">Enrollment Open</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 13. Description * -->
                             <div class="col-12">
-                                <label class="form-label">Course Description *</label>
+                                <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="courseDesc" rows="3" required placeholder="Comprehensive course description, syllabus overview, and expected outcomes..."></textarea>
+                                <div class="invalid-feedback" id="courseDescFeedback">Description is required (minimum 10 characters).</div>
                             </div>
+
+                            <!-- 14. Published -->
                             <div class="col-md-6 d-flex align-items-center">
                                 <div class="form-check form-switch mb-0">
                                     <input class="form-check-input" type="checkbox" id="coursePublished" checked>
-                                    <label class="form-check-label text-sm fw-semibold ms-2" for="coursePublished">Published (Visible in Catalog)</label>
+                                    <label class="form-check-label fw-semibold ms-2" for="coursePublished">Published (Active)</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4">Save Course</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveCourseBtn">
+                            <i class="bi bi-check2 me-1"></i> Save Course
+                        </button>
                     </div>
                 </form>
             </div>
@@ -509,34 +641,45 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="categoryModalTitle">Add New Category</h5>
+                    <h5 class="modal-title fw-bold" id="categoryModalTitle">Category Management</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="categoryForm">
+                <form id="categoryForm" novalidate>
                     <input type="hidden" id="categoryId">
                     <div class="modal-body p-4">
                         <div class="mb-3">
-                            <label class="form-label">Category Name *</label>
+                            <label class="form-label fw-semibold">Category Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="categoryName" required placeholder="e.g. Artificial Intelligence">
+                            <div class="invalid-feedback" id="catNameFeedback">Category Name is required.</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Slug *</label>
+                            <label class="form-label fw-semibold">Slug <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="categorySlug" required placeholder="e.g. artificial-intelligence">
+                            <div class="invalid-feedback" id="catSlugFeedback">Category Slug is required and must be unique.</div>
                         </div>
-                        <div class="row g-2 mb-2">
+                        <div class="row g-2 mb-3">
                             <div class="col-6">
-                                <label class="form-label">Icon Class</label>
+                                <label class="form-label fw-semibold">Icon Class</label>
                                 <input type="text" class="form-control" id="categoryIcon" value="bi-cpu" placeholder="bi-cpu">
                             </div>
                             <div class="col-6">
-                                <label class="form-label">Sort Order</label>
+                                <label class="form-label fw-semibold">Sort Order</label>
                                 <input type="number" class="form-control" id="categoryOrder" value="1" min="1">
                             </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Status</label>
+                            <select class="form-select" id="categoryStatus">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4">Save Category</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveCategoryBtn">
+                            <i class="bi bi-check2 me-1"></i> Save Category
+                        </button>
                     </div>
                 </form>
             </div>
@@ -545,43 +688,73 @@
 
     <!-- MODAL: Create / Edit Instructor -->
     <div class="modal fade" id="createInstructorModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="instructorModalTitle">Add New Instructor</h5>
+                    <h5 class="modal-title fw-bold" id="instructorModalTitle">Instructor Management</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="instructorForm">
+                <form id="instructorForm" novalidate>
                     <input type="hidden" id="instructorId">
                     <input type="hidden" id="instructorUserId">
                     <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label">Connect to Faculty Account (Optional)</label>
-                            <select class="form-select" id="instructorUserSelect">
-                                <option value="">-- Create or Enter Details Manually --</option>
-                            </select>
-                            <div class="form-text text-muted" style="font-size: 11px;">Connect directly to an existing Teacher account to avoid duplicate records.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Instructor Name *</label>
-                            <input type="text" class="form-control" id="instructorName" required placeholder="e.g. Dr. Sokha Chan">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Title / Role</label>
-                            <input type="text" class="form-control" id="instructorTitle" placeholder="e.g. Head of Data Science">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="instructorEmail" placeholder="e.g. sokha@aub.edu.kh">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Expertise / Domain</label>
-                            <input type="text" class="form-control" id="instructorExpertise" placeholder="e.g. Machine Learning, Deep Neural Nets">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Connect to Faculty Account (Optional)</label>
+                                <select class="form-select" id="instructorUserSelect">
+                                    <option value="">-- Create or Enter Details Manually --</option>
+                                </select>
+                                <div class="form-text text-muted" style="font-size: 11px;">Connect directly to an existing Teacher account to avoid duplicate records.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Instructor Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="instructorName" required placeholder="e.g. Dr. Sokha Chan">
+                                <div class="invalid-feedback" id="instNameFeedback">Instructor Name is required.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Title / Role</label>
+                                <input type="text" class="form-control" id="instructorTitle" placeholder="e.g. Head of Data Science">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" id="instructorEmail" placeholder="e.g. sokha@aub.edu.kh">
+                                <div class="invalid-feedback" id="instEmailFeedback">Please enter a valid email address.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone</label>
+                                <input type="text" class="form-control" id="instructorPhone" placeholder="e.g. +855 23 999 105">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Department / Faculty</label>
+                                <input type="text" class="form-control" id="instructorDepartment" value="Information Technology" placeholder="e.g. Information Technology">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Status</label>
+                                <select class="form-select" id="instructorStatus">
+                                    <option value="Active">Active</option>
+                                    <option value="On Leave">On Leave</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Expertise / Domain</label>
+                                <input type="text" class="form-control" id="instructorExpertise" placeholder="e.g. Machine Learning, Deep Neural Nets">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Bio / Profile Summary</label>
+                                <textarea class="form-control" id="instructorBio" rows="2" placeholder="Brief biographical profile and academic credentials..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Profile Photo URL (Optional)</label>
+                                <input type="text" class="form-control" id="instructorPhoto" placeholder="https://images.unsplash.com/...">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4">Save Instructor</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveInstructorBtn">
+                            <i class="bi bi-check2 me-1"></i> Save Instructor
+                        </button>
                     </div>
                 </form>
             </div>

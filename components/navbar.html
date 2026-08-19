@@ -1,1 +1,44 @@
-<!-- navbar.html -->
+<!-- AUB Digital Academy - Reusable Admin Topbar / Navbar Component -->
+<header class="admin-topbar">
+    <div class="admin-topbar-left">
+        <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Navigation Sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+        <button class="btn btn-sm btn-light border d-none d-lg-inline-flex align-items-center justify-content-center me-1" id="sidebarCollapseToggle" title="Toggle Compact Sidebar" style="width: 36px; height: 36px; border-radius: 8px;">
+            <i class="bi bi-layout-sidebar-inset"></i>
+        </button>
+        <div class="admin-search-wrapper">
+            <i class="bi bi-search"></i>
+            <input type="text" class="admin-search-input" id="globalSearchInput" placeholder="Search (Ctrl + K)...">
+            <div class="search-results-dropdown" id="searchResultsContainer"></div>
+        </div>
+    </div>
+
+    <div class="admin-topbar-actions">
+        <!-- Notifications Dropdown -->
+        <div class="position-relative">
+            <button class="admin-notification-btn" id="notificationBtn" aria-label="View Notifications">
+                <i class="bi bi-bell-fill"></i>
+                <span class="admin-notification-badge" id="notificationBadge">3</span>
+            </button>
+            <div class="notifications-dropdown" id="notificationsMenu">
+                <div class="d-flex justify-content-between align-items-center px-3 pb-2 border-bottom">
+                    <span class="fw-bold" style="font-size: 12.5px;">Notifications</span>
+                    <button class="btn btn-sm btn-link p-0 text-primary" id="markAllReadBtn" style="font-size: 11px; text-decoration: none;">Mark all read</button>
+                </div>
+                <div id="notificationsList" class="pt-1">
+                    <div class="p-3 text-center text-muted" style="font-size: 12px;">No new alerts</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Profile Topbar Item -->
+        <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" style="cursor: pointer;" title="Open Profile Settings">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar" class="topbar-admin-avatar">
+            <div class="d-none d-md-block text-start lh-1">
+                <div class="name topbar-admin-name" id="topbarAdminName">Admin</div>
+                <div class="role">System Administrator</div>
+            </div>
+        </div>
+    </div>
+</header>

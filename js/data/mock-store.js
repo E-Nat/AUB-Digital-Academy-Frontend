@@ -334,12 +334,22 @@
                 category_name: 'Software Engineering',
                 instructor_id: 2,
                 instructor_name: 'Prof. Alex Chen',
+                instructor_avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
                 difficulty: 'Intermediate',
                 duration: '12 Weeks',
+                duration_hours: '12 Weeks',
                 lesson_count: 6,
                 rating: 4.9,
                 enrolled_students_count: 2,
                 badge: 'Popular',
+                badge_text: 'Popular',
+                price: 50.00,
+                enrollment_start_date: '2026-08-01',
+                enrollment_deadline: '2026-09-05',
+                start_date: '2026-09-10',
+                end_date: '2026-11-20',
+                is_archived: 0,
+                order_num: 1,
                 description: 'Master frontend engineering with modern component architectures, reactive state management, asynchronous REST APIs, and containerized deployment.',
                 thumbnail_url: 'assets/images/course_webdev.jpg',
                 is_published: 1
@@ -352,12 +362,22 @@
                 category_name: 'Computer Science',
                 instructor_id: 1,
                 instructor_name: 'Dr. Sarah Johnson',
+                instructor_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150',
                 difficulty: 'Beginner',
                 duration: '8 Weeks',
+                duration_hours: '8 Weeks',
                 lesson_count: 5,
                 rating: 4.8,
                 enrolled_students_count: 2,
                 badge: 'Core Subject',
+                badge_text: 'Core Subject',
+                price: 0.00,
+                enrollment_start_date: '2026-08-01',
+                enrollment_deadline: '2026-08-23', // 3 days away for testing deadline approaching
+                start_date: '2026-08-28',
+                end_date: '2026-10-28',
+                is_archived: 0,
+                order_num: 2,
                 description: 'Fundamental algorithmic techniques, asymptotic analysis, graph algorithms, dynamic programming, and computational complexity theory.',
                 thumbnail_url: 'assets/images/digital_learning_graphic.jpg',
                 is_published: 1
@@ -370,12 +390,22 @@
                 category_name: 'Software Engineering',
                 instructor_id: 2,
                 instructor_name: 'Prof. Alex Chen',
+                instructor_avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
                 difficulty: 'Intermediate',
                 duration: '10 Weeks',
+                duration_hours: '10 Weeks',
                 lesson_count: 5,
                 rating: 4.85,
                 enrolled_students_count: 0,
                 badge: 'Essential',
+                badge_text: 'Essential',
+                price: 45.00,
+                enrollment_start_date: '2026-07-01',
+                enrollment_deadline: '2026-08-10', // Closed deadline
+                start_date: '2026-08-15',
+                end_date: '2026-10-25',
+                is_archived: 0,
+                order_num: 3,
                 description: 'Relational data modeling, SQL optimization, query indexing, transactions, and distributed cloud database deployments.',
                 thumbnail_url: 'assets/images/course_datascience.jpg',
                 is_published: 1
@@ -388,12 +418,22 @@
                 category_name: 'Cybersecurity',
                 instructor_id: 5,
                 instructor_name: 'Dr. Sokha Chan',
+                instructor_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150',
                 difficulty: 'Intermediate',
                 duration: '10 Weeks',
+                duration_hours: '10 Weeks',
                 lesson_count: 5,
                 rating: 4.9,
                 enrolled_students_count: 2,
                 badge: 'Security',
+                badge_text: 'Security',
+                price: 75.00,
+                enrollment_start_date: '2026-08-10',
+                enrollment_deadline: '2026-09-15',
+                start_date: '2026-09-20',
+                end_date: '2026-11-30',
+                is_archived: 0,
+                order_num: 4,
                 description: 'Enterprise zero-trust architecture, identity and access management, cryptography, network firewalls, and incident response.',
                 thumbnail_url: 'assets/images/course_cybersecurity.jpg',
                 is_published: 1
@@ -406,12 +446,22 @@
                 category_name: 'Artificial Intelligence',
                 instructor_id: 3,
                 instructor_name: 'Dr. Michael Chang',
+                instructor_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150',
                 difficulty: 'Advanced',
                 duration: '14 Weeks',
+                duration_hours: '14 Weeks',
                 lesson_count: 5,
                 rating: 4.95,
                 enrolled_students_count: 1,
                 badge: 'Featured',
+                badge_text: 'Featured',
+                price: 99.00,
+                enrollment_start_date: '2026-08-15',
+                enrollment_deadline: '2026-09-30',
+                start_date: '2026-10-05',
+                end_date: '2027-01-15',
+                is_archived: 0,
+                order_num: 5,
                 description: 'Supervised and unsupervised learning, deep neural networks, convolutional networks, transformers, and deployment pipelines.',
                 thumbnail_url: 'assets/images/hero_digital_learning.jpg',
                 is_published: 1
@@ -424,15 +474,25 @@
                 category_name: 'Data Science & Analytics',
                 instructor_id: 3,
                 instructor_name: 'Dr. Michael Chang',
+                instructor_avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150',
                 difficulty: 'Intermediate',
                 duration: '10 Weeks',
+                duration_hours: '10 Weeks',
                 lesson_count: 4,
                 rating: 4.75,
                 enrolled_students_count: 0,
                 badge: 'Recommended',
+                badge_text: 'Recommended',
+                price: 60.00,
+                enrollment_start_date: '2026-09-01',
+                enrollment_deadline: '2026-10-01',
+                start_date: '2026-10-10',
+                end_date: '2026-12-20',
+                is_archived: 0,
+                order_num: 6,
                 description: 'Data wrangling with Python, exploratory data analysis, statistical modeling, and interactive executive dashboards.',
                 thumbnail_url: 'assets/images/course_datascience.jpg',
-                is_published: 1
+                is_published: 0 // Draft
             }
         ],
         chapters: [
@@ -473,13 +533,21 @@
             { id: 26, course_id: 5, chapter_num: 5, title: 'Transformer Models & Generative AI Applications', duration: '4 Hours', lesson_count: 5, description: 'Attention mechanisms, BERT, GPT transformer encoders, and fine-tuning.', quiz_count: 1 }
         ],
         enrollments: [
-            { id: 101, student_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-15', progress_percentage: 85, status: 'Active' },
-            { id: 102, student_id: 3, student_name: 'Chanthou Meas', student_uni_id: '202401235', student_email: 'chanthou.meas@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-13', progress_percentage: 60, status: 'Active' },
-            { id: 103, student_id: 4, student_name: 'Dara Keo', student_uni_id: '202401236', student_email: 'dara.keo@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', major: 'Cybersecurity & Information Defense', enrollment_date: '2026-03-09', progress_percentage: 100, status: 'Completed' },
-            { id: 104, student_id: 5, student_name: 'Kanha Rath', student_uni_id: '202401237', student_email: 'kanha.rath@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150', course_id: 5, course_title: 'Artificial Intelligence & Machine Learning', major: 'Artificial Intelligence & Machine Learning', enrollment_date: '2026-03-17', progress_percentage: 40, status: 'Active' },
-            { id: 105, student_id: 6, student_name: 'Vibol Pen', student_uni_id: '202401238', student_email: 'vibol.pen@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150', course_id: 2, course_title: 'Applied Programming & Algorithms', major: 'Business Information Technology', enrollment_date: '2026-03-05', progress_percentage: 95, status: 'Active' },
-            { id: 106, student_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 2, course_title: 'Applied Programming & Algorithms', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-11', progress_percentage: 50, status: 'Active' },
-            { id: 107, student_id: 3, student_name: 'Chanthou Meas', student_uni_id: '202401235', student_email: 'chanthou.meas@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-14', progress_percentage: 30, status: 'Active' }
+            { id: 101, student_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-15', progress_percentage: 85, status: 'Active', payment_status: 'Paid' },
+            { id: 102, student_id: 3, student_name: 'Chanthou Meas', student_uni_id: '202401235', student_email: 'chanthou.meas@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-13', progress_percentage: 60, status: 'Active', payment_status: 'Paid' },
+            { id: 103, student_id: 4, student_name: 'Dara Keo', student_uni_id: '202401236', student_email: 'dara.keo@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', major: 'Cybersecurity & Information Defense', enrollment_date: '2026-03-09', progress_percentage: 100, status: 'Completed', payment_status: 'Paid' },
+            { id: 104, student_id: 5, student_name: 'Kanha Rath', student_uni_id: '202401237', student_email: 'kanha.rath@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150', course_id: 5, course_title: 'Artificial Intelligence & Machine Learning', major: 'Artificial Intelligence & Machine Learning', enrollment_date: '2026-03-17', progress_percentage: 40, status: 'Active', payment_status: 'Paid' },
+            { id: 105, student_id: 6, student_name: 'Vibol Pen', student_uni_id: '202401238', student_email: 'vibol.pen@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150', course_id: 2, course_title: 'Applied Programming & Algorithms', major: 'Business Information Technology', enrollment_date: '2026-03-05', progress_percentage: 95, status: 'Active', payment_status: 'Paid' },
+            { id: 106, student_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 2, course_title: 'Applied Programming & Algorithms', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-11', progress_percentage: 50, status: 'Active', payment_status: 'Paid' },
+            { id: 107, student_id: 3, student_name: 'Chanthou Meas', student_uni_id: '202401235', student_email: 'chanthou.meas@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', major: 'Computer Science & Software Engineering', enrollment_date: '2026-03-14', progress_percentage: 30, status: 'Active', payment_status: 'Paid' }
+        ],
+        payments: [
+            { id: 1, transaction_id: 'TXN-2026-8801', enrollment_id: 101, user_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', amount: 50.00, payment_method: 'ABA PAY', payment_status: 'Paid', invoice_number: 'INV-2026-00412', payment_date: '2026-08-05 14:32:00' },
+            { id: 2, transaction_id: 'TXN-2026-8802', enrollment_id: 102, user_id: 3, student_name: 'Chanthou Meas', student_uni_id: '202401235', student_email: 'chanthou.meas@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150', course_id: 1, course_title: 'Full-Stack Modern Web Architecture', amount: 50.00, payment_method: 'Credit Card', payment_status: 'Paid', invoice_number: 'INV-2026-00413', payment_date: '2026-08-08 10:15:00' },
+            { id: 3, transaction_id: 'TXN-2026-8803', enrollment_id: 103, user_id: 4, student_name: 'Dara Keo', student_uni_id: '202401236', student_email: 'dara.keo@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', amount: 75.00, payment_method: 'ABA PAY', payment_status: 'Paid', invoice_number: 'INV-2026-00414', payment_date: '2026-08-11 16:45:00' },
+            { id: 4, transaction_id: 'TXN-2026-8804', enrollment_id: 104, user_id: 5, student_name: 'Kanha Rath', student_uni_id: '202401237', student_email: 'kanha.rath@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150', course_id: 5, course_title: 'Artificial Intelligence & Machine Learning', amount: 99.00, payment_method: 'Bank Transfer', payment_status: 'Paid', invoice_number: 'INV-2026-00415', payment_date: '2026-08-16 09:20:00' },
+            { id: 5, transaction_id: 'TXN-2026-8805', enrollment_id: null, user_id: 6, student_name: 'Vibol Pen', student_uni_id: '202401238', student_email: 'vibol.pen@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150', course_id: 3, course_title: 'Database Systems & Cloud Architecture', amount: 45.00, payment_method: 'ABA PAY', payment_status: 'Refunded', invoice_number: 'INV-2026-00416', payment_date: '2026-08-12 11:30:00' },
+            { id: 6, transaction_id: 'TXN-2026-8806', enrollment_id: null, user_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 5, course_title: 'Artificial Intelligence & Machine Learning', amount: 99.00, payment_method: 'ABA PAY', payment_status: 'Pending', invoice_number: 'INV-2026-00417', payment_date: '2026-08-19 18:00:00' }
         ],
         notifications: [
             { id: 1, title: 'New Student Enrollment', message: 'Sok Virak enrolled in Full-Stack Modern Web Architecture', type: 'enrollment', timestamp: '10 minutes ago', read: false, link_url: 'enrollment-management.html' },
@@ -861,29 +929,50 @@
             return user;
         }
 
-        // 3. Academic Programs CRUD
+        // 3. Academic Programs CRUD (Featured Programs)
         getPrograms() {
             return [...this.state.programs];
         }
 
         createProgram(programData) {
+            if (!programData || typeof programData !== 'object') {
+                throw new Error('Invalid program data.');
+            }
+            const title = (programData.title || '').trim();
+            const degree = (programData.degree_type || '').trim();
+            const duration = (programData.duration || '').trim();
+            const desc = (programData.description || '').trim();
+
+            if (!title || title.length < 3) {
+                throw new Error('Program Title is required (minimum 3 characters).');
+            }
+            if (!degree) {
+                throw new Error('Degree Type is required.');
+            }
+            if (!duration || duration.length < 2) {
+                throw new Error('Duration is required (e.g. 4 Years).');
+            }
+            if (!desc || desc.length < 10) {
+                throw new Error('Program Description is required (minimum 10 characters).');
+            }
+
             const nextId = this.state.programs.length > 0 
                 ? Math.max(...this.state.programs.map(p => Number(p.id) || 0)) + 1 
                 : 1;
 
             const newProgram = {
                 id: nextId,
-                title: programData.title,
-                slug: programData.slug || programData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-                degree_type: programData.degree_type || 'BACHELOR DEGREE',
+                title: title,
+                slug: programData.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                degree_type: degree,
                 faculty: programData.faculty || 'Information Technology Faculty',
-                duration: programData.duration || '4 Years',
-                icon_class: programData.icon_class || 'bi-laptop',
-                theme_class: programData.theme_class || 'theme-blue',
-                description: programData.description || '',
-                detail_url: programData.detail_url || '#',
-                order_num: Number(programData.order_num) || nextId,
-                is_published: programData.is_published !== undefined ? Number(programData.is_published) : 1
+                duration: duration,
+                icon_class: (programData.icon_class || 'bi-laptop').trim(),
+                theme_class: (programData.theme_class || 'theme-blue').trim(),
+                description: desc,
+                detail_url: (programData.detail_url || '#').trim(),
+                order_num: !isNaN(Number(programData.order_num)) ? Math.max(0, Number(programData.order_num)) : nextId,
+                is_published: programData.is_published !== undefined ? (Number(programData.is_published) ? 1 : 0) : 1
             };
 
             this.state.programs.push(newProgram);
@@ -894,7 +983,40 @@
         updateProgram(id, programData) {
             const idx = this.state.programs.findIndex(p => p.id === Number(id));
             if (idx === -1) return null;
-            this.state.programs[idx] = { ...this.state.programs[idx], ...programData, id: Number(id) };
+
+            const existing = this.state.programs[idx];
+            const title = programData.title !== undefined ? String(programData.title).trim() : existing.title;
+            const degree = programData.degree_type !== undefined ? String(programData.degree_type).trim() : existing.degree_type;
+            const duration = programData.duration !== undefined ? String(programData.duration).trim() : existing.duration;
+            const desc = programData.description !== undefined ? String(programData.description).trim() : existing.description;
+
+            if (!title || title.length < 3) {
+                throw new Error('Program Title is required (minimum 3 characters).');
+            }
+            if (!degree) {
+                throw new Error('Degree Type is required.');
+            }
+            if (!duration || duration.length < 2) {
+                throw new Error('Duration is required (e.g. 4 Years).');
+            }
+            if (!desc || desc.length < 10) {
+                throw new Error('Program Description is required (minimum 10 characters).');
+            }
+
+            this.state.programs[idx] = {
+                ...existing,
+                ...programData,
+                id: Number(id),
+                title: title,
+                degree_type: degree,
+                duration: duration,
+                description: desc,
+                icon_class: programData.icon_class !== undefined ? String(programData.icon_class).trim() : existing.icon_class,
+                theme_class: programData.theme_class !== undefined ? String(programData.theme_class).trim() : existing.theme_class,
+                detail_url: programData.detail_url !== undefined ? String(programData.detail_url).trim() : existing.detail_url,
+                order_num: programData.order_num !== undefined && !isNaN(Number(programData.order_num)) ? Math.max(0, Number(programData.order_num)) : existing.order_num,
+                is_published: programData.is_published !== undefined ? (Number(programData.is_published) ? 1 : 0) : existing.is_published
+            };
             this.saveState();
             return this.state.programs[idx];
         }
@@ -922,15 +1044,184 @@
         }
 
         // 4. Academic Courses CRUD
+        calculateCourseStatus(course) {
+            if (!course.is_published || course.is_published === 0) {
+                return 'Draft';
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const enrStart = course.enrollment_start_date ? String(course.enrollment_start_date).split('T')[0] : null;
+            const enrDeadline = course.enrollment_deadline ? String(course.enrollment_deadline).split('T')[0] : null;
+            const courseStart = course.start_date ? String(course.start_date).split('T')[0] : null;
+            const courseEnd = course.end_date ? String(course.end_date).split('T')[0] : null;
+
+            if (courseEnd && today > courseEnd) {
+                return 'Completed';
+            }
+            if (courseStart && today >= courseStart && (!courseEnd || today <= courseEnd)) {
+                return 'In Progress';
+            }
+            if (enrDeadline && today > enrDeadline) {
+                return 'Enrollment Closed';
+            }
+            if (enrStart && today < enrStart) {
+                return 'Upcoming';
+            }
+            if (enrDeadline) {
+                const diffMs = new Date(enrDeadline) - new Date(today);
+                const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                if (diffDays >= 0 && diffDays <= 3) {
+                    return 'Deadline Approaching';
+                }
+            }
+            return 'Enrollment Open';
+        }
+
         getCourses() {
-            return [...this.state.courses];
+            return this.state.courses.map(c => {
+                const computedStatus = this.calculateCourseStatus(c);
+                let deadlineWarning = null;
+                if (c.enrollment_deadline) {
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    const deadlineDate = new Date(c.enrollment_deadline);
+                    deadlineDate.setHours(0,0,0,0);
+                    const diffDays = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                    if (diffDays > 0 && diffDays <= 3) {
+                        deadlineWarning = `⚠ Enrollment closes in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+                    } else if (diffDays === 0) {
+                        deadlineWarning = `⚠ Enrollment closes today!`;
+                    } else if (diffDays < 0) {
+                        deadlineWarning = `🔴 Enrollment Closed`;
+                    }
+                }
+                const enrolledCount = this.state.enrollments.filter(e => e.course_id === Number(c.id)).length;
+                return {
+                    ...c,
+                    computed_status: computedStatus,
+                    deadline_warning: deadlineWarning,
+                    enrolled_students_count: enrolledCount,
+                    price: c.price !== undefined ? c.price : 0.0
+                };
+            });
         }
 
         getCourseById(id) {
-            return this.state.courses.find(c => c.id === Number(id));
+            const c = this.state.courses.find(course => course.id === Number(id));
+            if (!c) return null;
+            return {
+                ...c,
+                computed_status: this.calculateCourseStatus(c),
+                enrolled_students_count: this.state.enrollments.filter(e => e.course_id === Number(c.id)).length
+            };
+        }
+
+        getCourseDetails(id) {
+            const course = this.getCourseById(id);
+            if (!course) return null;
+
+            // 1. Chapters
+            const chapters = this.getChaptersByCourseId(id);
+
+            // 2. Students
+            const students = this.state.enrollments.filter(e => e.course_id === Number(id));
+
+            // 3. Exams
+            const exams = [
+                { id: 1, title: 'Midterm Examination', format: 'Online Proctoring', duration: '90 Mins', passing_score: 70, weight: '30%', status: 'Scheduled', exam_date: course.start_date || '2026-10-01' },
+                { id: 2, title: 'Final Capstone Assessment', format: 'Project Submission + Oral Defense', duration: '120 Mins', passing_score: 75, weight: '40%', status: 'Upcoming', exam_date: course.end_date || '2026-11-10' }
+            ];
+
+            // 4. Quizzes
+            const quizzes = chapters.map(ch => ({
+                id: ch.id,
+                course_id: Number(id),
+                title: `${ch.title} Quiz Assessment`,
+                lesson_title: ch.title,
+                question_count: 10,
+                max_points: 100
+            }));
+
+            // 5. Schedule
+            const schedule = {
+                enrollment_opens: course.enrollment_start_date || '2026-08-20',
+                enrollment_deadline: course.enrollment_deadline || '2026-09-05',
+                course_starts: course.start_date || '2026-09-10',
+                course_ends: course.end_date || '2026-11-10',
+                weekly_sessions: 'Tuesdays & Thursdays, 18:00 - 20:00 (GMT+7)',
+                room: 'Virtual Lab 102 & Zoom Auditorium'
+            };
+
+            // 6. Payments
+            const payments = (this.state.payments || []).filter(p => p.course_id === Number(id));
+            const totalRevenue = payments
+                .filter(p => p.payment_status === 'Paid')
+                .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+            // 7. Reports
+            const completedCount = students.filter(s => s.progress_percentage >= 100 || s.status === 'Completed').length;
+            const avgProgress = students.length > 0
+                ? Math.round(students.reduce((sum, s) => sum + (Number(s.progress_percentage) || 0), 0) / students.length)
+                : 0;
+
+            return {
+                overview: course,
+                chapters,
+                students,
+                exams,
+                quizzes,
+                schedule,
+                payments: {
+                    transactions: payments,
+                    total_revenue: totalRevenue
+                },
+                reports: {
+                    total_enrolled: students.length,
+                    completed_count: completedCount,
+                    completion_rate: students.length > 0 ? Math.round((completedCount / students.length) * 100) : 0,
+                    average_progress: avgProgress,
+                    total_revenue: totalRevenue
+                }
+            };
         }
 
         createCourse(courseData) {
+            const title = typeof courseData.title === 'string' ? courseData.title.trim() : '';
+            const desc = typeof courseData.description === 'string' ? courseData.description.trim() : '';
+
+            // Validation 1: Required Fields
+            if (!title || title.length < 3) {
+                throw new Error('Course Title is required (minimum 3 characters).');
+            }
+            if (!courseData.category_id) {
+                throw new Error('Category is required.');
+            }
+            if (!courseData.instructor_id) {
+                throw new Error('Instructor is required.');
+            }
+            if (!courseData.difficulty) {
+                throw new Error('Difficulty level is required.');
+            }
+            if (!desc || desc.length < 10) {
+                throw new Error('Course Description is required (minimum 10 characters).');
+            }
+
+            // Validation 2: Clear Date Validations
+            if (courseData.enrollment_start_date && courseData.enrollment_deadline) {
+                if (new Date(courseData.enrollment_deadline) < new Date(courseData.enrollment_start_date)) {
+                    throw new Error('Date Error: Enrollment Deadline cannot be before Enrollment Start Date.');
+                }
+            }
+            if (courseData.enrollment_deadline && courseData.start_date) {
+                if (new Date(courseData.start_date) < new Date(courseData.enrollment_deadline)) {
+                    throw new Error('Date Error: Course Start Date cannot be before Enrollment Deadline.');
+                }
+            }
+            if (courseData.start_date && courseData.end_date) {
+                if (new Date(courseData.end_date) < new Date(courseData.start_date)) {
+                    throw new Error('Date Error: Course End Date cannot be before Course Start Date.');
+                }
+            }
+
             const nextId = this.state.courses.length > 0 
                 ? Math.max(...this.state.courses.map(c => Number(c.id) || 0)) + 1 
                 : 1;
@@ -940,19 +1231,29 @@
 
             const newCourse = {
                 id: nextId,
-                title: courseData.title,
-                slug: courseData.slug || courseData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                title: title,
+                slug: courseData.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
                 category_id: Number(courseData.category_id) || 1,
                 category_name: category ? category.name : 'Computer Science',
                 instructor_id: Number(courseData.instructor_id) || 1,
                 instructor_name: instructor ? instructor.name : 'Faculty Lead',
+                instructor_avatar: instructor ? (instructor.avatar_url || '') : '',
                 difficulty: courseData.difficulty || 'Beginner',
-                duration: courseData.duration || '8 Weeks',
+                duration: courseData.duration || courseData.duration_hours || '8 Weeks',
+                duration_hours: courseData.duration_hours || courseData.duration || '8 Weeks',
                 lesson_count: 0,
                 rating: 4.8,
                 enrolled_students_count: 0,
-                badge: courseData.badge || 'New Course',
-                description: courseData.description || '',
+                badge: courseData.badge || courseData.badge_text || '',
+                badge_text: courseData.badge_text || courseData.badge || '',
+                price: !isNaN(Number(courseData.price)) ? Math.max(0, Number(courseData.price)) : 0.0,
+                enrollment_start_date: courseData.enrollment_start_date || null,
+                enrollment_deadline: courseData.enrollment_deadline || null,
+                start_date: courseData.start_date || null,
+                end_date: courseData.end_date || null,
+                is_archived: 0,
+                order_num: Number(courseData.order_num) || 0,
+                description: desc,
                 thumbnail_url: courseData.thumbnail_url || 'assets/images/course_webdev.jpg',
                 is_published: courseData.is_published !== undefined ? Number(courseData.is_published) : 1
             };
@@ -966,6 +1267,45 @@
             const idx = this.state.courses.findIndex(c => c.id === Number(id));
             if (idx === -1) return null;
 
+            const existing = this.state.courses[idx];
+            const title = courseData.title !== undefined ? String(courseData.title).trim() : existing.title;
+            const desc = courseData.description !== undefined ? String(courseData.description).trim() : existing.description;
+
+            if (!title || title.length < 3) {
+                throw new Error('Course Title is required (minimum 3 characters).');
+            }
+            if (courseData.category_id !== undefined && !courseData.category_id) {
+                throw new Error('Category is required.');
+            }
+            if (courseData.instructor_id !== undefined && !courseData.instructor_id) {
+                throw new Error('Instructor is required.');
+            }
+            if (!desc || desc.length < 10) {
+                throw new Error('Course Description is required (minimum 10 characters).');
+            }
+
+            const effEnrStart = courseData.enrollment_start_date !== undefined ? courseData.enrollment_start_date : existing.enrollment_start_date;
+            const effEnrDeadline = courseData.enrollment_deadline !== undefined ? courseData.enrollment_deadline : existing.enrollment_deadline;
+            const effCourseStart = courseData.start_date !== undefined ? courseData.start_date : existing.start_date;
+            const effCourseEnd = courseData.end_date !== undefined ? courseData.end_date : existing.end_date;
+
+            // Date validations
+            if (effEnrStart && effEnrDeadline) {
+                if (new Date(effEnrDeadline) < new Date(effEnrStart)) {
+                    throw new Error('Date Error: Enrollment Deadline cannot be before Enrollment Start Date.');
+                }
+            }
+            if (effEnrDeadline && effCourseStart) {
+                if (new Date(effCourseStart) < new Date(effEnrDeadline)) {
+                    throw new Error('Date Error: Course Start Date cannot be before Enrollment Deadline.');
+                }
+            }
+            if (effCourseStart && effCourseEnd) {
+                if (new Date(effCourseEnd) < new Date(effCourseStart)) {
+                    throw new Error('Date Error: Course End Date cannot be before Course Start Date.');
+                }
+            }
+
             const category = courseData.category_id 
                 ? this.state.categories.find(cat => cat.id === Number(courseData.category_id)) 
                 : null;
@@ -974,15 +1314,68 @@
                 : null;
 
             this.state.courses[idx] = {
-                ...this.state.courses[idx],
+                ...existing,
                 ...courseData,
                 id: Number(id),
-                category_name: category ? category.name : this.state.courses[idx].category_name,
-                instructor_name: instructor ? instructor.name : this.state.courses[idx].instructor_name
+                title: title,
+                description: desc,
+                category_name: category ? category.name : existing.category_name,
+                instructor_name: instructor ? instructor.name : existing.instructor_name,
+                instructor_avatar: instructor ? (instructor.avatar_url || '') : existing.instructor_avatar,
+                price: courseData.price !== undefined ? (!isNaN(Number(courseData.price)) ? Math.max(0, Number(courseData.price)) : 0.0) : existing.price,
+                enrollment_start_date: effEnrStart,
+                enrollment_deadline: effEnrDeadline,
+                start_date: effCourseStart,
+                end_date: effCourseEnd,
+                is_published: courseData.is_published !== undefined ? Number(courseData.is_published) : existing.is_published
             };
 
             this.saveState();
             return this.state.courses[idx];
+        }
+
+        duplicateCourse(id) {
+            const original = this.getCourseById(id);
+            if (!original) throw new Error('Course not found.');
+
+            const nextId = this.state.courses.length > 0 
+                ? Math.max(...this.state.courses.map(c => Number(c.id) || 0)) + 1 
+                : 1;
+
+            const cloned = {
+                ...original,
+                id: nextId,
+                title: `${original.title} (Copy)`,
+                slug: `${original.slug}-copy-${Date.now().toString().slice(-4)}`,
+                is_published: 0, // starts as draft
+                enrolled_students_count: 0
+            };
+
+            this.state.courses.unshift(cloned);
+
+            // Duplicate chapters
+            const origChapters = this.getChaptersByCourseId(id);
+            for (const ch of origChapters) {
+                const nextChId = this.state.chapters.length > 0 
+                    ? Math.max(...this.state.chapters.map(c => Number(c.id) || 0)) + 1 
+                    : 1;
+                this.state.chapters.push({
+                    ...ch,
+                    id: nextChId,
+                    course_id: nextId
+                });
+            }
+
+            this.saveState();
+            return cloned;
+        }
+
+        archiveCourse(id) {
+            const course = this.getCourseById(id);
+            if (!course) throw new Error('Course not found.');
+            course.is_archived = course.is_archived === 1 ? 0 : 1;
+            this.saveState();
+            return course;
         }
 
         deleteCourse(id) {
@@ -1101,12 +1494,38 @@
                 slug: slug,
                 icon: catData.icon || 'bi-tags',
                 order_num: Number(catData.order_num) || nextId,
-                color: catData.color || '#2563EB'
+                color: catData.color || '#2563EB',
+                status: catData.status || 'Active'
             };
 
             this.state.categories.push(newCategory);
             this.saveState();
             return newCategory;
+        }
+
+        updateCategory(id, catData) {
+            const idx = this.state.categories.findIndex(c => c.id === Number(id));
+            if (idx === -1) return null;
+
+            const name = (catData.name || this.state.categories[idx].name || '').trim();
+            if (!name) throw new Error('Category name is required.');
+
+            const slug = catData.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+            if (this.state.categories.some(c => c.id !== Number(id) && (c.name.toLowerCase() === name.toLowerCase() || c.slug === slug))) {
+                throw new Error('Another category with this name or slug already exists.');
+            }
+
+            this.state.categories[idx] = {
+                ...this.state.categories[idx],
+                ...catData,
+                name,
+                slug,
+                id: Number(id)
+            };
+
+            this.saveState();
+            return this.state.categories[idx];
         }
 
         deleteCategory(id) {
@@ -1136,7 +1555,7 @@
                         email: matchedUser.email,
                         avatar_url: matchedUser.avatar_url || ins.avatar_url,
                         university_id: matchedUser.university_id,
-                        status: matchedUser.status
+                        status: matchedUser.status || ins.status || 'Active'
                     };
                 }
                 return ins;
@@ -1146,6 +1565,16 @@
         }
 
         createInstructor(insData) {
+            const name = (insData.name || '').trim();
+            if (!name || name.length < 2) throw new Error('Instructor Name is required (minimum 2 characters).');
+
+            if (insData.email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(insData.email)) {
+                    throw new Error('Please provide a valid email address.');
+                }
+            }
+
             let matchedUser = null;
             if (insData.user_id) {
                 matchedUser = this.getUserById(insData.user_id);
@@ -1155,13 +1584,14 @@
 
             if (!matchedUser) {
                 matchedUser = this.createUser({
-                    full_name: insData.name,
-                    email: insData.email || `${insData.name.toLowerCase().replace(/[^a-z0-9]+/g, '.')}@aub.edu.kh`,
+                    full_name: name,
+                    email: insData.email || `${name.toLowerCase().replace(/[^a-z0-9]+/g, '.')}@aub.edu.kh`,
                     role: 'TEACHER',
                     role_id: 2,
-                    status: 'Active',
-                    faculty: insData.faculty || 'Information Technology',
-                    avatar_url: insData.avatar_url
+                    status: insData.status || 'Active',
+                    faculty: insData.faculty || insData.department || 'Information Technology',
+                    avatar_url: insData.avatar_url,
+                    phone: insData.phone || ''
                 });
             }
 
@@ -1173,11 +1603,15 @@
                 id: nextId,
                 user_id: matchedUser.id,
                 name: matchedUser.full_name,
-                title: insData.title || 'Faculty Member',
+                title: insData.title || 'Lecturer',
                 email: matchedUser.email,
+                phone: insData.phone || '',
                 expertise: insData.expertise || 'Computer Science & Technology',
-                faculty: insData.faculty || 'Information Technology',
-                avatar_url: matchedUser.avatar_url || insData.avatar_url
+                department: insData.department || insData.faculty || 'Information Technology',
+                faculty: insData.faculty || insData.department || 'Information Technology',
+                bio: insData.bio || '',
+                avatar_url: matchedUser.avatar_url || insData.avatar_url,
+                status: insData.status || 'Active'
             };
 
             this.state.instructors.push(newInstructor);
@@ -1189,6 +1623,13 @@
             const idx = this.state.instructors.findIndex(i => i.id === Number(id));
             if (idx === -1) return null;
 
+            if (insData.email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(insData.email)) {
+                    throw new Error('Please provide a valid email address.');
+                }
+            }
+
             this.state.instructors[idx] = {
                 ...this.state.instructors[idx],
                 ...insData,
@@ -1198,7 +1639,9 @@
             if (this.state.instructors[idx].user_id) {
                 this.updateUser(this.state.instructors[idx].user_id, {
                     full_name: insData.name || this.state.instructors[idx].name,
-                    email: insData.email || this.state.instructors[idx].email
+                    email: insData.email || this.state.instructors[idx].email,
+                    phone: insData.phone !== undefined ? insData.phone : this.state.instructors[idx].phone,
+                    status: insData.status || this.state.instructors[idx].status
                 });
             }
 
@@ -1216,9 +1659,176 @@
             return true;
         }
 
-        // 7. Enrollment Management CRUD
+        // 7. Enrollment & Payment Management CRUD
         getEnrollments() {
             return [...this.state.enrollments];
+        }
+
+        getPayments(filters = {}) {
+            let list = [...(this.state.payments || [])];
+            if (filters.status && filters.status !== 'all') {
+                list = list.filter(p => p.payment_status === filters.status);
+            }
+            return list.sort((a, b) => new Date(b.payment_date || 0) - new Date(a.payment_date || 0));
+        }
+
+        getPaymentStats() {
+            const list = this.state.payments || [];
+            const paidItems = list.filter(p => p.payment_status === 'Paid');
+            const pendingItems = list.filter(p => p.payment_status === 'Pending');
+            const refundedItems = list.filter(p => p.payment_status === 'Refunded');
+
+            const totalRevenue = paidItems.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+            const refundedTotal = refundedItems.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+            return {
+                totalRevenue,
+                paidCount: paidItems.length,
+                pendingCount: pendingItems.length,
+                refundedTotal,
+                refundedCount: refundedItems.length
+            };
+        }
+
+        createPayment(paymentData) {
+            const nextId = (this.state.payments && this.state.payments.length > 0)
+                ? Math.max(...this.state.payments.map(p => Number(p.id) || 0)) + 1
+                : 1;
+
+            const txnId = `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const invNum = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 90000) + 10000)}`;
+
+            const student = this.getUserById(paymentData.user_id);
+            const course = this.getCourseById(paymentData.course_id);
+
+            const newPayment = {
+                id: nextId,
+                transaction_id: txnId,
+                enrollment_id: paymentData.enrollment_id || null,
+                user_id: Number(paymentData.user_id),
+                student_name: student ? student.full_name : (paymentData.student_name || 'Student'),
+                student_uni_id: student ? student.university_id : '0001000',
+                student_email: student ? student.email : 'student@aub.edu.kh',
+                student_avatar: student ? student.avatar_url : '',
+                course_id: Number(paymentData.course_id),
+                course_title: course ? course.title : 'Academic Course',
+                amount: Number(paymentData.amount) || 0.0,
+                payment_method: paymentData.payment_method || 'ABA PAY',
+                payment_status: paymentData.payment_status || 'Paid',
+                invoice_number: invNum,
+                payment_date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                notes: paymentData.notes || ''
+            };
+
+            if (!this.state.payments) this.state.payments = [];
+            this.state.payments.unshift(newPayment);
+
+            if (paymentData.enrollment_id) {
+                const enr = this.state.enrollments.find(e => e.id === Number(paymentData.enrollment_id));
+                if (enr) {
+                    enr.payment_status = newPayment.payment_status;
+                }
+            }
+
+            this.saveState();
+            return newPayment;
+        }
+
+        refundPayment(id) {
+            const payment = (this.state.payments || []).find(p => p.id === Number(id));
+            if (!payment) throw new Error('Payment not found.');
+
+            payment.payment_status = 'Refunded';
+
+            if (payment.enrollment_id) {
+                const enr = this.state.enrollments.find(e => e.id === Number(payment.enrollment_id));
+                if (enr) {
+                    enr.payment_status = 'Refunded';
+                    enr.status = 'Cancelled';
+                }
+            }
+
+            this.saveState();
+            return payment;
+        }
+
+        enrollInCourse(courseId, userId, paymentMethod = 'ABA PAY') {
+            const course = this.getCourseById(courseId);
+            if (!course) throw new Error('Course not found.');
+
+            // Deadline check: do NOT allow enrollment after enrollment deadline!
+            const today = new Date().toISOString().split('T')[0];
+            if (course.enrollment_deadline && today > course.enrollment_deadline) {
+                throw new Error(`Enrollment is closed for this course. The deadline was ${course.enrollment_deadline}.`);
+            }
+
+            const exists = this.state.enrollments.some(e => e.student_id === Number(userId) && e.course_id === Number(courseId));
+            if (exists) {
+                throw new Error('You are already enrolled in this course.');
+            }
+
+            const student = this.getUserById(userId);
+            const nextEnrId = this.state.enrollments.length > 0 
+                ? Math.max(...this.state.enrollments.map(e => Number(e.id) || 0)) + 1 
+                : 101;
+
+            const isFree = !course.price || Number(course.price) === 0;
+
+            const newEnrollment = {
+                id: nextEnrId,
+                student_id: Number(userId),
+                student_name: student ? student.full_name : 'Student',
+                student_uni_id: student ? student.university_id : '202401234',
+                student_email: student ? student.email : 'student@aub.edu.kh',
+                student_avatar: student ? student.avatar_url : 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150',
+                course_id: Number(courseId),
+                course_title: course.title,
+                major: student ? (student.major || 'Computer Science & Software Engineering') : 'Computer Science & Software Engineering',
+                enrollment_date: today,
+                progress_percentage: 0,
+                status: 'Active',
+                payment_status: 'Paid'
+            };
+
+            this.state.enrollments.unshift(newEnrollment);
+
+            // Record transaction
+            const nextPayId = (this.state.payments && this.state.payments.length > 0)
+                ? Math.max(...this.state.payments.map(p => Number(p.id) || 0)) + 1
+                : 1;
+
+            const txnId = `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+            const invNum = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 90000) + 10000)}`;
+
+            const newPayment = {
+                id: nextPayId,
+                transaction_id: txnId,
+                enrollment_id: nextEnrId,
+                user_id: Number(userId),
+                student_name: newEnrollment.student_name,
+                student_uni_id: newEnrollment.student_uni_id,
+                student_email: newEnrollment.student_email,
+                student_avatar: newEnrollment.student_avatar,
+                course_id: Number(courseId),
+                course_title: course.title,
+                amount: Number(course.price) || 0.0,
+                payment_method: isFree ? 'Free Enrollment' : paymentMethod,
+                payment_status: 'Paid',
+                invoice_number: invNum,
+                payment_date: new Date().toISOString().replace('T', ' ').slice(0, 19),
+                notes: isFree ? 'Complimentary Academic Course' : 'Standard Course Enrollment Fee'
+            };
+
+            if (!this.state.payments) this.state.payments = [];
+            this.state.payments.unshift(newPayment);
+
+            course.enrolled_students_count = this.state.enrollments.filter(e => e.course_id === course.id).length;
+
+            this.saveState();
+            return {
+                enrollment: newEnrollment,
+                payment: newPayment
+            };
         }
 
         createEnrollment(enrData) {

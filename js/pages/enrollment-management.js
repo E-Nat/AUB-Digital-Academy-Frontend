@@ -83,6 +83,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         applyFilters();
     }
 
+    function getPaymentBadgeHtml(paymentStatus) {
+        const pStatus = (paymentStatus || 'Paid').toLowerCase();
+        if (pStatus === 'paid') {
+            return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Paid</span>`;
+        } else if (pStatus === 'pending') {
+            return `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pending</span>`;
+        } else if (pStatus === 'refunded') {
+            return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1"><i class="bi bi-arrow-counterclockwise me-1"></i>Refunded</span>`;
+        }
+        return `<span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1">${escapeHtml(paymentStatus || 'Unpaid')}</span>`;
+    }
+
     function renderEnrollments(items) {
         const tbody = document.getElementById('enrollmentsTableBody');
         const countEl = document.getElementById('enrollmentRecordCount');
@@ -95,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (items.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" class="text-center py-5 text-muted">
+                    <td colspan="8" class="text-center py-5 text-muted">
                         <i class="bi bi-person-x fs-3 d-block mb-2 text-secondary opacity-50"></i>
                         <span class="fw-semibold">No enrollment records match your search</span>
                         <div style="font-size: 11.5px;" class="mt-1">Try resetting the status filter or search keyword.</div>
@@ -108,6 +120,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         tbody.innerHTML = items.map(e => {
             const statusClass = (e.status || 'Active').toLowerCase();
             const isDone = statusClass === 'completed' || e.progress_percentage === 100;
+            const course = window.AdminStore ? window.AdminStore.getCourseById(e.course_id) : null;
+            const courseTimeline = (course && course.start_date && course.end_date)
+                ? `<div class="text-dark fw-semibold" style="font-size: 11.5px;"><i class="bi bi-calendar-event text-primary me-1"></i>${String(course.start_date).split('T')[0]} &rarr; ${String(course.end_date).split('T')[0]}</div>`
+                : `<div class="text-muted small" style="font-size: 11px;">Enrolled: ${formatDate(e.enrollment_date)}</div>`;
+
             return `
                 <tr>
                     <td class="text-muted fw-bold" style="font-size: 12px;">#ENR-${e.id}</td>
@@ -121,11 +138,16 @@ document.addEventListener('DOMContentLoaded', async function () {
                         </div>
                     </td>
                     <td>
-                        <span class="fw-semibold text-primary" style="font-size: 12.5px;">${escapeHtml(e.course_title || 'Academic Course')}</span>
+                        <span class="fw-semibold text-dark" style="font-size: 12.5px;">${escapeHtml(e.course_title || 'Academic Course')}</span>
                         <div class="text-muted" style="font-size: 10.5px;">${escapeHtml(e.major || 'Computer Science')}</div>
                     </td>
-                    <td class="text-muted" style="font-size: 11.5px;">${formatDate(e.enrollment_date)}</td>
-                    <td style="width: 140px;">
+                    <td>
+                        ${getPaymentBadgeHtml(e.payment_status || 'Paid')}
+                    </td>
+                    <td>
+                        ${courseTimeline}
+                    </td>
+                    <td style="width: 130px;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 6px;">
                                 <div class="progress-bar ${isDone ? 'bg-success' : 'bg-primary'}" style="width: ${e.progress_percentage || 0}%; border-radius: 6px;"></div>
@@ -135,21 +157,48 @@ document.addEventListener('DOMContentLoaded', async function () {
                     </td>
                     <td>
                         <span class="admin-status-badge ${statusClass}">
-                            <i class="bi ${statusClass === 'completed' ? 'bi-check2-all' : statusClass === 'pending' ? 'bi-clock' : statusClass === 'dropped' ? 'bi-x-circle' : 'bi-check-circle-fill'} me-1"></i>
+                            <i class="bi ${statusClass === 'completed' ? 'bi-check2-all' : statusClass === 'pending' ? 'bi-clock' : statusClass === 'cancelled' || statusClass === 'dropped' ? 'bi-x-circle' : 'bi-check-circle-fill'} me-1"></i>
                             ${escapeHtml(e.status || 'Active')}
                         </span>
                     </td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <button class="action-btn" title="View Details" onclick="openViewEnrollmentModal(${e.id})">
-                                <i class="bi bi-eye"></i>
+                    <td class="text-end pe-3">
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-light btn-sm border py-1 px-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                Actions
                             </button>
-                            <button class="action-btn" title="Update Progress & Status" onclick="openEditEnrollmentModal(${e.id})">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="action-btn delete" title="Cancel Enrollment" onclick="deleteEnrollment(${e.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="font-size: 12px;">
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="javascript:void(0)" onclick="openViewEnrollmentModal(${e.id})">
+                                        <i class="bi bi-eye text-primary me-2"></i> View Details
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="javascript:void(0)" onclick="openEditEnrollmentModal(${e.id})">
+                                        <i class="bi bi-pencil text-secondary me-2"></i> Update Progress
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5 text-success" href="javascript:void(0)" onclick="approveEnrollmentAction(${e.id})">
+                                        <i class="bi bi-check2-circle text-success me-2"></i> Approve Admission
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="payment-management.html">
+                                        <i class="bi bi-credit-card text-info me-2"></i> View Payment Record
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-1.5" href="user-management.html">
+                                        <i class="bi bi-person text-dark me-2"></i> View Student Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-1.5 text-danger" href="javascript:void(0)" onclick="deleteEnrollment(${e.id})">
+                                        <i class="bi bi-x-circle text-danger me-2"></i> Cancel Enrollment
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </td>
                 </tr>
@@ -160,9 +209,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     function applyFilters() {
         const searchInput = document.getElementById('enrollmentSearchInput');
         const statusFilter = document.getElementById('enrollmentStatusFilter');
+        const paymentFilter = document.getElementById('enrollmentPaymentFilter');
 
         const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const statusVal = statusFilter ? statusFilter.value.toLowerCase() : 'all';
+        const payVal = paymentFilter ? paymentFilter.value.toLowerCase() : 'all';
 
         const filtered = allEnrollments.filter(item => {
             const matchQuery = !q || 
@@ -174,7 +225,10 @@ document.addEventListener('DOMContentLoaded', async function () {
             const itemStatus = (item.status || 'Active').toLowerCase();
             const matchStatus = statusVal === 'all' || itemStatus === statusVal;
 
-            return matchQuery && matchStatus;
+            const itemPay = (item.payment_status || 'Paid').toLowerCase();
+            const matchPay = payVal === 'all' || itemPay === payVal;
+
+            return matchQuery && matchStatus && matchPay;
         });
 
         renderEnrollments(filtered);
@@ -186,11 +240,27 @@ document.addEventListener('DOMContentLoaded', async function () {
     const statusFilter = document.getElementById('enrollmentStatusFilter');
     if (statusFilter) statusFilter.addEventListener('change', applyFilters);
 
+    const paymentFilter = document.getElementById('enrollmentPaymentFilter');
+    if (paymentFilter) paymentFilter.addEventListener('change', applyFilters);
+
     window.resetEnrollmentFilters = function () {
         if (searchInput) searchInput.value = '';
         if (statusFilter) statusFilter.value = 'all';
+        if (paymentFilter) paymentFilter.value = 'all';
         applyFilters();
         if (window.AdminStore) window.AdminStore.constructor.toast('Enrollment filters reset', 'info');
+    };
+
+    window.approveEnrollmentAction = function (id) {
+        const enr = allEnrollments.find(e => e.id === id);
+        if (!enr) return;
+        enr.status = 'Active';
+        enr.payment_status = 'Paid';
+        if (window.AdminStore) {
+            window.AdminStore.updateEnrollment(id, { status: 'Active', payment_status: 'Paid' });
+            window.AdminStore.constructor.notifySuccess('Admission Approved', `Student ${enr.student_name} is confirmed as Active in ${enr.course_title}.`);
+        }
+        applyFilters();
     };
 
     // 2. Add Enrollment Modal

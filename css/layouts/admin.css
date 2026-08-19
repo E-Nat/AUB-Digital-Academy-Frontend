@@ -1306,12 +1306,65 @@ body.admin-body {
     padding: 8px 18px !important;
 }
 
+/* Collapsible Sidebar (Tablet / Desktop Compact Mode) */
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar {
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+}
+
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-brand-info,
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-sidebar-label,
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-nav-item span,
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-logout-btn span {
+    display: none !important;
+}
+
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-nav-item,
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-logout-btn {
+    justify-content: center;
+    padding: 0;
+}
+
+.admin-wrapper.admin-sidebar-collapsed .admin-sidebar-brand {
+    justify-content: center;
+    padding: 12px 8px;
+}
+
+.admin-wrapper.admin-sidebar-collapsed .admin-brand-header {
+    justify-content: center;
+}
+
+.admin-wrapper.admin-sidebar-collapsed .admin-main {
+    margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
+}
+
 /* ==========================================================================
-   8. RESPONSIVE BREAKPOINTS (Desktop >=1200px, Tablet 768-1199px, Mobile <768px)
+   8. COMPREHENSIVE RESPONSIVE BREAKPOINTS
+   Targeting: 1920px, 1440px, 1280px, 1024px, 768px, 430px, 390px, 375px
    ========================================================================== */
 
-/* Tablet & Intermediate Desktop (768px – 1199px) */
-@media (max-width: 1199.98px) and (min-width: 768px) {
+/* 1. Ultra-Wide & Full HD Desktops (1440px – 1920px+) */
+@media (min-width: 1440px) {
+    .admin-content {
+        max-width: 1800px;
+        margin: 0 auto;
+        width: 100%;
+    }
+}
+
+/* 2. Standard & Compact Desktops (1025px – 1439px) */
+@media (max-width: 1439.98px) and (min-width: 1025px) {
+    .admin-kpi-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+/* 3. Tablet Landscape (992px – 1024.98px) */
+@media (max-width: 1024.98px) and (min-width: 992px) {
     :root {
         --sidebar-width: var(--sidebar-width-tablet);
     }
@@ -1342,8 +1395,8 @@ body.admin-body {
     }
 }
 
-/* Mobile Screens (< 768px) */
-@media (max-width: 767.98px) {
+/* 4. Tablet Portrait & Mobile Screens (< 992px, e.g. 768px, 430px, 390px, 375px) */
+@media (max-width: 991.98px) {
     .admin-sidebar {
         position: fixed;
         left: 0;
@@ -1377,7 +1430,7 @@ body.admin-body {
     }
 
     .admin-search-wrapper {
-        width: 160px;
+        width: 200px;
     }
 
     .admin-content {
@@ -1404,7 +1457,7 @@ body.admin-body {
     }
 
     .admin-kpi-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
     }
 
@@ -1417,29 +1470,33 @@ body.admin-body {
         margin-bottom: 16px;
     }
 
-    /* Modals on Mobile: Near Full-Screen & Scrollable Body */
+    /* Modals on Tablet & Mobile: Near Full-Screen & Scrollable Body */
     .modal-dialog {
-        margin: 10px !important;
-        max-width: calc(100% - 20px) !important;
-        width: calc(100% - 20px) !important;
+        margin: 12px auto !important;
+        max-width: calc(100% - 24px) !important;
+        width: calc(100% - 24px) !important;
     }
 
     .modal-content {
-        max-height: calc(100vh - 20px);
+        max-height: calc(100vh - 24px);
         display: flex;
         flex-direction: column;
     }
 
     .modal-body {
-        max-height: calc(100vh - 130px);
+        max-height: calc(100vh - 140px);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        padding: 14px;
+        padding: 16px;
     }
 
     .modal-footer {
-        padding: 10px 14px;
+        padding: 12px 16px;
         flex-wrap: nowrap;
+        position: sticky;
+        bottom: 0;
+        background: #FFFFFF;
+        border-top: 1px solid var(--admin-border);
     }
 
     .modal-footer > button {
@@ -1450,5 +1507,42 @@ body.admin-body {
     .modal-body .row.g-3 > [class*="col-md-"],
     .modal-body .row.g-3 > [class*="col-sm-"] {
         width: 100% !important;
+    }
+}
+
+/* 5. Mobile Phones (375px – 480px: iPhone SE, iPhone 13/14/15/Pro Max) */
+@media (max-width: 480px) {
+    .admin-kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .admin-search-wrapper {
+        width: 140px;
+    }
+
+    .admin-topbar-profile .d-none.d-md-block,
+    .admin-topbar-profile .name,
+    .admin-topbar-profile .role {
+        display: none !important;
+    }
+
+    .admin-topbar-profile {
+        padding: 2px;
+    }
+
+    .admin-date-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .modal-dialog {
+        margin: 8px !important;
+        max-width: calc(100% - 16px) !important;
+        width: calc(100% - 16px) !important;
+    }
+
+    .modal-body {
+        padding: 12px;
     }
 }

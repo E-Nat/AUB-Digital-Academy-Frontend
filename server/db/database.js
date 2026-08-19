@@ -218,6 +218,13 @@ async function initSchema() {
             lesson_count INTEGER DEFAULT 12,
             enrolled_students_count INTEGER DEFAULT 0,
             badge_text TEXT,
+            price REAL DEFAULT 0.0,
+            enrollment_start_date DATE,
+            enrollment_deadline DATE,
+            start_date DATE,
+            end_date DATE,
+            status TEXT DEFAULT 'Draft',
+            is_archived INTEGER DEFAULT 0,
             order_num INTEGER DEFAULT 0,
             is_popular INTEGER DEFAULT 1,
             is_published INTEGER DEFAULT 1,
@@ -227,6 +234,32 @@ async function initSchema() {
             FOREIGN KEY (instructor_id) REFERENCES instructors(id) ON DELETE SET NULL
         );
     `);
+
+    const courseCols = [
+        'price REAL DEFAULT 0.0',
+        'enrollment_start_date DATE',
+        'enrollment_deadline DATE',
+        'start_date DATE',
+        'end_date DATE',
+        'status TEXT DEFAULT "Draft"',
+        'is_archived INTEGER DEFAULT 0'
+    ];
+    for (const cc of courseCols) {
+        try {
+            await dbAsync.run(`ALTER TABLE courses ADD COLUMN ${cc};`);
+        } catch (e) {}
+    }
+
+    try {
+        await dbAsync.run(`ALTER TABLE categories ADD COLUMN status TEXT DEFAULT 'Active';`);
+    } catch (e) {}
+
+    try {
+        await dbAsync.run(`ALTER TABLE instructors ADD COLUMN phone TEXT DEFAULT '';`);
+    } catch (e) {}
+    try {
+        await dbAsync.run(`ALTER TABLE instructors ADD COLUMN department TEXT DEFAULT '';`);
+    } catch (e) {}
 
     // 8. Modules (Chapters)
     await dbAsync.run(`
@@ -296,6 +329,7 @@ async function initSchema() {
             program_id INTEGER,
             enrollment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
             status TEXT DEFAULT 'Active',
+            payment_status TEXT DEFAULT 'Paid',
             progress_percentage REAL DEFAULT 0.0,
             completed_at DATETIME,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -303,6 +337,35 @@ async function initSchema() {
             FOREIGN KEY (program_id) REFERENCES programs(id) ON DELETE SET NULL
         );
     `);
+
+    try {
+        await dbAsync.run(`ALTER TABLE enrollments ADD COLUMN payment_status TEXT DEFAULT 'Paid';`);
+    } catch (e) {}
+
+    // 11b. Payments / Transactions
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id TEXT UNIQUE NOT NULL,
+            enrollment_id INTEGER,
+            user_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            payment_method TEXT DEFAULT 'ABA PAY',
+            payment_status TEXT DEFAULT 'Paid',
+            payment_deadline DATE,
+            invoice_number TEXT,
+            notes TEXT,
+            payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE SET NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        );
+    `);
+
+    try {
+        await dbAsync.run(`ALTER TABLE payments ADD COLUMN payment_deadline DATE;`);
+    } catch (e) {}
 
     // Enforce Unique Enrollment Constraint: student cannot be enrolled in the same course twice
     await dbAsync.run(`
@@ -471,6 +534,157 @@ async function initSchema() {
         );
     `);
 
+    // 21. Exams & Quizzes
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS exams (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            course_id INTEGER NOT NULL,
+            chapter_id INTEGER,
+            instructor_id INTEGER,
+            exam_type TEXT DEFAULT 'Midterm',
+            description TEXT DEFAULT '',
+            total_questions INTEGER DEFAULT 20,
+            total_marks INTEGER DEFAULT 100,
+            passing_score INTEGER DEFAULT 50,
+            duration_minutes INTEGER DEFAULT 60,
+            start_datetime DATETIME NOT NULL,
+            end_datetime DATETIME NOT NULL,
+            attempts_allowed INTEGER DEFAULT 2,
+            status TEXT DEFAULT 'Scheduled',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (chapter_id) REFERENCES modules(id) ON DELETE SET NULL,
+            FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE SET NULL
+        );
+    `);
+
+    // Quizzes table column upgrades
+    const quizColumns = [
+        'chapter_id INTEGER REFERENCES modules(id)',
+        'instructor_id INTEGER REFERENCES users(id)',
+        'questions_count INTEGER DEFAULT 10',
+        'total_marks INTEGER DEFAULT 100',
+        'passing_score INTEGER DEFAULT 60',
+        'time_limit_minutes INTEGER DEFAULT 30',
+        'available_from DATETIME',
+        'due_date DATETIME',
+        'attempts_allowed INTEGER DEFAULT 3',
+        'status TEXT DEFAULT ' + "'Published'"
+    ];
+    for (const qc of quizColumns) {
+        try {
+            await dbAsync.run(`ALTER TABLE quizzes ADD COLUMN ${qc};`);
+        } catch (e) {}
+    }
+
+    // 22. Exam & Quiz Questions Bank
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS exam_questions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exam_id INTEGER,
+            quiz_id INTEGER,
+            question_type TEXT DEFAULT 'Multiple Choice',
+            question_text TEXT NOT NULL,
+            options_json TEXT NOT NULL,
+            correct_answer TEXT NOT NULL,
+            points INTEGER DEFAULT 5,
+            explanation TEXT DEFAULT '',
+            order_num INTEGER DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE,
+            FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+        );
+    `);
+
+    // 23. Exam & Quiz Results / Submissions
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS exam_submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            exam_id INTEGER,
+            quiz_id INTEGER,
+            student_id INTEGER NOT NULL,
+            course_id INTEGER,
+            score REAL NOT NULL,
+            total_marks REAL NOT NULL,
+            percentage REAL NOT NULL,
+            correct_count INTEGER DEFAULT 0,
+            wrong_count INTEGER DEFAULT 0,
+            attempt_number INTEGER DEFAULT 1,
+            answers_json TEXT,
+            status TEXT DEFAULT 'Passed',
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE,
+            FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE SET NULL
+        );
+    `);
+
+    // 24. Invoices
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS invoices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_number TEXT UNIQUE NOT NULL,
+            student_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            payment_id INTEGER,
+            amount REAL NOT NULL,
+            discount REAL DEFAULT 0.0,
+            tax REAL DEFAULT 0.0,
+            total_amount REAL NOT NULL,
+            issue_date DATE NOT NULL,
+            due_date DATE NOT NULL,
+            status TEXT DEFAULT 'Paid',
+            notes TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL
+        );
+    `);
+
+    // 25. Teacher Payroll
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS teacher_payroll (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            teacher_id INTEGER NOT NULL,
+            department_id INTEGER,
+            pay_period TEXT NOT NULL,
+            base_salary REAL NOT NULL,
+            course_compensation REAL DEFAULT 0.0,
+            exam_compensation REAL DEFAULT 0.0,
+            bonus REAL DEFAULT 0.0,
+            deductions REAL DEFAULT 0.0,
+            net_pay REAL NOT NULL,
+            payment_date DATE,
+            status TEXT DEFAULT 'Paid',
+            notes TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
+        );
+    `);
+
+    // 26. Calendar Events & Schedule
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS calendar_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            course_id INTEGER,
+            instructor_id INTEGER,
+            start_time DATETIME NOT NULL,
+            end_time DATETIME,
+            location_room TEXT DEFAULT 'Room 101',
+            description TEXT DEFAULT '',
+            status TEXT DEFAULT 'Active',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (instructor_id) REFERENCES users(id) ON DELETE SET NULL
+        );
+    `);
+
     // Indexes for fast searching and performance
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_teachers_code ON teachers(teacher_code);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_teachers_status ON teachers(status);`);
@@ -480,6 +694,11 @@ async function initSchema() {
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_classes_teacher ON classes(teacher_id);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_teacher_courses ON teacher_courses(teacher_id, course_id);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_class_enrollments ON class_enrollments(class_id, student_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_exams_course ON exams(course_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_exam_subs_student ON exam_submissions(student_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_invoices_student ON invoices(student_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_payroll_teacher ON teacher_payroll(teacher_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_calendar_time ON calendar_events(start_time);`);
 
     console.log('Database schema verified & tables initialized successfully.');
 }

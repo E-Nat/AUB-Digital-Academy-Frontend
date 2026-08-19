@@ -35,31 +35,55 @@
             <nav class="admin-sidebar-menu">
                 <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid"></i>
+                    <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
                 </a>
 
-                <div class="admin-sidebar-label">MANAGEMENT</div>
+                <div class="admin-sidebar-label">ACADEMIC</div>
+                <a href="academic-management.html" class="admin-nav-item">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Course Management</span>
+                </a>
+                <a href="exam-management.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Exam & Quiz</span>
+                </a>
+                <a href="schedule-management.html" class="admin-nav-item">
+                    <i class="bi bi-calendar-week-fill"></i>
+                    <span>Academic Schedule</span>
+                </a>
+
+                <div class="admin-sidebar-label">STUDENTS & FACULTY</div>
                 <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people-fill"></i>
                     <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge-fill"></i>
                     <span>Teacher Management</span>
                 </a>
-                <a href="academic-management.html" class="admin-nav-item">
-                    <i class="bi bi-mortarboard"></i>
-                    <span>Academic Management</span>
-                </a>
                 <a href="enrollment-management.html" class="admin-nav-item active">
-                    <i class="bi bi-person-check"></i>
+                    <i class="bi bi-person-check-fill"></i>
                     <span>Enrollment Management</span>
                 </a>
 
+                <div class="admin-sidebar-label">FINANCE</div>
+                <a href="payment-management.html" class="admin-nav-item">
+                    <i class="bi bi-credit-card-2-front-fill"></i>
+                    <span>Payments & Invoices</span>
+                </a>
+                <a href="payroll-management.html" class="admin-nav-item">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Teacher Payroll</span>
+                </a>
+
                 <div class="admin-sidebar-label">SYSTEM</div>
+                <a href="reports.html" class="admin-nav-item">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    <span>Reports & Analytics</span>
+                </a>
                 <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
                 </a>
             </nav>
@@ -80,9 +104,12 @@
                     <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
                         <i class="bi bi-list"></i>
                     </button>
+                    <button class="btn btn-sm btn-light border d-none d-lg-inline-flex align-items-center justify-content-center me-1" id="sidebarCollapseToggle" title="Toggle Compact Sidebar" style="width: 36px; height: 36px; border-radius: 8px;">
+                        <i class="bi bi-layout-sidebar-inset"></i>
+                    </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="enrollmentSearchInput" placeholder="Search by student, course, ID...">
+                        <input type="text" class="admin-search-input" id="enrollmentSearchInput" placeholder="Search by student, course, ID, payment status...">
                     </div>
                 </div>
 
@@ -101,8 +128,8 @@
             <div class="admin-content">
                 <div class="admin-header-row">
                     <div>
-                        <h1 class="admin-page-title">Enrollment Management</h1>
-                        <p class="admin-page-subtitle">Track course enrollments, student learning progress, and completion milestones.</p>
+                        <h1 class="admin-page-title">Enrollment & Student Cohort Management</h1>
+                        <p class="admin-page-subtitle">Track course admissions, payment status verification, learning progress, and completion milestones.</p>
                     </div>
                     <div class="d-flex gap-2">
                         <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" onclick="exportEnrollmentsCSV()">
@@ -117,15 +144,26 @@
                 <!-- FILTER BAR -->
                 <div class="admin-card mb-3 p-3">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <label class="form-label mb-0 text-muted" style="font-size: 12px; white-space: nowrap;">Status Filter:</label>
-                            <select class="form-select form-select-sm" id="enrollmentStatusFilter" style="width: 150px; font-size: 12.5px;">
-                                <option value="all">All Statuses</option>
-                                <option value="Active">Active</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Dropped">Dropped</option>
-                            </select>
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-muted" style="font-size: 12px; white-space: nowrap;">Status Filter:</label>
+                                <select class="form-select form-select-sm" id="enrollmentStatusFilter" style="width: 140px; font-size: 12.5px;">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0 text-muted" style="font-size: 12px; white-space: nowrap;">Payment Filter:</label>
+                                <select class="form-select form-select-sm" id="enrollmentPaymentFilter" style="width: 140px; font-size: 12.5px;">
+                                    <option value="all">All Payments</option>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Refunded">Refunded</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-muted text-xs" id="enrollmentRecordCount">Showing 0 enrollments</span>
@@ -144,11 +182,12 @@
                                 <tr>
                                     <th>ENROLLMENT ID</th>
                                     <th>STUDENT</th>
-                                    <th>COURSE / PROGRAM</th>
-                                    <th>ENROLLED DATE</th>
+                                    <th>COURSE</th>
+                                    <th>PAYMENT</th>
+                                    <th>COURSE TIMELINE</th>
                                     <th>PROGRESS</th>
                                     <th>STATUS</th>
-                                    <th>ACTIONS</th>
+                                    <th class="text-end pe-3">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody id="enrollmentsTableBody">

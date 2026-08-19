@@ -53,8 +53,19 @@ document.addEventListener('DOMContentLoaded', function () {
     let activeCourseInView = null;
 
     // ==========================================
-    // 1. PROGRAMS MANAGEMENT
+    // 1. PROGRAMS MANAGEMENT (Featured Programs)
     // ==========================================
+    const THEME_COLOR_MAP = {
+        'theme-blue': '#2563eb',
+        'theme-cyan': '#0891b2',
+        'theme-green': '#16a34a',
+        'theme-purple': '#9333ea',
+        'theme-gold': '#d97706',
+        'theme-orange': '#ea580c',
+        'theme-rose': '#e11d48',
+        'theme-indigo': '#4f46e5'
+    };
+
     async function loadPrograms() {
         let loaded = false;
         try {
@@ -91,25 +102,35 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        tbody.innerHTML = programs.map(p => `
+        tbody.innerHTML = programs.map(p => {
+            const themeClass = p.theme_class || 'theme-blue';
+            const themeColor = THEME_COLOR_MAP[themeClass] || '#2563eb';
+            const iconClass = p.icon_class || 'bi-laptop';
+
+            return `
             <tr>
-                <td class="text-muted fw-bold" style="font-size: 12px;">#${p.order_num || 1}</td>
+                <td class="text-muted fw-bold" style="font-size: 12px;">#${p.order_num !== undefined ? p.order_num : 1}</td>
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-2 p-1 d-flex align-items-center justify-content-center bg-light border" style="width: 34px; height: 34px; flex-shrink: 0;">
-                            <i class="bi ${escapeHtml(p.icon_class || 'bi-laptop')} text-primary" style="font-size: 15px;"></i>
+                        <div class="rounded-2 p-1 d-flex align-items-center justify-content-center border" style="width: 36px; height: 36px; flex-shrink: 0; background-color: rgba(37, 99, 235, 0.06);">
+                            <i class="bi ${escapeHtml(iconClass)}" style="font-size: 16px; color: ${themeColor};"></i>
                         </div>
                         <div>
                             <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(p.title)}</div>
-                            <div class="text-muted text-truncate" style="font-size: 11px; max-width: 280px;">${escapeHtml(p.description || '')}</div>
+                            <div class="text-muted text-truncate" style="font-size: 11px; max-width: 280px;" title="${escapeHtml(p.description || '')}">${escapeHtml(p.description || '')}</div>
                         </div>
                     </div>
                 </td>
-                <td class="text-muted fw-semibold" style="font-size: 11.5px;">${escapeHtml(p.degree_type || 'BACHELOR DEGREE')}</td>
-                <td class="text-muted" style="font-size: 12px;">${escapeHtml(p.duration || '4 Years')}</td>
-                <td><span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">${escapeHtml(p.theme_class || 'theme-blue')}</span></td>
+                <td><span class="badge bg-light text-primary border fw-semibold px-2 py-1" style="font-size: 11px;">${escapeHtml(p.degree_type || 'BACHELOR DEGREE')}</span></td>
+                <td class="text-muted fw-medium" style="font-size: 12px;"><i class="bi bi-clock me-1 opacity-75"></i>${escapeHtml(p.duration || '4 Years')}</td>
                 <td>
-                    <span class="admin-status-badge ${p.is_published ? 'published' : 'draft'} cursor-pointer" onclick="toggleProgramStatus(${p.id})" title="Click to toggle publish">
+                    <div class="d-inline-flex align-items-center gap-1.5 px-2 py-1 rounded bg-light border" style="font-size: 11px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background-color: ${themeColor}; display: inline-block;"></span>
+                        <span class="text-secondary text-capitalize">${themeClass.replace('theme-', '')}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="admin-status-badge ${p.is_published ? 'published' : 'draft'} cursor-pointer" onclick="toggleProgramStatus(${p.id})" title="Click to toggle publish status">
                         <i class="bi ${p.is_published ? 'bi-check-circle-fill' : 'bi-dash-circle'} me-1"></i>
                         ${p.is_published ? 'Published' : 'Draft'}
                     </span>
@@ -125,14 +146,229 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
+    }
+
+    // Live UI updaters for Program Modal
+    function updateProgramIconPreview() {
+        const iconInput = document.getElementById('programIcon');
+        const iconPreview = document.getElementById('programIconPreview');
+        if (!iconInput || !iconPreview) return;
+        const val = iconInput.value.trim() || 'bi-laptop';
+        iconPreview.className = `bi ${val}`;
+    }
+
+    function updateProgramThemePreview() {
+        const themeSelect = document.getElementById('programTheme');
+        const dot = document.getElementById('programThemePreviewDot');
+        if (!themeSelect || !dot) return;
+        const color = THEME_COLOR_MAP[themeSelect.value] || '#2563eb';
+        dot.style.backgroundColor = color;
+    }
+
+    function updateProgramDescCount() {
+        const descInput = document.getElementById('programDesc');
+        const countEl = document.getElementById('programDescCharCount');
+        if (!descInput || !countEl) return;
+        const len = descInput.value.trim().length;
+        if (len < 10) {
+            countEl.textContent = `${len} / 10 min chars`;
+            countEl.className = 'text-danger text-xs';
+        } else {
+            countEl.textContent = `${len} chars`;
+            countEl.className = 'text-muted text-xs';
+        }
+    }
+
+    // Program Field Validation
+    function setFieldInvalid(inputId, feedbackId, message) {
+        const input = document.getElementById(inputId);
+        const feedback = document.getElementById(feedbackId);
+        if (input) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        }
+        if (feedback && message) {
+            feedback.textContent = message;
+        }
+    }
+
+    function setFieldValid(inputId) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    }
+
+    function clearProgramValidation() {
+        const fields = ['programTitle', 'programDegree', 'programDuration', 'programIcon', 'programTheme', 'programDesc', 'programUrl', 'programOrder'];
+        fields.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('is-invalid', 'is-valid');
+            }
+        });
+    }
+
+    function validateProgramForm() {
+        let isValid = true;
+        let firstInvalidEl = null;
+
+        // 1. Program Title *
+        const titleEl = document.getElementById('programTitle');
+        const titleVal = titleEl ? titleEl.value.trim() : '';
+        if (!titleVal) {
+            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title is required.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = titleEl;
+        } else if (titleVal.length < 3) {
+            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = titleEl;
+        } else if (titleVal.length > 150) {
+            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title cannot exceed 150 characters.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = titleEl;
+        } else {
+            setFieldValid('programTitle');
+        }
+
+        // 2. Degree Type *
+        const degreeEl = document.getElementById('programDegree');
+        const degreeVal = degreeEl ? degreeEl.value.trim() : '';
+        if (!degreeVal) {
+            setFieldInvalid('programDegree', 'programDegreeFeedback', 'Please select a valid Degree Type.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = degreeEl;
+        } else {
+            setFieldValid('programDegree');
+        }
+
+        // 3. Duration *
+        const durationEl = document.getElementById('programDuration');
+        const durationVal = durationEl ? durationEl.value.trim() : '';
+        if (!durationVal) {
+            setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required (e.g. 4 Years).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = durationEl;
+        } else if (durationVal.length < 2) {
+            setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration must be at least 2 characters (e.g. 4 Years).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = durationEl;
+        } else {
+            setFieldValid('programDuration');
+        }
+
+        // 4. Description *
+        const descEl = document.getElementById('programDesc');
+        const descVal = descEl ? descEl.value.trim() : '';
+        if (!descVal) {
+            setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description is required.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = descEl;
+        } else if (descVal.length < 10) {
+            setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description must be at least 10 characters long.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = descEl;
+        } else {
+            setFieldValid('programDesc');
+        }
+
+        // 5. Sort Order
+        const orderEl = document.getElementById('programOrder');
+        const orderVal = orderEl ? orderEl.value : '';
+        if (orderVal !== '' && (isNaN(Number(orderVal)) || Number(orderVal) < 0)) {
+            setFieldInvalid('programOrder', 'programOrderFeedback', 'Sort order must be a non-negative number (0 or higher).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = orderEl;
+        } else {
+            setFieldValid('programOrder');
+        }
+
+        return { isValid, firstInvalidEl };
+    }
+
+    // Attach live listeners for Program fields
+    const programTitleInput = document.getElementById('programTitle');
+    if (programTitleInput) {
+        programTitleInput.addEventListener('input', function () {
+            if (this.value.trim().length >= 3) setFieldValid('programTitle');
+            else if (this.classList.contains('is-invalid')) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
+        });
+        programTitleInput.addEventListener('blur', function () {
+            if (!this.value.trim()) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title is required.');
+            else if (this.value.trim().length < 3) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
+            else setFieldValid('programTitle');
+        });
+    }
+
+    const programDegreeSelect = document.getElementById('programDegree');
+    if (programDegreeSelect) {
+        programDegreeSelect.addEventListener('change', function () {
+            if (this.value) setFieldValid('programDegree');
+            else setFieldInvalid('programDegree', 'programDegreeFeedback', 'Please select a Degree Type.');
+        });
+    }
+
+    const programDurationInput = document.getElementById('programDuration');
+    if (programDurationInput) {
+        programDurationInput.addEventListener('input', function () {
+            if (this.value.trim().length >= 2) setFieldValid('programDuration');
+        });
+        programDurationInput.addEventListener('blur', function () {
+            if (!this.value.trim()) setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required.');
+            else setFieldValid('programDuration');
+        });
+    }
+
+    const programDescInput = document.getElementById('programDesc');
+    if (programDescInput) {
+        programDescInput.addEventListener('input', function () {
+            updateProgramDescCount();
+            if (this.value.trim().length >= 10) setFieldValid('programDesc');
+        });
+        programDescInput.addEventListener('blur', function () {
+            if (!this.value.trim()) setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description is required.');
+            else if (this.value.trim().length < 10) setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description must be at least 10 characters.');
+            else setFieldValid('programDesc');
+        });
+    }
+
+    const programIconInput = document.getElementById('programIcon');
+    if (programIconInput) {
+        programIconInput.addEventListener('input', updateProgramIconPreview);
+    }
+
+    const programThemeSelect = document.getElementById('programTheme');
+    if (programThemeSelect) {
+        programThemeSelect.addEventListener('change', updateProgramThemePreview);
+    }
+
+    const programOrderInput = document.getElementById('programOrder');
+    if (programOrderInput) {
+        programOrderInput.addEventListener('input', function () {
+            if (Number(this.value) >= 0) setFieldValid('programOrder');
+            else setFieldInvalid('programOrder', 'programOrderFeedback', 'Sort order must be 0 or greater.');
+        });
     }
 
     window.openCreateProgramModal = function () {
         document.getElementById('programForm').reset();
         document.getElementById('programId').value = '';
+        document.getElementById('programDuration').value = '4 Years';
+        document.getElementById('programIcon').value = 'bi-laptop';
+        document.getElementById('programTheme').value = 'theme-blue';
+        document.getElementById('programOrder').value = allPrograms.length + 1;
         document.getElementById('programPublished').checked = true;
         document.getElementById('programModalTitle').textContent = 'Add New Featured Program';
+        
+        clearProgramValidation();
+        updateProgramIconPreview();
+        updateProgramThemePreview();
+        updateProgramDescCount();
+
         if (programModal) programModal.show();
     };
 
@@ -140,6 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const p = allPrograms.find(prog => prog.id === id);
         if (!p) return;
 
+        clearProgramValidation();
         document.getElementById('programId').value = p.id;
         document.getElementById('programTitle').value = p.title;
         document.getElementById('programDegree').value = p.degree_type || 'BACHELOR DEGREE';
@@ -148,9 +385,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('programTheme').value = p.theme_class || 'theme-blue';
         document.getElementById('programDesc').value = p.description || '';
         document.getElementById('programUrl').value = p.detail_url || '';
-        document.getElementById('programOrder').value = p.order_num || 1;
-        document.getElementById('programPublished').checked = p.is_published === 1;
+        document.getElementById('programOrder').value = p.order_num !== undefined ? p.order_num : 1;
+        document.getElementById('programPublished').checked = p.is_published === 1 || p.is_published === true;
         document.getElementById('programModalTitle').textContent = 'Edit Featured Program';
+
+        updateProgramIconPreview();
+        updateProgramThemePreview();
+        updateProgramDescCount();
 
         if (programModal) programModal.show();
     };
@@ -160,43 +401,77 @@ document.addEventListener('DOMContentLoaded', function () {
         programForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            // Run full validation
+            const { isValid, firstInvalidEl } = validateProgramForm();
+            if (!isValid) {
+                if (firstInvalidEl) {
+                    firstInvalidEl.focus();
+                }
+                if (window.AdminStore) {
+                    window.AdminStore.constructor.toast('Please correct the highlighted errors in the form.', 'error');
+                }
+                return;
+            }
+
             const id = document.getElementById('programId').value;
             const title = document.getElementById('programTitle').value.trim();
+            const degreeType = document.getElementById('programDegree').value.trim();
+            const duration = document.getElementById('programDuration').value.trim();
+            const iconClass = document.getElementById('programIcon').value.trim() || 'bi-laptop';
+            const themeClass = document.getElementById('programTheme').value || 'theme-blue';
+            const description = document.getElementById('programDesc').value.trim();
+            const detailUrl = document.getElementById('programUrl').value.trim() || '#';
+            const orderNum = parseInt(document.getElementById('programOrder').value, 10);
+            const isPublished = document.getElementById('programPublished').checked ? 1 : 0;
+
             const payload = {
                 title: title,
-                degree_type: document.getElementById('programDegree').value.trim(),
-                duration: document.getElementById('programDuration').value.trim(),
-                icon_class: document.getElementById('programIcon').value.trim(),
-                theme_class: document.getElementById('programTheme').value,
-                description: document.getElementById('programDesc').value.trim(),
-                detail_url: document.getElementById('programUrl').value.trim(),
-                order_num: parseInt(document.getElementById('programOrder').value) || 1,
-                is_published: document.getElementById('programPublished').checked ? 1 : 0
+                degree_type: degreeType,
+                duration: duration,
+                icon_class: iconClass,
+                theme_class: themeClass,
+                description: description,
+                detail_url: detailUrl,
+                order_num: isNaN(orderNum) ? 1 : Math.max(0, orderNum),
+                is_published: isPublished
             };
 
-            if (id) {
-                if (window.AdminStore) {
-                    window.AdminStore.updateProgram(id, payload);
-                    allPrograms = window.AdminStore.getPrograms();
-                }
-                if (programModal) programModal.hide();
-                renderProgramsTable(allPrograms);
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Updated', `"${title}" has been successfully updated.`);
-            } else {
-                if (window.AdminStore) {
-                    window.AdminStore.createProgram(payload);
-                    allPrograms = window.AdminStore.getPrograms();
-                }
-                if (programModal) programModal.hide();
-                renderProgramsTable(allPrograms);
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Created', `"${title}" has been added to academic programs.`);
+            const saveBtn = document.getElementById('saveProgramBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
             }
 
             try {
+                if (id) {
+                    if (window.AdminStore) {
+                        window.AdminStore.updateProgram(id, payload);
+                        allPrograms = window.AdminStore.getPrograms();
+                    }
+                    if (programModal) programModal.hide();
+                    renderProgramsTable(allPrograms);
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Updated', `"${title}" has been successfully updated.`);
+                } else {
+                    if (window.AdminStore) {
+                        window.AdminStore.createProgram(payload);
+                        allPrograms = window.AdminStore.getPrograms();
+                    }
+                    if (programModal) programModal.hide();
+                    renderProgramsTable(allPrograms);
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Created', `"${title}" has been added to featured academic programs.`);
+                }
+
                 const url = id ? `${API_BASE}/admin/programs/${id}` : `${API_BASE}/admin/programs`;
                 const method = id ? 'PUT' : 'POST';
                 await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {}
+            } catch (err) {
+                console.error('Save program error:', err);
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Program`;
+                }
+            }
         });
     }
 
@@ -485,13 +760,129 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Dynamic Course Status Preview Calculator
+    function updateCourseStatusPreview() {
+        const enrStart = document.getElementById('courseEnrollmentStart')?.value;
+        const enrDeadline = document.getElementById('courseEnrollmentDeadline')?.value;
+        const courseStart = document.getElementById('courseStartDate')?.value;
+        const courseEnd = document.getElementById('courseEndDate')?.value;
+        const isPublished = document.getElementById('coursePublished')?.checked;
+        const badgeEl = document.getElementById('courseStatusPreviewBadge');
+        if (!badgeEl) return;
+
+        if (!isPublished) {
+            badgeEl.className = 'badge bg-secondary ms-1';
+            badgeEl.textContent = 'Draft';
+            return;
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        let status = 'Enrollment Open';
+        let badgeClass = 'badge bg-success ms-1';
+
+        if (courseEnd && today > courseEnd) {
+            status = 'Completed';
+            badgeClass = 'badge bg-dark ms-1';
+        } else if (courseStart && today >= courseStart) {
+            status = 'In Progress';
+            badgeClass = 'badge bg-primary ms-1';
+        } else if (enrDeadline && today > enrDeadline) {
+            status = 'Enrollment Closed';
+            badgeClass = 'badge bg-danger ms-1';
+        } else if (enrStart && today < enrStart) {
+            status = 'Upcoming';
+            badgeClass = 'badge bg-info text-dark ms-1';
+        } else if (enrDeadline) {
+            const diffMs = new Date(enrDeadline) - new Date(today);
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0 && diffDays <= 3) {
+                status = `Deadline Approaching (${diffDays}d left)`;
+                badgeClass = 'badge bg-warning text-dark ms-1';
+            }
+        }
+
+        badgeEl.className = badgeClass;
+        badgeEl.textContent = status;
+    }
+
+    ['courseEnrollmentStart', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateCourseStatusPreview);
+    });
+    const coursePubSwitch = document.getElementById('coursePublished');
+    if (coursePubSwitch) coursePubSwitch.addEventListener('change', updateCourseStatusPreview);
+
+    function validateCourseForm() {
+        let isValid = true;
+        let firstInvalidEl = null;
+
+        const title = document.getElementById('courseTitle');
+        if (!title || !title.value.trim() || title.value.trim().length < 3) {
+            setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required (minimum 3 characters).');
+            if (!firstInvalidEl) firstInvalidEl = title;
+            isValid = false;
+        } else {
+            setFieldValid('courseTitle');
+        }
+
+        const desc = document.getElementById('courseDesc');
+        if (!desc || !desc.value.trim() || desc.value.trim().length < 10) {
+            setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required (minimum 10 characters).');
+            if (!firstInvalidEl) firstInvalidEl = desc;
+            isValid = false;
+        } else {
+            setFieldValid('courseDesc');
+        }
+
+        const enrStart = document.getElementById('courseEnrollmentStart')?.value;
+        const enrDeadline = document.getElementById('courseEnrollmentDeadline')?.value;
+        const courseStart = document.getElementById('courseStartDate')?.value;
+        const courseEnd = document.getElementById('courseEndDate')?.value;
+
+        // Date logic checks
+        if (enrStart && enrDeadline && new Date(enrDeadline) < new Date(enrStart)) {
+            setFieldInvalid('courseEnrollmentDeadline', 'courseDeadlineFeedback', 'Enrollment Deadline cannot be before Enrollment Start Date.');
+            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEnrollmentDeadline');
+            isValid = false;
+        } else {
+            setFieldValid('courseEnrollmentDeadline');
+        }
+
+        if (enrDeadline && courseStart && new Date(courseStart) < new Date(enrDeadline)) {
+            setFieldInvalid('courseStartDate', 'courseDeadlineFeedback', 'Course Start Date cannot be before Enrollment Deadline.');
+            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseStartDate');
+            isValid = false;
+        } else if (courseStart) {
+            setFieldValid('courseStartDate');
+        }
+
+        if (courseStart && courseEnd && new Date(courseEnd) < new Date(courseStart)) {
+            setFieldInvalid('courseEndDate', 'courseDeadlineFeedback', 'Course End Date cannot be before Course Start Date.');
+            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEndDate');
+            isValid = false;
+        } else if (courseEnd) {
+            setFieldValid('courseEndDate');
+        }
+
+        return { isValid, firstInvalidEl };
+    }
+
     window.openCreateCourseModal = function () {
         document.getElementById('courseForm').reset();
         document.getElementById('courseId').value = '';
         const pubSwitch = document.getElementById('coursePublished');
         if (pubSwitch) pubSwitch.checked = true;
         document.getElementById('courseModalTitle').textContent = 'Add New Specialized Course';
+        document.getElementById('coursePrice').value = '0.00';
+        document.getElementById('courseDuration').value = '8 Weeks';
+        document.getElementById('courseLessons').value = '12';
+        
+        // Default lifecycle dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('courseEnrollmentStart').value = today;
+        
         populateCourseSelects();
+        updateCourseStatusPreview();
         if (courseModal) courseModal.show();
     };
 
@@ -505,14 +896,20 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseDifficulty').value = c.difficulty || 'Beginner';
         document.getElementById('courseCategorySelect').value = c.category_id || 1;
         document.getElementById('courseInstructorSelect').value = c.instructor_id || 1;
-        document.getElementById('courseDuration').value = c.duration || '8 Weeks';
+        document.getElementById('courseDuration').value = c.duration || c.duration_hours || '8 Weeks';
         document.getElementById('courseLessons').value = c.lesson_count || 12;
-        document.getElementById('courseBadge').value = c.badge || '';
+        document.getElementById('coursePrice').value = c.price !== undefined ? c.price : '0.00';
+        document.getElementById('courseBadge').value = c.badge || c.badge_text || '';
+        document.getElementById('courseEnrollmentStart').value = c.enrollment_start_date ? String(c.enrollment_start_date).split('T')[0] : '';
+        document.getElementById('courseEnrollmentDeadline').value = c.enrollment_deadline ? String(c.enrollment_deadline).split('T')[0] : '';
+        document.getElementById('courseStartDate').value = c.start_date ? String(c.start_date).split('T')[0] : '';
+        document.getElementById('courseEndDate').value = c.end_date ? String(c.end_date).split('T')[0] : '';
         document.getElementById('courseDesc').value = c.description || '';
         const pubSwitch = document.getElementById('coursePublished');
-        if (pubSwitch) pubSwitch.checked = (c.is_published === 1);
+        if (pubSwitch) pubSwitch.checked = (c.is_published === 1 || c.is_published === true);
         document.getElementById('courseModalTitle').textContent = 'Edit Specialized Course';
 
+        updateCourseStatusPreview();
         if (courseModal) courseModal.show();
     };
 
@@ -537,6 +934,15 @@ document.addEventListener('DOMContentLoaded', function () {
         courseForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
+            const { isValid, firstInvalidEl } = validateCourseForm();
+            if (!isValid) {
+                if (firstInvalidEl) firstInvalidEl.focus();
+                if (window.AdminStore) {
+                    window.AdminStore.constructor.toast('Please correct the errors in the course form.', 'error');
+                }
+                return;
+            }
+
             const id = document.getElementById('courseId').value;
             const title = document.getElementById('courseTitle').value.trim();
             const pubSwitch = document.getElementById('coursePublished');
@@ -548,52 +954,71 @@ document.addEventListener('DOMContentLoaded', function () {
                 instructor_id: parseInt(document.getElementById('courseInstructorSelect').value) || 1,
                 difficulty: document.getElementById('courseDifficulty').value,
                 duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
+                duration_hours: document.getElementById('courseDuration').value.trim() || '8 Weeks',
                 lesson_count: parseInt(document.getElementById('courseLessons').value) || 12,
+                price: parseFloat(document.getElementById('coursePrice').value) || 0.00,
                 badge: document.getElementById('courseBadge').value.trim(),
+                badge_text: document.getElementById('courseBadge').value.trim(),
+                enrollment_start_date: document.getElementById('courseEnrollmentStart').value || null,
+                enrollment_deadline: document.getElementById('courseEnrollmentDeadline').value || null,
+                start_date: document.getElementById('courseStartDate').value || null,
+                end_date: document.getElementById('courseEndDate').value || null,
                 description: document.getElementById('courseDesc').value.trim(),
                 is_published: isPublished
             };
 
-            if (id) {
-                if (window.AdminStore) {
-                    window.AdminStore.updateCourse(id, payload);
-                    allCourses = window.AdminStore.getCourses();
-                }
-                if (courseModal) courseModal.hide();
-                applyCourseFilters();
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" details have been updated successfully.`);
-            } else {
-                if (window.AdminStore) {
-                    const newCourse = window.AdminStore.createCourse(payload);
-                    // Add initial sample chapters for newly created course
-                    window.AdminStore.createChapter({
-                        course_id: newCourse.id,
-                        chapter_num: 1,
-                        title: 'Foundations & Architecture Overview',
-                        duration: '2 Hours',
-                        lesson_count: 3,
-                        description: 'Core introductory concepts and system setup.'
-                    });
-                    window.AdminStore.createChapter({
-                        course_id: newCourse.id,
-                        chapter_num: 2,
-                        title: 'Hands-on Implementation & Best Practices',
-                        duration: '3 Hours',
-                        lesson_count: 4,
-                        description: 'Step-by-step practical laboratory exercise.'
-                    });
-                    allCourses = window.AdminStore.getCourses();
-                }
-                if (courseModal) courseModal.hide();
-                applyCourseFilters();
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Created', `"${title}" has been created with default starter modules.`);
+            const saveBtn = document.getElementById('saveCourseBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
             }
 
             try {
+                if (id) {
+                    if (window.AdminStore) {
+                        window.AdminStore.updateCourse(id, payload);
+                        allCourses = window.AdminStore.getCourses();
+                    }
+                    if (courseModal) courseModal.hide();
+                    applyCourseFilters();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated successfully.`);
+                } else {
+                    if (window.AdminStore) {
+                        const newCourse = window.AdminStore.createCourse(payload);
+                        window.AdminStore.createChapter({
+                            course_id: newCourse.id,
+                            chapter_num: 1,
+                            title: 'Foundations & Architecture Overview',
+                            duration: '2 Hours',
+                            lesson_count: 3,
+                            description: 'Core introductory concepts and system setup.'
+                        });
+                        window.AdminStore.createChapter({
+                            course_id: newCourse.id,
+                            chapter_num: 2,
+                            title: 'Hands-on Implementation & Best Practices',
+                            duration: '3 Hours',
+                            lesson_count: 4,
+                            description: 'Step-by-step practical laboratory exercise.'
+                        });
+                        allCourses = window.AdminStore.getCourses();
+                    }
+                    if (courseModal) courseModal.hide();
+                    applyCourseFilters();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Created', `"${title}" has been created with default starter modules.`);
+                }
+
                 const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
                 const method = id ? 'PUT' : 'POST';
                 await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {}
+            } catch (err) {
+                if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to Save Course', err.message);
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Course`;
+                }
+            }
         });
     }
 
@@ -908,30 +1333,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const name = document.getElementById('categoryName').value.trim();
             const slug = document.getElementById('categorySlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const id = document.getElementById('categoryId')?.value;
+
+            if (!name) {
+                setFieldInvalid('categoryName', 'catNameFeedback', 'Category Name is required.');
+                return;
+            }
+
+            // Duplicate name or slug check
+            const duplicate = allCategories.find(c => (!id || c.id !== Number(id)) && (c.name.toLowerCase() === name.toLowerCase() || c.slug.toLowerCase() === slug.toLowerCase()));
+            if (duplicate) {
+                if (duplicate.name.toLowerCase() === name.toLowerCase()) {
+                    setFieldInvalid('categoryName', 'catNameFeedback', `Category "${name}" already exists.`);
+                } else {
+                    setFieldInvalid('categorySlug', 'catSlugFeedback', `Category slug "${slug}" already exists.`);
+                }
+                if (window.AdminStore) window.AdminStore.constructor.toast('Duplicate category detected.', 'error');
+                return;
+            }
+
             const payload = {
                 name: name,
                 slug: slug,
                 icon: document.getElementById('categoryIcon').value.trim() || 'bi-laptop',
-                order_num: parseInt(document.getElementById('categoryOrder').value) || 1
+                order_num: parseInt(document.getElementById('categoryOrder').value) || 1,
+                status: document.getElementById('categoryStatus')?.value || 'Active'
             };
 
+            const saveBtn = document.getElementById('saveCategoryBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
+            }
+
             try {
-                if (window.AdminStore) {
-                    window.AdminStore.createCategory(payload);
-                    allCategories = window.AdminStore.getCategories();
+                if (id) {
+                    if (window.AdminStore) {
+                        window.AdminStore.updateCategory(id, payload);
+                        allCategories = window.AdminStore.getCategories();
+                    }
+                    if (categoryModal) categoryModal.hide();
+                    renderCategoriesTable(allCategories);
+                    populateCategoryFilterOptions();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Updated', `"${name}" has been updated.`);
+                } else {
+                    if (window.AdminStore) {
+                        window.AdminStore.createCategory(payload);
+                        allCategories = window.AdminStore.getCategories();
+                    }
+                    if (categoryModal) categoryModal.hide();
+                    renderCategoriesTable(allCategories);
+                    populateCategoryFilterOptions();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
                 }
 
-                if (categoryModal) categoryModal.hide();
-                renderCategoriesTable(allCategories);
-                populateCategoryFilterOptions();
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
-
-                await fetch(`${API_BASE}/admin/categories`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(payload) });
+                const url = id ? `${API_BASE}/admin/categories/${id}` : `${API_BASE}/admin/categories`;
+                const method = id ? 'PUT' : 'POST';
+                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
             } catch (err) {
                 if (window.AdminStore) {
-                    window.AdminStore.constructor.notifyError('Failed to Create Category', err.message);
-                } else {
-                    alert(err.message);
+                    window.AdminStore.constructor.notifyError('Failed to Save Category', err.message);
+                }
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Category`;
                 }
             }
         });
@@ -1081,33 +1547,77 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
 
             const name = document.getElementById('instructorName').value.trim();
+            const email = document.getElementById('instructorEmail').value.trim();
+            const id = document.getElementById('instructorId')?.value;
             const userId = parseInt(document.getElementById('instructorUserId')?.value) || null;
+
+            if (!name || name.length < 2) {
+                setFieldInvalid('instructorName', 'instNameFeedback', 'Instructor Name is required (min 2 chars).');
+                return;
+            }
+
+            if (email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    setFieldInvalid('instructorEmail', 'instEmailFeedback', 'Please enter a valid email address (e.g. name@aub.edu.kh).');
+                    return;
+                } else {
+                    setFieldValid('instructorEmail');
+                }
+            }
+
             const payload = {
                 user_id: userId,
                 name: name,
-                title: document.getElementById('instructorTitle').value.trim() || 'Faculty Member',
-                email: document.getElementById('instructorEmail').value.trim(),
+                title: document.getElementById('instructorTitle').value.trim() || 'Lecturer',
+                email: email,
+                phone: document.getElementById('instructorPhone')?.value.trim() || '',
+                department: document.getElementById('instructorDepartment')?.value.trim() || 'Information Technology',
+                faculty: document.getElementById('instructorDepartment')?.value.trim() || 'Information Technology',
+                status: document.getElementById('instructorStatus')?.value || 'Active',
                 expertise: document.getElementById('instructorExpertise').value.trim() || 'Computer Science & Technology',
-                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
+                bio: document.getElementById('instructorBio')?.value.trim() || '',
+                avatar_url: document.getElementById('instructorPhoto')?.value.trim() || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
             };
 
+            const saveBtn = document.getElementById('saveInstructorBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
+            }
+
             try {
-                if (window.AdminStore) {
-                    window.AdminStore.createInstructor(payload);
-                    allInstructors = window.AdminStore.getInstructors();
+                if (id) {
+                    if (window.AdminStore) {
+                        window.AdminStore.updateInstructor(id, payload);
+                        allInstructors = window.AdminStore.getInstructors();
+                    }
+                    if (instructorModal) instructorModal.hide();
+                    renderInstructorsTable(allInstructors);
+                    populateCourseSelects();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Updated', `${name} profile updated.`);
+                } else {
+                    if (window.AdminStore) {
+                        window.AdminStore.createInstructor(payload);
+                        allInstructors = window.AdminStore.getInstructors();
+                    }
+                    if (instructorModal) instructorModal.hide();
+                    renderInstructorsTable(allInstructors);
+                    populateCourseSelects();
+                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Added', `${name} is connected to academic faculty.`);
                 }
 
-                if (instructorModal) instructorModal.hide();
-                renderInstructorsTable(allInstructors);
-                populateCourseSelects();
-                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Added', `${name} is connected to academic faculty.`);
-
-                await fetch(`${API_BASE}/admin/instructors`, { method: 'POST', headers: getHeaders(), body: JSON.stringify(payload) });
+                const url = id ? `${API_BASE}/admin/instructors/${id}` : `${API_BASE}/admin/instructors`;
+                const method = id ? 'PUT' : 'POST';
+                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
             } catch (err) {
                 if (window.AdminStore) {
-                    window.AdminStore.constructor.notifyError('Failed to Create Instructor', err.message);
-                } else {
-                    alert(err.message);
+                    window.AdminStore.constructor.notifyError('Failed to Save Instructor', err.message);
+                }
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Instructor`;
                 }
             }
         });

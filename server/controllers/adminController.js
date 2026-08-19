@@ -9,6 +9,7 @@ exports.getDashboardMetrics = async (req, res) => {
     try {
         const totalUsersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM users`);
         const totalCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1`);
+        const activeCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1 AND is_archived = 0 AND (status = 'In Progress' OR status = 'Enrollment Open' OR status = 'Upcoming')`);
         const totalStudentsRow = await dbAsync.get(`
             SELECT COUNT(*) as count FROM users u
             JOIN roles r ON u.role_id = r.id
@@ -34,19 +35,24 @@ exports.getDashboardMetrics = async (req, res) => {
         `);
         const totalChaptersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM modules`);
         const totalEnrollmentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments`);
+        const pendingPaymentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM payments WHERE payment_status = 'Pending'`);
+        const upcomingExamsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM exams WHERE status IN ('Scheduled', 'Open')`);
 
         res.json({
             success: true,
             data: {
                 totalUsers: totalUsersRow ? totalUsersRow.count : 0,
                 totalCourses: totalCoursesRow ? totalCoursesRow.count : 0,
+                activeCourses: activeCoursesRow ? (activeCoursesRow.count || totalCoursesRow.count) : 0,
                 totalStudents: totalStudentsRow ? totalStudentsRow.count : 0,
                 totalTeachers: totalTeachersRow ? totalTeachersRow.count : 0,
                 totalAdmins: totalAdminsRow ? totalAdminsRow.count : 0,
                 activeUsers: activeUsersRow ? activeUsersRow.count : 0,
                 newTeachersThisMonth: newTeachersThisMonthRow ? newTeachersThisMonthRow.count : 0,
                 totalChapters: totalChaptersRow ? totalChaptersRow.count : 0,
-                totalEnrollments: totalEnrollmentsRow ? totalEnrollmentsRow.count : 0
+                totalEnrollments: totalEnrollmentsRow ? totalEnrollmentsRow.count : 0,
+                pendingPayments: pendingPaymentsRow ? pendingPaymentsRow.count : 0,
+                upcomingExams: upcomingExamsRow ? upcomingExamsRow.count : 4
             }
         });
     } catch (error) {
@@ -311,27 +317,49 @@ exports.createProgram = async (req, res) => {
     try {
         const { title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published } = req.body;
 
-        if (!title || !description) {
-            return res.status(400).json({ success: false, message: 'Title and description are required.' });
+        const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+        const trimmedDegree = typeof degree_type === 'string' ? degree_type.trim() : '';
+        const trimmedDuration = typeof duration === 'string' ? duration.trim() : '';
+        const trimmedDesc = typeof description === 'string' ? description.trim() : '';
+
+        // Validation: Required fields
+        if (!trimmedTitle || trimmedTitle.length < 3) {
+            return res.status(400).json({ success: false, message: 'Program Title is required and must be at least 3 characters.' });
+        }
+        if (!trimmedDegree) {
+            return res.status(400).json({ success: false, message: 'Degree Type is required.' });
+        }
+        if (!trimmedDuration || trimmedDuration.length < 2) {
+            return res.status(400).json({ success: false, message: 'Duration is required (e.g. 4 Years).' });
+        }
+        if (!trimmedDesc || trimmedDesc.length < 10) {
+            return res.status(400).json({ success: false, message: 'Program Description is required and must be at least 10 characters.' });
         }
 
-        const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim()
+            : trimmedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const parsedOrder = Number(order_num);
+        const finalOrder = (!isNaN(parsedOrder) && parsedOrder >= 0) ? Math.floor(parsedOrder) : 0;
+        const finalPublished = (is_published === 1 || is_published === true || is_published === '1') ? 1 : 0;
+        const finalFeatured = (is_featured === 0 || is_featured === false || is_featured === '0') ? 0 : 1;
 
         const result = await dbAsync.run(
             `INSERT INTO programs (title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                title,
+                trimmedTitle,
                 finalSlug,
-                degree_type || 'BACHELOR DEGREE',
-                duration || '4 Years',
-                description,
-                icon_class || 'bi-laptop',
-                theme_class || 'theme-blue',
-                detail_url || '#',
-                order_num || 0,
-                is_featured !== undefined ? is_featured : 1,
-                is_published !== undefined ? is_published : 1
+                trimmedDegree,
+                trimmedDuration,
+                trimmedDesc,
+                (icon_class && typeof icon_class === 'string' && icon_class.trim()) ? icon_class.trim() : 'bi-laptop',
+                (theme_class && typeof theme_class === 'string' && theme_class.trim()) ? theme_class.trim() : 'theme-blue',
+                (detail_url && typeof detail_url === 'string' && detail_url.trim()) ? detail_url.trim() : '#',
+                finalOrder,
+                finalFeatured,
+                finalPublished
             ]
         );
 
@@ -347,17 +375,68 @@ exports.updateProgram = async (req, res) => {
         const { id } = req.params;
         const { title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published } = req.body;
 
+        const existing = await dbAsync.get(`SELECT * FROM programs WHERE id = ?`, [id]);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Program not found.' });
+        }
+
+        const trimmedTitle = title !== undefined ? (typeof title === 'string' ? title.trim() : '') : existing.title;
+        const trimmedDegree = degree_type !== undefined ? (typeof degree_type === 'string' ? degree_type.trim() : '') : existing.degree_type;
+        const trimmedDuration = duration !== undefined ? (typeof duration === 'string' ? duration.trim() : '') : existing.duration;
+        const trimmedDesc = description !== undefined ? (typeof description === 'string' ? description.trim() : '') : existing.description;
+
+        // Validation: Required fields
+        if (!trimmedTitle || trimmedTitle.length < 3) {
+            return res.status(400).json({ success: false, message: 'Program Title is required and must be at least 3 characters.' });
+        }
+        if (!trimmedDegree) {
+            return res.status(400).json({ success: false, message: 'Degree Type is required.' });
+        }
+        if (!trimmedDuration || trimmedDuration.length < 2) {
+            return res.status(400).json({ success: false, message: 'Duration is required (e.g. 4 Years).' });
+        }
+        if (!trimmedDesc || trimmedDesc.length < 10) {
+            return res.status(400).json({ success: false, message: 'Program Description is required and must be at least 10 characters.' });
+        }
+
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim()
+            : (trimmedTitle !== existing.title ? trimmedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : existing.slug);
+
+        const parsedOrder = Number(order_num !== undefined ? order_num : existing.order_num);
+        const finalOrder = (!isNaN(parsedOrder) && parsedOrder >= 0) ? Math.floor(parsedOrder) : 0;
+        const finalPublished = is_published !== undefined
+            ? ((is_published === 1 || is_published === true || is_published === '1') ? 1 : 0)
+            : existing.is_published;
+        const finalFeatured = is_featured !== undefined
+            ? ((is_featured === 0 || is_featured === false || is_featured === '0') ? 0 : 1)
+            : existing.is_featured;
+
         await dbAsync.run(
             `UPDATE programs
              SET title = ?, slug = ?, degree_type = ?, duration = ?, description = ?,
                  icon_class = ?, theme_class = ?, detail_url = ?, order_num = ?,
                  is_featured = ?, is_published = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
-            [title, slug, degree_type, duration, description, icon_class, theme_class, detail_url, order_num, is_featured, is_published, id]
+            [
+                trimmedTitle,
+                finalSlug,
+                trimmedDegree,
+                trimmedDuration,
+                trimmedDesc,
+                icon_class !== undefined ? icon_class : existing.icon_class,
+                theme_class !== undefined ? theme_class : existing.theme_class,
+                detail_url !== undefined ? detail_url : existing.detail_url,
+                finalOrder,
+                finalFeatured,
+                finalPublished,
+                id
+            ]
         );
 
         res.json({ success: true, message: 'Program updated successfully.' });
     } catch (error) {
+        console.error('Update program error:', error);
         res.status(500).json({ success: false, message: 'Failed to update program.' });
     }
 };
@@ -398,77 +477,501 @@ exports.toggleProgramPublish = async (req, res) => {
 // 5. COURSES MANAGEMENT CRUD
 // ==========================================
 
+function calculateCourseStatus(course) {
+    if (!course.is_published) {
+        return 'Draft';
+    }
+    const today = new Date().toISOString().split('T')[0];
+    const enrStart = course.enrollment_start_date ? String(course.enrollment_start_date).split('T')[0] : null;
+    const enrDeadline = course.enrollment_deadline ? String(course.enrollment_deadline).split('T')[0] : null;
+    const courseStart = course.start_date ? String(course.start_date).split('T')[0] : null;
+    const courseEnd = course.end_date ? String(course.end_date).split('T')[0] : null;
+
+    if (courseEnd && today > courseEnd) {
+        return 'Completed';
+    }
+    if (courseStart && today >= courseStart && (!courseEnd || today <= courseEnd)) {
+        return 'In Progress';
+    }
+    if (enrDeadline && today > enrDeadline) {
+        return 'Enrollment Closed';
+    }
+    if (enrStart && today < enrStart) {
+        return 'Upcoming';
+    }
+    if (enrDeadline) {
+        const diffMs = new Date(enrDeadline) - new Date(today);
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0 && diffDays <= 3) {
+            return 'Deadline Approaching';
+        }
+    }
+    return 'Enrollment Open';
+}
+
 exports.getAllCourses = async (req, res) => {
     try {
         const courses = await dbAsync.all(`
-            SELECT c.*, cat.name as category_name, inst.name as instructor_name
+            SELECT c.*, cat.name as category_name, cat.slug as category_slug, 
+                   inst.name as instructor_name, inst.avatar_url as instructor_avatar,
+                   (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = c.id) as enrolled_students_count,
+                   (SELECT COUNT(*) FROM modules m WHERE m.course_id = c.id) as real_lesson_count
             FROM courses c
             LEFT JOIN categories cat ON c.category_id = cat.id
             LEFT JOIN instructors inst ON c.instructor_id = inst.id
             ORDER BY c.order_num ASC, c.id ASC
         `);
-        res.json({ success: true, data: courses });
+
+        // Attach computed status and deadline countdown warning
+        const formatted = courses.map(c => {
+            const computedStatus = calculateCourseStatus(c);
+            let deadlineWarning = null;
+            if (c.enrollment_deadline) {
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const deadlineDate = new Date(c.enrollment_deadline);
+                deadlineDate.setHours(0,0,0,0);
+                const diffDays = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                if (diffDays > 0 && diffDays <= 3) {
+                    deadlineWarning = `⚠ Enrollment closes in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+                } else if (diffDays === 0) {
+                    deadlineWarning = `⚠ Enrollment closes today!`;
+                } else if (diffDays < 0) {
+                    deadlineWarning = `🔴 Enrollment Closed`;
+                }
+            }
+            return {
+                ...c,
+                computed_status: computedStatus,
+                deadline_warning: deadlineWarning,
+                price: c.price !== undefined ? c.price : 0.0
+            };
+        });
+
+        res.json({ success: true, data: formatted });
     } catch (error) {
+        console.error('getAllCourses error:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch courses.' });
+    }
+};
+
+exports.getCourseDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const course = await dbAsync.get(`
+            SELECT c.*, cat.name as category_name, cat.slug as category_slug,
+                   inst.name as instructor_name, inst.title as instructor_title,
+                   inst.avatar_url as instructor_avatar, inst.email as instructor_email, inst.bio as instructor_bio
+            FROM courses c
+            LEFT JOIN categories cat ON c.category_id = cat.id
+            LEFT JOIN instructors inst ON c.instructor_id = inst.id
+            WHERE c.id = ?
+        `, [id]);
+
+        if (!course) {
+            return res.status(404).json({ success: false, message: 'Course not found.' });
+        }
+
+        course.computed_status = calculateCourseStatus(course);
+
+        // 1. Chapters & Modules Tab
+        const chapters = await dbAsync.all(`
+            SELECT * FROM modules WHERE course_id = ? ORDER BY order_num ASC, id ASC
+        `, [id]);
+        for (const chap of chapters) {
+            chap.lessons = await dbAsync.all(`
+                SELECT * FROM lessons WHERE module_id = ? ORDER BY order_num ASC, id ASC
+            `, [chap.id]);
+        }
+
+        // 2. Enrolled Students Tab
+        const students = await dbAsync.all(`
+            SELECT e.id as enrollment_id, e.enrollment_date, e.status as enrollment_status,
+                   e.payment_status, e.progress_percentage,
+                   u.id as student_id, u.full_name as student_name, u.university_id, u.email as student_email, u.avatar_url
+            FROM enrollments e
+            JOIN users u ON e.user_id = u.id
+            WHERE e.course_id = ?
+            ORDER BY e.enrollment_date DESC
+        `, [id]);
+
+        // 3. Exams Tab
+        const exams = [
+            { id: 1, title: 'Midterm Examination', format: 'Online Proctoring', duration: '90 Mins', passing_score: 70, weight: '30%', status: 'Scheduled', exam_date: course.start_date || '2026-10-01' },
+            { id: 2, title: 'Final Capstone Assessment', format: 'Project Submission + Oral Defense', duration: '120 Mins', passing_score: 75, weight: '40%', status: 'Upcoming', exam_date: course.end_date || '2026-11-10' }
+        ];
+
+        // 4. Quizzes Tab
+        const quizzes = await dbAsync.all(`
+            SELECT q.*, (SELECT COUNT(*) FROM lessons l WHERE l.id = q.lesson_id) as lesson_title
+            FROM quizzes q
+            WHERE q.course_id = ?
+        `, [id]);
+
+        // 5. Schedule Tab
+        const schedule = {
+            enrollment_opens: course.enrollment_start_date || '2026-08-20',
+            enrollment_deadline: course.enrollment_deadline || '2026-09-05',
+            course_starts: course.start_date || '2026-09-10',
+            course_ends: course.end_date || '2026-11-10',
+            weekly_sessions: 'Tuesdays & Thursdays, 18:00 - 20:00 (GMT+7)',
+            room: 'Virtual Lab 102 & Zoom Auditorium'
+        };
+
+        // 6. Payments & Financials Tab
+        const payments = await dbAsync.all(`
+            SELECT p.*, u.full_name as student_name, u.email as student_email
+            FROM payments p
+            JOIN users u ON p.user_id = u.id
+            WHERE p.course_id = ?
+            ORDER BY p.payment_date DESC
+        `, [id]);
+
+        const totalRevenue = payments
+            .filter(p => p.payment_status === 'Paid')
+            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+        // 7. Reports & Analytics Tab
+        const completedCount = students.filter(s => s.progress_percentage >= 100 || s.enrollment_status === 'Completed').length;
+        const avgProgress = students.length > 0
+            ? Math.round(students.reduce((sum, s) => sum + (Number(s.progress_percentage) || 0), 0) / students.length)
+            : 0;
+
+        const reports = {
+            total_enrolled: students.length,
+            completed_count: completedCount,
+            completion_rate: students.length > 0 ? Math.round((completedCount / students.length) * 100) : 0,
+            average_progress: avgProgress,
+            total_revenue: totalRevenue
+        };
+
+        res.json({
+            success: true,
+            data: {
+                overview: course,
+                chapters,
+                students,
+                exams,
+                quizzes,
+                schedule,
+                payments: {
+                    transactions: payments,
+                    total_revenue: totalRevenue
+                },
+                reports
+            }
+        });
+    } catch (error) {
+        console.error('getCourseDetails error:', error);
+        res.status(500).json({ success: false, message: 'Failed to retrieve course details.' });
     }
 };
 
 exports.createCourse = async (req, res) => {
     try {
-        const { title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published } = req.body;
+        const { 
+            title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, 
+            duration_hours, lesson_count, badge_text, price, enrollment_start_date, enrollment_deadline, 
+            start_date, end_date, order_num, is_popular, is_published 
+        } = req.body;
 
-        if (!title || !description) {
-            return res.status(400).json({ success: false, message: 'Title and description are required.' });
+        const trimmedTitle = typeof title === 'string' ? title.trim() : '';
+        const trimmedDesc = typeof description === 'string' ? description.trim() : '';
+
+        // Validation 1: Required Fields
+        if (!trimmedTitle || trimmedTitle.length < 3) {
+            return res.status(400).json({ success: false, message: 'Course Title is required (minimum 3 characters).' });
+        }
+        if (!category_id) {
+            return res.status(400).json({ success: false, message: 'Category is required.' });
+        }
+        if (!instructor_id) {
+            return res.status(400).json({ success: false, message: 'Instructor is required.' });
+        }
+        if (!difficulty) {
+            return res.status(400).json({ success: false, message: 'Difficulty level is required.' });
+        }
+        if (!trimmedDesc || trimmedDesc.length < 10) {
+            return res.status(400).json({ success: false, message: 'Course Description is required (minimum 10 characters).' });
         }
 
-        const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        // Validation 2: Clear Date Validations
+        if (enrollment_start_date && enrollment_deadline) {
+            if (new Date(enrollment_deadline) < new Date(enrollment_start_date)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Enrollment Deadline cannot be before Enrollment Start Date.' 
+                });
+            }
+        }
+        if (enrollment_deadline && start_date) {
+            if (new Date(start_date) < new Date(enrollment_deadline)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Course Start Date cannot be before Enrollment Deadline.' 
+                });
+            }
+        }
+        if (start_date && end_date) {
+            if (new Date(end_date) < new Date(start_date)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Course End Date cannot be before Course Start Date.' 
+                });
+            }
+        }
+
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim()
+            : trimmedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        const parsedPrice = !isNaN(Number(price)) ? Math.max(0, Number(price)) : 0.0;
+        const parsedOrder = !isNaN(Number(order_num)) ? Math.max(0, Number(order_num)) : 0;
+        const finalPublished = (is_published === 1 || is_published === true || is_published === '1') ? 1 : 0;
 
         const result = await dbAsync.run(
-            `INSERT INTO courses (title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO courses (
+                title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, 
+                duration_hours, lesson_count, badge_text, price, enrollment_start_date, enrollment_deadline, 
+                start_date, end_date, order_num, is_popular, is_published
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                title,
+                trimmedTitle,
                 finalSlug,
-                description,
+                trimmedDesc,
                 category_id || null,
                 instructor_id || null,
                 thumbnail_url || 'assets/images/course_webdev.jpg',
                 rating || 4.8,
                 difficulty || 'Beginner',
-                duration_hours || '8 Hours',
-                lesson_count || 0,
+                duration_hours || '8 Weeks',
+                lesson_count || 12,
                 badge_text || null,
-                order_num || 0,
+                parsedPrice,
+                enrollment_start_date || null,
+                enrollment_deadline || null,
+                start_date || null,
+                end_date || null,
+                parsedOrder,
                 is_popular !== undefined ? is_popular : 1,
-                is_published !== undefined ? is_published : 1
+                finalPublished
             ]
         );
 
-        res.status(201).json({ success: true, message: 'Course created successfully.', id: result.lastID, data: { id: result.lastID } });
+        res.status(201).json({ 
+            success: true, 
+            message: 'Specialized Course created successfully.', 
+            id: result.lastID, 
+            data: { id: result.lastID } 
+        });
     } catch (error) {
         console.error('Create course error:', error);
-        res.status(500).json({ success: false, message: 'Failed to create course.' });
+        res.status(500).json({ success: false, message: 'Failed to create specialized course.' });
     }
 };
 
 exports.updateCourse = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published } = req.body;
+        const existing = await dbAsync.get(`SELECT * FROM courses WHERE id = ?`, [id]);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Course not found.' });
+        }
+
+        const { 
+            title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, 
+            duration_hours, lesson_count, badge_text, price, enrollment_start_date, enrollment_deadline, 
+            start_date, end_date, order_num, is_popular, is_published 
+        } = req.body;
+
+        const trimmedTitle = title !== undefined ? String(title).trim() : existing.title;
+        const trimmedDesc = description !== undefined ? String(description).trim() : existing.description;
+
+        // Validation 1: Required Fields
+        if (!trimmedTitle || trimmedTitle.length < 3) {
+            return res.status(400).json({ success: false, message: 'Course Title is required (minimum 3 characters).' });
+        }
+        if (category_id !== undefined && !category_id) {
+            return res.status(400).json({ success: false, message: 'Category is required.' });
+        }
+        if (instructor_id !== undefined && !instructor_id) {
+            return res.status(400).json({ success: false, message: 'Instructor is required.' });
+        }
+        if (!trimmedDesc || trimmedDesc.length < 10) {
+            return res.status(400).json({ success: false, message: 'Course Description is required (minimum 10 characters).' });
+        }
+
+        // Effective Dates
+        const effEnrStart = enrollment_start_date !== undefined ? enrollment_start_date : existing.enrollment_start_date;
+        const effEnrDeadline = enrollment_deadline !== undefined ? enrollment_deadline : existing.enrollment_deadline;
+        const effCourseStart = start_date !== undefined ? start_date : existing.start_date;
+        const effCourseEnd = end_date !== undefined ? end_date : existing.end_date;
+
+        // Validation 2: Clear Date Validations
+        if (effEnrStart && effEnrDeadline) {
+            if (new Date(effEnrDeadline) < new Date(effEnrStart)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Enrollment Deadline cannot be before Enrollment Start Date.' 
+                });
+            }
+        }
+        if (effEnrDeadline && effCourseStart) {
+            if (new Date(effCourseStart) < new Date(effEnrDeadline)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Course Start Date cannot be before Enrollment Deadline.' 
+                });
+            }
+        }
+        if (effCourseStart && effCourseEnd) {
+            if (new Date(effCourseEnd) < new Date(effCourseStart)) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Date Error: Course End Date cannot be before Course Start Date.' 
+                });
+            }
+        }
+
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim()
+            : (trimmedTitle !== existing.title ? trimmedTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : existing.slug);
+
+        const parsedPrice = price !== undefined ? (!isNaN(Number(price)) ? Math.max(0, Number(price)) : 0.0) : existing.price;
+        const parsedOrder = order_num !== undefined ? (!isNaN(Number(order_num)) ? Math.max(0, Number(order_num)) : 0) : existing.order_num;
+        const finalPublished = is_published !== undefined
+            ? ((is_published === 1 || is_published === true || is_published === '1') ? 1 : 0)
+            : existing.is_published;
 
         await dbAsync.run(
             `UPDATE courses
              SET title = ?, slug = ?, description = ?, category_id = ?, instructor_id = ?,
                  thumbnail_url = ?, rating = ?, difficulty = ?, duration_hours = ?,
-                 lesson_count = COALESCE(?, lesson_count), badge_text = ?, order_num = ?, is_popular = ?,
-                 is_published = ?, updated_at = CURRENT_TIMESTAMP
+                 lesson_count = COALESCE(?, lesson_count), badge_text = ?, price = ?,
+                 enrollment_start_date = ?, enrollment_deadline = ?, start_date = ?, end_date = ?,
+                 order_num = ?, is_popular = ?, is_published = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
-            [title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published, id]
+            [
+                trimmedTitle,
+                finalSlug,
+                trimmedDesc,
+                category_id !== undefined ? category_id : existing.category_id,
+                instructor_id !== undefined ? instructor_id : existing.instructor_id,
+                thumbnail_url !== undefined ? thumbnail_url : existing.thumbnail_url,
+                rating !== undefined ? rating : existing.rating,
+                difficulty !== undefined ? difficulty : existing.difficulty,
+                duration_hours !== undefined ? duration_hours : existing.duration_hours,
+                lesson_count !== undefined ? lesson_count : existing.lesson_count,
+                badge_text !== undefined ? badge_text : existing.badge_text,
+                parsedPrice,
+                effEnrStart,
+                effEnrDeadline,
+                effCourseStart,
+                effCourseEnd,
+                parsedOrder,
+                is_popular !== undefined ? is_popular : existing.is_popular,
+                finalPublished,
+                id
+            ]
         );
 
         res.json({ success: true, message: 'Course updated successfully.' });
     } catch (error) {
+        console.error('Update course error:', error);
         res.status(500).json({ success: false, message: 'Failed to update course.' });
+    }
+};
+
+exports.duplicateCourse = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const original = await dbAsync.get(`SELECT * FROM courses WHERE id = ?`, [id]);
+        if (!original) {
+            return res.status(404).json({ success: false, message: 'Source course not found.' });
+        }
+
+        const newTitle = `${original.title} (Copy)`;
+        const newSlug = `${original.slug}-copy-${Date.now().toString().slice(-4)}`;
+
+        const result = await dbAsync.run(
+            `INSERT INTO courses (
+                title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, 
+                duration_hours, lesson_count, badge_text, price, enrollment_start_date, enrollment_deadline, 
+                start_date, end_date, order_num, is_popular, is_published
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                newTitle,
+                newSlug,
+                original.description,
+                original.category_id,
+                original.instructor_id,
+                original.thumbnail_url,
+                original.rating,
+                original.difficulty,
+                original.duration_hours,
+                original.lesson_count,
+                original.badge_text ? `${original.badge_text}` : null,
+                original.price,
+                original.enrollment_start_date,
+                original.enrollment_deadline,
+                original.start_date,
+                original.end_date,
+                (original.order_num || 0) + 1,
+                original.is_popular,
+                0 // duplicate starts as draft
+            ]
+        );
+
+        const newCourseId = result.lastID;
+
+        // Duplicate Chapters & Modules
+        const originalModules = await dbAsync.all(`SELECT * FROM modules WHERE course_id = ?`, [id]);
+        for (const mod of originalModules) {
+            const modResult = await dbAsync.run(
+                `INSERT INTO modules (course_id, title, description, duration, order_num, status)
+                 VALUES (?, ?, ?, ?, ?, ?)`,
+                [newCourseId, mod.title, mod.description, mod.duration, mod.order_num, mod.status]
+            );
+            const newModId = modResult.lastID;
+
+            const originalLessons = await dbAsync.all(`SELECT * FROM lessons WHERE module_id = ?`, [mod.id]);
+            for (const les of originalLessons) {
+                await dbAsync.run(
+                    `INSERT INTO lessons (module_id, title, video_url, description, duration, order_num)
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    [newModId, les.title, les.video_url, les.description, les.duration, les.order_num]
+                );
+            }
+        }
+
+        res.status(201).json({ 
+            success: true, 
+            message: `Course duplicated as "${newTitle}".`, 
+            id: newCourseId,
+            data: { id: newCourseId }
+        });
+    } catch (error) {
+        console.error('Duplicate course error:', error);
+        res.status(500).json({ success: false, message: 'Failed to duplicate course.' });
+    }
+};
+
+exports.archiveCourse = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const course = await dbAsync.get(`SELECT is_archived, title FROM courses WHERE id = ?`, [id]);
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+        const newArchiveState = course.is_archived === 1 ? 0 : 1;
+        await dbAsync.run(`UPDATE courses SET is_archived = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [newArchiveState, id]);
+
+        res.json({ 
+            success: true, 
+            message: `Course "${course.title}" ${newArchiveState === 1 ? 'archived' : 'unarchived'}.`, 
+            is_archived: newArchiveState 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to update course archive status.' });
     }
 };
 
@@ -493,13 +996,13 @@ exports.deleteCourse = async (req, res) => {
 exports.toggleCoursePublish = async (req, res) => {
     try {
         const { id } = req.params;
-        const course = await dbAsync.get(`SELECT is_published FROM courses WHERE id = ?`, [id]);
+        const course = await dbAsync.get(`SELECT is_published, title FROM courses WHERE id = ?`, [id]);
         if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
         const newStatus = course.is_published === 1 ? 0 : 1;
         await dbAsync.run(`UPDATE courses SET is_published = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [newStatus, id]);
 
-        res.json({ success: true, message: `Course ${newStatus === 1 ? 'published' : 'unpublished'}.`, is_published: newStatus });
+        res.json({ success: true, message: `Course "${course.title}" is now ${newStatus === 1 ? 'Published' : 'Draft'}.`, is_published: newStatus });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to toggle course status.' });
     }
@@ -590,7 +1093,11 @@ exports.deleteChapter = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
     try {
-        const categories = await dbAsync.all(`SELECT * FROM categories ORDER BY order_num ASC, name ASC`);
+        const categories = await dbAsync.all(`
+            SELECT c.*, (SELECT COUNT(*) FROM courses WHERE category_id = c.id) as course_count 
+            FROM categories c 
+            ORDER BY c.order_num ASC, c.name ASC
+        `);
         res.json({ success: true, data: categories });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch categories.' });
@@ -599,23 +1106,93 @@ exports.getAllCategories = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
     try {
-        const { name, slug, icon, type, color, order_num } = req.body;
-        if (!name) return res.status(400).json({ success: false, message: 'Category name is required.' });
+        const { name, slug, icon, type, color, order_num, status = 'Active' } = req.body;
+        const trimmedName = typeof name === 'string' ? name.trim() : '';
 
-        const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (!trimmedName || trimmedName.length < 2) {
+            return res.status(400).json({ success: false, message: 'Category Name is required (minimum 2 characters).' });
+        }
 
-        const existing = await dbAsync.get(`SELECT id FROM categories WHERE name = ? OR slug = ?`, [name, finalSlug]);
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim().toLowerCase()
+            : trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+        if (!finalSlug || finalSlug.length < 2) {
+            return res.status(400).json({ success: false, message: 'Category Slug is required.' });
+        }
+
+        // Duplicate Check: Prevent duplicate category names and slugs
+        const existing = await dbAsync.get(
+            `SELECT id, name, slug FROM categories WHERE LOWER(name) = LOWER(?) OR LOWER(slug) = LOWER(?)`, 
+            [trimmedName, finalSlug]
+        );
         if (existing) {
-            return res.status(400).json({ success: false, message: 'A category with this name or slug already exists.' });
+            if (existing.name.toLowerCase() === trimmedName.toLowerCase()) {
+                return res.status(400).json({ success: false, message: `A category with the name "${trimmedName}" already exists.` });
+            }
+            return res.status(400).json({ success: false, message: `A category with the slug "${finalSlug}" already exists.` });
         }
 
         const result = await dbAsync.run(
-            `INSERT INTO categories (name, slug, icon, type, color, order_num) VALUES (?, ?, ?, ?, ?, ?)`,
-            [name, finalSlug, icon || 'bi-tag', type || 'general', color || '#2563EB', order_num || 0]
+            `INSERT INTO categories (name, slug, icon, type, color, order_num, status) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [trimmedName, finalSlug, icon || 'bi-tag', type || 'general', color || '#2563EB', Number(order_num) || 0, status || 'Active']
         );
-        res.status(201).json({ success: true, message: 'Category created.', id: result.lastID, data: { id: result.lastID } });
+        res.status(201).json({ success: true, message: 'Category created successfully.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
+        console.error('Create category error:', error);
         res.status(500).json({ success: false, message: 'Failed to create category.' });
+    }
+};
+
+exports.updateCategory = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, slug, icon, type, color, order_num, status } = req.body;
+
+        const existing = await dbAsync.get(`SELECT * FROM categories WHERE id = ?`, [id]);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Category not found.' });
+        }
+
+        const trimmedName = name !== undefined ? String(name).trim() : existing.name;
+        if (!trimmedName || trimmedName.length < 2) {
+            return res.status(400).json({ success: false, message: 'Category Name is required (minimum 2 characters).' });
+        }
+
+        const finalSlug = (slug && typeof slug === 'string' && slug.trim())
+            ? slug.trim().toLowerCase()
+            : (trimmedName !== existing.name ? trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : existing.slug);
+
+        // Prevent duplicate names and slugs on other categories
+        const duplicate = await dbAsync.get(
+            `SELECT id, name, slug FROM categories WHERE (LOWER(name) = LOWER(?) OR LOWER(slug) = LOWER(?)) AND id != ?`,
+            [trimmedName, finalSlug, id]
+        );
+        if (duplicate) {
+            if (duplicate.name.toLowerCase() === trimmedName.toLowerCase()) {
+                return res.status(400).json({ success: false, message: `Another category with the name "${trimmedName}" already exists.` });
+            }
+            return res.status(400).json({ success: false, message: `Another category with the slug "${finalSlug}" already exists.` });
+        }
+
+        await dbAsync.run(
+            `UPDATE categories SET name = ?, slug = ?, icon = ?, type = ?, color = ?, order_num = ?, status = ? WHERE id = ?`,
+            [
+                trimmedName,
+                finalSlug,
+                icon !== undefined ? icon : existing.icon,
+                type !== undefined ? type : existing.type,
+                color !== undefined ? color : existing.color,
+                order_num !== undefined ? Number(order_num) : existing.order_num,
+                status !== undefined ? status : existing.status,
+                id
+            ]
+        );
+
+        res.json({ success: true, message: 'Category updated successfully.' });
+    } catch (error) {
+        console.error('Update category error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update category.' });
     }
 };
 
@@ -630,7 +1207,7 @@ exports.deleteCategory = async (req, res) => {
             });
         }
         await dbAsync.run(`DELETE FROM categories WHERE id = ?`, [id]);
-        res.json({ success: true, message: 'Category deleted.' });
+        res.json({ success: true, message: 'Category deleted successfully.' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to delete category.' });
     }
@@ -642,7 +1219,11 @@ exports.deleteCategory = async (req, res) => {
 
 exports.getAllInstructors = async (req, res) => {
     try {
-        const instructors = await dbAsync.all(`SELECT * FROM instructors ORDER BY id ASC`);
+        const instructors = await dbAsync.all(`
+            SELECT i.*, (SELECT COUNT(*) FROM courses WHERE instructor_id = i.id) as assigned_courses_count
+            FROM instructors i 
+            ORDER BY i.id ASC
+        `);
         res.json({ success: true, data: instructors });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch instructors.' });
@@ -651,17 +1232,93 @@ exports.getAllInstructors = async (req, res) => {
 
 exports.createInstructor = async (req, res) => {
     try {
-        const { name, title, bio, avatar_url, email, expertise, faculty } = req.body;
-        if (!name) return res.status(400).json({ success: false, message: 'Instructor name is required.' });
+        const { name, title, bio, avatar_url, email, phone, expertise, department, faculty, status = 'Active' } = req.body;
+        const trimmedName = typeof name === 'string' ? name.trim() : '';
+
+        if (!trimmedName || trimmedName.length < 2) {
+            return res.status(400).json({ success: false, message: 'Instructor Name is required (minimum 2 characters).' });
+        }
+
+        // Email validation
+        const trimmedEmail = typeof email === 'string' ? email.trim() : '';
+        if (trimmedEmail) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(trimmedEmail)) {
+                return res.status(400).json({ success: false, message: 'Please provide a valid email address (e.g. instructor@aub.edu.kh).' });
+            }
+        }
+
+        const avatar = avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(trimmedName)}`;
 
         const result = await dbAsync.run(
-            `INSERT INTO instructors (name, title, bio, avatar_url, email, expertise, faculty)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [name, title, bio, avatar_url || '', email || '', expertise || '', faculty || 'Information Technology']
+            `INSERT INTO instructors (name, title, bio, avatar_url, email, phone, expertise, department, faculty, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                trimmedName, 
+                title || 'Lecturer', 
+                bio || '', 
+                avatar, 
+                trimmedEmail, 
+                phone || '', 
+                expertise || '', 
+                department || faculty || 'Information Technology', 
+                faculty || 'Information Technology', 
+                status || 'Active'
+            ]
         );
-        res.status(201).json({ success: true, message: 'Instructor created.', id: result.lastID, data: { id: result.lastID } });
+        res.status(201).json({ success: true, message: 'Instructor created successfully.', id: result.lastID, data: { id: result.lastID } });
     } catch (error) {
+        console.error('Create instructor error:', error);
         res.status(500).json({ success: false, message: 'Failed to create instructor.' });
+    }
+};
+
+exports.updateInstructor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, title, bio, avatar_url, email, phone, expertise, department, faculty, status } = req.body;
+
+        const existing = await dbAsync.get(`SELECT * FROM instructors WHERE id = ?`, [id]);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Instructor not found.' });
+        }
+
+        const trimmedName = name !== undefined ? String(name).trim() : existing.name;
+        if (!trimmedName || trimmedName.length < 2) {
+            return res.status(400).json({ success: false, message: 'Instructor Name is required (minimum 2 characters).' });
+        }
+
+        const trimmedEmail = email !== undefined ? String(email).trim() : existing.email;
+        if (trimmedEmail) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(trimmedEmail)) {
+                return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+            }
+        }
+
+        await dbAsync.run(
+            `UPDATE instructors
+             SET name = ?, title = ?, bio = ?, avatar_url = ?, email = ?, phone = ?, expertise = ?, department = ?, faculty = ?, status = ?
+             WHERE id = ?`,
+            [
+                trimmedName,
+                title !== undefined ? title : existing.title,
+                bio !== undefined ? bio : existing.bio,
+                avatar_url !== undefined ? avatar_url : existing.avatar_url,
+                trimmedEmail,
+                phone !== undefined ? phone : existing.phone,
+                expertise !== undefined ? expertise : existing.expertise,
+                department !== undefined ? department : existing.department,
+                faculty !== undefined ? faculty : existing.faculty,
+                status !== undefined ? status : existing.status,
+                id
+            ]
+        );
+
+        res.json({ success: true, message: 'Instructor updated successfully.' });
+    } catch (error) {
+        console.error('Update instructor error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update instructor.' });
     }
 };
 
@@ -676,7 +1333,7 @@ exports.deleteInstructor = async (req, res) => {
             });
         }
         await dbAsync.run(`DELETE FROM instructors WHERE id = ?`, [id]);
-        res.json({ success: true, message: 'Instructor deleted.' });
+        res.json({ success: true, message: 'Instructor deleted successfully.' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to delete instructor.' });
     }
@@ -1197,5 +1854,372 @@ exports.deleteEnrollment = async (req, res) => {
         res.json({ success: true, message: 'Enrollment deleted.' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to delete enrollment.' });
+    }
+};
+
+// ==========================================
+// 10. PAYMENT MANAGEMENT CRUD
+// ==========================================
+
+exports.getAllPayments = async (req, res) => {
+    try {
+        const { status, timeframe } = req.query;
+        let sql = `
+            SELECT p.*, 
+                   u.full_name as student_name, u.university_id as student_uni_id, u.email as student_email, u.avatar_url as student_avatar,
+                   c.title as course_title, c.difficulty as course_difficulty,
+                   inst.name as instructor_name
+            FROM payments p
+            JOIN users u ON p.user_id = u.id
+            JOIN courses c ON p.course_id = c.id
+            LEFT JOIN instructors inst ON c.instructor_id = inst.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        if (status && status !== 'all') {
+            sql += ` AND p.payment_status = ?`;
+            params.push(status);
+        }
+
+        if (timeframe === 'this_month') {
+            sql += ` AND strftime('%Y-%m', p.payment_date) = strftime('%Y-%m', 'now')`;
+        } else if (timeframe === 'last_month') {
+            sql += ` AND strftime('%Y-%m', p.payment_date) = strftime('%Y-%m', 'now', '-1 month')`;
+        }
+
+        sql += ` ORDER BY p.payment_date DESC, p.id DESC`;
+
+        const payments = await dbAsync.all(sql, params);
+        res.json({ success: true, data: payments });
+    } catch (error) {
+        console.error('getAllPayments error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch payments.' });
+    }
+};
+
+exports.getPaymentStats = async (req, res) => {
+    try {
+        const totalRevenueRow = await dbAsync.get(`
+            SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'Paid'
+        `);
+        const paidCountRow = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM payments WHERE payment_status = 'Paid'
+        `);
+        const pendingCountRow = await dbAsync.get(`
+            SELECT COUNT(*) as count FROM payments WHERE payment_status = 'Pending'
+        `);
+        const refundedRow = await dbAsync.get(`
+            SELECT COALESCE(SUM(amount), 0) as total, COUNT(*) as count FROM payments WHERE payment_status = 'Refunded'
+        `);
+
+        res.json({
+            success: true,
+            data: {
+                totalRevenue: totalRevenueRow.total || 0,
+                paidCount: paidCountRow.count || 0,
+                pendingCount: pendingCountRow.count || 0,
+                refundedTotal: refundedRow.total || 0,
+                refundedCount: refundedRow.count || 0
+            }
+        });
+    } catch (error) {
+        console.error('getPaymentStats error:', error);
+        res.status(500).json({ success: false, message: 'Failed to calculate payment stats.' });
+    }
+};
+
+exports.createPayment = async (req, res) => {
+    try {
+        const { user_id, course_id, amount, payment_method = 'ABA PAY', payment_status = 'Paid', notes = '' } = req.body;
+        if (!user_id || !course_id) {
+            return res.status(400).json({ success: false, message: 'User ID and Course ID are required.' });
+        }
+
+        const txnId = `TXN-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const invoiceNum = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 90000) + 10000)}`;
+
+        // Check if enrollment exists
+        let enrollment = await dbAsync.get(`SELECT id FROM enrollments WHERE user_id = ? AND course_id = ?`, [user_id, course_id]);
+        if (!enrollment) {
+            const enrResult = await dbAsync.run(`
+                INSERT INTO enrollments (user_id, course_id, status, payment_status, progress_percentage)
+                VALUES (?, ?, 'Active', ?, 0.0)
+            `, [user_id, course_id, payment_status]);
+            enrollment = { id: enrResult.lastID };
+        } else {
+            await dbAsync.run(`UPDATE enrollments SET payment_status = ?, status = 'Active' WHERE id = ?`, [payment_status, enrollment.id]);
+        }
+
+        const result = await dbAsync.run(`
+            INSERT INTO payments (transaction_id, enrollment_id, user_id, course_id, amount, payment_method, payment_status, invoice_number, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [txnId, enrollment.id, user_id, course_id, Number(amount) || 0.0, payment_method, payment_status, invoiceNum, notes]);
+
+        res.status(201).json({
+            success: true,
+            message: 'Payment recorded successfully.',
+            id: result.lastID,
+            data: {
+                id: result.lastID,
+                transaction_id: txnId,
+                invoice_number: invoiceNum
+            }
+        });
+    } catch (error) {
+        console.error('createPayment error:', error);
+        res.status(500).json({ success: false, message: 'Failed to record payment.' });
+    }
+};
+
+exports.refundPayment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const payment = await dbAsync.get(`SELECT * FROM payments WHERE id = ?`, [id]);
+        if (!payment) {
+            return res.status(404).json({ success: false, message: 'Payment record not found.' });
+        }
+
+        await dbAsync.run(`UPDATE payments SET payment_status = 'Refunded' WHERE id = ?`, [id]);
+        if (payment.enrollment_id) {
+            await dbAsync.run(`UPDATE enrollments SET payment_status = 'Refunded', status = 'Cancelled' WHERE id = ?`, [payment.enrollment_id]);
+        }
+
+        res.json({ success: true, message: `Payment ${payment.transaction_id} marked as Refunded.` });
+    } catch (error) {
+        console.error('refundPayment error:', error);
+        res.status(500).json({ success: false, message: 'Failed to refund payment.' });
+    }
+};
+
+// ==========================================
+// EXAMS & QUIZZES CONTROLLERS
+// ==========================================
+exports.getAllExams = async (req, res) => {
+    try {
+        const exams = await dbAsync.all(`
+            SELECT ex.*, c.title as course_title, u.full_name as instructor_name, m.title as chapter_title
+            FROM exams ex
+            LEFT JOIN courses c ON ex.course_id = c.id
+            LEFT JOIN users u ON ex.instructor_id = u.id
+            LEFT JOIN modules m ON ex.chapter_id = m.id
+            ORDER BY ex.start_datetime ASC
+        `);
+        res.json({ success: true, data: exams });
+    } catch (error) {
+        console.error('getAllExams error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch exams.' });
+    }
+};
+
+exports.createExam = async (req, res) => {
+    try {
+        const { title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status } = req.body;
+        if (!title || !course_id || !start_datetime || !end_datetime) {
+            return res.status(400).json({ success: false, message: 'Title, Course, Start Date & End Date are required.' });
+        }
+        const result = await dbAsync.run(`
+            INSERT INTO exams (title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [title, course_id, chapter_id || null, instructor_id || null, exam_type || 'Midterm Exam', description || '', Number(total_questions) || 20, Number(total_marks) || 100, Number(passing_score) || 50, Number(duration_minutes) || 60, start_datetime, end_datetime, Number(attempts_allowed) || 2, status || 'Scheduled']);
+
+        res.status(201).json({ success: true, message: 'Exam created successfully.', id: result.lastID });
+    } catch (error) {
+        console.error('createExam error:', error);
+        res.status(500).json({ success: false, message: 'Failed to create exam.' });
+    }
+};
+
+exports.updateExam = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status } = req.body;
+        await dbAsync.run(`
+            UPDATE exams SET title = ?, course_id = ?, chapter_id = ?, instructor_id = ?, exam_type = ?, description = ?, total_questions = ?, total_marks = ?, passing_score = ?, duration_minutes = ?, start_datetime = ?, end_datetime = ?, attempts_allowed = ?, status = ?
+            WHERE id = ?
+        `, [title, course_id, chapter_id || null, instructor_id || null, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status, id]);
+        res.json({ success: true, message: 'Exam updated successfully.' });
+    } catch (error) {
+        console.error('updateExam error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update exam.' });
+    }
+};
+
+exports.deleteExam = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await dbAsync.run(`DELETE FROM exams WHERE id = ?`, [id]);
+        res.json({ success: true, message: 'Exam deleted successfully.' });
+    } catch (error) {
+        console.error('deleteExam error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete exam.' });
+    }
+};
+
+// Exam Submissions / Results
+exports.getExamResults = async (req, res) => {
+    try {
+        const results = await dbAsync.all(`
+            SELECT es.*, u.full_name as student_name, u.university_id, u.avatar_url, ex.title as exam_title, c.title as course_title
+            FROM exam_submissions es
+            LEFT JOIN users u ON es.student_id = u.id
+            LEFT JOIN exams ex ON es.exam_id = ex.id
+            LEFT JOIN courses c ON es.course_id = c.id
+            ORDER BY es.submitted_at DESC
+        `);
+        res.json({ success: true, data: results });
+    } catch (error) {
+        console.error('getExamResults error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch exam results.' });
+    }
+};
+
+// Invoices CRUD
+exports.getAllInvoices = async (req, res) => {
+    try {
+        const invoices = await dbAsync.all(`
+            SELECT inv.*, u.full_name as student_name, u.email as student_email, u.university_id, c.title as course_title
+            FROM invoices inv
+            LEFT JOIN users u ON inv.student_id = u.id
+            LEFT JOIN courses c ON inv.course_id = c.id
+            ORDER BY inv.issue_date DESC
+        `);
+        res.json({ success: true, data: invoices });
+    } catch (error) {
+        console.error('getAllInvoices error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch invoices.' });
+    }
+};
+
+exports.createInvoice = async (req, res) => {
+    try {
+        const { student_id, course_id, amount, discount = 0, tax = 0, issue_date, due_date, status = 'Issued', notes = '' } = req.body;
+        const total = (Number(amount) || 0) - (Number(discount) || 0) + (Number(tax) || 0);
+        const invNum = `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 90000) + 10000)}`;
+
+        const result = await dbAsync.run(`
+            INSERT INTO invoices (invoice_number, student_id, course_id, amount, discount, tax, total_amount, issue_date, due_date, status, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [invNum, student_id, course_id, amount, discount, tax, total, issue_date || new Date().toISOString().split('T')[0], due_date, status, notes]);
+
+        res.status(201).json({ success: true, message: 'Invoice created.', id: result.lastID });
+    } catch (error) {
+        console.error('createInvoice error:', error);
+        res.status(500).json({ success: false, message: 'Failed to create invoice.' });
+    }
+};
+
+// Teacher Payroll CRUD
+exports.getTeacherPayroll = async (req, res) => {
+    try {
+        const payroll = await dbAsync.all(`
+            SELECT tp.*, u.full_name as teacher_name, u.email as teacher_email, u.avatar_url, t.teacher_code, d.name as department_name
+            FROM teacher_payroll tp
+            LEFT JOIN users u ON tp.teacher_id = u.id
+            LEFT JOIN teachers t ON t.user_id = u.id
+            LEFT JOIN departments d ON tp.department_id = d.id
+            ORDER BY tp.created_at DESC
+        `);
+        res.json({ success: true, data: payroll });
+    } catch (error) {
+        console.error('getTeacherPayroll error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch teacher payroll.' });
+    }
+};
+
+exports.updatePayrollStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, payment_date } = req.body;
+        await dbAsync.run(`
+            UPDATE teacher_payroll SET status = ?, payment_date = ?
+            WHERE id = ?
+        `, [status, payment_date || (status === 'Paid' ? new Date().toISOString().split('T')[0] : null), id]);
+        res.json({ success: true, message: 'Payroll status updated successfully.' });
+    } catch (error) {
+        console.error('updatePayrollStatus error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update payroll status.' });
+    }
+};
+
+// Calendar & Schedule
+exports.getCalendarEvents = async (req, res) => {
+    try {
+        const events = await dbAsync.all(`
+            SELECT ce.*, c.title as course_title, u.full_name as instructor_name
+            FROM calendar_events ce
+            LEFT JOIN courses c ON ce.course_id = c.id
+            LEFT JOIN users u ON ce.instructor_id = u.id
+            ORDER BY ce.start_time ASC
+        `);
+        res.json({ success: true, data: events });
+    } catch (error) {
+        console.error('getCalendarEvents error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch calendar events.' });
+    }
+};
+
+exports.createCalendarEvent = async (req, res) => {
+    try {
+        const { title, event_type, course_id, instructor_id, start_time, end_time, location_room, description } = req.body;
+        const result = await dbAsync.run(`
+            INSERT INTO calendar_events (title, event_type, course_id, instructor_id, start_time, end_time, location_room, description, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Active')
+        `, [title, event_type || 'Class', course_id || null, instructor_id || null, start_time, end_time || null, location_room || 'Room 101', description || '']);
+        res.status(201).json({ success: true, message: 'Event scheduled.', id: result.lastID });
+    } catch (error) {
+        console.error('createCalendarEvent error:', error);
+        res.status(500).json({ success: false, message: 'Failed to schedule event.' });
+    }
+};
+
+// Analytical Reports
+exports.getReportsData = async (req, res) => {
+    try {
+        const type = req.query.type || 'enrollment';
+        
+        const enrollmentReport = await dbAsync.all(`
+            SELECT c.title as course_name, cat.name as category_name, COUNT(e.id) as total_enrollments,
+                   SUM(CASE WHEN e.status = 'Completed' THEN 1 ELSE 0 END) as completed_count,
+                   AVG(e.progress_percentage) as avg_progress,
+                   SUM(CASE WHEN e.payment_status = 'Paid' THEN c.price ELSE 0 END) as gross_revenue
+            FROM courses c
+            LEFT JOIN categories cat ON c.category_id = cat.id
+            LEFT JOIN enrollments e ON e.course_id = c.id
+            GROUP BY c.id
+            ORDER BY total_enrollments DESC
+        `);
+
+        const examReport = await dbAsync.all(`
+            SELECT ex.title as exam_title, c.title as course_name, COUNT(es.id) as total_submissions,
+                   AVG(es.percentage) as avg_percentage,
+                   SUM(CASE WHEN es.status = 'Passed' THEN 1 ELSE 0 END) as passed_count,
+                   SUM(CASE WHEN es.status = 'Failed' THEN 1 ELSE 0 END) as failed_count
+            FROM exams ex
+            LEFT JOIN courses c ON ex.course_id = c.id
+            LEFT JOIN exam_submissions es ON es.exam_id = ex.id
+            GROUP BY ex.id
+        `);
+
+        const payrollSummary = await dbAsync.all(`
+            SELECT d.name as department_name, COUNT(tp.id) as faculty_count,
+                   SUM(tp.base_salary) as total_base, SUM(tp.course_compensation) as total_course_comp,
+                   SUM(tp.bonus) as total_bonus, SUM(tp.net_pay) as total_payroll
+            FROM departments d
+            LEFT JOIN teacher_payroll tp ON tp.department_id = d.id
+            GROUP BY d.id
+        `);
+
+        res.json({
+            success: true,
+            data: {
+                enrollments: enrollmentReport,
+                exams: examReport,
+                payroll: payrollSummary
+            }
+        });
+    } catch (error) {
+        console.error('getReportsData error:', error);
+        res.status(500).json({ success: false, message: 'Failed to generate reports.' });
     }
 };

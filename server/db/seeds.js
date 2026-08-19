@@ -1167,22 +1167,292 @@ async function seedDatabase() {
         );
     }
 
-    // 18. Seed Class Enrollments (Teacher -> Class -> Enrollment -> Student)
-    console.log('Seeding Class Enrollments...');
-    const classEnrollments = [
-        { classId: 1, studentId: 2 }, // Sok Virak in Web Dev Alpha
-        { classId: 1, studentId: 3 }, // Chanthou Meas in Web Dev Alpha
-        { classId: 1, studentId: 6 }, // Vibol Pen in Web Dev Alpha
-        { classId: 2, studentId: 4 }, // Dara Keo in Web Dev Beta
-        { classId: 2, studentId: 5 }, // Kanha Rath in Web Dev Beta
-        { classId: 3, studentId: 2 }, // Sok Virak in UI/UX Studio
-        { classId: 4, studentId: 3 }  // Chanthou Meas in Security Lab
+    // 19. Seed Exams & Quizzes
+    console.log('Seeding Exams & Quizzes...');
+    const exams = [
+        {
+            id: 1,
+            title: 'Midterm Examination: Web Architecture & RESTful APIs',
+            courseId: 1,
+            chapterId: 1,
+            instructorId: 7,
+            examType: 'Midterm Exam',
+            description: 'Comprehensive evaluation of frontend/backend communication, state management, HTTP protocols, and async JavaScript execution.',
+            totalQuestions: 20,
+            totalMarks: 100,
+            passingScore: 50,
+            duration: 60,
+            start: '2026-08-15 08:00:00',
+            end: '2026-09-25 23:59:59',
+            attempts: 2,
+            status: 'Open'
+        },
+        {
+            id: 2,
+            title: 'Final Examination: Advanced Design Systems & Prototyping',
+            courseId: 2,
+            chapterId: 2,
+            instructorId: 8,
+            examType: 'Final Exam',
+            description: 'Design token architecture, accessibility compliance, Figma component libraries, and interactive prototyping evaluation.',
+            totalQuestions: 25,
+            totalMarks: 100,
+            passingScore: 60,
+            duration: 90,
+            start: '2026-09-10 09:00:00',
+            end: '2026-09-30 18:00:00',
+            attempts: 1,
+            status: 'Scheduled'
+        },
+        {
+            id: 3,
+            title: 'Practical Assessment: Network Defense & Penetration Testing',
+            courseId: 3,
+            chapterId: 1,
+            instructorId: 9,
+            examType: 'Practical Exam',
+            description: 'Hands-on lab exam covering vulnerability scanning, Wireshark packet analysis, and OWASP Top 10 mitigation.',
+            totalQuestions: 20,
+            totalMarks: 100,
+            passingScore: 70,
+            duration: 120,
+            start: '2026-08-01 08:00:00',
+            end: '2026-08-20 23:59:59',
+            attempts: 2,
+            status: 'Completed'
+        },
+        {
+            id: 4,
+            title: 'Entrance Evaluation: Python Statistical Modeling & ML',
+            courseId: 4,
+            chapterId: 1,
+            instructorId: 10,
+            examType: 'Entrance Test',
+            description: 'Probability, NumPy array manipulations, pandas data cleansing, and scikit-learn regression algorithms.',
+            totalQuestions: 15,
+            totalMarks: 75,
+            passingScore: 50,
+            duration: 45,
+            start: '2026-08-10 08:00:00',
+            end: '2026-09-15 23:59:59',
+            attempts: 3,
+            status: 'Open'
+        }
     ];
 
-    for (const ce of classEnrollments) {
+    for (const ex of exams) {
         await dbAsync.run(
-            `INSERT OR IGNORE INTO class_enrollments (class_id, student_id) VALUES (?, ?)`,
-            [ce.classId, ce.studentId]
+            `INSERT OR IGNORE INTO exams (id, title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [ex.id, ex.title, ex.courseId, ex.chapterId, ex.instructorId, ex.examType, ex.description, ex.totalQuestions, ex.totalMarks, ex.passingScore, ex.duration, ex.start, ex.end, ex.attempts, ex.status]
+        );
+    }
+
+    // 20. Seed Exam Questions
+    console.log('Seeding Exam Questions...');
+    const examQuestions = [
+        {
+            id: 1,
+            examId: 1,
+            type: 'Multiple Choice',
+            text: 'Which HTTP status code is returned when a requested resource is created successfully on the server?',
+            options: JSON.stringify(['200 OK', '201 Created', '204 No Content', '301 Moved Permanently']),
+            correct: '201 Created',
+            points: 5,
+            explanation: 'HTTP 201 Created indicates that the request has succeeded and has led to the creation of a new resource.',
+            order: 1
+        },
+        {
+            id: 2,
+            examId: 1,
+            type: 'Multiple Choice',
+            text: 'What is the primary characteristic of an idempotent HTTP method such as PUT or DELETE?',
+            options: JSON.stringify([
+                'It executes asynchronously on the client',
+                'Multiple identical requests produce the same server state as a single request',
+                'It cannot return JSON responses',
+                'It bypasses CORS headers'
+            ]),
+            correct: 'Multiple identical requests produce the same server state as a single request',
+            points: 5,
+            explanation: 'An idempotent HTTP method can be called multiple times without altering the final server state beyond the initial call.',
+            order: 2
+        },
+        {
+            id: 3,
+            examId: 1,
+            type: 'True/False',
+            text: 'In Node.js, the event loop runs on multiple operating system threads simultaneously by default.',
+            options: JSON.stringify(['True', 'False']),
+            correct: 'False',
+            points: 5,
+            explanation: 'Node.js event loop runs on a single thread; asynchronous I/O is offloaded to the libuv threadpool.',
+            order: 3
+        },
+        {
+            id: 4,
+            examId: 1,
+            type: 'Multiple Choice',
+            text: 'Which database indexing strategy is most optimal for speeding up exact match queries on email addresses?',
+            options: JSON.stringify(['Full-text index', 'B-Tree Unique Index', 'R-Tree spatial index', 'Hash Index only']),
+            correct: 'B-Tree Unique Index',
+            points: 5,
+            explanation: 'A unique B-Tree index provides O(log N) lookup speeds and enforces email uniqueness.',
+            order: 4
+        }
+    ];
+
+    for (const eq of examQuestions) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO exam_questions (id, exam_id, question_type, question_text, options_json, correct_answer, points, explanation, order_num)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [eq.id, eq.examId, eq.type, eq.text, eq.options, eq.correct, eq.points, eq.explanation, eq.order]
+        );
+    }
+
+    // 21. Seed Exam Results / Submissions
+    console.log('Seeding Exam Submissions & Results...');
+    const examSubmissions = [
+        { id: 1, examId: 1, studentId: 2, courseId: 1, score: 85, totalMarks: 100, percentage: 85.0, correct: 17, wrong: 3, attempt: 1, status: 'Passed', submitted: '2026-08-16 14:30:00' },
+        { id: 2, examId: 1, studentId: 3, courseId: 1, score: 92, totalMarks: 100, percentage: 92.0, correct: 18, wrong: 2, attempt: 1, status: 'Passed', submitted: '2026-08-16 15:45:00' },
+        { id: 3, examId: 3, studentId: 4, courseId: 3, score: 76, totalMarks: 100, percentage: 76.0, correct: 15, wrong: 5, attempt: 1, status: 'Passed', submitted: '2026-08-10 11:20:00' },
+        { id: 4, examId: 3, studentId: 5, courseId: 3, score: 45, totalMarks: 100, percentage: 45.0, correct: 9, wrong: 11, attempt: 1, status: 'Failed', submitted: '2026-08-11 16:10:00' },
+        { id: 5, examId: 4, studentId: 6, courseId: 4, score: 68, totalMarks: 75, percentage: 90.6, correct: 14, wrong: 1, attempt: 1, status: 'Passed', submitted: '2026-08-12 10:00:00' }
+    ];
+
+    for (const es of examSubmissions) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO exam_submissions (id, exam_id, student_id, course_id, score, total_marks, percentage, correct_count, wrong_count, attempt_number, status, submitted_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [es.id, es.examId, es.studentId, es.courseId, es.score, es.totalMarks, es.percentage, es.correct, es.wrong, es.attempt, es.status, es.submitted]
+        );
+    }
+
+    // 21b. Seed Payments
+    console.log('Seeding Payments...');
+    const payments = [
+        { id: 1, transactionId: 'TXN-2026-8801', enrollmentId: 1, userId: 2, courseId: 1, amount: 50.0, method: 'ABA PAY', status: 'Paid', invoiceNumber: 'INV-2026-0001', notes: 'Tuition paid via ABA QR', paymentDate: '2026-08-01 10:15:00', deadline: '2026-08-15' },
+        { id: 2, transactionId: 'TXN-2026-8802', enrollmentId: 2, userId: 3, courseId: 1, amount: 65.0, method: 'Credit Card', status: 'Paid', invoiceNumber: 'INV-2026-0002', notes: 'MasterCard processed', paymentDate: '2026-08-02 14:30:00', deadline: '2026-08-16' },
+        { id: 3, transactionId: 'TXN-2026-8803', enrollmentId: 3, userId: 4, courseId: 4, amount: 75.0, method: 'Wing Bank', status: 'Paid', invoiceNumber: 'INV-2026-0003', notes: 'Wing Money transfer', paymentDate: '2026-08-03 09:20:00', deadline: '2026-08-17' },
+        { id: 4, transactionId: 'TXN-2026-8804', enrollmentId: 4, userId: 5, courseId: 5, amount: 80.0, method: 'Bakong KHQR', status: 'Pending', invoiceNumber: 'INV-2026-0004', notes: 'Awaiting bank confirmation', paymentDate: null, deadline: '2026-08-26' },
+        { id: 5, transactionId: 'TXN-2026-8805', enrollmentId: 5, userId: 6, courseId: 2, amount: 50.0, method: 'Bank Transfer', status: 'Failed', invoiceNumber: 'INV-2026-0005', notes: 'Insufficient funds on attempt', paymentDate: null, deadline: '2026-08-05' }
+    ];
+
+    for (const p of payments) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO payments (id, transaction_id, enrollment_id, user_id, course_id, amount, payment_method, payment_status, payment_deadline, invoice_number, notes, payment_date)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [p.id, p.transactionId, p.enrollmentId, p.userId, p.courseId, p.amount, p.method, p.status, p.deadline, p.invoiceNumber, p.notes, p.paymentDate]
+        );
+    }
+
+    // 22. Seed Invoices
+    console.log('Seeding Invoices...');
+    const invoices = [
+        { id: 1, invNum: 'INV-2026-0001', studentId: 2, courseId: 1, paymentId: 1, amount: 50.0, discount: 0, tax: 0, total: 50.0, issue: '2026-08-01', due: '2026-08-15', status: 'Paid', notes: 'Tuition Fee - Full-Stack Modern Web Architecture' },
+        { id: 2, invNum: 'INV-2026-0002', studentId: 3, courseId: 2, paymentId: 2, amount: 65.0, discount: 0, tax: 0, total: 65.0, issue: '2026-08-02', due: '2026-08-16', status: 'Paid', notes: 'Tuition Fee - UI/UX Design Systems' },
+        { id: 3, invNum: 'INV-2026-0003', studentId: 4, courseId: 3, paymentId: 3, amount: 75.0, discount: 0, tax: 0, total: 75.0, issue: '2026-08-03', due: '2026-08-17', status: 'Paid', notes: 'Tuition Fee - Cybersecurity Defense' },
+        { id: 4, invNum: 'INV-2026-0004', studentId: 5, courseId: 4, paymentId: 4, amount: 80.0, discount: 0, tax: 0, total: 80.0, issue: '2026-08-12', due: '2026-08-26', status: 'Issued', notes: 'Tuition Fee - Data Science & AI' },
+        { id: 5, invNum: 'INV-2026-0005', studentId: 6, courseId: 5, paymentId: 5, amount: 55.0, discount: 5.0, tax: 0, total: 50.0, issue: '2026-07-20', due: '2026-08-05', status: 'Overdue', notes: 'Tuition Fee - Cloud Solutions Architecture' }
+    ];
+
+    for (const inv of invoices) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO invoices (id, invoice_number, student_id, course_id, payment_id, amount, discount, tax, total_amount, issue_date, due_date, status, notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [inv.id, inv.invNum, inv.studentId, inv.courseId, inv.paymentId, inv.amount, inv.discount, inv.tax, inv.total, inv.issue, inv.due, inv.status, inv.notes]
+        );
+    }
+
+    // 23. Seed Teacher Payroll
+    console.log('Seeding Teacher Payroll...');
+    const payrolls = [
+        {
+            id: 1,
+            teacherId: 7,
+            departmentId: 1,
+            payPeriod: 'August 2026',
+            baseSalary: 2500.0,
+            courseComp: 600.0,
+            examComp: 150.0,
+            bonus: 200.0,
+            deductions: 150.0,
+            netPay: 3300.0,
+            paymentDate: '2026-08-25',
+            status: 'Paid',
+            notes: 'Monthly salary, lecture hours (48h), midterm grading bonus'
+        },
+        {
+            id: 2,
+            teacherId: 8,
+            departmentId: 2,
+            payPeriod: 'August 2026',
+            baseSalary: 2200.0,
+            courseComp: 500.0,
+            examComp: 100.0,
+            bonus: 150.0,
+            deductions: 120.0,
+            netPay: 2830.0,
+            paymentDate: '2026-08-25',
+            status: 'Paid',
+            notes: 'Monthly salary, design lab studio supervision'
+        },
+        {
+            id: 3,
+            teacherId: 9,
+            departmentId: 1,
+            payPeriod: 'August 2026',
+            baseSalary: 2700.0,
+            courseComp: 700.0,
+            examComp: 200.0,
+            bonus: 250.0,
+            deductions: 180.0,
+            netPay: 3670.0,
+            paymentDate: '2026-08-28',
+            status: 'Processing',
+            notes: 'Monthly salary, cyber lab hardware setup & grading'
+        },
+        {
+            id: 4,
+            teacherId: 10,
+            departmentId: 1,
+            payPeriod: 'August 2026',
+            baseSalary: 2600.0,
+            courseComp: 550.0,
+            examComp: 120.0,
+            bonus: 180.0,
+            deductions: 160.0,
+            netPay: 3290.0,
+            paymentDate: null,
+            status: 'Pending',
+            notes: 'Awaiting faculty dean sign-off'
+        }
+    ];
+
+    for (const pr of payrolls) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO teacher_payroll (id, teacher_id, department_id, pay_period, base_salary, course_compensation, exam_compensation, bonus, deductions, net_pay, payment_date, status, notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [pr.id, pr.teacherId, pr.departmentId, pr.payPeriod, pr.baseSalary, pr.courseComp, pr.examComp, pr.bonus, pr.deductions, pr.netPay, pr.paymentDate, pr.status, pr.notes]
+        );
+    }
+
+    // 24. Seed Calendar Events
+    console.log('Seeding Academic Calendar & Schedule...');
+    const calendarEvents = [
+        { id: 1, title: 'Web Architecture: Fall Semester Starts', type: 'Course Start', courseId: 1, instructorId: 7, start: '2026-09-01 08:30:00', end: '2026-09-01 11:30:00', room: 'Lecture Hall 101', desc: 'Orientation and syllabus review.' },
+        { id: 2, title: 'Web Architecture: Enrollment Deadline', type: 'Enrollment Deadline', courseId: 1, instructorId: 7, start: '2026-08-28 23:59:59', end: '2026-08-28 23:59:59', room: 'Online Portal', desc: 'Final cutoff for regular admissions.' },
+        { id: 3, title: 'UI/UX Studio: Design Sprint Class', type: 'Class', courseId: 2, instructorId: 8, start: '2026-08-24 14:00:00', end: '2026-08-24 16:30:00', room: 'Studio 105', desc: 'Figma component library hands-on.' },
+        { id: 4, title: 'Midterm Examination: Web Architecture', type: 'Exam', courseId: 1, instructorId: 7, start: '2026-09-20 08:00:00', end: '2026-09-20 23:59:59', room: 'Online Exam Center', desc: 'Midterm exam testing frontend & API concepts.' },
+        { id: 5, title: 'Cybersecurity: Penetration Testing Lab Exam', type: 'Exam', courseId: 3, instructorId: 9, start: '2026-09-18 09:00:00', end: '2026-09-18 12:00:00', room: 'Cybersecurity Lab 401', desc: 'Live simulated network attack test.' },
+        { id: 6, title: 'Tuition Payment Cutoff: Fall Batch', type: 'Payment Deadline', courseId: 1, instructorId: null, start: '2026-08-30 23:59:59', end: '2026-08-30 23:59:59', room: 'Finance Office', desc: 'Deadline to settle student invoices.' }
+    ];
+
+    for (const ce of calendarEvents) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO calendar_events (id, title, event_type, course_id, instructor_id, start_time, end_time, location_room, description, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [ce.id, ce.title, ce.type, ce.courseId, ce.instructorId, ce.start, ce.end, ce.room, ce.desc, 'Active']
         );
     }
 

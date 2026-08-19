@@ -1,14 +1,15 @@
-// ==========================================
-// AUB Digital Academy - Shared Admin Sidebar & Layout Controller
-// Mobile Drawer, Topbar Hydration, Dynamic Date, SweetAlert2 Logout Confirmation
-// ==========================================
+// ==========================================================================
+// AUB Digital Academy - Shared Admin Sidebar & Layout Controller (Phase 1)
+// Responsive Drawer, Backdrop, Route Activation, Notifications, Collapse & Logout
+// ==========================================================================
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Mobile Sidebar Toggle & Backdrop
     const sidebar = document.querySelector('.admin-sidebar');
     const mobileToggle = document.getElementById('mobileSidebarToggle');
-    
-    // Create Backdrop Element if not already present
+    const collapseToggle = document.getElementById('sidebarCollapseToggle');
+    const adminWrapper = document.querySelector('.admin-wrapper') || document.body;
+
+    // 1. Create or Find Backdrop Element for Mobile/Tablet Drawer
     let backdrop = document.querySelector('.admin-sidebar-backdrop');
     if (!backdrop && sidebar) {
         backdrop = document.createElement('div');
@@ -16,22 +17,41 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.appendChild(backdrop);
     }
 
+    // 2. Mobile Sidebar Toggle
     if (mobileToggle && sidebar) {
         mobileToggle.addEventListener('click', function (e) {
             e.stopPropagation();
             sidebar.classList.toggle('show');
             if (backdrop) backdrop.classList.toggle('active');
+            document.body.classList.toggle('sidebar-open');
         });
     }
 
+    // 3. Backdrop Click Closes Sidebar
     if (backdrop) {
         backdrop.addEventListener('click', function () {
             if (sidebar) sidebar.classList.remove('show');
             backdrop.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
         });
     }
 
-    // Close sidebar on link click (mobile)
+    // 4. Desktop/Tablet Sidebar Collapse Toggle
+    if (collapseToggle && sidebar) {
+        collapseToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            adminWrapper.classList.toggle('admin-sidebar-collapsed');
+            const isCollapsed = adminWrapper.classList.contains('admin-sidebar-collapsed');
+            localStorage.setItem('aub_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+        });
+
+        // Restore collapsed preference
+        if (localStorage.getItem('aub_sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
+            adminWrapper.classList.add('admin-sidebar-collapsed');
+        }
+    }
+
+    // 5. Close Mobile Sidebar on Link Click
     if (sidebar) {
         const navLinks = sidebar.querySelectorAll('.admin-nav-item');
         navLinks.forEach(link => {
@@ -39,15 +59,77 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.innerWidth < 992) {
                     sidebar.classList.remove('show');
                     if (backdrop) backdrop.classList.remove('active');
+                    document.body.classList.remove('sidebar-open');
                 }
             });
         });
     }
 
-    // 2. Hydrate Admin Profile info in topbar
+    // 6. Automatic Active Navigation Item Detection
+    try {
+        const currentPath = window.location.pathname.toLowerCase();
+        const currentFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'dashboard.html';
+        const navItems = document.querySelectorAll('.admin-nav-item');
+        
+        let hasActive = false;
+        navItems.forEach(item => {
+            const href = item.getAttribute('href');
+            if (href) {
+                const itemFile = href.substring(href.lastIndexOf('/') + 1).toLowerCase().split('?')[0].split('#')[0];
+                if (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html')) {
+                    item.classList.add('active');
+                    hasActive = true;
+                } else {
+                    item.classList.remove('active');
+                }
+            }
+        });
+        
+        // Fallback: If no exact match (e.g. index), keep first item or match by alias
+        if (!hasActive && navItems.length > 0) {
+            if (currentFile.includes('course') || currentFile.includes('academic')) {
+                const academicLink = document.querySelector('a[href*="academic"], a[href*="course"]');
+                if (academicLink) academicLink.classList.add('active');
+            } else if (currentFile.includes('dashboard')) {
+                const dashLink = document.querySelector('a[href*="dashboard"]');
+                if (dashLink) dashLink.classList.add('active');
+            }
+        }
+    } catch (e) {
+        console.warn('Active route detection note:', e);
+    }
+
+    // 7. Notification Dropdown Toggle & Outside Click Dismiss
+    const notifBtn = document.getElementById('notificationBtn');
+    const notifMenu = document.getElementById('notificationsMenu');
+    if (notifBtn && notifMenu) {
+        notifBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            notifMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!notifMenu.contains(e.target) && !notifBtn.contains(e.target)) {
+                notifMenu.classList.remove('show');
+            }
+        });
+    }
+
+    // 8. Global Keyboard Shortcut for Search (Ctrl + / or Ctrl + K)
+    const searchInput = document.getElementById('globalSearchInput');
+    if (searchInput) {
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === '/')) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+    }
+
+    // 9. Hydrate Admin Profile Info in Topbar
     try {
         let user = null;
-        if (window.AdminStore) {
+        if (window.AdminStore && typeof window.AdminStore.getAdminUser === 'function') {
             user = window.AdminStore.getAdminUser();
         }
         if (!user) {
@@ -69,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Error hydrating admin profile info:', e);
     }
 
-    // 3. Hydrate Date Badge if present
+    // 10. Hydrate Current Date Badge
     const dateBadge = document.getElementById('currentDateBadge');
     if (dateBadge) {
         const now = new Date();
@@ -78,7 +160,16 @@ document.addEventListener('DOMContentLoaded', function () {
         dateBadge.textContent = `${formatted} | ${weekday}`;
     }
 
-    // 4. Global Logout with SweetAlert2 Confirmation
+    // 11. Handle Responsive Window Resize
+    window.addEventListener('resize', function () {
+        if (window.innerWidth >= 992) {
+            if (sidebar) sidebar.classList.remove('show');
+            if (backdrop) backdrop.classList.remove('active');
+            document.body.classList.remove('sidebar-open');
+        }
+    });
+
+    // 12. Global Logout with SweetAlert2 Confirmation
     const logoutBtns = document.querySelectorAll('.admin-logout-btn, #logoutBtn');
     logoutBtns.forEach(btn => {
         btn.addEventListener('click', async function (e) {
@@ -105,8 +196,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (confirmed) {
                 localStorage.removeItem('aub_auth_token');
                 localStorage.removeItem('token');
+                localStorage.removeItem('aub_user');
                 sessionStorage.removeItem('aub_auth_token');
                 sessionStorage.removeItem('token');
+                sessionStorage.removeItem('aub_user');
                 window.location.href = '../authentication/login.html';
             }
         });

@@ -14,13 +14,14 @@ router.post('/auth/login', authController.login);
 router.get('/auth/me', authenticateToken, authController.getMe);
 
 // ==========================================
-// 2. PUBLIC FRONTEND ROUTES (Consumed by welcomepage.html)
+// 2. PUBLIC FRONTEND ROUTES (Consumed by welcomepage.html & student course pages)
 // ==========================================
 router.get('/public/categories', publicController.getCategories);
 router.get('/public/programs/featured', publicController.getFeaturedPrograms);
 router.get('/public/courses/popular', publicController.getPopularCourses);
 router.get('/public/courses', publicController.getAllCourses);
 router.get('/public/courses/:idOrSlug', publicController.getCourseDetails);
+router.post('/public/courses/:id/enroll', publicController.enrollInCourse);
 
 // ==========================================
 // 3. ADMIN DASHBOARD & MANAGEMENT ROUTES (Protected by RBAC)
@@ -42,11 +43,14 @@ router.put('/admin/programs/:id', authenticateToken, requireAdmin, adminControll
 router.delete('/admin/programs/:id', authenticateToken, requireAdmin, adminController.deleteProgram);
 router.patch('/admin/programs/:id/toggle-publish', authenticateToken, requireAdmin, adminController.toggleProgramPublish);
 
-// Courses CRUD
+// Courses CRUD & Advanced Operations
 router.get('/admin/courses', authenticateToken, requireAdmin, adminController.getAllCourses);
+router.get('/admin/courses/:id/details', authenticateToken, requireAdmin, adminController.getCourseDetails);
 router.post('/admin/courses', authenticateToken, requireAdmin, adminController.createCourse);
 router.put('/admin/courses/:id', authenticateToken, requireAdmin, adminController.updateCourse);
 router.delete('/admin/courses/:id', authenticateToken, requireAdmin, adminController.deleteCourse);
+router.post('/admin/courses/:id/duplicate', authenticateToken, requireAdmin, adminController.duplicateCourse);
+router.patch('/admin/courses/:id/archive', authenticateToken, requireAdmin, adminController.archiveCourse);
 router.patch('/admin/courses/:id/toggle-publish', authenticateToken, requireAdmin, adminController.toggleCoursePublish);
 
 // Course Chapters CRUD
@@ -58,12 +62,20 @@ router.delete('/admin/chapters/:id', authenticateToken, requireAdmin, adminContr
 // Categories CRUD
 router.get('/admin/categories', authenticateToken, requireAdmin, adminController.getAllCategories);
 router.post('/admin/categories', authenticateToken, requireAdmin, adminController.createCategory);
+router.put('/admin/categories/:id', authenticateToken, requireAdmin, adminController.updateCategory);
 router.delete('/admin/categories/:id', authenticateToken, requireAdmin, adminController.deleteCategory);
 
 // Instructors CRUD
 router.get('/admin/instructors', authenticateToken, requireAdmin, adminController.getAllInstructors);
 router.post('/admin/instructors', authenticateToken, requireAdmin, adminController.createInstructor);
+router.put('/admin/instructors/:id', authenticateToken, requireAdmin, adminController.updateInstructor);
 router.delete('/admin/instructors/:id', authenticateToken, requireAdmin, adminController.deleteInstructor);
+
+// Payments Management CRUD
+router.get('/admin/payments', authenticateToken, requireAdmin, adminController.getAllPayments);
+router.get('/admin/payments/stats', authenticateToken, requireAdmin, adminController.getPaymentStats);
+router.post('/admin/payments', authenticateToken, requireAdmin, adminController.createPayment);
+router.post('/admin/payments/:id/refund', authenticateToken, requireAdmin, adminController.refundPayment);
 
 // Users CRUD & Profile Management
 router.get('/admin/users', authenticateToken, requireAdmin, adminController.getAllUsers);
@@ -80,6 +92,28 @@ router.get('/admin/enrollments', authenticateToken, requireAdmin, adminControlle
 router.post('/admin/enrollments', authenticateToken, requireAdmin, adminController.createEnrollment);
 router.put('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.updateEnrollmentStatus);
 router.delete('/admin/enrollments/:id', authenticateToken, requireAdmin, adminController.deleteEnrollment);
+
+// Exams & Quizzes CRUD & Results
+router.get('/admin/exams', authenticateToken, requireAdmin, adminController.getAllExams);
+router.post('/admin/exams', authenticateToken, requireAdmin, adminController.createExam);
+router.put('/admin/exams/:id', authenticateToken, requireAdmin, adminController.updateExam);
+router.delete('/admin/exams/:id', authenticateToken, requireAdmin, adminController.deleteExam);
+router.get('/admin/exam-results', authenticateToken, requireAdmin, adminController.getExamResults);
+
+// Invoices CRUD
+router.get('/admin/invoices', authenticateToken, requireAdmin, adminController.getAllInvoices);
+router.post('/admin/invoices', authenticateToken, requireAdmin, adminController.createInvoice);
+
+// Teacher Payroll CRUD
+router.get('/admin/payroll', authenticateToken, requireAdmin, adminController.getTeacherPayroll);
+router.patch('/admin/payroll/:id/status', authenticateToken, requireAdmin, adminController.updatePayrollStatus);
+
+// Schedule / Calendar Events
+router.get('/admin/calendar/events', authenticateToken, requireAdmin, adminController.getCalendarEvents);
+router.post('/admin/calendar/events', authenticateToken, requireAdmin, adminController.createCalendarEvent);
+
+// Reports
+router.get('/admin/reports', authenticateToken, requireAdmin, adminController.getReportsData);
 
 const teacherAssignmentController = require('../controllers/teacherAssignmentController');
 const teacherController = require('../controllers/teacherController');
