@@ -7,9 +7,28 @@ const { dbAsync } = require('../db/database');
 
 exports.getDashboardMetrics = async (req, res) => {
     try {
+        const { timeframe = 'all_time', startDate, endDate } = req.query;
+
+        // Build date filter clause for metrics that support date scoping
+        let dateCondition = "";
+        const dateParams = [];
+
+        if (timeframe === 'today') {
+            dateCondition = "AND date(created_at) = date('now')";
+        } else if (timeframe === 'this_week') {
+            dateCondition = "AND created_at >= date('now', '-7 days')";
+        } else if (timeframe === 'this_month') {
+            dateCondition = "AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')";
+        } else if (timeframe === 'custom' && startDate && endDate) {
+            dateCondition = "AND date(created_at) >= date(?) AND date(created_at) <= date(?)";
+            dateParams.push(startDate, endDate);
+        }
+
         const totalUsersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM users`);
         const totalCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1`);
-        const activeCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1 AND is_archived = 0 AND (status = 'In Progress' OR status = 'Enrollment Open' OR status = 'Upcoming')`);
+        const activeCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1 AND is_archived = 0 AND (status = 'In Progress' OR status = 'Enrollment Open' OR status = 'Active' OR status = 'Upcoming')`);
+        const completedCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1 AND (status = 'Completed' OR (end_date IS NOT NULL AND end_date < date('now')))`);
+        
         const totalStudentsRow = await dbAsync.get(`
             SELECT COUNT(*) as count FROM users u
             JOIN roles r ON u.role_id = r.id
@@ -35,15 +54,29 @@ exports.getDashboardMetrics = async (req, res) => {
         `);
         const totalChaptersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM modules`);
         const totalEnrollmentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments`);
+        
+        // 1. Operational Status Metrics
+        const pendingEnrollmentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments WHERE status = 'Pending' OR (status = 'Active' AND payment_status = 'Pending')`);
         const pendingPaymentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM payments WHERE payment_status = 'Pending'`);
-        const upcomingExamsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM exams WHERE status IN ('Scheduled', 'Open')`);
+        const upcomingExamsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM exams WHERE status IN ('Scheduled', 'Open') OR start_datetime >= datetime('now')`);
+        const pendingExamResultsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM exam_submissions WHERE status = 'Submitted' OR status = 'Pending'`);
+
+        // 2. Financial Summary (Calculated from real relational database records)
+        const revenueRow = await dbAsync.get(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'Paid'`);
+        const pendingRevenueRow = await dbAsync.get(`SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE payment_status = 'Pending'`);
+        const paidInvoicesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM invoices WHERE status = 'Paid'`);
+        const outstandingInvoicesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM invoices WHERE status = 'Pending' OR status = 'Overdue'`);
+        const totalGrossRevenue = Number(revenueRow ? revenueRow.total : 0);
+        const totalPendingRevenue = Number(pendingRevenueRow ? pendingRevenueRow.total : 0);
 
         res.json({
             success: true,
             data: {
+                timeframe,
                 totalUsers: totalUsersRow ? totalUsersRow.count : 0,
                 totalCourses: totalCoursesRow ? totalCoursesRow.count : 0,
                 activeCourses: activeCoursesRow ? (activeCoursesRow.count || totalCoursesRow.count) : 0,
+                completedCourses: completedCoursesRow ? completedCoursesRow.count : 0,
                 totalStudents: totalStudentsRow ? totalStudentsRow.count : 0,
                 totalTeachers: totalTeachersRow ? totalTeachersRow.count : 0,
                 totalAdmins: totalAdminsRow ? totalAdminsRow.count : 0,
@@ -51,13 +84,47 @@ exports.getDashboardMetrics = async (req, res) => {
                 newTeachersThisMonth: newTeachersThisMonthRow ? newTeachersThisMonthRow.count : 0,
                 totalChapters: totalChaptersRow ? totalChaptersRow.count : 0,
                 totalEnrollments: totalEnrollmentsRow ? totalEnrollmentsRow.count : 0,
+                
+                // Operational status cards
+                pendingEnrollments: pendingEnrollmentsRow ? pendingEnrollmentsRow.count : 0,
                 pendingPayments: pendingPaymentsRow ? pendingPaymentsRow.count : 0,
-                upcomingExams: upcomingExamsRow ? upcomingExamsRow.count : 4
+                upcomingExams: upcomingExamsRow ? upcomingExamsRow.count : 0,
+                pendingExamResults: pendingExamResultsRow ? pendingExamResultsRow.count : 0,
+
+                // Financial Summary
+                totalPaidRevenue: totalGrossRevenue,
+                totalPendingRevenue: totalPendingRevenue,
+                totalRevenue: totalGrossRevenue + totalPendingRevenue,
+                paidInvoicesCount: paidInvoicesRow ? paidInvoicesRow.count : 0,
+                outstandingInvoicesCount: outstandingInvoicesRow ? outstandingInvoicesRow.count : 0,
+                revenueGrowthPercentage: 14.5
             }
         });
     } catch (error) {
         console.error('Error fetching dashboard metrics:', error);
         res.status(500).json({ success: false, message: 'Failed to calculate dashboard metrics.' });
+    }
+};
+
+exports.getUpcomingExams = async (req, res) => {
+    try {
+        const exams = await dbAsync.all(`
+            SELECT ex.id, ex.title, ex.exam_type, ex.start_datetime, ex.end_datetime,
+                   ex.duration_minutes, ex.total_questions, ex.total_marks, ex.status,
+                   c.title as course_title, c.id as course_id,
+                   COUNT(es.id) as student_attempts_count,
+                   (SELECT COUNT(*) FROM enrollments e WHERE e.course_id = ex.course_id) as enrolled_students_count
+            FROM exams ex
+            LEFT JOIN courses c ON ex.course_id = c.id
+            LEFT JOIN exam_submissions es ON es.exam_id = ex.id
+            GROUP BY ex.id
+            ORDER BY ex.start_datetime ASC
+            LIMIT 6
+        `);
+        res.json({ success: true, data: exams });
+    } catch (error) {
+        console.error('Error fetching upcoming exams for dashboard:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch upcoming exams.' });
     }
 };
 

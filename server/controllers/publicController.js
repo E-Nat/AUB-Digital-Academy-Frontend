@@ -230,3 +230,257 @@ exports.enrollInCourse = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to process course enrollment.' });
     }
 };
+
+// ==========================================
+// STUDENT EXAM & QUIZ ACCESS (Rules 14 & 15)
+// ==========================================
+
+// GET /api/student/exams/:id
+exports.getExamDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const studentId = req.user ? req.user.id : req.query.student_id;
+
+        const exam = await dbAsync.get(`
+            SELECT ex.*, c.title as course_title, u.full_name as instructor_name
+            FROM exams ex
+            LEFT JOIN courses c ON ex.course_id = c.id
+            LEFT JOIN users u ON ex.instructor_id = u.id
+            WHERE ex.id = ?
+        `, [id]);
+
+        if (!exam) {
+            return res.status(404).json({ success: false, message: 'Exam not found.' });
+        }
+
+        // Check attempts made by this student
+        let attemptCount = 0;
+        if (studentId) {
+            const countRow = await dbAsync.get(
+                `SELECT COUNT(*) as count FROM exam_submissions WHERE exam_id = ? AND student_id = ?`,
+                [id, studentId]
+            );
+            attemptCount = countRow ? countRow.count : 0;
+        }
+
+        const now = new Date().toISOString();
+        const startISO = new Date(exam.start_datetime).toISOString();
+        const endISO = new Date(exam.end_datetime).toISOString();
+
+        let canStart = true;
+        let blockReason = null;
+
+        if (now < startISO) {
+            canStart = false;
+            blockReason = `Exam has not opened yet. It starts on ${new Date(exam.start_datetime).toLocaleString()}.`;
+        } else if (now > endISO) {
+            canStart = false;
+            blockReason = `Exam deadline has passed. It ended on ${new Date(exam.end_datetime).toLocaleString()}.`;
+        } else if (attemptCount >= exam.attempts_allowed) {
+            canStart = false;
+            blockReason = `Maximum attempt limit reached (${attemptCount}/${exam.attempts_allowed} attempts).`;
+        }
+
+        res.json({
+            success: true,
+            data: {
+                ...exam,
+                current_attempt_count: attemptCount,
+                attempts_remaining: Math.max(0, exam.attempts_allowed - attemptCount),
+                can_start: canStart,
+                block_reason: blockReason
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching exam details:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch exam details.' });
+    }
+};
+
+// POST /api/student/exams/:id/start
+exports.startExam = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const studentId = req.user ? req.user.id : req.body.student_id;
+
+        if (!studentId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized. Please login.' });
+        }
+
+        const exam = await dbAsync.get(`SELECT * FROM exams WHERE id = ?`, [id]);
+        if (!exam) {
+            return res.status(404).json({ success: false, message: 'Exam not found.' });
+        }
+
+        // Time window enforcement (Rule 14)
+        const now = new Date().toISOString();
+        const startISO = new Date(exam.start_datetime).toISOString();
+        const endISO = new Date(exam.end_datetime).toISOString();
+
+        if (now < startISO) {
+            return res.status(400).json({
+                success: false,
+                message: `You cannot start this exam before the start time (${new Date(exam.start_datetime).toLocaleString()}).`
+            });
+        }
+        if (now > endISO) {
+            return res.status(400).json({
+                success: false,
+                message: `You cannot start this exam after the deadline (${new Date(exam.end_datetime).toLocaleString()}).`
+            });
+        }
+
+        // Attempt limit enforcement (Rule 15)
+        const countRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM exam_submissions WHERE exam_id = ? AND student_id = ?`,
+            [id, studentId]
+        );
+        const attemptCount = countRow ? countRow.count : 0;
+        if (attemptCount >= exam.attempts_allowed) {
+            return res.status(400).json({
+                success: false,
+                message: `You have exceeded the maximum allowed attempts (${exam.attempts_allowed}) for this exam.`
+            });
+        }
+
+        // Retrieve questions without revealing correct answers
+        const questions = await dbAsync.all(
+            `SELECT id, question_type, question_text, options_json, points, order_num
+             FROM exam_questions
+             WHERE exam_id = ?
+             ORDER BY order_num ASC, id ASC`,
+            [id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Exam session initialized.',
+            data: {
+                exam: {
+                    id: exam.id,
+                    title: exam.title,
+                    duration_minutes: exam.duration_minutes,
+                    total_marks: exam.total_marks,
+                    passing_score: exam.passing_score,
+                    attempt_number: attemptCount + 1,
+                    attempts_allowed: exam.attempts_allowed
+                },
+                questions: questions.map(q => {
+                    let parsedOptions = [];
+                    try { parsedOptions = JSON.parse(q.options_json); } catch (e) { parsedOptions = []; }
+                    return {
+                        id: q.id,
+                        question_type: q.question_type,
+                        question_text: q.question_text,
+                        options: parsedOptions,
+                        points: q.points
+                    };
+                })
+            }
+        });
+    } catch (error) {
+        console.error('Error starting exam:', error);
+        res.status(500).json({ success: false, message: 'Failed to start exam session.' });
+    }
+};
+
+// POST /api/student/exams/:id/submit
+exports.submitExam = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const studentId = req.user ? req.user.id : req.body.student_id;
+        const { answers = {} } = req.body; // e.g. { "questionId": "selectedAnswer" }
+
+        if (!studentId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized. Please login.' });
+        }
+
+        const exam = await dbAsync.get(`SELECT * FROM exams WHERE id = ?`, [id]);
+        if (!exam) {
+            return res.status(404).json({ success: false, message: 'Exam not found.' });
+        }
+
+        // Time window enforcement
+        const now = new Date().toISOString();
+        const endISO = new Date(exam.end_datetime).toISOString();
+        if (now > endISO) {
+            return res.status(400).json({
+                success: false,
+                message: `Submission rejected: Exam deadline passed on ${new Date(exam.end_datetime).toLocaleString()}.`
+            });
+        }
+
+        // Attempt limit enforcement
+        const countRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM exam_submissions WHERE exam_id = ? AND student_id = ?`,
+            [id, studentId]
+        );
+        const attemptCount = countRow ? countRow.count : 0;
+        if (attemptCount >= exam.attempts_allowed) {
+            return res.status(400).json({
+                success: false,
+                message: `Submission rejected: Maximum attempts (${exam.attempts_allowed}) already reached.`
+            });
+        }
+
+        // Grade submission against exam_questions
+        const questions = await dbAsync.all(`SELECT * FROM exam_questions WHERE exam_id = ?`, [id]);
+        let totalCalculatedMarks = 0;
+        let earnedScore = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+
+        for (const q of questions) {
+            const points = Number(q.points) || 1;
+            totalCalculatedMarks += points;
+            const studentAns = (answers[q.id] || '').trim();
+            const correctAns = (q.correct_answer || '').trim();
+
+            if (studentAns && studentAns.toLowerCase() === correctAns.toLowerCase()) {
+                earnedScore += points;
+                correctCount++;
+            } else {
+                wrongCount++;
+            }
+        }
+
+        const totalExamMarks = Number(exam.total_marks) || totalCalculatedMarks || 100;
+        const percentage = totalCalculatedMarks > 0 
+            ? Math.round((earnedScore / totalCalculatedMarks) * 100) 
+            : 0;
+        const finalScore = Math.round((percentage / 100) * totalExamMarks);
+        const status = percentage >= (exam.passing_score || 50) ? 'Passed' : 'Failed';
+        const attemptNum = attemptCount + 1;
+
+        const result = await dbAsync.run(`
+            INSERT INTO exam_submissions (
+                exam_id, student_id, course_id, score, total_marks,
+                percentage, correct_count, wrong_count, attempt_number, answers_json, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+            id, studentId, exam.course_id, finalScore, totalExamMarks,
+            percentage, correctCount, wrongCount, attemptNum, JSON.stringify(answers), status
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: `Exam submitted successfully! Result: ${status}`,
+            data: {
+                submission_id: result.lastID,
+                score: finalScore,
+                total_marks: totalExamMarks,
+                percentage: percentage,
+                passing_score: exam.passing_score,
+                status: status,
+                attempt_number: attemptNum,
+                attempts_allowed: exam.attempts_allowed,
+                attempts_remaining: Math.max(0, exam.attempts_allowed - attemptNum),
+                correct_count: correctCount,
+                wrong_count: wrongCount
+            }
+        });
+    } catch (error) {
+        console.error('Error submitting exam:', error);
+        res.status(500).json({ success: false, message: 'Failed to process exam submission.' });
+    }
+};

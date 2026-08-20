@@ -23,6 +23,11 @@ router.get('/public/courses', publicController.getAllCourses);
 router.get('/public/courses/:idOrSlug', publicController.getCourseDetails);
 router.post('/public/courses/:id/enroll', publicController.enrollInCourse);
 
+// Student Exam & Quiz Endpoints (Enforcing Rules 14 & 15)
+router.get('/student/exams/:id', authenticateToken, publicController.getExamDetails);
+router.post('/student/exams/:id/start', authenticateToken, publicController.startExam);
+router.post('/student/exams/:id/submit', authenticateToken, publicController.submitExam);
+
 // ==========================================
 // 3. ADMIN DASHBOARD & MANAGEMENT ROUTES (Protected by RBAC)
 // ==========================================
@@ -30,6 +35,7 @@ router.post('/public/courses/:id/enroll', publicController.enrollInCourse);
 router.get('/admin/dashboard/metrics', authenticateToken, requireAdmin, adminController.getDashboardMetrics);
 router.get('/admin/dashboard/stats', authenticateToken, requireAdmin, adminController.getDashboardStats);
 router.get('/admin/dashboard/recent-enrollments', authenticateToken, requireAdmin, adminController.getRecentEnrollments);
+router.get('/admin/dashboard/upcoming-exams', authenticateToken, requireAdmin, adminController.getUpcomingExams);
 
 // Global Search & Notifications
 router.get('/admin/search', authenticateToken, requireAdmin, adminController.globalSearch);

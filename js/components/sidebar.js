@@ -204,4 +204,34 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // 13. Accessibility Text Size Scaling Preference (Standard 100%, Large 115%, Extra Large 130%)
+    try {
+        const savedTextSize = localStorage.getItem('aub_text_size') || 'standard';
+        document.documentElement.setAttribute('data-text-size', savedTextSize);
+
+        window.setAUBTextSize = function (size) {
+            if (['standard', 'large', 'xlarge'].includes(size)) {
+                localStorage.setItem('aub_text_size', size);
+                document.documentElement.setAttribute('data-text-size', size);
+                const radio = document.querySelector(`input[name="portalTextSize"][value="${size}"]`);
+                if (radio) radio.checked = true;
+            }
+        };
+
+        const textSizeRadios = document.querySelectorAll('input[name="portalTextSize"]');
+        if (textSizeRadios.length > 0) {
+            textSizeRadios.forEach(radio => {
+                if (radio.value === savedTextSize) radio.checked = true;
+                radio.addEventListener('change', function () {
+                    if (this.checked) {
+                        window.setAUBTextSize(this.value);
+                    }
+                });
+            });
+        }
+    } catch (e) {
+        console.warn('Text size initialization note:', e);
+    }
 });
+

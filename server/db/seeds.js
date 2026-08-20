@@ -493,7 +493,13 @@ async function seedDatabase() {
             badge_text: 'Popular',
             order_num: 1,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 120.00,
+            enrollment_start_date: '2026-07-01',
+            enrollment_deadline: '2026-08-30',
+            start_date: '2026-09-01',
+            end_date: '2026-11-30',
+            status: 'In Progress'
         },
         {
             id: 2,
@@ -511,7 +517,13 @@ async function seedDatabase() {
             badge_text: 'Core Subject',
             order_num: 2,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 80.00,
+            enrollment_start_date: '2026-07-15',
+            enrollment_deadline: '2026-08-25',
+            start_date: '2026-09-01',
+            end_date: '2026-10-31',
+            status: 'In Progress'
         },
         {
             id: 3,
@@ -529,7 +541,13 @@ async function seedDatabase() {
             badge_text: 'Essential',
             order_num: 3,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 150.00,
+            enrollment_start_date: '2026-06-01',
+            enrollment_deadline: '2026-08-10',
+            start_date: '2026-08-15',
+            end_date: '2026-10-25',
+            status: 'Enrollment Closed'
         },
         {
             id: 4,
@@ -547,7 +565,13 @@ async function seedDatabase() {
             badge_text: 'Security',
             order_num: 4,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 110.00,
+            enrollment_start_date: '2026-07-01',
+            enrollment_deadline: '2026-08-31',
+            start_date: '2026-09-05',
+            end_date: '2026-11-15',
+            status: 'In Progress'
         },
         {
             id: 5,
@@ -565,7 +589,13 @@ async function seedDatabase() {
             badge_text: 'Featured',
             order_num: 5,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 190.00,
+            enrollment_start_date: '2026-08-01',
+            enrollment_deadline: '2026-09-15',
+            start_date: '2026-09-20',
+            end_date: '2026-12-20',
+            status: 'Enrollment Open'
         },
         {
             id: 6,
@@ -583,22 +613,38 @@ async function seedDatabase() {
             badge_text: 'Recommended',
             order_num: 6,
             is_popular: 1,
-            is_published: 1
+            is_published: 1,
+            price: 130.00,
+            enrollment_start_date: '2026-08-05',
+            enrollment_deadline: '2026-09-20',
+            start_date: '2026-09-25',
+            end_date: '2026-12-05',
+            status: 'Enrollment Open'
         }
     ];
 
     for (const c of courses) {
         await dbAsync.run(
-            `INSERT INTO courses (id, title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, enrolled_students_count, badge_text, order_num, is_popular, is_published)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(id) DO UPDATE SET 
+            `INSERT INTO courses (
+                id, title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, 
+                duration_hours, lesson_count, enrolled_students_count, badge_text, order_num, is_popular, is_published,
+                price, enrollment_start_date, enrollment_deadline, start_date, end_date, status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET 
                 title = excluded.title, slug = excluded.slug, description = excluded.description,
                 category_id = excluded.category_id, instructor_id = excluded.instructor_id,
                 thumbnail_url = excluded.thumbnail_url, rating = excluded.rating, difficulty = excluded.difficulty,
                 duration_hours = excluded.duration_hours, lesson_count = excluded.lesson_count,
                 enrolled_students_count = excluded.enrolled_students_count, badge_text = excluded.badge_text,
-                order_num = excluded.order_num, is_popular = excluded.is_popular, is_published = excluded.is_published`,
-            [c.id, c.title, c.slug, c.description, c.category_id, c.instructor_id, c.thumbnail_url, c.rating, c.difficulty, c.duration_hours, c.lesson_count, c.enrolled_students_count, c.badge_text, c.order_num, c.is_popular, c.is_published]
+                order_num = excluded.order_num, is_popular = excluded.is_popular, is_published = excluded.is_published,
+                price = excluded.price, enrollment_start_date = excluded.enrollment_start_date,
+                enrollment_deadline = excluded.enrollment_deadline, start_date = excluded.start_date,
+                end_date = excluded.end_date, status = excluded.status`,
+            [
+                c.id, c.title, c.slug, c.description, c.category_id, c.instructor_id, c.thumbnail_url, c.rating, c.difficulty,
+                c.duration_hours, c.lesson_count, c.enrolled_students_count, c.badge_text, c.order_num, c.is_popular, c.is_published,
+                c.price, c.enrollment_start_date, c.enrollment_deadline, c.start_date, c.end_date, c.status
+            ]
         );
     }
 
