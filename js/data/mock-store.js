@@ -549,6 +549,26 @@
             { id: 5, transaction_id: 'TXN-2026-8805', enrollment_id: null, user_id: 6, student_name: 'Vibol Pen', student_uni_id: '202401238', student_email: 'vibol.pen@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150', course_id: 3, course_title: 'Database Systems & Cloud Architecture', amount: 45.00, payment_method: 'ABA PAY', payment_status: 'Refunded', invoice_number: 'INV-2026-00416', payment_date: '2026-08-12 11:30:00' },
             { id: 6, transaction_id: 'TXN-2026-8806', enrollment_id: null, user_id: 2, student_name: 'Sok Virak', student_uni_id: '202401234', student_email: 'sok.virak@student.aub.edu.kh', student_avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150', course_id: 5, course_title: 'Artificial Intelligence & Machine Learning', amount: 99.00, payment_method: 'ABA PAY', payment_status: 'Pending', invoice_number: 'INV-2026-00417', payment_date: '2026-08-19 18:00:00' }
         ],
+        materials: [
+            { id: 1, lesson_id: 1, course_id: 1, title: 'Course Syllabus & Web Standards Guide.pdf', type: 'PDF', file_name: 'Web_Standards_Guide_2026.pdf', file_url: 'https://aub.edu.kh/materials/web_standards_guide.pdf', file_size: '2.4 MB' },
+            { id: 2, lesson_id: 1, course_id: 1, title: 'HTML5 Semantic Tree Reference.pdf', type: 'PDF', file_name: 'HTML5_Semantic_Reference.pdf', file_url: 'https://aub.edu.kh/materials/html5_semantic.pdf', file_size: '1.1 MB' },
+            { id: 3, lesson_id: 2, course_id: 1, title: 'CSS Grid & Flexbox Cheat Sheet.pdf', type: 'PDF', file_name: 'CSS_Grid_Flexbox_Cheatsheet.pdf', file_url: 'https://aub.edu.kh/materials/css_grid.pdf', file_size: '1.8 MB' },
+            { id: 4, lesson_id: 3, course_id: 1, title: 'React Hooks & State Flow Diagram.pdf', type: 'PDF', file_name: 'React_State_Flow_Diagram.pdf', file_url: 'https://aub.edu.kh/materials/react_state_flow.pdf', file_size: '3.2 MB' },
+            { id: 5, lesson_id: 4, course_id: 1, title: 'REST API Design Best Practices.pdf', type: 'PDF', file_name: 'REST_API_Best_Practices.pdf', file_url: 'https://aub.edu.kh/materials/rest_api_guide.pdf', file_size: '1.9 MB' }
+        ],
+        announcements: [
+            { id: 1, course_id: 1, title: 'Welcome to Full-Stack Modern Web Architecture!', message: 'Classes begin promptly on September 1, 2026. Please download the course syllabus from Lesson 1 materials.', priority: 'Normal', author_name: 'Dr. Sarah Johnson', published_at: '2026-08-15 09:00:00' },
+            { id: 2, course_id: 1, title: 'Midterm Examination Schedule Released', message: 'The Midterm Exam window is confirmed for September 20, 2026 from 08:00 to 23:59. Total duration is 60 minutes with 2 attempts permitted.', priority: 'Important', author_name: 'Dr. Sarah Johnson', published_at: '2026-08-18 14:30:00' }
+        ],
+        certificates: [
+            { id: 1, certificate_number: 'AUB-CERT-2026-0801', student_id: 4, student_name: 'Dara Keo', course_id: 4, course_title: 'Cybersecurity Fundamentals & Network Defense', issue_date: '2026-08-14', completion_date: '2026-08-14', grade_achieved: 'A+ (High Distinction)', status: 'Issued', pdf_url: 'https://aub.edu.kh/certificates/AUB-CERT-2026-0801.pdf' },
+            { id: 2, certificate_number: 'AUB-CERT-2026-0802', student_id: 2, student_name: 'Sok Virak', course_id: 2, course_title: 'Applied Programming & Algorithms', issue_date: '2026-08-10', completion_date: '2026-08-10', grade_achieved: 'A (Distinction)', status: 'Issued', pdf_url: 'https://aub.edu.kh/certificates/AUB-CERT-2026-0802.pdf' }
+        ],
+        audit_logs: [
+            { id: 1, user_name: 'Dr. Johnathan Vance', user_role: 'ADMIN', action: 'CREATE_COURSE', entity_type: 'Course', entity_id: 1, details: 'Created course: Full-Stack Modern Web Architecture ($50.00)', created_at: '2026-08-15 09:00:00' },
+            { id: 2, user_name: 'Dr. Sarah Johnson', user_role: 'TEACHER', action: 'UPLOAD_MATERIAL', entity_type: 'LessonMaterial', entity_id: 1, details: 'Uploaded syllabus PDF for Lesson 1', created_at: '2026-08-16 10:30:00' },
+            { id: 3, user_name: 'Dr. Johnathan Vance', user_role: 'ADMIN', action: 'ISSUE_CERTIFICATE', entity_type: 'Certificate', entity_id: 1, details: 'Issued certificate AUB-CERT-2026-0801 for Dara Keo', created_at: '2026-08-18 16:00:00' }
+        ],
         notifications: [
             { id: 1, title: 'New Student Enrollment', message: 'Sok Virak enrolled in Full-Stack Modern Web Architecture', type: 'enrollment', timestamp: '10 minutes ago', read: false, link_url: 'enrollment-management.html' },
             { id: 2, title: 'Course Updated', message: 'Prof. Alex Chen updated syllabus for Full-Stack Modern Web Architecture', type: 'course', timestamp: '1 hour ago', read: false, link_url: 'academic-management.html' },

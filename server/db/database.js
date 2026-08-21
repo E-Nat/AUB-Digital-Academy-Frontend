@@ -685,6 +685,118 @@ async function initSchema() {
         );
     `);
 
+    // 27. Learning Materials (PDFs, Worksheets, Documents, External Links)
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS lesson_materials (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lesson_id INTEGER NOT NULL,
+            course_id INTEGER,
+            title TEXT NOT NULL,
+            type TEXT DEFAULT 'PDF',
+            file_name TEXT NOT NULL,
+            file_url TEXT NOT NULL,
+            file_size TEXT DEFAULT '1.5 MB',
+            uploaded_by INTEGER,
+            is_published INTEGER DEFAULT 1,
+            order_num INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+        );
+    `);
+
+    // 28. Lesson Videos (Video URL, Storage Path, Duration, Resolution)
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS lesson_videos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lesson_id INTEGER UNIQUE NOT NULL,
+            course_id INTEGER,
+            video_title TEXT NOT NULL,
+            video_url TEXT NOT NULL,
+            storage_path TEXT DEFAULT '',
+            duration_minutes INTEGER DEFAULT 15,
+            resolution TEXT DEFAULT '1080p',
+            platform TEXT DEFAULT 'Direct Stream',
+            thumbnail_url TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        );
+    `);
+
+    // 29. Course Announcements
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS course_announcements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            message TEXT NOT NULL,
+            priority TEXT DEFAULT 'Normal',
+            published_by INTEGER NOT NULL,
+            status TEXT DEFAULT 'Published',
+            published_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (published_by) REFERENCES users(id) ON DELETE CASCADE
+        );
+    `);
+
+    // 30. Certificates (Issued upon satisfying completion rules)
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS certificates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            certificate_number TEXT UNIQUE NOT NULL,
+            student_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            issue_date DATE NOT NULL,
+            completion_date DATE NOT NULL,
+            grade_achieved TEXT DEFAULT 'A (Distinction)',
+            status TEXT DEFAULT 'Issued',
+            pdf_url TEXT DEFAULT '',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(student_id, course_id),
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        );
+    `);
+
+    // 31. Student Lesson Learning Progress
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS student_lesson_progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            lesson_id INTEGER NOT NULL,
+            course_id INTEGER NOT NULL,
+            is_completed INTEGER DEFAULT 0,
+            completed_at DATETIME,
+            last_watched_seconds INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(student_id, lesson_id),
+            FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
+        );
+    `);
+
+    // 32. Centralized Administration Audit Logs
+    await dbAsync.run(`
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            user_name TEXT DEFAULT 'Administrator',
+            user_role TEXT DEFAULT 'ADMIN',
+            action TEXT NOT NULL,
+            entity_type TEXT NOT NULL,
+            entity_id INTEGER,
+            details TEXT DEFAULT '',
+            ip_address TEXT DEFAULT '127.0.0.1',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        );
+    `);
+
     // Indexes for fast searching and performance
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_teachers_code ON teachers(teacher_code);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_teachers_status ON teachers(status);`);
@@ -699,6 +811,12 @@ async function initSchema() {
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_invoices_student ON invoices(student_id);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_payroll_teacher ON teacher_payroll(teacher_id);`);
     await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_calendar_time ON calendar_events(start_time);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_materials_lesson ON lesson_materials(lesson_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_videos_lesson ON lesson_videos(lesson_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_announcements_course ON course_announcements(course_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_certificates_student ON certificates(student_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_progress_student ON student_lesson_progress(student_id, course_id);`);
+    await dbAsync.run(`CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);`);
 
     console.log('Database schema verified & tables initialized successfully.');
 }

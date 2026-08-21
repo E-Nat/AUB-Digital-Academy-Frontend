@@ -1,6 +1,6 @@
 // ==========================================================================
-// AUB Digital Academy - Shared Admin Sidebar & Layout Controller (Phase 1)
-// Responsive Drawer, Backdrop, Route Activation, Notifications, Collapse & Logout
+// AUB Digital Academy - Shared Admin Sidebar & Layout Controller
+// Accessible Navigation, Responsive Drawer, Route Activation, High Contrast UX
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -14,29 +14,62 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!backdrop && sidebar) {
         backdrop = document.createElement('div');
         backdrop.className = 'admin-sidebar-backdrop';
+        backdrop.setAttribute('aria-hidden', 'true');
         document.body.appendChild(backdrop);
     }
 
-    // 2. Mobile Sidebar Toggle
+    // Helper functions for mobile drawer state
+    function openMobileSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.add('show');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.classList.add('sidebar-open');
+        if (mobileToggle) {
+            mobileToggle.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    function closeMobileSidebar() {
+        if (!sidebar) return;
+        sidebar.classList.remove('show');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+        if (mobileToggle) {
+            mobileToggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    // 2. Mobile Sidebar Toggle & ARIA Controls
     if (mobileToggle && sidebar) {
+        mobileToggle.setAttribute('aria-controls', sidebar.id || 'adminSidebar');
+        mobileToggle.setAttribute('aria-expanded', sidebar.classList.contains('show') ? 'true' : 'false');
+
         mobileToggle.addEventListener('click', function (e) {
             e.stopPropagation();
-            sidebar.classList.toggle('show');
-            if (backdrop) backdrop.classList.toggle('active');
-            document.body.classList.toggle('sidebar-open');
+            if (sidebar.classList.contains('show')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
         });
     }
 
     // 3. Backdrop Click Closes Sidebar
     if (backdrop) {
         backdrop.addEventListener('click', function () {
-            if (sidebar) sidebar.classList.remove('show');
-            backdrop.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
+            closeMobileSidebar();
         });
     }
 
-    // 4. Desktop/Tablet Sidebar Collapse Toggle
+    // 4. Keyboard Navigation: Escape Closes Mobile Drawer
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('show')) {
+            closeMobileSidebar();
+            if (mobileToggle) mobileToggle.focus();
+        }
+    });
+
+    // 5. Desktop/Tablet Sidebar Collapse Toggle
     if (collapseToggle && sidebar) {
         collapseToggle.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -51,55 +84,87 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 5. Close Mobile Sidebar on Link Click
+    // 6. Close Mobile Sidebar on Link Click & Setup Titles for Collapsed Tooltips
     if (sidebar) {
         const navLinks = sidebar.querySelectorAll('.admin-nav-item');
         navLinks.forEach(link => {
+            const spanText = link.querySelector('span')?.textContent?.trim();
+            if (spanText && !link.getAttribute('title')) {
+                link.setAttribute('title', spanText);
+            }
+
             link.addEventListener('click', function () {
                 if (window.innerWidth < 992) {
-                    sidebar.classList.remove('show');
-                    if (backdrop) backdrop.classList.remove('active');
-                    document.body.classList.remove('sidebar-open');
+                    closeMobileSidebar();
                 }
             });
         });
+
+        const logoutBtn = sidebar.querySelector('.admin-logout-btn');
+        if (logoutBtn && !logoutBtn.getAttribute('title')) {
+            logoutBtn.setAttribute('title', 'Logout');
+        }
     }
 
-    // 6. Automatic Active Navigation Item Detection
-    try {
-        const currentPath = window.location.pathname.toLowerCase();
-        const currentFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'dashboard.html';
-        const navItems = document.querySelectorAll('.admin-nav-item');
-        
-        let hasActive = false;
-        navItems.forEach(item => {
-            const href = item.getAttribute('href');
-            if (href) {
-                const itemFile = href.substring(href.lastIndexOf('/') + 1).toLowerCase().split('?')[0].split('#')[0];
-                if (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html')) {
+    // 7. Automatic Active Navigation Item Detection with Hash Support & ARIA
+    function updateActiveNavigation() {
+        try {
+            const currentPath = window.location.pathname.toLowerCase();
+            const currentHash = window.location.hash.toLowerCase();
+            const currentFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'dashboard.html';
+            const navItems = document.querySelectorAll('.admin-nav-item');
+            
+            let matchedItem = null;
+
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (!href) return;
+
+                const urlParts = href.toLowerCase().split('#');
+                const itemFile = urlParts[0].substring(urlParts[0].lastIndexOf('/') + 1) || '';
+                const itemHash = urlParts[1] ? '#' + urlParts[1] : '';
+
+                // Exact match with hash (e.g. payment-management.html#invoices)
+                if (currentHash && itemHash === currentHash && (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html'))) {
+                    matchedItem = item;
+                } else if (!matchedItem && !currentHash && !itemHash && (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html'))) {
+                    matchedItem = item;
+                } else if (!matchedItem && !currentHash && itemFile === currentFile && !itemHash) {
+                    matchedItem = item;
+                }
+            });
+
+            // Fallback for file match without hash
+            if (!matchedItem) {
+                navItems.forEach(item => {
+                    const href = item.getAttribute('href');
+                    if (!href) return;
+                    const itemFile = href.split('#')[0].substring(href.split('#')[0].lastIndexOf('/') + 1).toLowerCase();
+                    if (itemFile === currentFile) {
+                        matchedItem = item;
+                    }
+                });
+            }
+
+            // Apply active class & aria-current
+            navItems.forEach(item => {
+                if (item === matchedItem) {
                     item.classList.add('active');
-                    hasActive = true;
+                    item.setAttribute('aria-current', 'page');
                 } else {
                     item.classList.remove('active');
+                    item.removeAttribute('aria-current');
                 }
-            }
-        });
-        
-        // Fallback: If no exact match (e.g. index), keep first item or match by alias
-        if (!hasActive && navItems.length > 0) {
-            if (currentFile.includes('course') || currentFile.includes('academic')) {
-                const academicLink = document.querySelector('a[href*="academic"], a[href*="course"]');
-                if (academicLink) academicLink.classList.add('active');
-            } else if (currentFile.includes('dashboard')) {
-                const dashLink = document.querySelector('a[href*="dashboard"]');
-                if (dashLink) dashLink.classList.add('active');
-            }
+            });
+        } catch (e) {
+            console.warn('Active route detection note:', e);
         }
-    } catch (e) {
-        console.warn('Active route detection note:', e);
     }
 
-    // 7. Notification Dropdown Toggle & Outside Click Dismiss
+    updateActiveNavigation();
+    window.addEventListener('hashchange', updateActiveNavigation);
+
+    // 8. Notification Dropdown Toggle & Outside Click Dismiss
     const notifBtn = document.getElementById('notificationBtn');
     const notifMenu = document.getElementById('notificationsMenu');
     if (notifBtn && notifMenu) {
@@ -115,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 8. Global Keyboard Shortcut for Search (Ctrl + / or Ctrl + K)
+    // 9. Global Keyboard Shortcut for Search (Ctrl + / or Ctrl + K)
     const searchInput = document.getElementById('globalSearchInput');
     if (searchInput) {
         document.addEventListener('keydown', function (e) {
@@ -126,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 9. Hydrate Admin Profile Info in Topbar
+    // 10. Hydrate Admin Profile Info in Topbar
     try {
         let user = null;
         if (window.AdminStore && typeof window.AdminStore.getAdminUser === 'function') {
@@ -151,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Error hydrating admin profile info:', e);
     }
 
-    // 10. Hydrate Current Date Badge
+    // 11. Hydrate Current Date Badge
     const dateBadge = document.getElementById('currentDateBadge');
     if (dateBadge) {
         const now = new Date();
@@ -160,16 +225,14 @@ document.addEventListener('DOMContentLoaded', function () {
         dateBadge.textContent = `${formatted} | ${weekday}`;
     }
 
-    // 11. Handle Responsive Window Resize
+    // 12. Handle Responsive Window Resize
     window.addEventListener('resize', function () {
         if (window.innerWidth >= 992) {
-            if (sidebar) sidebar.classList.remove('show');
-            if (backdrop) backdrop.classList.remove('active');
-            document.body.classList.remove('sidebar-open');
+            closeMobileSidebar();
         }
     });
 
-    // 12. Global Logout with SweetAlert2 Confirmation
+    // 13. Global Logout with SweetAlert2 Confirmation
     const logoutBtns = document.querySelectorAll('.admin-logout-btn, #logoutBtn');
     logoutBtns.forEach(btn => {
         btn.addEventListener('click', async function (e) {
@@ -205,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 13. Accessibility Text Size Scaling Preference (Standard 100%, Large 115%, Extra Large 130%)
+    // 14. Accessibility Text Size Scaling Preference (Standard 100%, Large 115%, Extra Large 130%)
     try {
         const savedTextSize = localStorage.getItem('aub_text_size') || 'standard';
         document.documentElement.setAttribute('data-text-size', savedTextSize);

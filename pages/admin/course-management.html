@@ -22,7 +22,7 @@
         
         <!-- SIDEBAR -->
                                 <!-- AUB DIGITAL ACADEMY - MINIMAL WHITE SIDEBAR -->
-        <aside class="admin-sidebar" id="adminSidebar">
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Administration Sidebar Navigation">
             <div class="admin-sidebar-brand">
                 <div class="admin-brand-header">
                     <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
@@ -33,75 +33,75 @@
                 </div>
             </div>
 
-            <nav class="admin-sidebar-menu">
+            <nav class="admin-sidebar-menu" aria-label="Main Navigation">
                 <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid"></i>
+                    <i class="bi bi-grid" aria-hidden="true"></i>
                     <span>Dashboard</span>
                 </a>
 
                 <div class="admin-sidebar-label">ACADEMIC</div>
                 <a href="academic-management.html" class="admin-nav-item">
-                    <i class="bi bi-mortarboard"></i>
+                    <i class="bi bi-mortarboard" aria-hidden="true"></i>
                     <span>Academic Management</span>
                 </a>
                 <a href="course-management.html" class="admin-nav-item active">
-                    <i class="bi bi-book"></i>
+                    <i class="bi bi-book" aria-hidden="true"></i>
                     <span>Course Management</span>
                 </a>
                 <a href="exam-management.html" class="admin-nav-item">
-                    <i class="bi bi-clipboard-check"></i>
+                    <i class="bi bi-clipboard-check" aria-hidden="true"></i>
                     <span>Exam & Quiz Management</span>
                 </a>
                 <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check"></i>
+                    <i class="bi bi-person-check" aria-hidden="true"></i>
                     <span>Enrollment Management</span>
                 </a>
                 <a href="schedule-management.html" class="admin-nav-item">
-                    <i class="bi bi-calendar3"></i>
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
                     <span>Schedule / Calendar</span>
                 </a>
 
                 <div class="admin-sidebar-label">PEOPLE</div>
                 <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people" aria-hidden="true"></i>
                     <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge" aria-hidden="true"></i>
                     <span>Teacher Management</span>
                 </a>
 
                 <div class="admin-sidebar-label">FINANCE</div>
                 <a href="payment-management.html" class="admin-nav-item">
-                    <i class="bi bi-credit-card"></i>
+                    <i class="bi bi-credit-card" aria-hidden="true"></i>
                     <span>Payments</span>
                 </a>
                 <a href="payment-management.html#invoices" class="admin-nav-item">
-                    <i class="bi bi-receipt"></i>
+                    <i class="bi bi-receipt" aria-hidden="true"></i>
                     <span>Invoices</span>
                 </a>
                 <a href="payroll-management.html" class="admin-nav-item">
-                    <i class="bi bi-wallet2"></i>
+                    <i class="bi bi-wallet2" aria-hidden="true"></i>
                     <span>Teacher Payroll</span>
                 </a>
 
                 <div class="admin-sidebar-label">REPORTS</div>
                 <a href="reports.html" class="admin-nav-item">
-                    <i class="bi bi-bar-chart"></i>
+                    <i class="bi bi-bar-chart" aria-hidden="true"></i>
                     <span>Reports & Analytics</span>
                 </a>
 
                 <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-gear" aria-hidden="true"></i>
                     <span>Settings</span>
                 </a>
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" id="logoutBtn">
-                    <i class="bi bi-box-arrow-left"></i>
+                <button class="admin-logout-btn" id="logoutBtn" type="button" aria-label="Sign Out of Administration Portal">
+                    <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
                     <span>Logout</span>
                 </button>
             </div>
@@ -428,31 +428,34 @@
                             </div>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <!-- 8 Tabs Navigation -->
+                        <!-- 9 Tabs Navigation -->
                         <ul class="nav nav-tabs border-bottom-0" id="courseDetailTabs" role="tablist">
                             <li class="nav-item">
                                 <button class="nav-link active py-2" id="tab-overview" data-bs-toggle="tab" data-bs-target="#content-overview" type="button"><i class="bi bi-info-circle me-1"></i> Overview</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-chapters" data-bs-toggle="tab" data-bs-target="#content-chapters" type="button"><i class="bi bi-collection-play me-1"></i> Chapters</button>
+                                <button class="nav-link py-2" id="tab-chapters" data-bs-toggle="tab" data-bs-target="#content-chapters" type="button"><i class="bi bi-collection-play me-1"></i> Lessons & Syllabus</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-students" data-bs-toggle="tab" data-bs-target="#content-students" type="button"><i class="bi bi-people me-1"></i> Students</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-exams" data-bs-toggle="tab" data-bs-target="#content-exams" type="button"><i class="bi bi-award me-1"></i> Exams</button>
+                                <button class="nav-link py-2" id="tab-materials" data-bs-toggle="tab" data-bs-target="#content-materials" type="button"><i class="bi bi-file-earmark-pdf me-1"></i> Materials (PDFs)</button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link py-2" id="tab-quizzes" data-bs-toggle="tab" data-bs-target="#content-quizzes" type="button"><i class="bi bi-patch-question me-1"></i> Quizzes</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-schedule" data-bs-toggle="tab" data-bs-target="#content-schedule" type="button"><i class="bi bi-calendar-check me-1"></i> Schedule</button>
+                                <button class="nav-link py-2" id="tab-assignments" data-bs-toggle="tab" data-bs-target="#content-assignments" type="button"><i class="bi bi-journal-check me-1"></i> Assignments</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-payments" data-bs-toggle="tab" data-bs-target="#content-payments" type="button"><i class="bi bi-credit-card me-1"></i> Payments</button>
+                                <button class="nav-link py-2" id="tab-exams" data-bs-toggle="tab" data-bs-target="#content-exams" type="button"><i class="bi bi-award me-1"></i> Exams</button>
                             </li>
                             <li class="nav-item">
-                                <button class="nav-link py-2" id="tab-reports" data-bs-toggle="tab" data-bs-target="#content-reports" type="button"><i class="bi bi-bar-chart-line me-1"></i> Reports</button>
+                                <button class="nav-link py-2" id="tab-students" data-bs-toggle="tab" data-bs-target="#content-students" type="button"><i class="bi bi-people me-1"></i> Students & Progress</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-2" id="tab-schedule" data-bs-toggle="tab" data-bs-target="#content-schedule" type="button"><i class="bi bi-calendar-check me-1"></i> Schedule & Announcements</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link py-2" id="tab-payments" data-bs-toggle="tab" data-bs-target="#content-payments" type="button"><i class="bi bi-credit-card me-1"></i> Payments & Revenue</button>
                             </li>
                         </ul>
                     </div>
@@ -461,20 +464,22 @@
                     <div class="tab-content" id="courseDetailTabContents">
                         <!-- Tab 1: Overview -->
                         <div class="tab-pane fade show active" id="content-overview"></div>
-                        <!-- Tab 2: Chapters -->
+                        <!-- Tab 2: Lessons & Syllabus -->
                         <div class="tab-pane fade" id="content-chapters"></div>
-                        <!-- Tab 3: Students -->
-                        <div class="tab-pane fade" id="content-students"></div>
-                        <!-- Tab 4: Exams -->
-                        <div class="tab-pane fade" id="content-exams"></div>
-                        <!-- Tab 5: Quizzes -->
+                        <!-- Tab 3: Materials -->
+                        <div class="tab-pane fade" id="content-materials"></div>
+                        <!-- Tab 4: Quizzes -->
                         <div class="tab-pane fade" id="content-quizzes"></div>
-                        <!-- Tab 6: Schedule -->
+                        <!-- Tab 5: Assignments -->
+                        <div class="tab-pane fade" id="content-assignments"></div>
+                        <!-- Tab 6: Exams -->
+                        <div class="tab-pane fade" id="content-exams"></div>
+                        <!-- Tab 7: Students -->
+                        <div class="tab-pane fade" id="content-students"></div>
+                        <!-- Tab 8: Schedule -->
                         <div class="tab-pane fade" id="content-schedule"></div>
-                        <!-- Tab 7: Payments -->
+                        <!-- Tab 9: Payments -->
                         <div class="tab-pane fade" id="content-payments"></div>
-                        <!-- Tab 8: Reports -->
-                        <div class="tab-pane fade" id="content-reports"></div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light d-flex justify-content-between">
@@ -485,6 +490,145 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Add / Edit Lesson -->
+    <div class="modal fade" id="lessonModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="lessonModalTitle">Add Lesson</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="lessonForm">
+                    <input type="hidden" id="lessonModuleId">
+                    <input type="hidden" id="lessonId">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Lesson Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lessonTitle" required placeholder="e.g. Modern Asynchronous JavaScript & Promises">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Duration</label>
+                                <input type="text" class="form-control" id="lessonDuration" value="25 Mins" placeholder="e.g. 30 Mins">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Order / Sequence</label>
+                                <input type="number" class="form-control" id="lessonOrder" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Video Stream URL</label>
+                            <input type="url" class="form-control" id="lessonVideoUrl" placeholder="https://commondatastorage.googleapis.com/... or cloud storage URL">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Lesson Description</label>
+                            <textarea class="form-control" id="lessonDesc" rows="3" placeholder="Summary of learning objectives covered in this lesson..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveLessonBtn">
+                            <i class="bi bi-check2 me-1"></i> Save Lesson
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Attach Learning Material (PDF) -->
+    <div class="modal fade" id="materialModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="materialModalTitle">Attach Learning Material</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="materialForm">
+                    <input type="hidden" id="materialLessonId">
+                    <input type="hidden" id="materialCourseId">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Material Display Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="materialTitle" required placeholder="e.g. Complete Syllabus & Web Standards Guide">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Document Type</label>
+                                <select class="form-select" id="materialType">
+                                    <option value="PDF">PDF Document</option>
+                                    <option value="Worksheet">Lab Worksheet</option>
+                                    <option value="Document">Word / Office Doc</option>
+                                    <option value="Link">External Resource Link</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Estimated File Size</label>
+                                <input type="text" class="form-control" id="materialSize" value="1.8 MB" placeholder="e.g. 2.4 MB">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">File Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="materialFileName" required placeholder="e.g. Web_Standards_Guide_2026.pdf">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">File Download URL <span class="text-danger">*</span></label>
+                            <input type="url" class="form-control" id="materialFileUrl" required placeholder="https://aub.edu.kh/materials/web_guide.pdf">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveMaterialBtn">
+                            <i class="bi bi-cloud-arrow-up me-1"></i> Attach Material
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 5: Post Course Announcement -->
+    <div class="modal fade" id="announcementModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold">Post Course Announcement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="announcementForm">
+                    <input type="hidden" id="announcementCourseId">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Announcement Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="announcementTitle" required placeholder="e.g. Midterm Examination Schedule Update">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Priority Level</label>
+                            <select class="form-select" id="announcementPriority">
+                                <option value="Normal">Normal</option>
+                                <option value="Important">Important</option>
+                                <option value="Urgent">Urgent / Action Required</option>
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold">Message Content <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="announcementMessage" rows="4" required placeholder="Detailed message for enrolled students..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveAnnouncementBtn">
+                            <i class="bi bi-broadcast me-1"></i> Publish Announcement
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
             </div>
         </div>
     </div>

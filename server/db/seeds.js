@@ -693,10 +693,49 @@ async function seedDatabase() {
             `INSERT INTO modules (id, course_id, title, description, duration, order_num, lesson_count, quiz_count, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON CONFLICT(id) DO UPDATE SET 
-                course_id = excluded.course_id, title = excluded.title, description = excluded.description,
-                duration = excluded.duration, order_num = excluded.order_num, lesson_count = excluded.lesson_count,
-                quiz_count = excluded.quiz_count, status = excluded.status`,
+                 course_id = excluded.course_id, title = excluded.title, description = excluded.description,
+                 duration = excluded.duration, order_num = excluded.order_num, lesson_count = excluded.lesson_count,
+                 quiz_count = excluded.quiz_count, status = excluded.status`,
             [m.id, m.course_id, m.title, m.description, m.duration, m.order_num, m.lesson_count, m.quiz_count, 'Published']
+        );
+    }
+
+    // 7b. Seed Lessons
+    console.log('Seeding Lessons...');
+    const lessons = [
+        // Module 1 (Course 1)
+        { id: 1, moduleId: 1, title: 'Web Standards & Browser Architecture', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', desc: 'Understanding HTTP/HTTPS, browser rendering pipelines, and the DOM tree.', duration: '25 Mins', order: 1 },
+        { id: 2, moduleId: 1, title: 'Modern ES6+ Syntax & Asynchronous JavaScript', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', desc: 'Promises, async/await, arrow functions, destructuring, and closures.', duration: '35 Mins', order: 2 },
+        { id: 3, moduleId: 1, title: 'DOM Tree Manipulation & Event Lifecycle', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', desc: 'Event delegation, bubbling, capturing, and accessible interactive widgets.', duration: '30 Mins', order: 3 },
+        { id: 4, moduleId: 1, title: 'Browser Storage, Cookies & Security', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', desc: 'LocalStorage, SessionStorage, IndexedDB, and Content Security Policy (CSP).', duration: '28 Mins', order: 4 },
+
+        // Module 2 (Course 1)
+        { id: 5, moduleId: 2, title: 'CSS3 Flexbox Layout Mastery', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', desc: '1D alignment, flex-grow, flex-shrink, and responsive header/footer flows.', duration: '30 Mins', order: 1 },
+        { id: 6, moduleId: 2, title: 'CSS Grid Specification & 2D Layouts', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', desc: 'Grid template areas, repeat notation, autofill, and complex application views.', duration: '40 Mins', order: 2 },
+        { id: 7, moduleId: 2, title: 'Responsive Breakpoints & Fluid Typography', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', desc: 'Fluid font scaling with clamp(), mobile-first CSS media queries.', duration: '32 Mins', order: 3 },
+        { id: 8, moduleId: 2, title: 'CSS Variables, Design Tokens & Theming', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', desc: 'Centralized design tokens, light/dark themes, and accessible color contrast.', duration: '25 Mins', order: 4 },
+
+        // Module 3 (Course 1)
+        { id: 9, moduleId: 3, title: 'React JSX & Component Composition', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', desc: 'Atomic component boundaries, props interface design, and children slots.', duration: '35 Mins', order: 1 },
+        { id: 10, moduleId: 3, title: 'State, Props & One-Way Data Flow', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', desc: 'State lifting, event propagation upwards, immutable object updates.', duration: '30 Mins', order: 2 },
+        { id: 11, moduleId: 3, title: 'Modern Hooks: useState, useEffect, useMemo', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', desc: 'Effect dependencies, cleanups, memoized selectors, and callback hooks.', duration: '45 Mins', order: 3 },
+        { id: 12, moduleId: 3, title: 'Custom Hooks & Global Context API', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', desc: 'Encapsulating reusable business logic with custom React hooks.', duration: '38 Mins', order: 4 },
+
+        // Module 17 (Course 4)
+        { id: 25, moduleId: 17, title: 'Threat Modeling & Vulnerability Surface', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', desc: 'STRIDE framework, attack vector modeling, and vulnerability mitigation.', duration: '30 Mins', order: 1 },
+        { id: 26, moduleId: 17, title: 'Network Firewalls & Packet Filtering', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', desc: 'Stateful packet inspection, iptables, and deep packet inspection rules.', duration: '40 Mins', order: 2 },
+        { id: 27, moduleId: 18, title: 'Cryptography & Public Key Infrastructure', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', desc: 'Asymmetric encryption keys, certificates, TLS handshakes, and signatures.', duration: '45 Mins', order: 1 },
+        { id: 28, moduleId: 21, title: 'Zero-Trust Architecture & Identity Management', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', desc: 'Identity verification, least-privilege RBAC, and zero-trust policies.', duration: '35 Mins', order: 1 }
+    ];
+
+    for (const l of lessons) {
+        await dbAsync.run(
+            `INSERT INTO lessons (id, module_id, title, video_url, description, duration, order_num)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET 
+                 module_id = excluded.module_id, title = excluded.title, video_url = excluded.video_url,
+                 description = excluded.description, duration = excluded.duration, order_num = excluded.order_num`,
+            [l.id, l.moduleId, l.title, l.videoUrl, l.desc, l.duration, l.order]
         );
     }
 
@@ -1499,6 +1538,114 @@ async function seedDatabase() {
             `INSERT OR IGNORE INTO calendar_events (id, title, event_type, course_id, instructor_id, start_time, end_time, location_room, description, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [ce.id, ce.title, ce.type, ce.courseId, ce.instructorId, ce.start, ce.end, ce.room, ce.desc, 'Active']
+        );
+    }
+
+    // 25. Seed Learning Materials (PDFs, Worksheets, Syllabi)
+    console.log('Seeding Learning Materials (PDFs & Documents)...');
+    const materials = [
+        { id: 1, lessonId: 1, courseId: 1, title: 'Course Syllabus & Web Standards Guide.pdf', type: 'PDF', fileName: 'Web_Standards_Guide_2026.pdf', fileUrl: 'https://aub.edu.kh/materials/web_standards_guide.pdf', fileSize: '2.4 MB', uploadedBy: 7 },
+        { id: 2, lessonId: 1, courseId: 1, title: 'HTML5 Semantic Tree Reference.pdf', type: 'PDF', fileName: 'HTML5_Semantic_Reference.pdf', fileUrl: 'https://aub.edu.kh/materials/html5_semantic.pdf', fileSize: '1.1 MB', uploadedBy: 7 },
+        { id: 3, lessonId: 2, courseId: 1, title: 'CSS Grid & Flexbox Cheat Sheet.pdf', type: 'PDF', fileName: 'CSS_Grid_Flexbox_Cheatsheet.pdf', fileUrl: 'https://aub.edu.kh/materials/css_grid.pdf', fileSize: '1.8 MB', uploadedBy: 7 },
+        { id: 4, lessonId: 3, courseId: 1, title: 'React Hooks & State Flow Diagram.pdf', type: 'PDF', fileName: 'React_State_Flow_Diagram.pdf', fileUrl: 'https://aub.edu.kh/materials/react_state_flow.pdf', fileSize: '3.2 MB', uploadedBy: 7 },
+        { id: 5, lessonId: 4, courseId: 1, title: 'REST API Design Best Practices.pdf', type: 'PDF', fileName: 'REST_API_Best_Practices.pdf', fileUrl: 'https://aub.edu.kh/materials/rest_api_guide.pdf', fileSize: '1.9 MB', uploadedBy: 7 },
+        { id: 6, lessonId: 25, courseId: 4, title: 'Network Security Packet Filtering Lab.pdf', type: 'PDF', fileName: 'Packet_Filtering_Lab_Guide.pdf', fileUrl: 'https://aub.edu.kh/materials/packet_filtering.pdf', fileSize: '2.7 MB', uploadedBy: 9 },
+        { id: 7, lessonId: 26, courseId: 4, title: 'Cryptography & Public Key Infrastructure.pdf', type: 'PDF', fileName: 'PKI_Encryption_Overview.pdf', fileUrl: 'https://aub.edu.kh/materials/pki_encryption.pdf', fileSize: '2.1 MB', uploadedBy: 9 }
+    ];
+
+    for (const m of materials) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO lesson_materials (id, lesson_id, course_id, title, type, file_name, file_url, file_size, uploaded_by, is_published, order_num)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)`,
+            [m.id, m.lessonId, m.courseId, m.title, m.type, m.fileName, m.fileUrl, m.fileSize, m.uploadedBy]
+        );
+    }
+
+    // 26. Seed Lesson Videos
+    console.log('Seeding Lesson Videos...');
+    const videos = [
+        { id: 1, lessonId: 1, courseId: 1, title: 'Lecture 1: Web Architecture Principles', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', path: '/videos/web_arch_01.mp4', duration: 18, res: '1080p' },
+        { id: 2, lessonId: 2, courseId: 1, title: 'Lecture 2: Advanced CSS Grid & Design Tokens', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4', path: '/videos/web_arch_02.mp4', duration: 25, res: '1080p' },
+        { id: 3, lessonId: 3, courseId: 1, title: 'Lecture 3: React Component Lifecycle & Hooks', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4', path: '/videos/web_arch_03.mp4', duration: 32, res: '1080p' },
+        { id: 4, lessonId: 4, courseId: 1, title: 'Lecture 4: Express Middleware & Async Endpoints', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4', path: '/videos/web_arch_04.mp4', duration: 28, res: '1080p' }
+    ];
+
+    for (const v of videos) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO lesson_videos (id, lesson_id, course_id, video_title, video_url, storage_path, duration_minutes, resolution, platform)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Direct Stream')`,
+            [v.id, v.lessonId, v.courseId, v.title, v.url, v.path, v.duration, v.res]
+        );
+    }
+
+    // 27. Seed Course Announcements
+    console.log('Seeding Course Announcements...');
+    const announcements = [
+        { id: 1, courseId: 1, title: 'Welcome to Full-Stack Modern Web Architecture!', message: 'Classes begin promptly on September 1, 2026. Please download the course syllabus from Lesson 1 materials.', priority: 'Normal', publishedBy: 7, publishedAt: '2026-08-15 09:00:00' },
+        { id: 2, courseId: 1, title: 'Midterm Examination Schedule Released', message: 'The Midterm Exam window is confirmed for September 20, 2026 from 08:00 to 23:59. Total duration is 60 minutes with 2 attempts permitted.', priority: 'Important', publishedBy: 7, publishedAt: '2026-08-18 14:30:00' },
+        { id: 3, courseId: 4, title: 'Cybersecurity Lab Access Credentials', message: 'All enrolled students have been provisioned with VPN and sandbox credentials. Please verify your student email for the security keys.', priority: 'Urgent', publishedBy: 9, publishedAt: '2026-08-19 11:00:00' }
+    ];
+
+    for (const a of announcements) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO course_announcements (id, course_id, title, message, priority, published_by, status, published_at)
+             VALUES (?, ?, ?, ?, ?, ?, 'Published', ?)`,
+            [a.id, a.courseId, a.title, a.message, a.priority, a.publishedBy, a.publishedAt]
+        );
+    }
+
+    // 28. Seed Certificates
+    console.log('Seeding Certificates...');
+    const certificates = [
+        { id: 1, certNum: 'AUB-CERT-2026-0801', studentId: 4, courseId: 4, issue: '2026-08-14', completion: '2026-08-14', grade: 'A+ (High Distinction)', status: 'Issued', pdfUrl: 'https://aub.edu.kh/certificates/AUB-CERT-2026-0801.pdf' },
+        { id: 2, certNum: 'AUB-CERT-2026-0802', studentId: 2, courseId: 2, issue: '2026-08-10', completion: '2026-08-10', grade: 'A (Distinction)', status: 'Issued', pdfUrl: 'https://aub.edu.kh/certificates/AUB-CERT-2026-0802.pdf' }
+    ];
+
+    for (const c of certificates) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO certificates (id, certificate_number, student_id, course_id, issue_date, completion_date, grade_achieved, status, pdf_url)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [c.id, c.certNum, c.studentId, c.courseId, c.issue, c.completion, c.grade, c.status, c.pdfUrl]
+        );
+    }
+
+    // 29. Seed Student Lesson Progress
+    console.log('Seeding Student Learning Progress...');
+    const progressList = [
+        { studentId: 2, lessonId: 1, courseId: 1, completed: 1, watched: 1080 },
+        { studentId: 2, lessonId: 2, courseId: 1, completed: 1, watched: 1500 },
+        { studentId: 2, lessonId: 3, courseId: 1, completed: 1, watched: 1920 },
+        { studentId: 2, lessonId: 4, courseId: 1, completed: 0, watched: 600 },
+        { studentId: 3, lessonId: 1, courseId: 1, completed: 1, watched: 1080 },
+        { studentId: 3, lessonId: 2, courseId: 1, completed: 1, watched: 1200 },
+        { studentId: 4, lessonId: 25, courseId: 4, completed: 1, watched: 1400 },
+        { studentId: 4, lessonId: 26, courseId: 4, completed: 1, watched: 1600 }
+    ];
+
+    for (const p of progressList) {
+        await dbAsync.run(
+            `INSERT OR IGNORE INTO student_lesson_progress (student_id, lesson_id, course_id, is_completed, completed_at, last_watched_seconds)
+             VALUES (?, ?, ?, ?, ${p.completed ? "CURRENT_TIMESTAMP" : "NULL"}, ?)`,
+            [p.studentId, p.lessonId, p.courseId, p.completed, p.watched]
+        );
+    }
+
+    // 30. Seed Centralized Audit Logs
+    console.log('Seeding Administrative Audit Logs...');
+    const auditLogs = [
+        { userId: 1, userName: 'Dr. Johnathan Vance', userRole: 'ADMIN', action: 'CREATE_COURSE', entityType: 'Course', entityId: 1, details: 'Created course: Full-Stack Modern Web Architecture ($50.00)' },
+        { userId: 7, userName: 'Dr. Sarah Johnson', userRole: 'TEACHER', action: 'UPLOAD_MATERIAL', entityType: 'LessonMaterial', entityId: 1, details: 'Uploaded syllabus PDF for Lesson 1' },
+        { userId: 1, userName: 'Dr. Johnathan Vance', userRole: 'ADMIN', action: 'SCHEDULE_EXAM', entityType: 'Exam', entityId: 1, details: 'Scheduled Midterm Exam for Web Architecture' },
+        { userId: 2, userName: 'Sok Virak', userRole: 'STUDENT', action: 'COURSE_ENROLLMENT', entityType: 'Enrollment', entityId: 101, details: 'Enrolled in Web Architecture and paid $50.00 via ABA PAY' },
+        { userId: 7, userName: 'Dr. Sarah Johnson', userRole: 'TEACHER', action: 'GRADE_SUBMISSION', entityType: 'Assignment', entityId: 1, details: 'Graded assignment for Sok Virak: Score 92/100' },
+        { userId: 1, userName: 'Dr. Johnathan Vance', userRole: 'ADMIN', action: 'ISSUE_CERTIFICATE', entityType: 'Certificate', entityId: 1, details: 'Issued certificate AUB-CERT-2026-0801 for Dara Keo' }
+    ];
+
+    for (const log of auditLogs) {
+        await dbAsync.run(
+            `INSERT INTO audit_logs (user_id, user_name, user_role, action, entity_type, entity_id, details, ip_address)
+             VALUES (?, ?, ?, ?, ?, ?, ?, '127.0.0.1')`,
+            [log.userId, log.userName, log.userRole, log.action, log.entityType, log.entityId, log.details]
         );
     }
 

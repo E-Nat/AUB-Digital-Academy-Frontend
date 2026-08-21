@@ -15,6 +15,7 @@
     
     <!-- Custom Admin CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <link href="../../css/pages/academic-management.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
@@ -22,7 +23,7 @@
         
         <!-- SIDEBAR -->
                                 <!-- AUB DIGITAL ACADEMY - MINIMAL WHITE SIDEBAR -->
-        <aside class="admin-sidebar" id="adminSidebar">
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Administration Sidebar Navigation">
             <div class="admin-sidebar-brand">
                 <div class="admin-brand-header">
                     <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
@@ -33,75 +34,75 @@
                 </div>
             </div>
 
-            <nav class="admin-sidebar-menu">
+            <nav class="admin-sidebar-menu" aria-label="Main Navigation">
                 <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid"></i>
+                    <i class="bi bi-grid" aria-hidden="true"></i>
                     <span>Dashboard</span>
                 </a>
 
                 <div class="admin-sidebar-label">ACADEMIC</div>
                 <a href="academic-management.html" class="admin-nav-item active">
-                    <i class="bi bi-mortarboard"></i>
+                    <i class="bi bi-mortarboard" aria-hidden="true"></i>
                     <span>Academic Management</span>
                 </a>
                 <a href="course-management.html" class="admin-nav-item">
-                    <i class="bi bi-book"></i>
+                    <i class="bi bi-book" aria-hidden="true"></i>
                     <span>Course Management</span>
                 </a>
                 <a href="exam-management.html" class="admin-nav-item">
-                    <i class="bi bi-clipboard-check"></i>
+                    <i class="bi bi-clipboard-check" aria-hidden="true"></i>
                     <span>Exam & Quiz Management</span>
                 </a>
                 <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check"></i>
+                    <i class="bi bi-person-check" aria-hidden="true"></i>
                     <span>Enrollment Management</span>
                 </a>
                 <a href="schedule-management.html" class="admin-nav-item">
-                    <i class="bi bi-calendar3"></i>
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
                     <span>Schedule / Calendar</span>
                 </a>
 
                 <div class="admin-sidebar-label">PEOPLE</div>
                 <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people" aria-hidden="true"></i>
                     <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge" aria-hidden="true"></i>
                     <span>Teacher Management</span>
                 </a>
 
                 <div class="admin-sidebar-label">FINANCE</div>
                 <a href="payment-management.html" class="admin-nav-item">
-                    <i class="bi bi-credit-card"></i>
+                    <i class="bi bi-credit-card" aria-hidden="true"></i>
                     <span>Payments</span>
                 </a>
                 <a href="payment-management.html#invoices" class="admin-nav-item">
-                    <i class="bi bi-receipt"></i>
+                    <i class="bi bi-receipt" aria-hidden="true"></i>
                     <span>Invoices</span>
                 </a>
                 <a href="payroll-management.html" class="admin-nav-item">
-                    <i class="bi bi-wallet2"></i>
+                    <i class="bi bi-wallet2" aria-hidden="true"></i>
                     <span>Teacher Payroll</span>
                 </a>
 
                 <div class="admin-sidebar-label">REPORTS</div>
                 <a href="reports.html" class="admin-nav-item">
-                    <i class="bi bi-bar-chart"></i>
+                    <i class="bi bi-bar-chart" aria-hidden="true"></i>
                     <span>Reports & Analytics</span>
                 </a>
 
                 <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-gear" aria-hidden="true"></i>
                     <span>Settings</span>
                 </a>
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" id="logoutBtn">
-                    <i class="bi bi-box-arrow-left"></i>
+                <button class="admin-logout-btn" id="logoutBtn" type="button" aria-label="Sign Out of Administration Portal">
+                    <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
                     <span>Logout</span>
                 </button>
             </div>
@@ -435,131 +436,782 @@
         </div>
     </div>
 
-    <!-- MODAL: Create / Edit Course -->
+    <!-- MODAL: Create / Edit Course (Tabbed Interface) -->
+    <!-- MODAL: Create / Edit Course (Multi-Step Stepper Interface) -->
     <div class="modal fade" id="createCourseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light pb-2">
+                    <div>
+                        <h5 class="modal-title fw-bold" id="courseModalTitle">Add New Specialized Course</h5>
+                        <p class="text-muted mb-0" style="font-size: 12px;" id="courseModalSubtitle">Create and configure an academic course</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Horizontal Course Creation Stepper Progress Bar -->
+                <div class="course-stepper-container" id="courseStepperContainer">
+                    <div class="stepper-track">
+                        <!-- Step 1: Basic Info -->
+                        <div class="stepper-step active" data-step="1" id="stepperStep1" onclick="handleStepperClick(1)">
+                            <div class="stepper-node">
+                                <span class="stepper-number">1</span>
+                                <i class="bi bi-check-lg stepper-check"></i>
+                            </div>
+                            <span class="stepper-label">Basic Info</span>
+                        </div>
+                        <div class="stepper-line" id="stepperLine1"></div>
+
+                        <!-- Step 2: Details & Pricing -->
+                        <div class="stepper-step" data-step="2" id="stepperStep2" onclick="handleStepperClick(2)">
+                            <div class="stepper-node">
+                                <span class="stepper-number">2</span>
+                                <i class="bi bi-check-lg stepper-check"></i>
+                            </div>
+                            <span class="stepper-label">Details &amp; Pricing</span>
+                        </div>
+                        <div class="stepper-line" id="stepperLine2"></div>
+
+                        <!-- Step 3: Course Media -->
+                        <div class="stepper-step" data-step="3" id="stepperStep3" onclick="handleStepperClick(3)">
+                            <div class="stepper-node">
+                                <span class="stepper-number">3</span>
+                                <i class="bi bi-check-lg stepper-check"></i>
+                            </div>
+                            <span class="stepper-label">Course Media</span>
+                        </div>
+                        <div class="stepper-line" id="stepperLine3"></div>
+
+                        <!-- Step 4: Schedule & Dates -->
+                        <div class="stepper-step" data-step="4" id="stepperStep4" onclick="handleStepperClick(4)">
+                            <div class="stepper-node">
+                                <span class="stepper-number">4</span>
+                                <i class="bi bi-check-lg stepper-check"></i>
+                            </div>
+                            <span class="stepper-label">Schedule &amp; Dates</span>
+                        </div>
+                        <div class="stepper-line" id="stepperLine4"></div>
+
+                        <!-- Step 5: Publishing -->
+                        <div class="stepper-step" data-step="5" id="stepperStep5" onclick="handleStepperClick(5)">
+                            <div class="stepper-node">
+                                <span class="stepper-number">5</span>
+                                <i class="bi bi-check-lg stepper-check"></i>
+                            </div>
+                            <span class="stepper-label">Publishing</span>
+                        </div>
+                    </div>
+
+                    <!-- Responsive Compact Step Badge for Mobile Screens -->
+                    <div class="d-none small-screen-stepper-indicator text-center py-1">
+                        <span class="badge bg-primary text-white px-3 py-1" id="compactStepBadge">Step 1 of 5: Basic Information</span>
+                    </div>
+                </div>
+
+                <form id="courseForm" novalidate>
+                    <input type="hidden" id="courseId">
+                    <input type="hidden" id="coursePublishedVal" value="1">
+                    
+                    <div class="modal-body p-4">
+                        
+                        <!-- ==========================================
+                             STEP 1: BASIC INFO
+                             ========================================== -->
+                        <div class="step-pane active" id="step1Pane">
+                            <div class="step-header">
+                                <h6>Basic Information</h6>
+                                <p>Start by defining the course identity, category, and instructor.</p>
+                            </div>
+                            <div class="row g-3">
+                                <!-- Course Title * -->
+                                <div class="col-md-8">
+                                    <label class="form-label fw-semibold">Course Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="courseTitle" required placeholder="e.g. Full-Stack Web Development">
+                                    <div class="invalid-feedback" id="courseTitleFeedback">Course Title is required (min 3 chars).</div>
+                                </div>
+                                <!-- Difficulty * -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Difficulty <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseDifficulty" required>
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                </div>
+                                <!-- Category / Discipline * -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Category / Discipline <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseCategorySelect" required>
+                                        <option value="">-- Select Category / Discipline --</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="courseCategoryFeedback">Please select a category.</div>
+                                </div>
+                                <!-- Instructor * -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Instructor <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseInstructorSelect" required>
+                                        <option value="">-- Select Assigned Instructor --</option>
+                                    </select>
+                                    <div class="invalid-feedback" id="courseInstructorFeedback">Please select an instructor.</div>
+                                </div>
+                                <!-- Description * -->
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label fw-semibold mb-0">Course Description <span class="text-danger">*</span></label>
+                                        <span class="text-muted" style="font-size: 11px;" id="courseDescCount">0 / 500</span>
+                                    </div>
+                                    <textarea class="form-control" id="courseDesc" rows="4" maxlength="500" required placeholder="Learn the fundamentals of full-stack web development, frontend interfaces, APIs, and modern deployment architectures..."></textarea>
+                                    <div class="invalid-feedback" id="courseDescFeedback">Course Description is required (minimum 10 characters).</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 2: DETAILS & PRICING
+                             ========================================== -->
+                        <div class="step-pane" id="step2Pane">
+                            <div class="step-header">
+                                <h6>Course Details &amp; Pricing</h6>
+                                <p>Define the duration, lesson structure, and course pricing.</p>
+                            </div>
+                            <div class="row g-3">
+                                <!-- Estimated Duration * -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Estimated Duration <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="courseDuration" value="8 Weeks" placeholder="e.g. 8 Weeks">
+                                </div>
+                                <!-- Lessons Count -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Lessons Count</label>
+                                    <input type="number" class="form-control" id="courseLessons" value="12" min="0">
+                                    <div class="form-text text-muted" style="font-size: 11px;">Automatically synchronized as syllabus modules are built.</div>
+                                </div>
+                                <!-- Course Price ($) -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Course Price ($)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="coursePrice" value="0.00" min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                    <div class="invalid-feedback" id="coursePriceFeedback">Price cannot be negative.</div>
+                                </div>
+                                <!-- Highlight Badge -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Highlight Badge</label>
+                                    <input type="text" class="form-control" id="courseBadge" placeholder="e.g. Popular, Featured, Bestseller">
+                                </div>
+                                <!-- Prerequisites -->
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Course Prerequisites (Optional)</label>
+                                    <input type="text" class="form-control" id="coursePrerequisites" placeholder="e.g. Basic programming concepts or None required">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 3: COURSE MEDIA
+                             ========================================== -->
+                        <div class="step-pane" id="step3Pane">
+                            <div class="step-header">
+                                <h6>Course Media</h6>
+                                <p>Upload course cover thumbnail and introduction preview video.</p>
+                            </div>
+                            <div class="row g-3">
+                                <!-- Card 1: Course Cover / Thumbnail -->
+                                <div class="col-md-6">
+                                    <div class="media-upload-card">
+                                        <label class="form-label fw-semibold mb-2 d-flex align-items-center gap-1">
+                                            <i class="bi bi-image text-primary"></i> Course Cover / Thumbnail
+                                        </label>
+                                        
+                                        <!-- Thumbnail Dropzone -->
+                                        <div class="file-upload-dropzone" id="thumbnailDropzone">
+                                            <input type="file" id="courseThumbnailInput" accept="image/png, image/jpeg, image/webp">
+                                            <i class="bi bi-cloud-arrow-up text-primary fs-2 d-block mb-1"></i>
+                                            <span class="fw-bold text-dark d-block" style="font-size: 13px;">🖼 Upload Course Image</span>
+                                            <span class="text-muted d-block" style="font-size: 11.5px;">PNG, JPG, JPEG, WEBP &bull; Max 5 MB</span>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mt-2 py-0 px-2" style="font-size: 11.5px;">Choose Image</button>
+                                        </div>
+
+                                        <!-- Image Preview Box -->
+                                        <div class="upload-preview-container" id="thumbnailPreviewBox" style="display: none;">
+                                            <img src="" alt="Cover Preview" class="upload-preview-img" id="thumbnailPreviewImg">
+                                            <div class="flex-grow-1 min-w-0">
+                                                <div class="fw-bold text-dark text-truncate" style="font-size: 12px;" id="thumbnailFileName">cover.jpg</div>
+                                                <div class="text-muted" style="font-size: 10.5px;" id="thumbnailFileSize">1.2 MB</div>
+                                            </div>
+                                            <div class="d-flex gap-1">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="replaceThumbnailBtn" style="font-size: 11px;">Replace</button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="removeThumbnailBtn" style="font-size: 11px;">Remove</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fallback URL Input -->
+                                        <div class="mt-2">
+                                            <label class="form-label text-muted" style="font-size: 11px;">Or enter Image URL directly:</label>
+                                            <input type="text" class="form-control form-control-sm" id="courseThumbnailUrl" placeholder="assets/images/courses/fullstack.jpg">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2: Introduction / Preview Video -->
+                                <div class="col-md-6">
+                                    <div class="media-upload-card">
+                                        <label class="form-label fw-semibold mb-2 d-flex align-items-center gap-1">
+                                            <i class="bi bi-camera-video text-primary"></i> Course Introduction / Preview Video
+                                        </label>
+
+                                        <!-- Video Dropzone -->
+                                        <div class="file-upload-dropzone" id="videoDropzone">
+                                            <input type="file" id="courseVideoInput" accept="video/mp4, video/webm, video/quicktime">
+                                            <i class="bi bi-play-circle text-primary fs-2 d-block mb-1"></i>
+                                            <span class="fw-bold text-dark d-block" style="font-size: 13px;">▶ Upload Introduction Video</span>
+                                            <span class="text-muted d-block" style="font-size: 11.5px;">MP4, WEBM, MOV &bull; Max 100 MB</span>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mt-2 py-0 px-2" style="font-size: 11.5px;">Choose Video</button>
+                                        </div>
+
+                                        <!-- Video Preview Box -->
+                                        <div id="videoPreviewBox" style="display: none;" class="mt-2 p-2 bg-white rounded border">
+                                            <video controls class="upload-preview-video" id="videoPreviewPlayer" style="max-height: 140px; width: 100%; border-radius: 6px;"></video>
+                                            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
+                                                <div class="text-truncate me-2">
+                                                    <div class="fw-bold text-dark text-truncate" style="font-size: 12px;" id="videoFileName">intro.mp4</div>
+                                                    <div class="text-muted" style="font-size: 10.5px;" id="videoFileSize">14.2 MB</div>
+                                                </div>
+                                                <div class="d-flex gap-1 flex-shrink-0">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="replaceVideoBtn" style="font-size: 11px;">Replace</button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="removeVideoBtn" style="font-size: 11px;">Remove</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fallback Video URL Input -->
+                                        <div class="mt-2">
+                                            <label class="form-label text-muted" style="font-size: 11px;">Or enter Video URL / Stream link:</label>
+                                            <input type="text" class="form-control form-control-sm" id="courseVideoUrl" placeholder="https://cdn.example.com/videos/intro.mp4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 4: SCHEDULE & DATES
+                             ========================================== -->
+                        <div class="step-pane" id="step4Pane">
+                            <div class="step-header">
+                                <h6>Schedule &amp; Course Dates</h6>
+                                <p>Set enrollment availability and the course lifecycle.</p>
+                            </div>
+                            
+                            <div class="p-3 bg-light rounded border mb-3">
+                                <div class="row g-3">
+                                    <!-- 1. Enrollment Opens -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Enrollment Opens</label>
+                                        <input type="date" class="form-control form-control-sm" id="courseEnrollmentStart">
+                                    </div>
+                                    <!-- 2. Enrollment Deadline -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Enrollment Deadline</label>
+                                        <input type="date" class="form-control form-control-sm" id="courseEnrollmentDeadline">
+                                        <div class="invalid-feedback small" id="courseDeadlineFeedback">Deadline must be after start.</div>
+                                    </div>
+                                    <!-- 3. Course Starts -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Course Starts</label>
+                                        <input type="date" class="form-control form-control-sm" id="courseStartDate">
+                                        <div class="invalid-feedback small" id="courseStartFeedback">Start must be after enrollment deadline.</div>
+                                    </div>
+                                    <!-- 4. Course Ends -->
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Course Ends</label>
+                                        <input type="date" class="form-control form-control-sm" id="courseEndDate">
+                                        <div class="invalid-feedback small" id="courseEndFeedback">End date must be after course start date.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Preview Card -->
+                            <div class="p-3 bg-white rounded border d-flex align-items-center justify-content-between" id="courseStatusPreviewContainer">
+                                <div>
+                                    <span class="fw-bold text-dark small d-block">Course Status Preview:</span>
+                                    <span class="text-muted" style="font-size: 11.5px;">Calculated automatically based on schedule dates and current time.</span>
+                                </div>
+                                <span class="badge bg-success px-3 py-2 fs-6" id="courseStatusPreviewBadge">Enrollment Open</span>
+                            </div>
+                        </div>
+
+                        <!-- ==========================================
+                             STEP 5: REVIEW & PUBLISH
+                             ========================================== -->
+                        <div class="step-pane" id="step5Pane">
+                            <div class="step-header">
+                                <h6>Review &amp; Publish</h6>
+                                <p>Review your course information before saving.</p>
+                            </div>
+
+                            <!-- Course Summary Card -->
+                            <div class="review-summary-card mb-3">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                    <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-file-earmark-check text-primary me-1"></i> COURSE SUMMARY</span>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary" id="reviewCourseDifficulty">Beginner</span>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="review-item-label">Course Title</div>
+                                        <div class="review-item-val" id="reviewCourseTitle">Full-Stack Web Development</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Category</div>
+                                        <div class="review-item-val" id="reviewCourseCategory">Computer Science</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Instructor</div>
+                                        <div class="review-item-val" id="reviewCourseInstructor">Dr. Sarah Johnson</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="review-item-label">Description</div>
+                                        <div class="review-item-val text-muted small" id="reviewCourseDesc" style="font-size: 12px; line-height: 1.5;">Course description overview...</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Duration</div>
+                                        <div class="review-item-val" id="reviewCourseDuration">8 Weeks</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Lessons</div>
+                                        <div class="review-item-val" id="reviewCourseLessons">12 Lessons</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Price</div>
+                                        <div class="review-item-val text-success" id="reviewCoursePrice">$0.00</div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="review-item-label">Prerequisites</div>
+                                        <div class="review-item-val" id="reviewCoursePrerequisites">None</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="review-item-label">Course Media</div>
+                                        <div class="small mt-1 d-flex flex-column gap-1">
+                                            <div id="reviewThumbStatus"><i class="bi bi-check-circle-fill text-success me-1"></i> Thumbnail added</div>
+                                            <div id="reviewVideoStatus"><i class="bi bi-check-circle-fill text-success me-1"></i> Introduction video added</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="review-item-label">Schedule &amp; Lifecycle</div>
+                                        <div class="review-item-val text-primary" id="reviewCourseSchedule">Aug 26, 2026 &rarr; Sep 12, 2026</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Course Status Selection -->
+                            <div>
+                                <label class="form-label fw-bold text-dark small mb-2">PUBLISHING STATUS</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="status-choice-card" id="statusCardDraft" onclick="setPublishStatusChoice(0)">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <input type="radio" name="coursePublishStatusRadio" id="statusRadioDraft" value="0">
+                                                    <div>
+                                                        <div class="fw-bold text-dark" style="font-size: 13px;">Save as Draft</div>
+                                                        <div class="text-muted" style="font-size: 11px;">Hidden from students until ready</div>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-secondary">Draft</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="status-choice-card selected" id="statusCardPublished" onclick="setPublishStatusChoice(1)">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <input type="radio" name="coursePublishStatusRadio" id="statusRadioPublished" value="1" checked>
+                                                    <div>
+                                                        <div class="fw-bold text-dark" style="font-size: 13px;">Published Course</div>
+                                                        <div class="text-muted" style="font-size: 11px;">Visible in academic student catalog</div>
+                                                    </div>
+                                                </div>
+                                                <span class="badge bg-success">Published</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Dynamic Stepper Footer (Sticky / Always Visible) -->
+                    <div class="modal-footer bg-light d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Cancel Button (Always Available) -->
+                            <button type="button" class="btn btn-secondary btn-sm" id="stepperCancelBtn" data-bs-dismiss="modal">Cancel</button>
+                            <!-- Steps 2-5 Back Button -->
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="stepperBackBtn" style="display: none;">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Steps 1-4 Continue Button -->
+                            <button type="button" class="btn btn-primary btn-sm px-4" id="stepperContinueBtn">
+                                Continue <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                            <!-- Step 5 Action Buttons -->
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" id="saveDraftBtn" style="display: none;">
+                                <i class="bi bi-save me-1"></i> Save as Draft
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm px-4" id="createCourseSubmitBtn" style="display: none;">
+                                <i class="bi bi-plus-circle me-1"></i> Create Course
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Course Content Builder (Visual Hierarchy: Course -> Module -> Lesson -> Media -> Quiz -> Assignment) -->
+    <div class="modal fade" id="courseContentBuilderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header content-builder-header">
+                    <div>
+                        <span class="badge bg-primary bg-opacity-25 text-white border border-light border-opacity-25 mb-1 px-2 py-1" id="builderCourseCategory">Academic</span>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="builderCourseTitle">Course Content Builder</h5>
+                        <p class="text-white text-opacity-75 mb-0" style="font-size: 12px;" id="builderCourseSubtitle">Visual Syllabus Hierarchy: Course &rarr; Modules &rarr; Lessons &rarr; Resources & Assessments</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    
+                    <!-- Builder Action Bar -->
+                    <div class="builder-action-bar">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fw-bold text-dark" style="font-size: 13px;"><i class="bi bi-diagram-3 text-primary me-1"></i> Syllabus Hierarchy</span>
+                            <span class="badge bg-white text-dark border px-2 py-1" id="builderStatsBadge">0 Modules &bull; 0 Lessons</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary" onclick="openAddModuleModal()">
+                                <i class="bi bi-plus-circle me-1"></i> Add Module
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openAddQuizModal()">
+                                <i class="bi bi-clipboard-plus me-1"></i> Add Quiz
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="openAddAssignmentModal()">
+                                <i class="bi bi-journal-plus me-1"></i> Add Assignment
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tree Hierarchy Container -->
+                    <div id="courseContentTreeContainer">
+                        <!-- Dynamic Modules, Lessons, Resources, Quizzes, Assignments -->
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-white border-top">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close Builder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Module -->
+    <div class="modal fade" id="moduleEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="moduleEditorTitle">Add New Module</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="moduleEditorForm">
+                    <input type="hidden" id="moduleEditorCourseId">
+                    <input type="hidden" id="moduleEditorId">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Module Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="moduleEditorTitleInput" placeholder="e.g. Module 1 — Introduction to Web Development" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Order / Sequence #</label>
+                                <input type="number" class="form-control" id="moduleEditorOrder" value="1" min="1">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Estimated Duration</label>
+                                <input type="text" class="form-control" id="moduleEditorDuration" value="2 Weeks" placeholder="2 Weeks">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-semibold">Learning Objectives / Description</label>
+                            <textarea class="form-control" id="moduleEditorDesc" rows="2" placeholder="Topics and skills covered in this chapter..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3" id="saveModuleBtn">Save Module</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Lesson & Materials -->
+    <div class="modal fade" id="lessonEditorModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold" id="courseModalTitle">Specialized Course</h5>
+                    <h5 class="modal-title fw-bold" id="lessonEditorTitle">Add Lesson & Learning Materials</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form id="courseForm" novalidate>
-                    <input type="hidden" id="courseId">
+                <form id="lessonEditorForm">
+                    <input type="hidden" id="lessonEditorModuleId">
+                    <input type="hidden" id="lessonEditorCourseId">
+                    <input type="hidden" id="lessonEditorId">
                     <div class="modal-body p-4">
                         <div class="row g-3">
-                            <!-- 1. Course Title * -->
                             <div class="col-md-8">
-                                <label class="form-label fw-semibold">Course Title <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="courseTitle" required placeholder="e.g. Full-Stack Modern Web Architecture">
-                                <div class="invalid-feedback" id="courseTitleFeedback">Course Title is required (min 3 chars).</div>
+                                <label class="form-label fw-semibold">Lesson Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lessonEditorTitleInput" placeholder="e.g. Lesson 1.1 — HTML5 Semantic Structure" required>
                             </div>
-                            <!-- 2. Difficulty * -->
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Difficulty <span class="text-danger">*</span></label>
-                                <select class="form-select" id="courseDifficulty" required>
-                                    <option value="Beginner">Beginner</option>
-                                    <option value="Intermediate">Intermediate</option>
-                                    <option value="Advanced">Advanced</option>
-                                </select>
+                                <label class="form-label fw-semibold">Duration</label>
+                                <input type="text" class="form-control" id="lessonEditorDuration" value="45 Mins" placeholder="45 Mins">
                             </div>
-                            <!-- 3. Category * -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
-                                <select class="form-select" id="courseCategorySelect" required>
-                                    <!-- Dynamic -->
-                                </select>
-                                <div class="invalid-feedback">Please select a category.</div>
-                            </div>
-                            <!-- 4. Instructor * -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Instructor <span class="text-danger">*</span></label>
-                                <select class="form-select" id="courseInstructorSelect" required>
-                                    <!-- Dynamic -->
-                                </select>
-                                <div class="invalid-feedback">Please select an instructor.</div>
-                            </div>
-                            <!-- 5. Duration -->
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Estimated Duration</label>
-                                <input type="text" class="form-control" id="courseDuration" value="8 Weeks" placeholder="e.g. 8 Weeks">
-                            </div>
-                            <!-- 6. Lessons Count -->
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Lessons Count</label>
-                                <input type="number" class="form-control" id="courseLessons" value="12" min="1">
-                            </div>
-                            <!-- 7. Course Price ($) -->
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Course Price ($)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number" class="form-control" id="coursePrice" value="0.00" min="0" step="0.01" placeholder="0.00">
-                                </div>
-                            </div>
-                            <!-- 8. Badge -->
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Badge</label>
-                                <input type="text" class="form-control" id="courseBadge" placeholder="e.g. Popular, Featured, New">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Lesson Summary</label>
+                                <textarea class="form-control" id="lessonEditorDesc" rows="2" placeholder="Summary of topics discussed in this lesson..."></textarea>
                             </div>
 
-                            <!-- Deadlines Section -->
-                            <div class="col-12 mt-3">
+                            <!-- Video Upload & Stream Section -->
+                            <div class="col-12">
                                 <div class="p-3 bg-light rounded border">
                                     <div class="d-flex align-items-center mb-2">
-                                        <i class="bi bi-calendar-event text-primary me-2 fs-5"></i>
-                                        <span class="fw-bold text-dark">Course Deadlines & Lifecycle Dates</span>
+                                        <i class="bi bi-camera-video text-primary me-2 fs-5"></i>
+                                        <span class="fw-bold text-dark">Lesson Video Stream</span>
                                     </div>
-                                    <div class="row g-3">
-                                        <!-- 9. Enrollment Start Date -->
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-semibold">Enrollment Opens</label>
-                                            <input type="date" class="form-control form-control-sm" id="courseEnrollmentStart">
-                                        </div>
-                                        <!-- 10. Enrollment Deadline -->
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-semibold">Enrollment Deadline</label>
-                                            <input type="date" class="form-control form-control-sm" id="courseEnrollmentDeadline">
-                                            <div class="invalid-feedback small" id="courseDeadlineFeedback">Deadline must be after start.</div>
-                                        </div>
-                                        <!-- 11. Course Start Date -->
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-semibold">Course Starts</label>
-                                            <input type="date" class="form-control form-control-sm" id="courseStartDate">
-                                        </div>
-                                        <!-- 12. Course End Date -->
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-semibold">Course Ends</label>
-                                            <input type="date" class="form-control form-control-sm" id="courseEndDate">
+                                    <div class="file-upload-dropzone p-3" id="lessonVideoDropzone">
+                                        <input type="file" id="lessonVideoInput" accept="video/mp4, video/webm, video/quicktime">
+                                        <i class="bi bi-film text-primary fs-3 d-block mb-1"></i>
+                                        <span class="fw-semibold text-dark d-block">🎥 Upload Video File</span>
+                                        <span class="text-muted" style="font-size: 11px;">MP4, WebM, MOV &bull; Max 100 MB &bull; Direct stream</span>
+                                    </div>
+                                    
+                                    <!-- Video Preview Container -->
+                                    <div id="videoPreviewContainer" style="display: none;" class="mt-2 p-2 bg-white rounded border">
+                                        <video controls class="upload-preview-video mb-2" id="videoPreviewPlayer"></video>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="small text-muted" id="videoFileInfo">video.mp4 (18.4 MB)</span>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" id="replaceLessonVideoBtn" style="font-size: 11px;">
+                                                    <i class="bi bi-arrow-repeat me-1"></i> Replace Video
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="removeVideoBtn" style="font-size: 11px;">
+                                                    <i class="bi bi-trash me-1"></i> Remove
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="mt-2" id="courseStatusPreviewContainer">
-                                        <span class="small text-muted">Computed Status Preview:</span>
-                                        <span class="badge bg-primary ms-1" id="courseStatusPreviewBadge">Enrollment Open</span>
+
+                                    <div class="mt-2">
+                                        <label class="form-label small text-muted">Or Video URL / Stream Key:</label>
+                                        <input type="text" class="form-control form-control-sm" id="lessonVideoUrl" placeholder="https://stream.aub.edu.kh/courses/web-dev/lesson1.mp4">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- 13. Description * -->
+                            <!-- Learning Materials Attachment (PDF/DOCX/PPTX/ZIP) -->
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Course Description <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="courseDesc" rows="3" required placeholder="Comprehensive course description, syllabus overview, and expected outcomes..."></textarea>
-                                <div class="invalid-feedback" id="courseDescFeedback">Description is required (minimum 10 characters).</div>
+                                <div class="p-3 bg-light rounded border">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-file-earmark-pdf text-danger me-2 fs-5"></i>
+                                        <span class="fw-bold text-dark">Learning Material / Document Attachment</span>
+                                    </div>
+                                    <div class="file-upload-dropzone p-3" id="materialDropzone">
+                                        <input type="file" id="lessonMaterialInput" accept=".pdf, .doc, .docx, .ppt, .pptx, .zip, .png, .jpg">
+                                        <i class="bi bi-file-earmark-arrow-up text-danger fs-3 d-block mb-1"></i>
+                                        <span class="fw-semibold text-dark d-block">📄 Select Document / PDF Material</span>
+                                        <span class="text-muted" style="font-size: 11px;">PDF, DOCX, PPTX, ZIP, Images</span>
+                                    </div>
+
+                                    <!-- Material Preview Container -->
+                                    <div id="materialPreviewContainer" style="display: none;" class="mt-2 p-2 bg-white rounded border d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-pdf text-danger fs-4"></i>
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 12px;" id="materialFileName">document.pdf</div>
+                                                <div class="text-muted" style="font-size: 10.5px;" id="materialFileSize">1.4 MB</div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="removeMaterialBtn" style="font-size: 11px;">Remove</button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- 14. Published -->
-                            <div class="col-md-6 d-flex align-items-center">
-                                <div class="form-check form-switch mb-0">
-                                    <input class="form-check-input" type="checkbox" id="coursePublished" checked>
-                                    <label class="form-check-label fw-semibold ms-2" for="coursePublished">Published (Active)</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3" id="saveLessonBtn">Save Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Quiz with QCM Questions -->
+    <div class="modal fade" id="quizEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="quizEditorTitle">Add Course Quiz & QCM Questions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="quizEditorForm">
+                    <input type="hidden" id="quizEditorCourseId">
+                    <input type="hidden" id="quizEditorId">
+                    <div class="modal-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Quiz Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="quizEditorTitleInput" placeholder="e.g. Module 1 Knowledge Check" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Time (Mins)</label>
+                                <input type="number" class="form-control" id="quizEditorDuration" value="20" min="5">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label fw-semibold">Passing %</label>
+                                <input type="number" class="form-control" id="quizEditorPassing" value="70" min="1" max="100">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Instructions / Description</label>
+                                <textarea class="form-control" id="quizEditorDesc" rows="2" placeholder="Instructions for students taking this assessment..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- QCM Question 1 Box -->
+                        <div class="p-3 bg-light rounded border">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-dark" style="font-size: 13px;"><i class="bi bi-question-circle text-primary me-1"></i> Question 1 (QCM)</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary">Single Choice</span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Question Text</label>
+                                <input type="text" class="form-control form-control-sm" id="qcmQuestionText" placeholder="e.g. Which HTML5 tag is used to specify a section of navigation links?" value="Which HTML5 tag is used to specify a section of navigation links?">
+                            </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text fw-bold">A</span>
+                                        <input type="text" class="form-control" id="qcmOptA" value="<navigation>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text fw-bold">B</span>
+                                        <input type="text" class="form-control" id="qcmOptB" value="<nav>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text fw-bold">C</span>
+                                        <input type="text" class="form-control" id="qcmOptC" value="<navigate>">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text fw-bold">D</span>
+                                        <input type="text" class="form-control" id="qcmOptD" value="<links>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label small fw-bold mb-0">Correct Answer Option:</label>
+                                <select class="form-select form-select-sm" style="width: 140px;" id="qcmCorrectAnswer">
+                                    <option value="0">Option A</option>
+                                    <option value="1" selected>Option B (Correct)</option>
+                                    <option value="2">Option C</option>
+                                    <option value="3">Option D</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3" id="saveQuizBtn">Save Quiz & Questions</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Assignment -->
+    <div class="modal fade" id="assignmentEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="assignmentEditorTitle">Add Course Assignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="assignmentEditorForm">
+                    <input type="hidden" id="assignmentEditorCourseId">
+                    <input type="hidden" id="assignmentEditorId">
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Assignment Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="assignmentEditorTitleInput" placeholder="e.g. Final Project — Responsive Web App" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Total Points</label>
+                                <input type="number" class="form-control" id="assignmentEditorPoints" value="100" min="10">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Due Date</label>
+                                <input type="date" class="form-control" id="assignmentEditorDueDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Status</label>
+                                <select class="form-select" id="assignmentEditorStatus">
+                                    <option value="Active">Active</option>
+                                    <option value="Draft">Draft</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Instructions & Submission Guidelines</label>
+                                <textarea class="form-control" id="assignmentEditorInstructions" rows="3" placeholder="Provide clear task instructions, required deliverables, and evaluation criteria..."></textarea>
+                            </div>
+                            <!-- Attachment Upload -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Starter Attachment / Project Brief (Optional)</label>
+                                <div class="file-upload-dropzone p-3" id="assignmentDropzone">
+                                    <input type="file" id="assignmentFileInput" accept=".pdf, .zip, .docx">
+                                    <i class="bi bi-file-earmark-zip text-primary fs-3 d-block mb-1"></i>
+                                    <span class="fw-semibold text-dark d-block">📁 Attach Project Files / Instructions</span>
+                                    <span class="text-muted" style="font-size: 11px;">ZIP, PDF, DOCX &bull; Max 20 MB</span>
+                                </div>
+                                <div id="assignmentPreviewContainer" style="display: none;" class="mt-2 p-2 bg-white rounded border d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-zip text-primary fs-4"></i>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 12px;" id="assignmentFileName">starter-project.zip</div>
+                                            <div class="text-muted" style="font-size: 10.5px;" id="assignmentFileSize">2.8 MB</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" id="removeAssignmentBtn" style="font-size: 11px;">Remove</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm px-4" id="saveCourseBtn">
-                            <i class="bi bi-check2 me-1"></i> Save Course
-                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm px-3" id="saveAssignmentBtn">Save Assignment</button>
                     </div>
                 </form>
             </div>

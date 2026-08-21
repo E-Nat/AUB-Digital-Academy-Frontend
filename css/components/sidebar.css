@@ -1,1 +1,357 @@
-/* sidebar.css */
+/* ==========================================================================
+   AUB DIGITAL ACADEMY - ADMINISTRATION PORTAL
+   Standalone Sidebar & Navigation Component Stylesheet
+   Accessible, Clean, High-Contrast, Professional Design
+   ========================================================================== */
+
+:root {
+    --sidebar-width: 270px;
+    --sidebar-width-tablet: 270px;
+    --topbar-height: 64px;
+
+    /* Clean White/Light Sidebar Tokens */
+    --admin-sidebar-bg: #FFFFFF;
+    --admin-sidebar-hover: #F1F5F9;
+    --admin-sidebar-hover-text: #0F172A;
+    --admin-sidebar-active-bg: #EFF6FF;
+    --admin-sidebar-active-text: #1D4ED8;
+    --admin-sidebar-text: #334155;
+    --admin-sidebar-text-muted: #64748B;
+    --admin-sidebar-border: #E2E8F0;
+    --admin-sidebar-label: #64748B;
+}
+
+/* ==========================================================================
+   1. SIDEBAR CONTAINER
+   ========================================================================== */
+.admin-sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+    background-color: var(--admin-sidebar-bg);
+    color: var(--admin-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 1000;
+    border-right: 1px solid var(--admin-sidebar-border);
+    box-shadow: none;
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   2. BRANDING / HEADER
+   ========================================================================== */
+.admin-sidebar-brand {
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--admin-sidebar-border);
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
+    box-sizing: border-box;
+    flex-shrink: 0;
+    background: #FFFFFF;
+}
+
+.admin-brand-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+    text-decoration: none;
+}
+
+.admin-brand-logo-img {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 6px;
+}
+
+.admin-brand-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.2;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.admin-brand-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: #0F172A;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.admin-brand-subtitle {
+    font-size: 12px;
+    font-weight: 400;
+    color: #64748B;
+    letter-spacing: 0.005em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* ==========================================================================
+   3. NAVIGATION MENU & SCROLLING
+   ========================================================================== */
+.admin-sidebar-menu {
+    padding: 8px 10px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #E2E8F0 transparent;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar-thumb {
+    background: #E2E8F0;
+    border-radius: 6px;
+}
+
+.admin-sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: #CBD5E1;
+}
+
+/* ==========================================================================
+   4. SECTION LABELS (Muted Slate, Uppercase, 12px)
+   ========================================================================== */
+.admin-sidebar-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--admin-sidebar-label);
+    padding: 14px 10px 4px 10px;
+    line-height: 1;
+    user-select: none;
+}
+
+.admin-sidebar-label:first-of-type {
+    padding-top: 6px;
+}
+
+/* ==========================================================================
+   5. NAVIGATION ITEMS (38px Height, 14.5px Font, 18px Outline Icons)
+   ========================================================================== */
+.admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 10px;
+    color: var(--admin-sidebar-text);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14.5px;
+    line-height: 1.4;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background-color 150ms ease, color 150ms ease;
+    box-sizing: border-box;
+    position: relative;
+    margin-bottom: 2px;
+    outline: none;
+}
+
+.admin-nav-item:last-of-type {
+    margin-bottom: 0;
+}
+
+.admin-nav-item i {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--admin-sidebar-text-muted);
+    transition: color 150ms ease;
+}
+
+.admin-nav-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+    letter-spacing: -0.01em;
+}
+
+/* Hover State */
+.admin-nav-item:hover {
+    color: var(--admin-sidebar-hover-text);
+    background-color: var(--admin-sidebar-hover);
+}
+
+.admin-nav-item:hover i {
+    color: var(--admin-sidebar-active-text);
+}
+
+/* Keyboard Focus State (Accessibility) */
+.admin-nav-item:focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
+}
+
+/* Active State (Soft Blue Background + Left Indicator) */
+.admin-nav-item.active {
+    color: var(--admin-sidebar-active-text);
+    background-color: var(--admin-sidebar-active-bg);
+    font-weight: 600;
+}
+
+.admin-nav-item.active i {
+    color: #2563EB;
+}
+
+.admin-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    background-color: #2563EB;
+    border-radius: 0 3px 3px 0;
+}
+
+/* ==========================================================================
+   6. SIDEBAR FOOTER & LOGOUT
+   ========================================================================== */
+.admin-sidebar-footer {
+    padding: 8px 10px 10px 10px;
+    border-top: 1px solid var(--admin-sidebar-border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+    background: #FFFFFF;
+}
+
+.admin-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0 10px;
+    color: #475569;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    font-size: 14.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    outline: none;
+}
+
+.admin-logout-btn i {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--admin-sidebar-text-muted);
+    transition: color 150ms ease;
+}
+
+.admin-logout-btn span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 1 auto;
+}
+
+.admin-logout-btn:hover {
+    color: #DC2626;
+    background-color: #FEF2F2;
+}
+
+.admin-logout-btn:hover i {
+    color: #DC2626;
+}
+
+.admin-logout-btn:focus-visible {
+    outline: 2px solid #DC2626;
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   7. BACKDROP & MOBILE DRAWER
+   ========================================================================== */
+.admin-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+    display: none;
+    opacity: 0;
+    transition: opacity 160ms ease;
+}
+
+.admin-sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+/* ==========================================================================
+   8. RESPONSIVE BREAKPOINTS
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 85vw;
+        transform: translateX(-100%);
+        z-index: 1050;
+        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+    }
+
+    .admin-sidebar.show {
+        transform: translateX(0);
+    }
+}

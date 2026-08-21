@@ -1,1 +1,277 @@
-<!-- quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Quiz & Assessment - Student Portal - AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <style>
+        .quiz-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--admin-border, #e2e8f0);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .qcm-option-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+        .qcm-option-card:hover {
+            border-color: #93c5fd;
+            background: #f8fafc;
+        }
+        .qcm-option-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .qcm-letter-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .qcm-option-card.selected .qcm-letter-badge {
+            background: #2563eb;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar" id="studentSidebar">
+            <div class="admin-sidebar-brand">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
+                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <div class="title">AUB DIGITAL</div>
+                        <div class="subtitle">STUDENT PORTAL</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="admin-sidebar-menu">
+                <a href="dashboard.html" class="admin-nav-item">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>My Learning</span>
+                </a>
+                <a href="my-courses.html" class="admin-nav-item">
+                    <i class="bi bi-journal-check"></i>
+                    <span>Enrolled Courses</span>
+                </a>
+                <a href="assignment.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Assignments</span>
+                </a>
+                <a href="quiz.html" class="admin-nav-item active">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    <span>Quizzes & Tests</span>
+                </a>
+                <a href="grades.html" class="admin-nav-item">
+                    <i class="bi bi-award"></i>
+                    <span>Grades & Certificates</span>
+                </a>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-people-fill"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-house"></i>
+                    <span>Back to Website</span>
+                </a>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+                <div class="admin-user-card">
+                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="studentAvatar">
+                    <div class="admin-user-info">
+                        <div class="name" id="studentName">Sok Virak</div>
+                        <div class="role" id="studentMajor">Computer Science</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-mobile-toggle" id="mobileSidebarToggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h5 class="mb-0 fw-bold" id="topbarQuizTitle">Quiz Assessment</h5>
+                </div>
+                <div class="admin-topbar-right">
+                    <span class="badge bg-light text-dark border px-3 py-2" id="quizTimerBadge">
+                        <i class="bi bi-clock me-1 text-primary"></i> <span id="timeRemaining">Untimed</span>
+                    </span>
+                </div>
+            </header>
+
+            <div class="admin-content-container py-4">
+
+                <!-- 1. QUIZ SELECTOR VIEW (Shown when no ?id= param is specified) -->
+                <div id="quizListView" style="display: none;">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <div>
+                            <h2 class="admin-page-title mb-1">Available Quizzes & Exams</h2>
+                            <p class="admin-page-subtitle mb-0">Select an assessment from your enrolled courses to begin.</p>
+                        </div>
+                    </div>
+                    <div class="row g-3" id="availableQuizzesContainer">
+                        <div class="col-12 text-center py-5 text-muted">
+                            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                            Loading enrolled course assessments...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. ACTIVE QUIZ TAKING VIEW (Shown when taking quiz) -->
+                <div id="quizTakingView" style="display: none;">
+                    
+                    <!-- Error / Status Notice Banner -->
+                    <div class="alert alert-danger d-none mb-4" id="quizErrorBanner" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span id="quizErrorMessage">Error loading assessment.</span>
+                    </div>
+
+                    <div id="quizActiveContent" class="row justify-content-center">
+                        <div class="col-lg-9">
+                            
+                            <!-- Quiz Header Card -->
+                            <div class="quiz-card p-4 mb-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 mb-2" id="courseBadge">Course Name</span>
+                                        <h3 class="fw-bold mb-1" id="quizDisplayTitle">Quiz Title</h3>
+                                        <p class="text-muted small mb-0" id="quizDisplayDesc">Instructions for taking this assessment.</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-secondary-subtle text-dark border px-3 py-2" id="totalQsBadge">0 Questions</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Question Card Container -->
+                            <div class="quiz-card p-4 mb-4" id="questionCard">
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                    <span class="fw-bold text-muted small" id="questionNumberIndicator">Question 1 of 1</span>
+                                    <span class="badge bg-info-subtle text-info-emphasis" id="questionPointsIndicator">10 Points</span>
+                                </div>
+
+                                <h5 class="fw-bold mb-4 text-dark" id="questionText">Loading question text...</h5>
+
+                                <div id="optionsContainer">
+                                    <!-- QCM Options injected here -->
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                    <button class="btn btn-outline-secondary px-3" id="prevQuestionBtn" disabled>
+                                        <i class="bi bi-arrow-left me-1"></i> Previous
+                                    </button>
+                                    <div>
+                                        <button class="btn btn-primary px-4" id="nextQuestionBtn">
+                                            Next <i class="bi bi-arrow-right ms-1"></i>
+                                        </button>
+                                        <button class="btn btn-success px-4 d-none" id="submitQuizBtn">
+                                            <i class="bi bi-check2-circle me-1"></i> Submit Assessment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 3. QUIZ RESULTS SCORE VIEW (Authoritative Server Graded) -->
+                <div id="quizResultView" style="display: none;">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 col-lg-6">
+                            <div class="quiz-card p-5 text-center">
+                                <div id="resultIcon" class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+                                </div>
+                                <h2 class="fw-bold mb-1" id="resultStatusText">Assessment Completed</h2>
+                                <p class="text-muted mb-4" id="resultQuizTitle">Quiz Title</p>
+
+                                <div class="bg-light rounded-4 p-4 mb-4">
+                                    <div class="row g-3">
+                                        <div class="col-6 border-end">
+                                            <div class="text-muted small fw-semibold">Your Score</div>
+                                            <div class="h2 fw-bold text-primary mb-0" id="resultScore">0 / 0</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-muted small fw-semibold">Percentage</div>
+                                            <div class="h2 fw-bold mb-0" id="resultPercentage">0%</div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-3 text-muted">
+                                    <div class="d-flex justify-content-around text-center">
+                                        <div>
+                                            <div class="small text-success fw-bold" id="resultCorrect">0 Correct</div>
+                                        </div>
+                                        <div>
+                                            <div class="small text-danger fw-bold" id="resultWrong">0 Wrong</div>
+                                        </div>
+                                        <div>
+                                            <div class="small text-muted fw-bold" id="resultAttempt">Attempt #1</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a href="dashboard.html" class="btn btn-outline-secondary px-4">Back to Dashboard</a>
+                                    <a href="grades.html" class="btn btn-primary px-4">View All Grades</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Student Quiz Controller -->
+    <script src="../../js/pages/student-quiz.js"></script>
+</body>
+</html>

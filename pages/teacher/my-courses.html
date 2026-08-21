@@ -82,6 +82,10 @@
                     <i class="bi bi-card-checklist"></i>
                     <span>Assignments</span>
                 </a>
+                <a href="quizzes.html" class="admin-nav-item">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Quizzes & QCM</span>
+                </a>
                 <a href="submissions.html" class="admin-nav-item">
                     <i class="bi bi-inbox-fill"></i>
                     <span>Student Submissions</span>
@@ -344,6 +348,140 @@
                 <div class="modal-footer bg-light py-2">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. ADD MODULE MODAL -->
+    <div class="modal fade" id="addModuleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-folder-plus text-primary me-2"></i>Add Chapter / Module</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addModuleForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Module Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="moduleTitle" placeholder="e.g. Chapter 1: Introduction to Frameworks" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Description / Objectives</label>
+                            <textarea class="form-control" id="moduleDesc" rows="2" placeholder="Overview of topics in this module..."></textarea>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Estimated Duration</label>
+                                <input type="text" class="form-control" id="moduleDuration" value="2 Hours">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Display Order</label>
+                                <input type="number" class="form-control" id="moduleOrder" value="1" min="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" id="saveModuleBtn">Create Module</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. ADD LESSON MODAL -->
+    <div class="modal fade" id="addLessonModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-journal-plus text-primary me-2"></i>Add Lesson</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addLessonForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Select Module / Chapter <span class="text-danger">*</span></label>
+                            <select class="form-select" id="lessonModuleSelect" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Lesson Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="lessonTitle" placeholder="e.g. 1.1 Setting Up Development Environment" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Video Stream URL</label>
+                            <input type="url" class="form-control" id="lessonVideoUrl" placeholder="https://example.com/stream/lesson1.mp4">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Duration</label>
+                                <input type="text" class="form-control" id="lessonDuration" value="25 Mins">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Order Number</label>
+                                <input type="number" class="form-control" id="lessonOrder" value="1" min="1">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Description / Summary</label>
+                            <textarea class="form-control" id="lessonDesc" rows="2" placeholder="Summary of what is covered in this lesson..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4" id="saveLessonBtn">Save Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. UPLOAD MATERIAL MODAL -->
+    <div class="modal fade" id="uploadMaterialModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Attach Learning Material (PDF)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="uploadMaterialForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Select Target Lesson <span class="text-danger">*</span></label>
+                            <select class="form-select" id="materialLessonSelect" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Material Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="materialTitle" placeholder="e.g. Chapter 1 Architecture Diagram & Slide Deck" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Document Type</label>
+                                <select class="form-select" id="materialType">
+                                    <option value="PDF">PDF Slide Deck</option>
+                                    <option value="Worksheet">Lab Worksheet</option>
+                                    <option value="CheatSheet">Cheat Sheet / Guide</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">File Size</label>
+                                <input type="text" class="form-control" id="materialSize" value="2.4 MB">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">File Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="materialFileName" placeholder="e.g. Architecture_Overview.pdf" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">File / Download URL <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="materialFileUrl" placeholder="https://academy.aub.edu.kh/materials/doc.pdf" value="https://academy.aub.edu.kh/materials/doc.pdf" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success px-4" id="saveMaterialBtn">Attach Document</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -7,7 +7,8 @@
     "start": "node server.js",
     "seed": "node db/seeds.js",
     "test": "node test-comprehensive-20-points.js",
-    "test:all": "node test-comprehensive-20-points.js && node test-user-management-suite.js && node test-student-management-suite.js && node test-teacher-suite.js"
+    "test:lms": "node test-lms-architecture.js",
+    "test:all": "node test-comprehensive-20-points.js && node test-user-management-suite.js && node test-student-management-suite.js && node test-teacher-suite.js && node test-lms-architecture.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

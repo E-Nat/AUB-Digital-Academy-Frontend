@@ -13,16 +13,17 @@
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Custom Admin CSS -->
+    <!-- Custom Admin & Dashboard CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <link href="../../css/pages/dashboard.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
     <div class="admin-wrapper">
         
         <!-- SIDEBAR -->
-                                <!-- AUB DIGITAL ACADEMY - MINIMAL WHITE SIDEBAR -->
-        <aside class="admin-sidebar" id="adminSidebar">
+        <!-- AUB DIGITAL ACADEMY - MINIMAL WHITE SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar" aria-label="Administration Sidebar Navigation">
             <div class="admin-sidebar-brand">
                 <div class="admin-brand-header">
                     <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
@@ -33,75 +34,75 @@
                 </div>
             </div>
 
-            <nav class="admin-sidebar-menu">
+            <nav class="admin-sidebar-menu" aria-label="Main Navigation">
                 <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item active">
-                    <i class="bi bi-grid"></i>
+                    <i class="bi bi-grid" aria-hidden="true"></i>
                     <span>Dashboard</span>
                 </a>
 
                 <div class="admin-sidebar-label">ACADEMIC</div>
                 <a href="academic-management.html" class="admin-nav-item">
-                    <i class="bi bi-mortarboard"></i>
+                    <i class="bi bi-mortarboard" aria-hidden="true"></i>
                     <span>Academic Management</span>
                 </a>
                 <a href="course-management.html" class="admin-nav-item">
-                    <i class="bi bi-book"></i>
+                    <i class="bi bi-book" aria-hidden="true"></i>
                     <span>Course Management</span>
                 </a>
                 <a href="exam-management.html" class="admin-nav-item">
-                    <i class="bi bi-clipboard-check"></i>
+                    <i class="bi bi-clipboard-check" aria-hidden="true"></i>
                     <span>Exam & Quiz Management</span>
                 </a>
                 <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check"></i>
+                    <i class="bi bi-person-check" aria-hidden="true"></i>
                     <span>Enrollment Management</span>
                 </a>
                 <a href="schedule-management.html" class="admin-nav-item">
-                    <i class="bi bi-calendar3"></i>
+                    <i class="bi bi-calendar3" aria-hidden="true"></i>
                     <span>Schedule / Calendar</span>
                 </a>
 
                 <div class="admin-sidebar-label">PEOPLE</div>
                 <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
+                    <i class="bi bi-people" aria-hidden="true"></i>
                     <span>User Management</span>
                 </a>
                 <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge"></i>
+                    <i class="bi bi-person-badge" aria-hidden="true"></i>
                     <span>Teacher Management</span>
                 </a>
 
                 <div class="admin-sidebar-label">FINANCE</div>
                 <a href="payment-management.html" class="admin-nav-item">
-                    <i class="bi bi-credit-card"></i>
+                    <i class="bi bi-credit-card" aria-hidden="true"></i>
                     <span>Payments</span>
                 </a>
                 <a href="payment-management.html#invoices" class="admin-nav-item">
-                    <i class="bi bi-receipt"></i>
+                    <i class="bi bi-receipt" aria-hidden="true"></i>
                     <span>Invoices</span>
                 </a>
                 <a href="payroll-management.html" class="admin-nav-item">
-                    <i class="bi bi-wallet2"></i>
+                    <i class="bi bi-wallet2" aria-hidden="true"></i>
                     <span>Teacher Payroll</span>
                 </a>
 
                 <div class="admin-sidebar-label">REPORTS</div>
                 <a href="reports.html" class="admin-nav-item">
-                    <i class="bi bi-bar-chart"></i>
+                    <i class="bi bi-bar-chart" aria-hidden="true"></i>
                     <span>Reports & Analytics</span>
                 </a>
 
                 <div class="admin-sidebar-label">SYSTEM</div>
                 <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear"></i>
+                    <i class="bi bi-gear" aria-hidden="true"></i>
                     <span>Settings</span>
                 </a>
             </nav>
 
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" id="logoutBtn">
-                    <i class="bi bi-box-arrow-left"></i>
+                <button class="admin-logout-btn" id="logoutBtn" type="button" aria-label="Sign Out of Administration Portal">
+                    <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
                     <span>Logout</span>
                 </button>
             </div>
@@ -152,257 +153,291 @@
             <!-- CONTENT BODY -->
             <div class="admin-content">
                 
-                <!-- HEADER & OPERATIONAL TITLE (Accessible 32px Title & 15.5px Subtitle) -->
-                <div class="admin-header-row">
+                <!-- 1. DASHBOARD HEADER & OPERATIONAL TITLE -->
+                <div class="dashboard-header-row">
                     <div>
-                        <h1 class="admin-page-title">Dashboard</h1>
-                        <p class="admin-page-subtitle">Operational overview for AUB Digital Academy</p>
+                        <h1 class="dashboard-page-title">Dashboard</h1>
+                        <p class="dashboard-page-subtitle">Operational overview for AUB Digital Academy</p>
                     </div>
-                    <div class="admin-date-badge">
+                    <div class="dashboard-date-badge">
                         <i class="bi bi-calendar3"></i>
                         <span id="currentDateBadge">August 21, 2026 | Friday</span>
                     </div>
                 </div>
 
-                <!-- GLOBAL DATE FILTER (Accessible 44px Height Controls) -->
-                <div class="admin-date-filter-toolbar">
-                    <div class="admin-date-filter-group">
-                        <span class="admin-date-filter-label"><i class="bi bi-calendar-range"></i> Date Range:</span>
-                        <button class="admin-date-pill active" data-timeframe="all_time" id="btnDateAll">All Time</button>
-                        <button class="admin-date-pill" data-timeframe="today" id="btnDateToday">Today</button>
-                        <button class="admin-date-pill" data-timeframe="this_week" id="btnDateWeek">This Week</button>
-                        <button class="admin-date-pill" data-timeframe="this_month" id="btnDateMonth">This Month</button>
-                        <button class="admin-date-pill" data-timeframe="custom" id="btnDateCustom"><i class="bi bi-sliders me-1"></i> Custom Range</button>
+                <!-- 2. DATE RANGE FILTER TOOLBAR -->
+                <div class="dashboard-filter-toolbar">
+                    <div class="dashboard-filter-group">
+                        <span class="dashboard-filter-label"><i class="bi bi-calendar-range"></i> Date Range:</span>
+                        <button class="dashboard-date-pill active" data-timeframe="all_time" id="btnDateAll">All Time</button>
+                        <button class="dashboard-date-pill" data-timeframe="today" id="btnDateToday">Today</button>
+                        <button class="dashboard-date-pill" data-timeframe="this_week" id="btnDateWeek">This Week</button>
+                        <button class="dashboard-date-pill" data-timeframe="this_month" id="btnDateMonth">This Month</button>
+                        <button class="dashboard-date-pill" data-timeframe="custom" id="btnDateCustom"><i class="bi bi-sliders me-1"></i> Custom Range</button>
                     </div>
                     <div class="d-none d-lg-flex align-items-center gap-2">
                         <span class="text-muted" style="font-size: 13.5px;" id="activeDateRangeDisplay">Showing: All Time Operational Data</span>
                     </div>
                 </div>
 
-                <!-- PRIMARY 4-COLUMN KPI CARDS (Accessibility Prioritized: 4 Desktop, 2 Tablet, 1 Mobile) -->
-                <div class="admin-kpi-primary-grid">
+                <!-- 3. KPI SUMMARY CARDS (3 Columns × 2 Rows on Desktop) -->
+                <div class="dashboard-kpi-grid">
                     <!-- 1. Pending Enrollments -->
-                    <div class="admin-kpi-card" onclick="window.location.href='enrollment-management.html'" title="Click to review pending enrollments">
-                        <div class="admin-kpi-card-top">
-                            <span class="admin-kpi-label">Pending Enrollments</span>
-                            <div class="admin-kpi-icon-wrap orange">
-                                <i class="bi bi-person-lines-fill"></i>
+                    <div class="dashboard-kpi-card" onclick="window.location.href='enrollment-management.html'" title="Review Pending Enrollments" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Enrollments</span>
+                            <div class="dashboard-kpi-icon orange">
+                                <i class="bi bi-people" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="admin-kpi-value" id="kpiPendingEnrollments">0</div>
-                        <div class="admin-kpi-status-badge attention">
-                            <i class="bi bi-exclamation-triangle-fill"></i> Requires Review
+                        <div class="dashboard-kpi-value" id="kpiPendingEnrollments">0</div>
+                        <div class="dashboard-kpi-badge attention">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Requires review
                         </div>
                     </div>
 
                     <!-- 2. Pending Payments -->
-                    <div class="admin-kpi-card" onclick="window.location.href='payment-management.html'" title="Click to view pending payments">
-                        <div class="admin-kpi-card-top">
-                            <span class="admin-kpi-label">Pending Payments</span>
-                            <div class="admin-kpi-icon-wrap amber">
-                                <i class="bi bi-credit-card"></i>
+                    <div class="dashboard-kpi-card" onclick="window.location.href='payment-management.html'" title="View Pending Payments" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Payments</span>
+                            <div class="dashboard-kpi-icon amber">
+                                <i class="bi bi-credit-card" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="admin-kpi-value" id="kpiPendingPayments">0</div>
-                        <div class="admin-kpi-status-badge pending">
-                            <i class="bi bi-clock-history"></i> Awaiting Settlement
+                        <div class="dashboard-kpi-value" id="kpiPendingPayments">0</div>
+                        <div class="dashboard-kpi-badge pending">
+                            <i class="bi bi-clock-history"></i> Awaiting settlement
                         </div>
                     </div>
 
                     <!-- 3. Active Courses -->
-                    <div class="admin-kpi-card" onclick="window.location.href='course-management.html'" title="Click to view active courses">
-                        <div class="admin-kpi-card-top">
-                            <span class="admin-kpi-label">Active Courses</span>
-                            <div class="admin-kpi-icon-wrap blue">
-                                <i class="bi bi-mortarboard"></i>
+                    <div class="dashboard-kpi-card" onclick="window.location.href='course-management.html'" title="View Active Courses" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Active Courses</span>
+                            <div class="dashboard-kpi-icon blue">
+                                <i class="bi bi-book" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="admin-kpi-value" id="kpiActiveCourses">0</div>
-                        <div class="admin-kpi-status-badge success">
-                            <i class="bi bi-check-circle-fill"></i> In Session / Open
+                        <div class="dashboard-kpi-value" id="kpiActiveCourses">0</div>
+                        <div class="dashboard-kpi-badge success">
+                            <i class="bi bi-check-circle-fill"></i> In session / Open
                         </div>
                     </div>
 
-                    <!-- 4. Upcoming Exams -->
-                    <div class="admin-kpi-card" onclick="window.location.href='exam-management.html'" title="Click to view upcoming exams">
-                        <div class="admin-kpi-card-top">
-                            <span class="admin-kpi-label">Upcoming Exams</span>
-                            <div class="admin-kpi-icon-wrap purple">
-                                <i class="bi bi-calendar-event"></i>
+                    <!-- 4. Completed Courses -->
+                    <div class="dashboard-kpi-card" onclick="window.location.href='academic-management.html'" title="View Completed Courses" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Completed Courses</span>
+                            <div class="dashboard-kpi-icon green">
+                                <i class="bi bi-mortarboard" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="admin-kpi-value" id="kpiUpcomingExams">0</div>
-                        <div class="admin-kpi-status-badge purple">
-                            <i class="bi bi-clock"></i> Scheduled Term
+                        <div class="dashboard-kpi-value" id="kpiCompletedCourses">0</div>
+                        <div class="dashboard-kpi-badge success">
+                            <i class="bi bi-archive-fill"></i> Archived / Completed
+                        </div>
+                    </div>
+
+                    <!-- 5. Upcoming Exams -->
+                    <div class="dashboard-kpi-card" onclick="window.location.href='exam-management.html'" title="View Upcoming Exams" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Upcoming Exams</span>
+                            <div class="dashboard-kpi-icon purple">
+                                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-kpi-value" id="kpiUpcomingExams">0</div>
+                        <div class="dashboard-kpi-badge purple">
+                            <i class="bi bi-clock"></i> Scheduled term
+                        </div>
+                    </div>
+
+                    <!-- 6. Pending Results -->
+                    <div class="dashboard-kpi-card" onclick="window.location.href='exam-management.html'" title="View Pending Exam Submissions" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Results</span>
+                            <div class="dashboard-kpi-icon red">
+                                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="dashboard-kpi-value" id="kpiPendingResults">0</div>
+                        <div class="dashboard-kpi-badge danger">
+                            <i class="bi bi-clipboard-data"></i> Awaiting grading
                         </div>
                     </div>
                 </div>
 
-                <!-- SECONDARY OPERATIONAL STRIP (Completed Courses & Pending Results) -->
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 border mb-4 shadow-xs" style="border-radius: 12px !important; border-color: var(--admin-border) !important;">
-                    <div class="d-flex flex-wrap align-items-center gap-4">
-                        <div class="d-flex align-items-center gap-2" onclick="window.location.href='academic-management.html'" style="cursor: pointer;">
-                            <span class="badge bg-light text-dark border px-2.5 py-1.5" style="font-size: 13.5px; font-weight: 700;">
-                                <i class="bi bi-archive me-1 text-muted"></i> <span id="kpiCompletedCourses">0</span>
-                            </span>
-                            <span class="text-secondary" style="font-size: 14px; font-weight: 500;">Completed / Past Courses</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2" onclick="window.location.href='exam-management.html'" style="cursor: pointer;">
-                            <span class="badge bg-light text-dark border px-2.5 py-1.5" style="font-size: 13.5px; font-weight: 700;">
-                                <i class="bi bi-hourglass-split me-1 text-warning"></i> <span id="kpiPendingResults">0</span>
-                            </span>
-                            <span class="text-secondary" style="font-size: 14px; font-weight: 500;">Pending Exam Results</span>
-                        </div>
-                    </div>
-                    <div class="text-muted" style="font-size: 13px;">
-                        <i class="bi bi-info-circle me-1"></i> Secondary Academic Records
-                    </div>
-                </div>
-
-                <!-- FINANCIAL SUMMARY HERO (Section 8) -->
-                <div class="admin-finance-hero">
-                    <div class="admin-finance-main">
-                        <div class="admin-finance-title">Total Paid Revenue</div>
-                        <div class="admin-finance-revenue-row">
-                            <span class="admin-finance-amount" id="kpiTotalRevenue">$0.00</span>
-                            <span class="admin-finance-trend">
+                <!-- 4. FINANCIAL SUMMARY (One Clean Wide Card) -->
+                <div class="dashboard-finance-card">
+                    <div class="dashboard-finance-hero">
+                        <div class="dashboard-finance-title">Total Paid Revenue</div>
+                        <div class="dashboard-finance-amount-row">
+                            <span class="dashboard-finance-amount" id="kpiTotalRevenue">$0.00</span>
+                            <span class="dashboard-finance-trend">
                                 <i class="bi bi-arrow-up-right"></i> +14.5% vs previous
                             </span>
                         </div>
-                        <div class="admin-finance-meta">
+                        <div class="dashboard-finance-meta">
                             <span><strong id="kpiPaidInvoicesCount">0</strong> Paid Invoices</span>
                             <span>•</span>
                             <a href="payment-management.html#invoices">View Invoices →</a>
                         </div>
                     </div>
 
-                    <div class="admin-finance-pillar">
-                        <span class="admin-finance-pillar-label">Pending Payments</span>
-                        <span class="admin-finance-pillar-value" id="kpiPendingRevenueAmount">$0.00</span>
-                        <span class="admin-finance-pillar-sub"><span id="kpiPendingCount">0</span> pending orders</span>
+                    <div class="dashboard-finance-pillar">
+                        <span class="dashboard-finance-pillar-label">Pending Payments</span>
+                        <span class="dashboard-finance-pillar-value" id="kpiPendingRevenueAmount">$0.00</span>
+                        <span class="dashboard-finance-pillar-sub"><span id="kpiPendingCount">0</span> pending orders</span>
                     </div>
 
-                    <div class="admin-finance-pillar">
-                        <span class="admin-finance-pillar-label">Outstanding Invoices</span>
-                        <span class="admin-finance-pillar-value" id="kpiOutstandingInvoicesCount">0</span>
-                        <span class="admin-finance-pillar-sub text-warning"><i class="bi bi-clock me-1"></i>Awaiting settlement</span>
+                    <div class="dashboard-finance-pillar">
+                        <span class="dashboard-finance-pillar-label">Outstanding Invoices</span>
+                        <span class="dashboard-finance-pillar-value" id="kpiOutstandingInvoicesCount">0</span>
+                        <span class="dashboard-finance-pillar-sub text-warning"><i class="bi bi-clock me-1"></i>Awaiting settlement</span>
                     </div>
 
-                    <div class="admin-finance-pillar">
-                        <span class="admin-finance-pillar-label">Total Gross Volume</span>
-                        <span class="admin-finance-pillar-value" id="kpiGrossRevenueAmount">$0.00</span>
-                        <span class="admin-finance-pillar-sub text-muted">All relational transactions</span>
-                    </div>
-                </div>
-
-                <!-- QUICK ACTIONS BAR (4 Accessible 44px Buttons) -->
-                <div class="admin-quick-actions-bar mb-4">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 bg-white rounded-3 border shadow-xs" style="border-radius: 12px !important; border-color: var(--admin-border) !important;">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-xs fw-bold text-uppercase text-muted" style="letter-spacing: 0.06em; font-size: 12px;">
-                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Actions:
-                            </span>
-                        </div>
-                        <div class="d-flex flex-wrap align-items-center gap-2 w-100-mobile">
-                            <a href="user-management.html" class="btn btn-outline-primary admin-quick-action-btn">
-                                <i class="bi bi-person-plus-fill"></i> Add New User
-                            </a>
-                            <a href="course-management.html" class="btn btn-outline-primary admin-quick-action-btn">
-                                <i class="bi bi-journal-plus"></i> Add New Course
-                            </a>
-                            <a href="exam-management.html" class="btn btn-outline-primary admin-quick-action-btn">
-                                <i class="bi bi-calendar-plus-fill"></i> Schedule Exam
-                            </a>
-                            <a href="enrollment-management.html" class="btn btn-outline-primary admin-quick-action-btn">
-                                <i class="bi bi-person-check-fill"></i> Enroll Student
-                            </a>
-                        </div>
+                    <div class="dashboard-finance-pillar">
+                        <span class="dashboard-finance-pillar-label">Total Gross Volume</span>
+                        <span class="dashboard-finance-pillar-value" id="kpiGrossRevenueAmount">$0.00</span>
+                        <span class="dashboard-finance-pillar-sub text-muted">All relational transactions</span>
                     </div>
                 </div>
 
-                <!-- ANALYTICS ROW (Section 9) -->
-                <div class="row g-3 mb-4">
-                    <!-- Enrollment by Discipline / Category Donut -->
+                <!-- 5. QUICK ACTIONS BAR -->
+                <div class="dashboard-quick-actions-bar">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-xs fw-bold text-uppercase text-muted" style="letter-spacing: 0.06em; font-size: 12.5px;">
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Actions:
+                        </span>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <a href="user-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
+                            <i class="bi bi-person-plus"></i> Add User
+                        </a>
+                        <a href="course-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
+                            <i class="bi bi-journal-plus"></i> Add Course
+                        </a>
+                        <a href="exam-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
+                            <i class="bi bi-calendar-plus"></i> Schedule Exam
+                        </a>
+                        <a href="enrollment-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
+                            <i class="bi bi-person-check"></i> Enroll Student
+                        </a>
+                        <a href="settings.html" class="btn btn-outline-secondary dashboard-quick-action-btn">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 6. MAIN ANALYTICS SECTION (Two-Column Layout, Equal Height) -->
+                <div class="row g-4 mb-4">
+                    <!-- Left: Enrollment & Exam Trends (BAR CHART) -->
                     <div class="col-lg-6">
-                        <div class="admin-card h-100 mb-0">
-                            <div class="admin-card-header">
+                        <div class="dashboard-card h-100 mb-0">
+                            <div class="dashboard-card-header">
                                 <div>
-                                    <h3 class="admin-card-title">Enrollment by Discipline</h3>
-                                    <p class="text-muted mb-0" style="font-size: 13px;">Student distribution across academic course categories</p>
+                                    <h2 class="dashboard-card-title">Enrollment & Exam Trends</h2>
+                                    <p class="dashboard-card-subtitle">Student enrollment and examination activity over time</p>
                                 </div>
-                                <select class="admin-dropdown-select" id="enrollmentTimeframeSelect">
+                                <div class="chart-legend-wrap">
+                                    <span class="chart-legend-item">
+                                        <span class="chart-legend-dot" style="background: #2563EB;"></span> Enrollments
+                                    </span>
+                                    <span class="chart-legend-item">
+                                        <span class="chart-legend-dot" style="background: #7C3AED;"></span> Exam Results
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Interactive SVG Bar Chart -->
+                            <div class="barchart-container" id="enrollmentExamBarChartContainer">
+                                <svg viewBox="0 0 540 220" class="barchart-svg" id="trendsBarChartSvg" role="img" aria-label="Monthly Enrollment and Exam Activity Bar Chart">
+                                    <!-- Dynamic SVG Content Rendered by JS -->
+                                </svg>
+                                <div id="chartTooltip" class="chart-floating-tooltip" role="tooltip"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Students by Major (DONUT CHART) -->
+                    <div class="col-lg-6">
+                        <div class="dashboard-card h-100 mb-0">
+                            <div class="dashboard-card-header">
+                                <div>
+                                    <h2 class="dashboard-card-title">Students by Major</h2>
+                                    <p class="dashboard-card-subtitle">Active student distribution by academic specialization</p>
+                                </div>
+                                <select class="admin-dropdown-select" id="majorTimeframeSelect" aria-label="Filter students by major timeframe">
                                     <option value="this_month">This Month</option>
                                     <option value="last_month">Last Month</option>
                                     <option value="last_3_months">Last 3 Months</option>
                                     <option value="this_year">This Year</option>
-                                    <option value="all_time">All Time</option>
+                                    <option value="all_time" selected>All Time</option>
                                 </select>
                             </div>
-                            <div class="row align-items-center">
-                                <div class="col-sm-5 text-center position-relative py-3">
-                                    <div class="donut-chart-container">
-                                        <svg viewBox="0 0 36 36" class="donut-chart" style="width: 130px; height: 130px; transform: rotate(-90deg);" id="enrollmentDonutSvg">
-                                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.2"></circle>
-                                            <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#0B1628" stroke-width="3.2" stroke-dasharray="100 0" stroke-linecap="round"></circle>
-                                        </svg>
-                                        <div class="position-absolute top-50 start-50 translate-middle text-center lh-1" style="pointer-events: none;">
-                                            <div class="text-muted mb-1" style="font-size: 11px; font-weight: 500;">Total</div>
-                                            <div class="fw-bold text-dark" style="font-size: 22px; font-variant-numeric: tabular-nums;" id="donutTotalNumber">0</div>
-                                        </div>
+                            
+                            <div class="donut-chart-box">
+                                <div class="donut-svg-wrap">
+                                    <svg viewBox="0 0 36 36" style="width: 140px; height: 140px; transform: rotate(-90deg);" id="studentsMajorDonutSvg" role="img" aria-label="Students by Major Donut Chart">
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.6"></circle>
+                                    </svg>
+                                    <div class="donut-center-info">
+                                        <div class="donut-center-label">TOTAL</div>
+                                        <div class="donut-center-value" id="donutTotalStudents">0</div>
                                     </div>
                                 </div>
-                                <div class="col-sm-7 ps-sm-3">
-                                    <div class="categories-scroll-list" id="enrollmentCategoriesList"></div>
+                                <div class="donut-legend-list" id="studentsByMajorContainer">
+                                    <!-- Dynamic Major Items -->
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Students Distribution by Major Bars -->
-                    <div class="col-lg-6">
-                        <div class="admin-card h-100 mb-0">
-                            <div class="admin-card-header">
-                                <div>
-                                    <h3 class="admin-card-title">Students by Major</h3>
-                                    <p class="text-muted mb-0" style="font-size: 13px;">Active student headcounts by primary degree specialization</p>
-                                </div>
-                                <select class="admin-dropdown-select" id="majorTimeframeSelect">
-                                    <option value="this_month">This Month</option>
-                                    <option value="last_month">Last Month</option>
-                                    <option value="last_3_months">Last 3 Months</option>
-                                    <option value="this_year">This Year</option>
-                                    <option value="all_time">All Time</option>
-                                </select>
-                            </div>
-                            <div class="majors-scroll-list" id="studentsByMajorContainer"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- OPERATIONS ROW: RECENT ENROLLMENTS (Section 10) & UPCOMING EXAMS (Section 11) -->
-                <div class="row g-3">
-                    <!-- Recent Enrollments (Section 10) -->
+                <!-- 7. ENROLLMENT BY DISCIPLINE (Horizontal Progress Visualization) -->
+                <div class="dashboard-card mb-4">
+                    <div class="dashboard-card-header">
+                        <div>
+                            <h2 class="dashboard-card-title">Enrollment by Discipline</h2>
+                            <p class="dashboard-card-subtitle">Student distribution across academic course categories</p>
+                        </div>
+                        <select class="admin-dropdown-select" id="enrollmentTimeframeSelect" aria-label="Filter enrollment discipline timeframe">
+                            <option value="this_month">This Month</option>
+                            <option value="last_month">Last Month</option>
+                            <option value="last_3_months">Last 3 Months</option>
+                            <option value="this_year">This Year</option>
+                            <option value="all_time" selected>All Time</option>
+                        </select>
+                    </div>
+                    <div class="discipline-list" id="enrollmentCategoriesList">
+                        <!-- Dynamic Categories -->
+                    </div>
+                </div>
+
+                <!-- 8. OPERATIONS ROW: RECENT ENROLLMENTS & UPCOMING EXAMS -->
+                <div class="row g-4">
+                    <!-- Recent Enrollments Table -->
                     <div class="col-xl-7 col-12">
-                        <div class="admin-card mb-0 h-100">
-                            <div class="admin-card-header">
+                        <div class="dashboard-card mb-0 h-100">
+                            <div class="dashboard-card-header">
                                 <div>
-                                    <h3 class="admin-card-title">Recent Enrollments</h3>
-                                    <p class="text-muted mb-0" style="font-size: 13px;">Latest course registrations from active students</p>
+                                    <h2 class="dashboard-card-title">Recent Enrollments</h2>
+                                    <p class="dashboard-card-subtitle">Latest student course registrations</p>
                                 </div>
-                                <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 12.5px; font-weight: 600;">
+                                <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 13px; font-weight: 600;">
                                     View All <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
-                            <div class="table-container admin-table-responsive">
-                                <table class="admin-table">
+                            <div class="dashboard-table-container">
+                                <table class="dashboard-table dashboard-table-responsive-cards" aria-label="Recent Enrollments Table">
                                     <thead>
                                         <tr>
-                                            <th>STUDENT</th>
-                                            <th>COURSE</th>
-                                            <th>ENROLLED</th>
-                                            <th>PROGRESS</th>
-                                            <th>STATUS</th>
-                                            <th class="text-end">ACTION</th>
+                                            <th scope="col">STUDENT</th>
+                                            <th scope="col">COURSE</th>
+                                            <th scope="col">ENROLLED</th>
+                                            <th scope="col">PROGRESS</th>
+                                            <th scope="col">STATUS</th>
+                                            <th scope="col" class="text-end">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody id="recentEnrollmentsTableBody">
@@ -413,27 +448,27 @@
                         </div>
                     </div>
 
-                    <!-- Upcoming Exams (Section 11) -->
+                    <!-- Upcoming Exams Table -->
                     <div class="col-xl-5 col-12">
-                        <div class="admin-card mb-0 h-100">
-                            <div class="admin-card-header">
+                        <div class="dashboard-card mb-0 h-100">
+                            <div class="dashboard-card-header">
                                 <div>
-                                    <h3 class="admin-card-title">Upcoming Exams</h3>
-                                    <p class="text-muted mb-0" style="font-size: 13px;">Scheduled academic evaluations & tests</p>
+                                    <h2 class="dashboard-card-title">Upcoming Exams</h2>
+                                    <p class="dashboard-card-subtitle">Scheduled academic evaluations & tests</p>
                                 </div>
-                                <a href="exam-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 12.5px; font-weight: 600;">
+                                <a href="exam-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 13px; font-weight: 600;">
                                     Manage <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
-                            <div class="table-container admin-table-responsive">
-                                <table class="admin-table">
+                            <div class="dashboard-table-container">
+                                <table class="dashboard-table dashboard-table-responsive-cards" aria-label="Upcoming Exams Table">
                                     <thead>
                                         <tr>
-                                            <th>EXAM</th>
-                                            <th>DATE & TIME</th>
-                                            <th>STUDENTS</th>
-                                            <th>STATUS</th>
-                                            <th class="text-end">ACTION</th>
+                                            <th scope="col">EXAM</th>
+                                            <th scope="col">DATE & TIME</th>
+                                            <th scope="col">STUDENTS</th>
+                                            <th scope="col">STATUS</th>
+                                            <th scope="col" class="text-end">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody id="upcomingExamsTableBody">
@@ -449,7 +484,7 @@
         </main>
     </div>
 
-    <!-- CUSTOM DATE RANGE MODAL (Section 6) -->
+    <!-- CUSTOM DATE RANGE MODAL -->
     <div class="modal fade" id="customDateModal" tabindex="-1" aria-labelledby="customDateModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
@@ -460,7 +495,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-muted mb-3" style="font-size: 13px;">Filter operational dashboard analytics and metrics within a specific timeframe.</p>
+                    <p class="text-muted mb-3" style="font-size: 13.5px;">Filter operational dashboard analytics and metrics within a specific timeframe.</p>
                     <div class="row g-3">
                         <div class="col-12 col-sm-6">
                             <label class="form-label fw-semibold" style="font-size: 13px;">Start Date *</label>

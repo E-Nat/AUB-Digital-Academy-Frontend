@@ -1,1 +1,901 @@
-/* dashboard.css */
+/* ==========================================================================
+   AUB DIGITAL ACADEMY - REDESIGNED DASHBOARD STYLESHEET
+   Clean Academic Administration + Modern SaaS Analytics + High Accessibility
+   ========================================================================== */
+
+/* 1. Dashboard Global Layout Tokens & Containers */
+:root {
+    --dash-bg: #F7F9FC;
+    --dash-card-bg: #FFFFFF;
+    --dash-border: #E7ECF2;
+    --dash-border-subtle: #F1F5F9;
+    --dash-text-main: #0F172A;
+    --dash-text-secondary: #64748B;
+    --dash-text-muted: #94A3B8;
+    --dash-primary: #2563EB;
+    --dash-primary-hover: #1D4ED8;
+    --dash-primary-light: #EFF6FF;
+    --dash-success: #059669;
+    --dash-success-light: #ECFDF5;
+    --dash-warning: #D97706;
+    --dash-warning-light: #FFFBEB;
+    --dash-orange: #EA580C;
+    --dash-orange-light: #FFF7ED;
+    --dash-purple: #7C3AED;
+    --dash-purple-light: #F5F3FF;
+    --dash-danger: #EF4444;
+    --dash-danger-light: #FEF2F2;
+    --dash-radius: 14px;
+    --dash-radius-lg: 16px;
+    --dash-radius-pill: 999px;
+    --dash-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    --dash-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.admin-body {
+    background-color: var(--dash-bg);
+}
+
+.admin-main {
+    background-color: var(--dash-bg);
+}
+
+.admin-content {
+    background-color: var(--dash-bg);
+    padding: 24px 28px;
+}
+
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 16px 14px;
+    }
+}
+
+/* 2. Dashboard Header */
+.dashboard-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.dashboard-page-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--dash-text-main);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin: 0 0 4px 0;
+}
+
+.dashboard-page-subtitle {
+    font-size: 15.5px;
+    font-weight: 400;
+    color: var(--dash-text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.dashboard-date-badge {
+    background: var(--dash-card-bg);
+    border: 1px solid var(--dash-border);
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dash-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--dash-shadow);
+    flex-shrink: 0;
+}
+
+.dashboard-date-badge i {
+    color: var(--dash-primary);
+    font-size: 16px;
+}
+
+/* 3. Date Range Filter Toolbar */
+.dashboard-filter-toolbar {
+    background: var(--dash-card-bg);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius);
+    padding: 12px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: var(--dash-shadow);
+}
+
+.dashboard-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    padding-bottom: 2px;
+}
+
+.dashboard-filter-group::-webkit-scrollbar {
+    height: 4px;
+}
+.dashboard-filter-group::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+
+.dashboard-filter-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dash-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.dashboard-date-pill {
+    background: var(--dash-card-bg);
+    border: 1.5px solid #E2E8F0;
+    color: #334155;
+    border-radius: 10px;
+    height: 42px;
+    padding: 0 16px;
+    font-size: 14.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 180ms ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    outline: none;
+}
+
+.dashboard-date-pill:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--dash-primary);
+}
+
+.dashboard-date-pill.active {
+    background: var(--dash-primary);
+    border-color: var(--dash-primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.dashboard-date-pill:focus-visible {
+    outline: 2px solid var(--dash-primary);
+    outline-offset: 2px;
+}
+
+/* 4. KPI Summary Cards Grid (3 columns × 2 rows on Desktop) */
+.dashboard-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard-kpi-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+.dashboard-kpi-card {
+    background: var(--dash-card-bg);
+    border-radius: var(--dash-radius);
+    border: 1px solid var(--dash-border);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 128px;
+    box-shadow: var(--dash-shadow);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+}
+
+.dashboard-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--dash-shadow-hover);
+    border-color: #CBD5E1;
+}
+
+.dashboard-kpi-card:focus-visible {
+    outline: 2px solid var(--dash-primary);
+    outline-offset: 2px;
+}
+
+.dashboard-kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.dashboard-kpi-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dash-text-secondary);
+    line-height: 1.25;
+}
+
+.dashboard-kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    flex-shrink: 0;
+}
+
+.dashboard-kpi-icon.orange { background: var(--dash-orange-light); color: var(--dash-orange); }
+.dashboard-kpi-icon.amber  { background: var(--dash-warning-light); color: var(--dash-warning); }
+.dashboard-kpi-icon.blue   { background: var(--dash-primary-light); color: var(--dash-primary); }
+.dashboard-kpi-icon.green  { background: var(--dash-success-light); color: var(--dash-success); }
+.dashboard-kpi-icon.purple { background: var(--dash-purple-light); color: var(--dash-purple); }
+.dashboard-kpi-icon.red    { background: var(--dash-danger-light); color: var(--dash-danger); }
+
+.dashboard-kpi-value {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--dash-text-main);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.dashboard-kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 8px;
+    line-height: 1.3;
+    width: fit-content;
+}
+
+.dashboard-kpi-badge.attention {
+    background: var(--dash-orange-light);
+    color: #C2410C;
+    border: 1px solid #FDBA74;
+}
+
+.dashboard-kpi-badge.pending {
+    background: var(--dash-warning-light);
+    color: #B45309;
+    border: 1px solid #FDE68A;
+}
+
+.dashboard-kpi-badge.success {
+    background: var(--dash-success-light);
+    color: #047857;
+    border: 1px solid #A7F3D0;
+}
+
+.dashboard-kpi-badge.purple {
+    background: var(--dash-purple-light);
+    color: #6D28D9;
+    border: 1px solid #DDD6FE;
+}
+
+.dashboard-kpi-badge.danger {
+    background: var(--dash-danger-light);
+    color: #B91C1C;
+    border: 1px solid #FECACA;
+}
+
+/* 5. Financial Summary Card */
+.dashboard-finance-card {
+    background: var(--dash-card-bg);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius-lg);
+    padding: 22px 26px;
+    margin-bottom: 24px;
+    box-shadow: var(--dash-shadow);
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
+    gap: 24px;
+    align-items: center;
+}
+
+@media (max-width: 1199px) {
+    .dashboard-finance-card {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-finance-card {
+        grid-template-columns: 1fr;
+        padding: 18px;
+        gap: 16px;
+    }
+}
+
+.dashboard-finance-hero {
+    border-right: 1px solid var(--dash-border-subtle);
+    padding-right: 22px;
+}
+
+@media (max-width: 1199px) {
+    .dashboard-finance-hero {
+        border-right: none;
+        border-bottom: 1px solid var(--dash-border-subtle);
+        padding-bottom: 18px;
+        padding-right: 0;
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-finance-hero {
+        grid-column: span 1;
+    }
+}
+
+.dashboard-finance-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dash-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+}
+
+.dashboard-finance-amount-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.dashboard-finance-amount {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--dash-text-main);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+}
+
+.dashboard-finance-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #047857;
+    background: var(--dash-success-light);
+    border: 1px solid #A7F3D0;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.dashboard-finance-meta {
+    font-size: 14px;
+    color: var(--dash-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-finance-meta a {
+    color: var(--dash-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.dashboard-finance-meta a:hover {
+    text-decoration: underline;
+}
+
+.dashboard-finance-pillar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dashboard-finance-pillar-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--dash-text-secondary);
+}
+
+.dashboard-finance-pillar-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dash-text-main);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.dashboard-finance-pillar-sub {
+    font-size: 13px;
+    color: var(--dash-text-muted);
+}
+
+/* 6. Main Analytics Two-Column Cards */
+.dashboard-card {
+    background: var(--dash-card-bg);
+    border-radius: var(--dash-radius-lg);
+    border: 1px solid var(--dash-border);
+    padding: 22px;
+    box-shadow: var(--dash-shadow);
+    margin-bottom: 24px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.dashboard-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dash-text-main);
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+}
+
+.dashboard-card-subtitle {
+    font-size: 13.5px;
+    color: var(--dash-text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Chart Legend Styling */
+.chart-legend-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dash-text-secondary);
+    flex-wrap: wrap;
+}
+
+.chart-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chart-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Interactive SVG Bar Chart Container */
+.barchart-container {
+    position: relative;
+    width: 100%;
+    min-height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.barchart-svg {
+    width: 100%;
+    height: 220px;
+    overflow: visible;
+}
+
+.barchart-grid-line {
+    stroke: #E2E8F0;
+    stroke-dasharray: 4 4;
+    stroke-width: 1;
+}
+
+.barchart-axis-text {
+    fill: #64748B;
+    font-size: 11.5px;
+    font-family: inherit;
+    font-weight: 500;
+    text-anchor: middle;
+}
+
+.barchart-bar {
+    transition: opacity 180ms ease, transform 180ms ease;
+    cursor: pointer;
+}
+
+.barchart-bar:hover {
+    opacity: 0.85;
+}
+
+/* Chart Floating Tooltip */
+.chart-floating-tooltip {
+    position: absolute;
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+    z-index: 50;
+    display: none;
+    transform: translate(-50%, -100%);
+    margin-top: -8px;
+    white-space: nowrap;
+}
+
+/* Donut Chart Layout */
+.donut-chart-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-height: 220px;
+}
+
+@media (max-width: 768px) {
+    .donut-chart-box {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+.donut-svg-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.donut-center-info {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.donut-center-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--dash-text-muted);
+    margin-bottom: 3px;
+}
+
+.donut-center-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--dash-text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.donut-legend-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.donut-legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    background: #F8FAFC;
+    border: 1px solid transparent;
+    transition: background 150ms ease;
+}
+
+.donut-legend-item:hover {
+    background: #F1F5F9;
+    border-color: #E2E8F0;
+}
+
+/* 7. Enrollment by Discipline Horizontal Bars */
+.discipline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.discipline-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.discipline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13.5px;
+}
+
+.discipline-name {
+    font-weight: 600;
+    color: var(--dash-text-main);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.discipline-count {
+    font-weight: 700;
+    color: var(--dash-text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.discipline-progress-track {
+    height: 8px;
+    background: #F1F5F9;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.discipline-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 8. Quick Actions Section */
+.dashboard-quick-actions-bar {
+    background: var(--dash-card-bg);
+    border: 1px solid var(--dash-border);
+    border-radius: var(--dash-radius);
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    box-shadow: var(--dash-shadow);
+}
+
+.dashboard-quick-action-btn {
+    height: 42px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 180ms ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* 9. Accessible Tables & Mobile Card Transformation */
+.dashboard-table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 14px;
+}
+
+.dashboard-table th {
+    background: #F8FAFC;
+    color: var(--dash-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--dash-border);
+    white-space: nowrap;
+}
+
+.dashboard-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--dash-border-subtle);
+    color: var(--dash-text-main);
+    vertical-align: middle;
+}
+
+.dashboard-table tbody tr {
+    transition: background 150ms ease;
+}
+
+.dashboard-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Table Student Cell */
+.table-student-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.table-student-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #E5EAF1;
+    flex-shrink: 0;
+}
+
+.table-student-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--dash-text-main);
+    line-height: 1.2;
+}
+
+.table-student-id {
+    font-size: 12px;
+    color: var(--dash-text-secondary);
+}
+
+/* Status Badges */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-pill.active { background: var(--dash-success-light); color: #047857; }
+.status-pill.active .dot { background-color: #047857; }
+
+.status-pill.completed { background: var(--dash-primary-light); color: #1D4ED8; }
+.status-pill.completed .dot { background-color: #1D4ED8; }
+
+.status-pill.pending { background: var(--dash-warning-light); color: #B45309; }
+.status-pill.pending .dot { background-color: #B45309; }
+
+.status-pill.scheduled { background: var(--dash-purple-light); color: #6D28D9; }
+.status-pill.scheduled .dot { background-color: #6D28D9; }
+
+.table-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--dash-border);
+    background: #FFFFFF;
+    color: var(--dash-text-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 150ms ease;
+}
+
+.table-action-btn:hover {
+    background: var(--dash-primary-light);
+    color: var(--dash-primary);
+    border-color: #BFDBFE;
+}
+
+/* Mobile Responsive Transformation for Tables (max-width: 768px) */
+@media (max-width: 768px) {
+    .dashboard-table-responsive-cards thead {
+        display: none;
+    }
+
+    .dashboard-table-responsive-cards tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dashboard-table-responsive-cards tr {
+        display: flex;
+        flex-direction: column;
+        background: #FFFFFF;
+        border: 1px solid var(--dash-border);
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .dashboard-table-responsive-cards td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+        border: none;
+    }
+
+    .dashboard-table-responsive-cards td:first-child {
+        padding-top: 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--dash-border-subtle);
+        margin-bottom: 6px;
+    }
+
+    .dashboard-table-responsive-cards td::before {
+        content: attr(data-label);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--dash-text-secondary);
+        letter-spacing: 0.04em;
+    }
+
+    .dashboard-table-responsive-cards td:first-child::before {
+        display: none;
+    }
+}

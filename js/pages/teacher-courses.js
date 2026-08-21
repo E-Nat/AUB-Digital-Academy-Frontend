@@ -1,333 +1,573 @@
 /**
- * AUB Digital Academy - Teacher Courses Controller
- * LMS Faculty view: Course cards with "Open Course", lesson syllabus, and learning materials.
+ * AUB Digital Academy - Teacher Courses & Content Hierarchy Controller
+ * Connects Faculty Workspace directly to REST APIs: Courses, Modules, Lessons & Learning Materials
  */
 
-document.addEventListener('DOMContentLoaded', function () {
-    const coursesData = [
-        {
-            id: 1,
-            title: 'Full-Stack Web Development',
-            category: 'Technology',
-            students_count: 1250,
-            lessons_count: 12,
-            pending_reviews: 8,
-            rating: 4.9,
-            status: 'Active',
-            description: 'Comprehensive curriculum covering modern web application architecture, RESTful API design, database modeling, and interactive frontend development.',
-            banner: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600',
-            lessons: [
-                { id: 1, order: 1, title: 'Course Overview & Dev Environment Setup', duration: '45 mins', is_free: 1 },
-                { id: 2, order: 2, title: 'HTML5 Semantic Layouts & CSS Grid System', duration: '60 mins', is_free: 1 },
-                { id: 3, order: 3, title: 'Modern JavaScript ES6+ Features', duration: '75 mins', is_free: 0 },
-                { id: 4, order: 4, title: 'Node.js & Express.js REST API Architecture', duration: '90 mins', is_free: 0 },
-                { id: 5, order: 5, title: 'Relational Database Design with SQLite & PostgreSQL', duration: '80 mins', is_free: 0 },
-                { id: 6, order: 6, title: 'JWT Authentication & Role-Based Access Control', duration: '85 mins', is_free: 0 }
-            ],
-            materials: [
-                { id: 1, title: 'Full-Stack Architecture Slide Deck (PDF)', size: '4.8 MB', date: 'Aug 10, 2026' },
-                { id: 2, title: 'Database Normalization & Schema Cheatsheet', size: '1.2 MB', date: 'Aug 14, 2026' }
-            ],
-            students: [
-                { name: 'Sreyneang Sok', id: '202401234', progress: '85%', last: '2h ago', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150' },
-                { name: 'Sokha Chan', id: '202401235', progress: '78%', last: '5h ago', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150' },
-                { name: 'Dara Keo', id: '202401236', progress: '92%', last: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150' }
-            ]
-        },
-        {
-            id: 2,
-            title: 'Python for Data Science & AI',
-            category: 'Technology',
-            students_count: 820,
-            lessons_count: 10,
-            pending_reviews: 4,
-            rating: 4.8,
-            status: 'Active',
-            description: 'Learn NumPy, Pandas, statistical modeling, machine learning algorithms, and deep neural networks.',
-            banner: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600',
-            lessons: [
-                { id: 101, order: 1, title: 'Python Fundamentals & Data Structures', duration: '50 mins', is_free: 1 },
-                { id: 102, order: 2, title: 'Data Cleaning & Wrangling with Pandas', duration: '70 mins', is_free: 0 },
-                { id: 103, order: 3, title: 'Statistical Analysis & Visualizations with Seaborn', duration: '65 mins', is_free: 0 }
-            ],
-            materials: [
-                { id: 11, title: 'Pandas Data Wrangling Guide.pdf', size: '2.5 MB', date: 'Aug 12, 2026' }
-            ],
-            students: [
-                { name: 'Vannak Chan', id: '202401239', progress: '65%', last: '1h ago', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=150' },
-                { name: 'Chanthou Meas', id: '202401235', progress: '70%', last: '3h ago', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150' }
-            ]
-        },
-        {
-            id: 3,
-            title: 'Cloud DevOps',
-            category: 'Technology',
-            students_count: 540,
-            lessons_count: 8,
-            pending_reviews: 2,
-            rating: 4.9,
-            status: 'Active',
-            description: 'Containerization with Docker, CI/CD pipelines, Kubernetes orchestration, and cloud architecture.',
-            banner: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600',
-            lessons: [
-                { id: 201, order: 1, title: 'Cloud Fundamentals & AWS Services Overview', duration: '60 mins', is_free: 1 },
-                { id: 202, order: 2, title: 'Docker Containers & Multi-Stage Builds', duration: '85 mins', is_free: 0 }
-            ],
-            materials: [
-                { id: 21, title: 'Docker & Kubernetes Cheat Sheet.pdf', size: '3.1 MB', date: 'Aug 15, 2026' }
-            ],
-            students: [
-                { name: 'Kanha Rath', id: '202401237', progress: '90%', last: '4h ago', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150' }
-            ]
-        }
-    ];
+document.addEventListener('DOMContentLoaded', async function () {
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.protocol === 'file:';
+    const API_BASE = (isLocal && window.location.port !== '5000') 
+        ? 'http://localhost:5000/api' 
+        : '/api';
 
-    let currentSelectedCourse = coursesData[0];
+    function getAuthToken() {
+        return localStorage.getItem('aub_auth_token') || 
+               localStorage.getItem('token') || 
+               sessionStorage.getItem('aub_auth_token') || 
+               sessionStorage.getItem('token') || '';
+    }
+
+    function getHeaders() {
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
+    }
+
+    // State
+    let assignedCourses = [];
+    let activeCourse = null;
+    let activeCourseDetails = null;
+
+    // Modals
     const courseManageModalEl = document.getElementById('courseManageModal');
     const courseManageModal = courseManageModalEl ? new bootstrap.Modal(courseManageModalEl) : null;
 
-    // 1. Render Courses Grid (Requirement 5: Clean cards with [ Open Course ])
-    function renderCoursesGrid(courses) {
+    const addModuleModalEl = document.getElementById('addModuleModal');
+    const addModuleModal = addModuleModalEl ? new bootstrap.Modal(addModuleModalEl) : null;
+
+    const addLessonModalEl = document.getElementById('addLessonModal');
+    const addLessonModal = addLessonModalEl ? new bootstrap.Modal(addLessonModalEl) : null;
+
+    const uploadMaterialModalEl = document.getElementById('uploadMaterialModal');
+    const uploadMaterialModal = uploadMaterialModalEl ? new bootstrap.Modal(uploadMaterialModalEl) : null;
+
+    // Update Teacher Name Display
+    const currentUserName = localStorage.getItem('user_full_name') || 'Dr. Sarah Johnson';
+    document.querySelectorAll('.teacher-name-display').forEach(el => el.textContent = currentUserName);
+
+    // ==========================================================================
+    // 1. LOAD ASSIGNED COURSES (GET /api/teacher/courses)
+    // ==========================================================================
+    async function loadAssignedCourses() {
+        const grid = document.getElementById('coursesListGrid');
+        if (grid) {
+            grid.innerHTML = `<div class="col-12 text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading assigned courses...</div>`;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/teacher/courses`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && Array.isArray(data.data)) {
+                    assignedCourses = data.data;
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching teacher courses:', err);
+        }
+
+        renderCoursesGrid();
+    }
+
+    function renderCoursesGrid() {
         const grid = document.getElementById('coursesListGrid');
         if (!grid) return;
 
-        grid.innerHTML = courses.map(course => `
-            <div class="col-lg-4 col-md-6">
-                <div class="teacher-course-card">
-                    <div class="teacher-course-banner" style="background-image: url('${course.banner}');">
-                        <div class="position-absolute top-0 start-0 p-3 z-1">
-                            <span class="badge bg-dark bg-opacity-75 text-white text-xs">${course.category}</span>
-                        </div>
-                        <div class="position-absolute top-0 end-0 p-3 z-1">
-                            <span class="badge bg-warning text-dark text-xs fw-bold"><i class="bi bi-star-fill me-1"></i> ${course.rating} ★</span>
-                        </div>
-                        <div class="position-absolute bottom-0 start-0 p-3 z-1 text-white">
-                            <h5 class="fw-bold mb-0 text-white">${course.title}</h5>
-                        </div>
+        const searchVal = (document.getElementById('courseSearchInput')?.value || '').toLowerCase().trim();
+        let filtered = assignedCourses;
+
+        if (searchVal) {
+            filtered = filtered.filter(c => 
+                (c.title || '').toLowerCase().includes(searchVal) ||
+                (c.category_name || '').toLowerCase().includes(searchVal)
+            );
+        }
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <div class="p-5 bg-light rounded-4 border text-center">
+                        <i class="bi bi-book text-muted" style="font-size: 3rem;"></i>
+                        <h5 class="fw-bold mt-3">No Assigned Courses Found</h5>
+                        <p class="text-muted small">You currently have no active course assignments. Please contact the Academic Administrator.</p>
                     </div>
+                </div>
+            `;
+            return;
+        }
 
-                    <div class="teacher-course-body">
-                        <p class="text-muted text-xs mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            ${course.description}
-                        </p>
-
-                        <div class="teacher-course-meta-grid mb-3">
-                            <div class="teacher-meta-item">
-                                <span>Students</span>
-                                <strong>${course.students_count.toLocaleString()} Students</strong>
-                            </div>
-                            <div class="teacher-meta-item">
-                                <span>Lessons</span>
-                                <strong>${course.lessons_count} Lessons</strong>
-                            </div>
-                            <div class="teacher-meta-item">
-                                <span>Rating</span>
-                                <strong class="text-warning">${course.rating} ★</strong>
-                            </div>
-                            <div class="teacher-meta-item">
-                                <span>Pending</span>
-                                <strong class="text-warning">${course.pending_reviews} to review</strong>
-                            </div>
+        grid.innerHTML = filtered.map(course => {
+            const bannerImg = course.thumbnail_url || 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=600';
+            return `
+                <div class="col-lg-4 col-md-6">
+                    <div class="teacher-course-card border rounded-3 overflow-hidden shadow-sm h-100 d-flex flex-column bg-white">
+                        <div class="position-relative" style="height: 160px; background-image: url('${bannerImg}'); background-size: cover; background-position: center;">
+                            <span class="badge bg-dark bg-opacity-75 text-white position-absolute top-0 start-0 m-3 px-2 py-1">
+                                ${escapeHtml(course.category_name || 'Academic')}
+                            </span>
                         </div>
-
-                        <div class="d-flex gap-2 mt-auto pt-2">
-                            <button type="button" class="btn btn-primary btn-sm flex-fill fw-semibold" onclick="openCourseDetails(${course.id})">
-                                Open Course <i class="bi bi-arrow-right ms-1"></i>
-                            </button>
-                            <a href="my-students.html?course=${course.id}" class="btn btn-outline-secondary btn-sm flex-fill">
-                                Students
-                            </a>
+                        <div class="p-3 d-flex flex-column flex-grow-1 justify-content-between">
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1">${escapeHtml(course.title)}</h5>
+                                <div class="text-xs text-muted mb-3 d-flex gap-3">
+                                    <span><i class="bi bi-clock me-1"></i>${course.duration_hours || 40} Hours</span>
+                                    <span><i class="bi bi-journal-text me-1"></i>${course.lesson_count || 0} Lessons</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 pt-2 border-top">
+                                <button class="btn btn-primary btn-sm flex-grow-1" onclick="openCourseInspector(${course.id})">
+                                    <i class="bi bi-folder2-open me-1"></i> Open Course Content
+                                </button>
+                                <a href="quizzes.html" class="btn btn-outline-secondary btn-sm" title="Quizzes">
+                                    <i class="bi bi-clipboard-check"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // 2. Open Course Details & Syllabus (Requirement 6)
-    window.openCourseDetails = function (courseId) {
-        const course = coursesData.find(c => c.id === courseId) || coursesData[0];
-        currentSelectedCourse = course;
-
-        document.getElementById('modalCourseTitle').textContent = course.title;
-        document.getElementById('modalCourseSubtitle').textContent = `Category: ${course.category} • ${course.students_count.toLocaleString()} Enrolled Students`;
-        document.getElementById('courseDescContent').textContent = course.description;
-        document.getElementById('courseActiveStudents').textContent = course.students_count.toLocaleString();
-        document.getElementById('courseTotalLessons').textContent = course.lessons.length;
-        document.getElementById('courseRating').textContent = `${course.rating} ★`;
-
-        renderLessonsTab(course);
-        renderMaterialsTab(course);
-        renderStudentsTab(course);
-
+    // ==========================================================================
+    // 2. OPEN COURSE CONTENT INSPECTOR (GET /api/admin/courses/:id/details)
+    // ==========================================================================
+    window.openCourseInspector = async function (courseId) {
+        activeCourse = assignedCourses.find(c => c.id === courseId) || { id: courseId, title: 'Course Content' };
+        
+        document.getElementById('modalCourseTitle').textContent = activeCourse.title;
+        document.getElementById('modalCourseSubtitle').textContent = `Category: ${activeCourse.category_name || 'Academic'} • Course ID: #${courseId}`;
+        
         if (courseManageModal) courseManageModal.show();
+        await loadCourseFullDetails(courseId);
     };
 
-    function renderLessonsTab(course) {
-        const container = document.getElementById('lessonsListContainer');
-        if (!container) return;
-
-        container.innerHTML = course.lessons.map((lesson, idx) => `
-            <div class="lesson-draggable-item">
-                <div class="d-flex align-items-center gap-3">
-                    <span class="badge bg-light text-dark border font-monospace text-xs">${idx + 1}</span>
-                    <div>
-                        <div class="fw-bold text-dark text-sm">${lesson.title}</div>
-                        <div class="text-xs text-muted"><i class="bi bi-clock me-1"></i> ${lesson.duration} &bull; ${lesson.is_free ? '<span class="text-success fw-semibold">Preview Available</span>' : '<span class="text-muted">Enrolled Only</span>'}</div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center gap-1">
-                    <button class="btn btn-outline-secondary btn-sm py-1 px-2" title="Move Up" onclick="moveLesson(${course.id}, ${idx}, -1)">
-                        <i class="bi bi-arrow-up"></i>
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm py-1 px-2" title="Move Down" onclick="moveLesson(${course.id}, ${idx}, 1)">
-                        <i class="bi bi-arrow-down"></i>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+    async function loadCourseFullDetails(courseId) {
+        try {
+            const res = await fetch(`${API_BASE}/admin/courses/${courseId}/details`, { headers: getHeaders() });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && data.data) {
+                    activeCourseDetails = data.data;
+                    renderOverviewTab();
+                    renderLessonsTab();
+                    renderMaterialsTab();
+                    renderAssignmentsTab();
+                    renderStudentsTab();
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching course details:', err);
+        }
     }
 
-    function renderMaterialsTab(course) {
-        const container = document.getElementById('courseMaterialsList');
-        if (!container) return;
+    // Render Overview
+    function renderOverviewTab() {
+        if (!activeCourseDetails) return;
+        const c = activeCourseDetails.course || activeCourse;
+        const descEl = document.getElementById('courseDescContent');
+        if (descEl) descEl.textContent = c.description || 'Comprehensive university curriculum.';
 
-        container.innerHTML = course.materials.map(mat => `
-            <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-2 bg-primary bg-opacity-10 text-primary rounded">
-                        <i class="bi bi-file-earmark-pdf fs-4"></i>
+        const studentsCount = (activeCourseDetails.students || []).length;
+        const lessonsCount = (activeCourseDetails.modules || []).reduce((acc, m) => acc + (m.lessons || []).length, 0);
+
+        document.getElementById('courseActiveStudents').textContent = studentsCount;
+        document.getElementById('courseTotalLessons').textContent = lessonsCount;
+    }
+
+    // Render Lessons & Syllabus Hierarchy (Module -> Lessons -> Videos & PDFs)
+    function renderLessonsTab() {
+        const container = document.getElementById('lessonsListContainer');
+        if (!container || !activeCourseDetails) return;
+
+        const modules = activeCourseDetails.modules || [];
+        if (modules.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted bg-light rounded-3 p-4">
+                    <i class="bi bi-folder2 text-muted fs-2"></i>
+                    <p class="mb-2 mt-2">No chapters/modules created yet.</p>
+                    <button class="btn btn-outline-primary btn-sm" onclick="openAddModuleModal()">
+                        <i class="bi bi-plus-circle me-1"></i> Add First Module
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = modules.map((mod, mIdx) => {
+            const lessons = mod.lessons || [];
+            return `
+                <div class="card border rounded-3 mb-3 shadow-none">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary px-2 py-1">Ch. ${mIdx + 1}</span>
+                            <span class="fw-bold text-dark">${escapeHtml(mod.title)}</span>
+                            <span class="text-muted text-xs">(${lessons.length} lessons • ${mod.duration || '2 Hours'})</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary btn-sm" onclick="openAddLessonModal(${mod.id})" title="Add Lesson">
+                                <i class="bi bi-plus-lg me-1"></i> Add Lesson
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteModule(${mod.id})" title="Delete Module">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
+                    <div class="card-body p-2">
+                        ${lessons.length === 0 ? '<div class="text-muted small py-2 px-3">No lessons in this module.</div>' : `
+                            <div class="list-group list-group-flush">
+                                ${lessons.map(les => `
+                                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-0 rounded-2 mb-1 bg-light-subtle">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-play-circle text-primary fs-5"></i>
+                                            <div>
+                                                <div class="fw-semibold text-dark text-sm">${escapeHtml(les.title)}</div>
+                                                <div class="text-xs text-muted">
+                                                    <span class="me-2"><i class="bi bi-clock me-1"></i>${les.duration || '20 Mins'}</span>
+                                                    ${les.video_url ? '<span class="badge bg-info-subtle text-info-emphasis me-1"><i class="bi bi-camera-video me-1"></i>Video Attached</span>' : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="openUploadMaterialForLesson(${les.id})" title="Attach PDF">
+                                                <i class="bi bi-paperclip"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" onclick="deleteLesson(${les.id})" title="Delete Lesson">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Render Learning Materials
+    function renderMaterialsTab() {
+        const container = document.getElementById('courseMaterialsList');
+        if (!container || !activeCourseDetails) return;
+
+        const materials = activeCourseDetails.materials || [];
+        if (materials.length === 0) {
+            container.innerHTML = `<div class="text-center py-4 text-muted bg-light rounded-3">No learning materials / PDFs attached to this course yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = materials.map(mat => `
+            <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-3"></i>
                     <div>
-                        <div class="fw-bold text-dark text-sm">${mat.title}</div>
-                        <div class="text-xs text-muted">${mat.size} &bull; Uploaded ${mat.date}</div>
+                        <div class="fw-bold text-dark">${escapeHtml(mat.title)}</div>
+                        <div class="text-xs text-muted">${mat.file_name} • ${mat.file_size || '1.5 MB'}</div>
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary btn-sm text-xs" onclick="Swal.fire({ icon: 'info', title: 'Downloading file...' })">
-                        <i class="bi bi-download"></i> Download
-                    </button>
+                    <a href="${mat.file_url}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-download me-1"></i> View / Download
+                    </a>
                 </div>
             </div>
         `).join('');
     }
 
-    function renderStudentsTab(course) {
-        const tbody = document.getElementById('courseStudentsTableBody');
-        if (!tbody) return;
+    // Render Assignments Tab
+    function renderAssignmentsTab() {
+        const container = document.getElementById('courseAssignmentsList');
+        if (!container || !activeCourseDetails) return;
 
-        tbody.innerHTML = course.students.map(st => `
+        const assignments = activeCourseDetails.assignments || [];
+        if (assignments.length === 0) {
+            container.innerHTML = `<div class="text-center py-4 text-muted bg-light rounded-3">No assignments created for this course yet.</div>`;
+            return;
+        }
+
+        container.innerHTML = assignments.map(a => `
+            <div class="p-3 bg-light rounded-3 border d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <div class="fw-bold text-dark">${escapeHtml(a.title)}</div>
+                    <div class="text-xs text-muted">Due: ${a.due_date ? new Date(a.due_date).toLocaleDateString() : 'N/A'} • Total Points: ${a.total_points || 100}</div>
+                </div>
+                <a href="submissions.html?assignmentId=${a.id}" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-inbox me-1"></i> View Submissions
+                </a>
+            </div>
+        `).join('');
+    }
+
+    // Render Enrolled Students
+    function renderStudentsTab() {
+        const tbody = document.getElementById('courseStudentsTableBody');
+        if (!tbody || !activeCourseDetails) return;
+
+        const students = activeCourseDetails.students || [];
+        if (students.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">No students enrolled in this course yet.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = students.map(st => `
             <tr>
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <img src="${st.avatar}" class="rounded-circle" style="width: 32px; height: 32px;">
-                        <span class="fw-bold text-dark text-sm">${st.name}</span>
+                        <img src="${st.avatar_url || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150'}" class="rounded-circle" width="32" height="32">
+                        <div>
+                            <div class="fw-bold text-dark text-sm">${escapeHtml(st.full_name || 'Student')}</div>
+                            <div class="text-xs text-muted">${st.email || st.university_id || ''}</div>
+                        </div>
                     </div>
                 </td>
                 <td>
-                    <div class="d-flex align-items-center gap-2" style="width: 140px;">
+                    <div class="d-flex align-items-center gap-2">
                         <div class="progress flex-grow-1" style="height: 6px;">
-                            <div class="progress-bar bg-primary" style="width: ${st.progress};"></div>
+                            <div class="progress-bar bg-primary" style="width: ${st.progress_percentage || 0}%;"></div>
                         </div>
-                        <span class="text-xs fw-bold text-dark">${st.progress}</span>
+                        <span class="text-xs fw-bold">${Math.round(st.progress_percentage || 0)}%</span>
                     </div>
                 </td>
-                <td class="text-muted text-xs">${st.last}</td>
+                <td class="text-muted text-xs">${st.enrolled_at ? new Date(st.enrolled_at).toLocaleDateString() : 'Active'}</td>
                 <td class="text-end">
-                    <a href="my-students.html" class="btn btn-outline-primary btn-sm py-1 px-2 text-xs">
-                        <i class="bi bi-eye me-1"></i> View Progress
-                    </a>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
                 </td>
             </tr>
         `).join('');
     }
 
-    window.openAddLessonModal = async function () {
-        const { value: formValues } = await Swal.fire({
-            title: 'Add Lesson',
-            html: `
-                <div class="text-start">
-                    <div class="mb-3">
-                        <label class="form-label text-xs fw-bold text-muted">Lesson Title *</label>
-                        <input type="text" id="swalLessonTitle" class="form-control form-control-sm" placeholder="e.g. Asynchronous JavaScript & Promises">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-xs fw-bold text-muted">Duration Estimate</label>
-                        <input type="text" id="swalLessonDuration" class="form-control form-control-sm" value="60 mins">
-                    </div>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: 'Add Lesson',
-            confirmButtonColor: '#2563eb',
-            preConfirm: () => {
-                const title = document.getElementById('swalLessonTitle').value.trim();
-                if (!title) { Swal.showValidationMessage('Lesson title is required'); return false; }
-                return {
-                    title: title,
-                    duration: document.getElementById('swalLessonDuration').value.trim() || '45 mins'
-                };
+    // ==========================================================================
+    // 3. ADD MODULE (POST /api/admin/chapters)
+    // ==========================================================================
+    window.openAddModuleModal = function () {
+        const form = document.getElementById('addModuleForm');
+        if (form) form.reset();
+        if (addModuleModal) addModuleModal.show();
+    };
+
+    document.getElementById('addModuleForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (!activeCourse) return;
+
+        const btn = document.getElementById('saveModuleBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+        const payload = {
+            course_id: activeCourse.id,
+            title: document.getElementById('moduleTitle').value.trim(),
+            description: document.getElementById('moduleDesc').value.trim(),
+            duration: document.getElementById('moduleDuration').value.trim() || '2 Hours',
+            order_num: parseInt(document.getElementById('moduleOrder').value) || 1,
+            status: 'Published'
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/chapters`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'Module Created!', timer: 1500, showConfirmButton: false });
+                if (addModuleModal) addModuleModal.hide();
+                await loadCourseFullDetails(activeCourse.id);
+            } else {
+                Swal.fire('Error', data.message || 'Failed to create module', 'error');
             }
-        });
-
-        if (formValues && currentSelectedCourse) {
-            const nextOrder = currentSelectedCourse.lessons.length + 1;
-            currentSelectedCourse.lessons.push({
-                id: Date.now(),
-                order: nextOrder,
-                title: formValues.title,
-                duration: formValues.duration,
-                is_free: 0
-            });
-            renderLessonsTab(currentSelectedCourse);
-            Swal.fire({ icon: 'success', title: 'Lesson Added', timer: 1400, showConfirmButton: false });
+        } catch (err) {
+            Swal.fire('Error', 'Unable to reach backend server', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Create Module';
         }
+    });
+
+    // ==========================================================================
+    // 4. ADD LESSON (POST /api/admin/lessons)
+    // ==========================================================================
+    window.openAddLessonModal = function (preselectModuleId) {
+        const select = document.getElementById('lessonModuleSelect');
+        const modules = activeCourseDetails?.modules || [];
+
+        if (select) {
+            select.innerHTML = modules.map(m => `<option value="${m.id}" ${m.id === preselectModuleId ? 'selected' : ''}>${m.title}</option>`).join('');
+        }
+
+        const form = document.getElementById('addLessonForm');
+        if (form) form.reset();
+        if (preselectModuleId && select) select.value = preselectModuleId;
+        if (addLessonModal) addLessonModal.show();
     };
 
-    window.openUploadMaterialModal = async function () {
-        const { value: title } = await Swal.fire({
-            title: 'Upload Material',
-            input: 'text',
-            inputLabel: 'Document / Slide Title',
-            inputPlaceholder: 'e.g. Lecture 4 Architecture Slides.pdf',
+    document.getElementById('addLessonForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('saveLessonBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+        const payload = {
+            module_id: parseInt(document.getElementById('lessonModuleSelect').value),
+            title: document.getElementById('lessonTitle').value.trim(),
+            video_url: document.getElementById('lessonVideoUrl').value.trim(),
+            duration: document.getElementById('lessonDuration').value.trim() || '20 Mins',
+            order_num: parseInt(document.getElementById('lessonOrder').value) || 1,
+            description: document.getElementById('lessonDesc').value.trim()
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/lessons`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'Lesson Added!', timer: 1500, showConfirmButton: false });
+                if (addLessonModal) addLessonModal.hide();
+                await loadCourseFullDetails(activeCourse.id);
+            } else {
+                Swal.fire('Error', data.message || 'Failed to add lesson', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Error', 'Unable to reach backend server', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Save Lesson';
+        }
+    });
+
+    // ==========================================================================
+    // 5. ATTACH LEARNING MATERIAL (POST /api/admin/materials)
+    // ==========================================================================
+    window.openUploadMaterialModal = function () {
+        openUploadMaterialForLesson(null);
+    };
+
+    window.openUploadMaterialForLesson = function (lessonId) {
+        const select = document.getElementById('materialLessonSelect');
+        const modules = activeCourseDetails?.modules || [];
+        const allLessons = [];
+        modules.forEach(m => (m.lessons || []).forEach(l => allLessons.push(l)));
+
+        if (select) {
+            select.innerHTML = allLessons.map(l => `<option value="${l.id}" ${l.id === lessonId ? 'selected' : ''}>${l.title}</option>`).join('');
+        }
+
+        const form = document.getElementById('uploadMaterialForm');
+        if (form) form.reset();
+        if (lessonId && select) select.value = lessonId;
+        if (uploadMaterialModal) uploadMaterialModal.show();
+    };
+
+    document.getElementById('uploadMaterialForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('saveMaterialBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Uploading...';
+
+        const payload = {
+            lesson_id: parseInt(document.getElementById('materialLessonSelect').value),
+            course_id: activeCourse?.id,
+            title: document.getElementById('materialTitle').value.trim(),
+            type: document.getElementById('materialType').value,
+            file_size: document.getElementById('materialSize').value.trim() || '1.5 MB',
+            file_name: document.getElementById('materialFileName').value.trim(),
+            file_url: document.getElementById('materialFileUrl').value.trim()
+        };
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/materials`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                Swal.fire({ icon: 'success', title: 'Document Attached!', timer: 1500, showConfirmButton: false });
+                if (uploadMaterialModal) uploadMaterialModal.hide();
+                await loadCourseFullDetails(activeCourse.id);
+            } else {
+                Swal.fire('Error', data.message || 'Failed to attach material', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Error', 'Unable to reach backend server', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Attach Document';
+        }
+    });
+
+    // Delete Lesson
+    window.deleteLesson = async function (lessonId) {
+        const confirm = await Swal.fire({
+            title: 'Delete Lesson?',
+            text: 'This will remove the lesson and its attached materials.',
+            icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Upload File',
-            confirmButtonColor: '#2563eb'
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete'
         });
 
-        if (title && currentSelectedCourse) {
-            currentSelectedCourse.materials.push({
-                id: Date.now(),
-                title: title,
-                size: '3.4 MB',
-                date: 'Aug 18, 2026'
+        if (!confirm.isConfirmed) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/admin/lessons/${lessonId}`, {
+                method: 'DELETE',
+                headers: getHeaders()
             });
-            renderMaterialsTab(currentSelectedCourse);
-            Swal.fire({ icon: 'success', title: 'Material Uploaded', timer: 1400, showConfirmButton: false });
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'Lesson Deleted', timer: 1200, showConfirmButton: false });
+                await loadCourseFullDetails(activeCourse.id);
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Failed to delete lesson', 'error');
         }
     };
 
-    window.moveLesson = function (courseId, index, direction) {
-        const course = coursesData.find(c => c.id === courseId);
-        if (!course) return;
+    // Delete Module
+    window.deleteModule = async function (moduleId) {
+        const confirm = await Swal.fire({
+            title: 'Delete Module / Chapter?',
+            text: 'This will delete the module and all its lessons.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete'
+        });
 
-        const targetIndex = index + direction;
-        if (targetIndex < 0 || targetIndex >= course.lessons.length) return;
+        if (!confirm.isConfirmed) return;
 
-        const temp = course.lessons[index];
-        course.lessons[index] = course.lessons[targetIndex];
-        course.lessons[targetIndex] = temp;
-
-        renderLessonsTab(course);
+        try {
+            const res = await fetch(`${API_BASE}/admin/chapters/${moduleId}`, {
+                method: 'DELETE',
+                headers: getHeaders()
+            });
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'Module Deleted', timer: 1200, showConfirmButton: false });
+                await loadCourseFullDetails(activeCourse.id);
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Failed to delete module', 'error');
+        }
     };
 
-    // Check URL parameters for direct course open
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('id');
-    if (targetId) {
-        setTimeout(() => openCourseDetails(parseInt(targetId)), 200);
-    }
+    // Search filter
+    document.getElementById('courseSearchInput')?.addEventListener('input', renderCoursesGrid);
 
-    // Initialize
-    renderCoursesGrid(coursesData);
+    // Initial Load
+    await loadAssignedCourses();
 });
+
+window.logoutTeacher = function () {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = '../authentication/login.html';
+};

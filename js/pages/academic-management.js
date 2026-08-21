@@ -52,6 +52,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const viewCourseModal = viewCourseModalEl ? new bootstrap.Modal(viewCourseModalEl) : null;
     let activeCourseInView = null;
 
+    // Course Content Builder Modals
+    const contentBuilderModalEl = document.getElementById('courseContentBuilderModal');
+    const contentBuilderModal = contentBuilderModalEl ? new bootstrap.Modal(contentBuilderModalEl) : null;
+
+    const moduleEditorModalEl = document.getElementById('moduleEditorModal');
+    const moduleEditorModal = moduleEditorModalEl ? new bootstrap.Modal(moduleEditorModalEl) : null;
+
+    const lessonEditorModalEl = document.getElementById('lessonEditorModal');
+    const lessonEditorModal = lessonEditorModalEl ? new bootstrap.Modal(lessonEditorModalEl) : null;
+
+    const quizEditorModalEl = document.getElementById('quizEditorModal');
+    const quizEditorModal = quizEditorModalEl ? new bootstrap.Modal(quizEditorModalEl) : null;
+
+    const assignmentEditorModalEl = document.getElementById('assignmentEditorModal');
+    const assignmentEditorModal = assignmentEditorModalEl ? new bootstrap.Modal(assignmentEditorModalEl) : null;
+
+    let activeBuilderCourseId = null;
+    let activeBuilderCourse = null;
+
     // ==========================================
     // 1. PROGRAMS MANAGEMENT (Featured Programs)
     // ==========================================
@@ -583,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2 cursor-pointer" onclick="openViewCourseModal(${c.id})" title="Click to view course details">
-                            <img src="../../${escapeHtml(c.thumbnail_url)}" class="rounded-2 object-fit-cover border" style="width: 44px; height: 32px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=100'">
+                            <img src="../../${escapeHtml(c.thumbnail_url || 'assets/images/courses/fullstack.jpg')}" class="rounded-2 object-fit-cover border" style="width: 44px; height: 32px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=100'">
                             <div>
                                 <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(c.title)}</div>
                                 <div class="text-muted" style="font-size: 11px;">
@@ -596,9 +615,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td><span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill" style="font-size: 11px;">${escapeHtml(c.category_name || 'General')}</span></td>
                     <td class="text-muted" style="font-size: 12px;">${escapeHtml(c.instructor_name || 'Faculty Staff')}</td>
                     <td>
-                        <button class="btn btn-sm btn-light border py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 11.5px;" onclick="openChaptersModal(${c.id})" title="Manage Course Chapters">
-                            <i class="bi bi-collection-play text-primary"></i>
-                            <span class="fw-bold text-dark">${chapterCount}</span> Chapters (${c.lesson_count || 12} Lessons)
+                        <button class="btn btn-sm btn-light border py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 11.5px;" onclick="openCourseContentBuilder(${c.id})" title="Open Course Content Builder">
+                            <i class="bi bi-diagram-3 text-primary"></i>
+                            <span class="fw-bold text-dark">${chapterCount}</span> Modules (${c.lesson_count || 12} Lessons)
                         </button>
                     </td>
                     <td><span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">${escapeHtml(c.difficulty || 'Beginner')}</span></td>
@@ -613,8 +632,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             <button class="action-btn" title="View Course Details" onclick="openViewCourseModal(${c.id})">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <button class="action-btn text-primary" title="Manage Chapters & Modules" onclick="openChaptersModal(${c.id})">
-                                <i class="bi bi-collection-play"></i>
+                            <button class="action-btn text-primary" title="Course Content Builder (Modules, Lessons, Quizzes, Assignments)" onclick="openCourseContentBuilder(${c.id})">
+                                <i class="bi bi-journal-bookmark"></i>
                             </button>
                             <button class="action-btn" title="Edit Course" onclick="openEditCourseModal(${c.id})">
                                 <i class="bi bi-pencil"></i>
@@ -681,7 +700,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (body) {
             body.innerHTML = `
                 <div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 mb-3 border">
-                    <img src="../../${escapeHtml(c.thumbnail_url)}" class="rounded-3 object-fit-cover border shadow-sm" style="width: 80px; height: 60px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
+                    <img src="../../${escapeHtml(c.thumbnail_url || 'assets/images/courses/fullstack.jpg')}" class="rounded-3 object-fit-cover border shadow-sm" style="width: 80px; height: 60px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center gap-2 mb-1">
                             <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">${escapeHtml(c.category_name || 'Academic')}</span>
@@ -745,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
         manageChaptersFromViewBtn.addEventListener('click', function () {
             if (viewCourseModal) viewCourseModal.hide();
             if (activeCourseInView) {
-                openChaptersModal(activeCourseInView.id);
+                openCourseContentBuilder(activeCourseInView.id);
             }
         });
     }
@@ -760,13 +779,20 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ==========================================================================
+    // MULTI-STEP COURSE CREATION STEPPER CONTROLLER
+    // ==========================================================================
+    let currentCourseStep = 1;
+    const totalCourseSteps = 5;
+    const completedCourseSteps = new Set();
+
     // Dynamic Course Status Preview Calculator
     function updateCourseStatusPreview() {
         const enrStart = document.getElementById('courseEnrollmentStart')?.value;
         const enrDeadline = document.getElementById('courseEnrollmentDeadline')?.value;
         const courseStart = document.getElementById('courseStartDate')?.value;
         const courseEnd = document.getElementById('courseEndDate')?.value;
-        const isPublished = document.getElementById('coursePublished')?.checked;
+        const isPublished = parseInt(document.getElementById('coursePublishedVal')?.value || '1') === 1;
         const badgeEl = document.getElementById('courseStatusPreviewBadge');
         if (!badgeEl) return;
 
@@ -805,82 +831,627 @@ document.addEventListener('DOMContentLoaded', function () {
         badgeEl.textContent = status;
     }
 
-    ['courseEnrollmentStart', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', updateCourseStatusPreview);
-    });
-    const coursePubSwitch = document.getElementById('coursePublished');
-    if (coursePubSwitch) coursePubSwitch.addEventListener('change', updateCourseStatusPreview);
+    // Stepper Navigation & UI Manager
+    window.goToCourseStep = function (step) {
+        if (step < 1 || step > 5) return;
 
-    function validateCourseForm() {
+        // If advancing forward, validate all intermediate steps
+        if (step > currentCourseStep) {
+            for (let s = currentCourseStep; s < step; s++) {
+                const { isValid, firstInvalidEl } = validateCourseStep(s);
+                if (!isValid) {
+                    if (firstInvalidEl) firstInvalidEl.focus();
+                    if (window.AdminStore) window.AdminStore.constructor.toast('Please complete all required fields before continuing.', 'error');
+                    return;
+                }
+                completedCourseSteps.add(s);
+            }
+        }
+
+        currentCourseStep = step;
+        updateCourseStepperUI();
+
+        // Switch active step pane
+        for (let i = 1; i <= 5; i++) {
+            const pane = document.getElementById(`step${i}Pane`);
+            if (pane) {
+                if (i === step) pane.classList.add('active');
+                else pane.classList.remove('active');
+            }
+        }
+
+        // Update modal footer buttons dynamically
+        const cancelBtn = document.getElementById('stepperCancelBtn');
+        const backBtn = document.getElementById('stepperBackBtn');
+        const continueBtn = document.getElementById('stepperContinueBtn');
+        const saveDraftBtn = document.getElementById('saveDraftBtn');
+        const createCourseBtn = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
+        const isEditing = Boolean(document.getElementById('courseId')?.value);
+
+        if (step === 1) {
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            if (backBtn) backBtn.style.display = 'none';
+            if (continueBtn) continueBtn.style.display = 'inline-block';
+            if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+            if (createCourseBtn) createCourseBtn.style.display = 'none';
+        } else if (step >= 2 && step <= 4) {
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            if (backBtn) backBtn.style.display = 'inline-block';
+            if (continueBtn) continueBtn.style.display = 'inline-block';
+            if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+            if (createCourseBtn) createCourseBtn.style.display = 'none';
+        } else if (step === 5) {
+            if (cancelBtn) cancelBtn.style.display = 'inline-block';
+            if (backBtn) backBtn.style.display = 'inline-block';
+            if (continueBtn) continueBtn.style.display = 'none';
+            if (saveDraftBtn) saveDraftBtn.style.display = 'inline-block';
+            if (createCourseBtn) {
+                createCourseBtn.style.display = 'inline-block';
+                createCourseBtn.innerHTML = isEditing 
+                    ? `<i class="bi bi-check-circle me-1"></i> Save Changes` 
+                    : `<i class="bi bi-plus-circle me-1"></i> Create Course`;
+            }
+            populateCourseSummaryReview();
+        }
+    };
+
+    function updateCourseStepperUI() {
+        const stepTitles = [
+            'Basic Information',
+            'Course Details & Pricing',
+            'Course Media',
+            'Schedule & Dates',
+            'Review & Publish'
+        ];
+
+        for (let i = 1; i <= 5; i++) {
+            const stepEl = document.getElementById(`stepperStep${i}`);
+            if (stepEl) {
+                stepEl.classList.remove('active', 'completed');
+                if (i === currentCourseStep) {
+                    stepEl.classList.add('active');
+                } else if (completedCourseSteps.has(i) && i < currentCourseStep) {
+                    stepEl.classList.add('completed');
+                }
+            }
+
+            if (i <= 4) {
+                const lineEl = document.getElementById(`stepperLine${i}`);
+                if (lineEl) {
+                    if (completedCourseSteps.has(i) && currentCourseStep > i) {
+                        lineEl.classList.add('completed');
+                    } else {
+                        lineEl.classList.remove('completed');
+                    }
+                }
+            }
+        }
+
+        const compactBadge = document.getElementById('compactStepBadge');
+        if (compactBadge) {
+            compactBadge.textContent = `Step ${currentCourseStep} of 5: ${stepTitles[currentCourseStep - 1]}`;
+        }
+    }
+
+    window.handleStepperClick = function (targetStep) {
+        if (targetStep === currentCourseStep) return;
+        if (targetStep < currentCourseStep || completedCourseSteps.has(targetStep)) {
+            goToCourseStep(targetStep);
+        } else if (targetStep === currentCourseStep + 1) {
+            goToCourseStep(targetStep);
+        }
+    };
+
+    // Step-by-Step Field Validation
+    function validateCourseStep(stepNumber) {
         let isValid = true;
         let firstInvalidEl = null;
 
-        const title = document.getElementById('courseTitle');
-        if (!title || !title.value.trim() || title.value.trim().length < 3) {
-            setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required (minimum 3 characters).');
-            if (!firstInvalidEl) firstInvalidEl = title;
-            isValid = false;
-        } else {
-            setFieldValid('courseTitle');
+        if (stepNumber === 1) {
+            // Course Title
+            const title = document.getElementById('courseTitle');
+            const titleVal = title ? title.value.trim() : '';
+            if (!titleVal) {
+                setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = title;
+            } else if (titleVal.length < 3) {
+                setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title must be at least 3 characters.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = title;
+            } else {
+                setFieldValid('courseTitle');
+            }
+
+            // Category
+            const catSelect = document.getElementById('courseCategorySelect');
+            if (!catSelect || !catSelect.value) {
+                setFieldInvalid('courseCategorySelect', 'courseCategoryFeedback', 'Please select a category / discipline.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = catSelect;
+            } else {
+                setFieldValid('courseCategorySelect');
+            }
+
+            // Instructor
+            const insSelect = document.getElementById('courseInstructorSelect');
+            if (!insSelect || !insSelect.value) {
+                setFieldInvalid('courseInstructorSelect', 'courseInstructorFeedback', 'Please select an assigned instructor.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = insSelect;
+            } else {
+                setFieldValid('courseInstructorSelect');
+            }
+
+            // Description
+            const desc = document.getElementById('courseDesc');
+            const descVal = desc ? desc.value.trim() : '';
+            if (!descVal) {
+                setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = desc;
+            } else if (descVal.length < 10) {
+                setFieldInvalid('courseDesc', 'courseDescFeedback', `Course Description must be at least 10 characters (${descVal.length}/10 entered).`);
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = desc;
+            } else {
+                setFieldValid('courseDesc');
+            }
         }
 
-        const desc = document.getElementById('courseDesc');
-        if (!desc || !desc.value.trim() || desc.value.trim().length < 10) {
-            setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required (minimum 10 characters).');
-            if (!firstInvalidEl) firstInvalidEl = desc;
-            isValid = false;
-        } else {
-            setFieldValid('courseDesc');
+        if (stepNumber === 2) {
+            const price = document.getElementById('coursePrice');
+            if (price && (parseFloat(price.value) < 0 || isNaN(parseFloat(price.value)))) {
+                setFieldInvalid('coursePrice', 'coursePriceFeedback', 'Price cannot be negative.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = price;
+            } else if (price) {
+                setFieldValid('coursePrice');
+            }
         }
+
+        if (stepNumber === 4) {
+            if (!validateCourseDates()) {
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEnrollmentDeadline');
+            }
+        }
+
+        return { isValid, firstInvalidEl };
+    }
+
+    function validateCourseDates() {
+        let datesValid = true;
+        const enrStart = document.getElementById('courseEnrollmentStart')?.value;
+        const enrDeadline = document.getElementById('courseEnrollmentDeadline')?.value;
+        const courseStart = document.getElementById('courseStartDate')?.value;
+        const courseEnd = document.getElementById('courseEndDate')?.value;
+
+        if (enrStart && enrDeadline && new Date(enrDeadline) < new Date(enrStart)) {
+            setFieldInvalid('courseEnrollmentDeadline', 'courseDeadlineFeedback', 'Enrollment Deadline cannot be before Enrollment Opens.');
+            datesValid = false;
+        } else {
+            setFieldValid('courseEnrollmentDeadline');
+        }
+
+        if (enrDeadline && courseStart && new Date(courseStart) < new Date(enrDeadline)) {
+            setFieldInvalid('courseStartDate', 'courseStartFeedback', 'Course Start Date cannot be before Enrollment Deadline.');
+            datesValid = false;
+        } else if (courseStart) {
+            setFieldValid('courseStartDate');
+        }
+
+        if (courseStart && courseEnd && new Date(courseEnd) < new Date(courseStart)) {
+            setFieldInvalid('courseEndDate', 'courseEndFeedback', 'Course End Date cannot be before Course Start Date.');
+            datesValid = false;
+        } else if (courseEnd) {
+            setFieldValid('courseEndDate');
+        }
+
+        return datesValid;
+    }
+
+    // Step 5 Review Summary Card Population
+    function populateCourseSummaryReview() {
+        const title = document.getElementById('courseTitle')?.value.trim() || 'Untitled Course';
+        const difficulty = document.getElementById('courseDifficulty')?.value || 'Beginner';
+        const catSelect = document.getElementById('courseCategorySelect');
+        const catName = (catSelect && catSelect.selectedIndex > 0) ? catSelect.options[catSelect.selectedIndex].text : 'General';
+        const insSelect = document.getElementById('courseInstructorSelect');
+        const insName = (insSelect && insSelect.selectedIndex > 0) ? insSelect.options[insSelect.selectedIndex].text : 'Faculty Member';
+        const duration = document.getElementById('courseDuration')?.value.trim() || '8 Weeks';
+        const lessons = document.getElementById('courseLessons')?.value || '12';
+        const price = parseFloat(document.getElementById('coursePrice')?.value || '0').toFixed(2);
+        const prerequisites = document.getElementById('coursePrerequisites')?.value.trim() || 'None';
+        const desc = document.getElementById('courseDesc')?.value.trim() || 'No description provided.';
 
         const enrStart = document.getElementById('courseEnrollmentStart')?.value;
         const enrDeadline = document.getElementById('courseEnrollmentDeadline')?.value;
         const courseStart = document.getElementById('courseStartDate')?.value;
         const courseEnd = document.getElementById('courseEndDate')?.value;
 
-        // Date logic checks
-        if (enrStart && enrDeadline && new Date(enrDeadline) < new Date(enrStart)) {
-            setFieldInvalid('courseEnrollmentDeadline', 'courseDeadlineFeedback', 'Enrollment Deadline cannot be before Enrollment Start Date.');
-            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEnrollmentDeadline');
-            isValid = false;
-        } else {
-            setFieldValid('courseEnrollmentDeadline');
+        // Set text values
+        const revTitle = document.getElementById('reviewCourseTitle');
+        const revCat = document.getElementById('reviewCourseCategory');
+        const revIns = document.getElementById('reviewCourseInstructor');
+        const revDiff = document.getElementById('reviewCourseDifficulty');
+        const revDesc = document.getElementById('reviewCourseDesc');
+        const revDur = document.getElementById('reviewCourseDuration');
+        const revLess = document.getElementById('reviewCourseLessons');
+        const revPrice = document.getElementById('reviewCoursePrice');
+        const revPrereq = document.getElementById('reviewCoursePrerequisites');
+        const revSched = document.getElementById('reviewCourseSchedule');
+
+        if (revTitle) revTitle.textContent = title;
+        if (revCat) revCat.textContent = catName;
+        if (revIns) revIns.textContent = insName;
+        if (revDiff) revDiff.textContent = difficulty;
+        if (revDesc) revDesc.textContent = desc;
+        if (revDur) revDur.textContent = duration;
+        if (revLess) revLess.textContent = `${lessons} Lessons`;
+        if (revPrice) revPrice.textContent = `$${price}`;
+        if (revPrereq) revPrereq.textContent = prerequisites;
+
+        if (revSched) {
+            if (courseStart && courseEnd) {
+                revSched.textContent = `${courseStart} → ${courseEnd}`;
+            } else if (enrStart) {
+                revSched.textContent = `Starts: ${enrStart}`;
+            } else {
+                revSched.textContent = 'Open Enrollment / Ongoing';
+            }
         }
 
-        if (enrDeadline && courseStart && new Date(courseStart) < new Date(enrDeadline)) {
-            setFieldInvalid('courseStartDate', 'courseDeadlineFeedback', 'Course Start Date cannot be before Enrollment Deadline.');
-            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseStartDate');
-            isValid = false;
-        } else if (courseStart) {
-            setFieldValid('courseStartDate');
+        // Media Status indicators
+        const thumbFileName = document.getElementById('thumbnailFileName')?.textContent;
+        const thumbBoxVisible = document.getElementById('thumbnailPreviewBox')?.style.display !== 'none';
+        const thumbUrl = document.getElementById('courseThumbnailUrl')?.value.trim();
+        const revThumbStatus = document.getElementById('reviewThumbStatus');
+        if (revThumbStatus) {
+            if (thumbBoxVisible || thumbUrl) {
+                revThumbStatus.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Thumbnail added ${thumbFileName ? `(${escapeHtml(thumbFileName)})` : ''}`;
+            } else {
+                revThumbStatus.innerHTML = `<span class="text-muted"><i class="bi bi-dash-circle me-1"></i> No thumbnail uploaded</span>`;
+            }
         }
 
-        if (courseStart && courseEnd && new Date(courseEnd) < new Date(courseStart)) {
-            setFieldInvalid('courseEndDate', 'courseDeadlineFeedback', 'Course End Date cannot be before Course Start Date.');
-            if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEndDate');
-            isValid = false;
-        } else if (courseEnd) {
-            setFieldValid('courseEndDate');
+        const videoFileName = document.getElementById('videoFileName')?.textContent;
+        const videoBoxVisible = document.getElementById('videoPreviewBox')?.style.display !== 'none';
+        const videoUrl = document.getElementById('courseVideoUrl')?.value.trim();
+        const revVideoStatus = document.getElementById('reviewVideoStatus');
+        if (revVideoStatus) {
+            if (videoBoxVisible || videoUrl) {
+                revVideoStatus.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> Introduction video added ${videoFileName ? `(${escapeHtml(videoFileName)})` : ''}`;
+            } else {
+                revVideoStatus.innerHTML = `<span class="text-muted"><i class="bi bi-dash-circle me-1"></i> No introduction video</span>`;
+            }
         }
-
-        return { isValid, firstInvalidEl };
     }
+
+    // Step 5 Publish Status Choice
+    window.setPublishStatusChoice = function (val) {
+        const pubInput = document.getElementById('coursePublishedVal');
+        if (pubInput) pubInput.value = val;
+
+        const radioDraft = document.getElementById('statusRadioDraft');
+        const radioPublish = document.getElementById('statusRadioPublished');
+        const cardDraft = document.getElementById('statusCardDraft');
+        const cardPublish = document.getElementById('statusCardPublished');
+
+        if (val === 1) {
+            if (radioPublish) radioPublish.checked = true;
+            if (cardPublish) cardPublish.classList.add('selected');
+            if (cardDraft) cardDraft.classList.remove('selected');
+        } else {
+            if (radioDraft) radioDraft.checked = true;
+            if (cardDraft) cardDraft.classList.add('selected');
+            if (cardPublish) cardPublish.classList.remove('selected');
+        }
+    };
+
+    // Real-Time Form Validation UX
+    function setupCourseFormValidation() {
+        const titleInput = document.getElementById('courseTitle');
+        if (titleInput) {
+            titleInput.addEventListener('input', function () {
+                const val = this.value.trim();
+                if (!val) {
+                    setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
+                } else if (val.length < 3) {
+                    setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title must be at least 3 characters.');
+                } else {
+                    setFieldValid('courseTitle');
+                }
+            });
+            titleInput.addEventListener('blur', function () {
+                const val = this.value.trim();
+                if (!val) setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
+                else if (val.length < 3) setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title must be at least 3 characters.');
+                else setFieldValid('courseTitle');
+            });
+        }
+
+        const descInput = document.getElementById('courseDesc');
+        const countSpan = document.getElementById('courseDescCount');
+        if (descInput) {
+            descInput.addEventListener('input', function () {
+                const val = this.value.trim();
+                if (countSpan) countSpan.textContent = `${val.length} / 500`;
+                if (!val) {
+                    setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required.');
+                } else if (val.length < 10) {
+                    setFieldInvalid('courseDesc', 'courseDescFeedback', `Course Description must be at least 10 characters (${val.length}/10 entered).`);
+                } else {
+                    setFieldValid('courseDesc');
+                }
+            });
+            descInput.addEventListener('blur', function () {
+                const val = this.value.trim();
+                if (!val) setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required.');
+                else if (val.length < 10) setFieldInvalid('courseDesc', 'courseDescFeedback', `Course Description must be at least 10 characters (${val.length}/10 entered).`);
+                else setFieldValid('courseDesc');
+            });
+        }
+
+        const catSelect = document.getElementById('courseCategorySelect');
+        if (catSelect) {
+            catSelect.addEventListener('change', function () {
+                if (!this.value) {
+                    setFieldInvalid('courseCategorySelect', 'courseCategoryFeedback', 'Please select a category.');
+                } else {
+                    setFieldValid('courseCategorySelect');
+                }
+            });
+        }
+
+        const insSelect = document.getElementById('courseInstructorSelect');
+        if (insSelect) {
+            insSelect.addEventListener('change', function () {
+                if (!this.value) {
+                    setFieldInvalid('courseInstructorSelect', 'courseInstructorFeedback', 'Please select an instructor.');
+                } else {
+                    setFieldValid('courseInstructorSelect');
+                }
+            });
+        }
+
+        const priceInput = document.getElementById('coursePrice');
+        if (priceInput) {
+            priceInput.addEventListener('input', function () {
+                const val = parseFloat(this.value);
+                if (isNaN(val) || val < 0) {
+                    setFieldInvalid('coursePrice', 'coursePriceFeedback', 'Price cannot be negative.');
+                } else {
+                    setFieldValid('coursePrice');
+                }
+            });
+        }
+
+        ['courseEnrollmentStart', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', () => {
+                    validateCourseDates();
+                    updateCourseStatusPreview();
+                });
+            }
+        });
+
+        // Stepper buttons
+        const continueBtn = document.getElementById('stepperContinueBtn');
+        if (continueBtn) {
+            continueBtn.addEventListener('click', function () {
+                goToCourseStep(currentCourseStep + 1);
+            });
+        }
+
+        const backBtn = document.getElementById('stepperBackBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function () {
+                goToCourseStep(currentCourseStep - 1);
+            });
+        }
+
+        const saveDraftBtn = document.getElementById('saveDraftBtn');
+        if (saveDraftBtn) {
+            saveDraftBtn.addEventListener('click', function () {
+                submitCourseWithPublishStatus(0);
+            });
+        }
+
+        const createCourseBtnEl = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
+        if (createCourseBtnEl) {
+            createCourseBtnEl.addEventListener('click', function () {
+                const isPub = parseInt(document.getElementById('coursePublishedVal')?.value || '1');
+                submitCourseWithPublishStatus(isPub);
+            });
+        }
+    }
+
+    // Media Upload Handlers: Thumbnail & Introduction Video
+    function setupMediaUploads() {
+        // 1. Thumbnail Upload
+        const thumbInput = document.getElementById('courseThumbnailInput');
+        const thumbDropzone = document.getElementById('thumbnailDropzone');
+        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
+        const thumbPreviewImg = document.getElementById('thumbnailPreviewImg');
+        const thumbFileName = document.getElementById('thumbnailFileName');
+        const thumbFileSize = document.getElementById('thumbnailFileSize');
+        const replaceThumbBtn = document.getElementById('replaceThumbnailBtn');
+        const removeThumbBtn = document.getElementById('removeThumbnailBtn');
+        const thumbUrlInput = document.getElementById('courseThumbnailUrl');
+
+        function handleThumbFile(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                if (window.AdminStore) window.AdminStore.constructor.toast('Please select a valid image file (PNG, JPG, WEBP)', 'error');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                if (window.AdminStore) window.AdminStore.constructor.toast('Image exceeds 5 MB limit', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (thumbPreviewImg) thumbPreviewImg.src = e.target.result;
+                if (thumbFileName) thumbFileName.textContent = file.name;
+                if (thumbFileSize) thumbFileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                if (thumbPreviewBox) thumbPreviewBox.style.display = 'flex';
+                if (thumbUrlInput) thumbUrlInput.value = `assets/images/courses/${file.name}`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (thumbInput) {
+            thumbInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleThumbFile(this.files[0]);
+            });
+        }
+
+        if (thumbDropzone) {
+            thumbDropzone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            thumbDropzone.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            thumbDropzone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleThumbFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        if (replaceThumbBtn && thumbInput) {
+            replaceThumbBtn.addEventListener('click', () => thumbInput.click());
+        }
+
+        if (removeThumbBtn) {
+            removeThumbBtn.addEventListener('click', function () {
+                if (thumbInput) thumbInput.value = '';
+                if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
+                if (thumbPreviewImg) thumbPreviewImg.src = '';
+                if (thumbUrlInput) thumbUrlInput.value = '';
+            });
+        }
+
+        // 2. Video Upload
+        const videoInput = document.getElementById('courseVideoInput');
+        const videoDropzone = document.getElementById('videoDropzone');
+        const videoPreviewBox = document.getElementById('videoPreviewBox');
+        const videoPreviewPlayer = document.getElementById('videoPreviewPlayer');
+        const videoFileName = document.getElementById('videoFileName');
+        const videoFileSize = document.getElementById('videoFileSize');
+        const replaceVideoBtn = document.getElementById('replaceVideoBtn');
+        const removeVideoBtn = document.getElementById('removeVideoBtn');
+        const videoUrlInput = document.getElementById('courseVideoUrl');
+
+        function handleVideoFile(file) {
+            if (!file || !file.type.startsWith('video/')) {
+                if (window.AdminStore) window.AdminStore.constructor.toast('Please select a valid video file (MP4, WebM, MOV)', 'error');
+                return;
+            }
+            if (file.size > 100 * 1024 * 1024) {
+                if (window.AdminStore) window.AdminStore.constructor.toast('Video exceeds 100 MB limit', 'error');
+                return;
+            }
+
+            const videoBlobUrl = URL.createObjectURL(file);
+            if (videoPreviewPlayer) videoPreviewPlayer.src = videoBlobUrl;
+            if (videoFileName) videoFileName.textContent = file.name;
+            if (videoFileSize) videoFileSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+            if (videoPreviewBox) videoPreviewBox.style.display = 'block';
+            if (videoUrlInput) videoUrlInput.value = `assets/videos/${file.name}`;
+        }
+
+        if (videoInput) {
+            videoInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleVideoFile(this.files[0]);
+            });
+        }
+
+        if (videoDropzone) {
+            videoDropzone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+            videoDropzone.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+            videoDropzone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleVideoFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        if (replaceVideoBtn && videoInput) {
+            replaceVideoBtn.addEventListener('click', () => videoInput.click());
+        }
+
+        if (removeVideoBtn) {
+            removeVideoBtn.addEventListener('click', function () {
+                if (videoInput) videoInput.value = '';
+                if (videoPreviewBox) videoPreviewBox.style.display = 'none';
+                if (videoPreviewPlayer) videoPreviewPlayer.src = '';
+                if (videoUrlInput) videoUrlInput.value = '';
+            });
+        }
+    }
+
+    setupCourseFormValidation();
+    setupMediaUploads();
 
     window.openCreateCourseModal = function () {
         document.getElementById('courseForm').reset();
         document.getElementById('courseId').value = '';
-        const pubSwitch = document.getElementById('coursePublished');
-        if (pubSwitch) pubSwitch.checked = true;
+        
+        // Reset Stepper to Step 1
+        completedCourseSteps.clear();
+        goToCourseStep(1);
+
         document.getElementById('courseModalTitle').textContent = 'Add New Specialized Course';
         document.getElementById('coursePrice').value = '0.00';
         document.getElementById('courseDuration').value = '8 Weeks';
         document.getElementById('courseLessons').value = '12';
         
+        // Reset thumbnail preview
+        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
+        if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
+        const thumbInput = document.getElementById('courseThumbnailInput');
+        if (thumbInput) thumbInput.value = '';
+        const thumbUrl = document.getElementById('courseThumbnailUrl');
+        if (thumbUrl) thumbUrl.value = 'assets/images/courses/fullstack.jpg';
+
+        // Reset video preview
+        const videoPreviewBox = document.getElementById('videoPreviewBox');
+        if (videoPreviewBox) videoPreviewBox.style.display = 'none';
+        const videoInput = document.getElementById('courseVideoInput');
+        if (videoInput) videoInput.value = '';
+        const videoUrl = document.getElementById('courseVideoUrl');
+        if (videoUrl) videoUrl.value = '';
+
+        // Reset character counter
+        const countSpan = document.getElementById('courseDescCount');
+        if (countSpan) countSpan.textContent = '0 / 500';
+
+        // Clear validation errors
+        ['courseTitle', 'courseCategorySelect', 'courseInstructorSelect', 'courseDesc', 'coursePrice', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
+            setFieldValid(id);
+        });
+        
         // Default lifecycle dates
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('courseEnrollmentStart').value = today;
         
+        setPublishStatusChoice(1);
         populateCourseSelects();
         updateCourseStatusPreview();
         if (courseModal) courseModal.show();
@@ -890,24 +1461,65 @@ document.addEventListener('DOMContentLoaded', function () {
         const c = allCourses.find(course => course.id === id);
         if (!c) return;
 
+        // Reset Stepper to Step 1 and prefill
+        completedCourseSteps.clear();
+        completedCourseSteps.add(1);
+        completedCourseSteps.add(2);
+        completedCourseSteps.add(3);
+        completedCourseSteps.add(4);
+        goToCourseStep(1);
+
         populateCourseSelects();
         document.getElementById('courseId').value = c.id;
         document.getElementById('courseTitle').value = c.title;
         document.getElementById('courseDifficulty').value = c.difficulty || 'Beginner';
-        document.getElementById('courseCategorySelect').value = c.category_id || 1;
-        document.getElementById('courseInstructorSelect').value = c.instructor_id || 1;
+        document.getElementById('courseCategorySelect').value = c.category_id || (allCategories[0] ? allCategories[0].id : 1);
+        document.getElementById('courseInstructorSelect').value = c.instructor_id || (allInstructors[0] ? allInstructors[0].id : 1);
         document.getElementById('courseDuration').value = c.duration || c.duration_hours || '8 Weeks';
-        document.getElementById('courseLessons').value = c.lesson_count || 12;
-        document.getElementById('coursePrice').value = c.price !== undefined ? c.price : '0.00';
+        document.getElementById('courseLessons').value = c.lesson_count !== undefined ? c.lesson_count : 12;
+        document.getElementById('coursePrice').value = c.price !== undefined ? parseFloat(c.price).toFixed(2) : '0.00';
         document.getElementById('courseBadge').value = c.badge || c.badge_text || '';
+        document.getElementById('coursePrerequisites').value = c.prerequisites || '';
         document.getElementById('courseEnrollmentStart').value = c.enrollment_start_date ? String(c.enrollment_start_date).split('T')[0] : '';
         document.getElementById('courseEnrollmentDeadline').value = c.enrollment_deadline ? String(c.enrollment_deadline).split('T')[0] : '';
         document.getElementById('courseStartDate').value = c.start_date ? String(c.start_date).split('T')[0] : '';
         document.getElementById('courseEndDate').value = c.end_date ? String(c.end_date).split('T')[0] : '';
         document.getElementById('courseDesc').value = c.description || '';
-        const pubSwitch = document.getElementById('coursePublished');
-        if (pubSwitch) pubSwitch.checked = (c.is_published === 1 || c.is_published === true);
+        
+        // Character counter
+        const countSpan = document.getElementById('courseDescCount');
+        if (countSpan) countSpan.textContent = `${(c.description || '').length} / 500`;
+
+        // Thumbnail preview
+        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
+        const thumbPreviewImg = document.getElementById('thumbnailPreviewImg');
+        const thumbUrl = document.getElementById('courseThumbnailUrl');
+        if (c.thumbnail_url) {
+            if (thumbUrl) thumbUrl.value = c.thumbnail_url;
+            if (thumbPreviewImg) thumbPreviewImg.src = `../../${c.thumbnail_url}`;
+            if (thumbPreviewBox) thumbPreviewBox.style.display = 'flex';
+        } else {
+            if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
+        }
+
+        // Video preview
+        const videoPreviewBox = document.getElementById('videoPreviewBox');
+        const videoUrl = document.getElementById('courseVideoUrl');
+        if (c.video_url) {
+            if (videoUrl) videoUrl.value = c.video_url;
+            if (videoPreviewBox) videoPreviewBox.style.display = 'block';
+        } else {
+            if (videoPreviewBox) videoPreviewBox.style.display = 'none';
+        }
+
+        const isPub = (c.is_published === 1 || c.is_published === true) ? 1 : 0;
+        setPublishStatusChoice(isPub);
         document.getElementById('courseModalTitle').textContent = 'Edit Specialized Course';
+
+        // Clear validation errors
+        ['courseTitle', 'courseCategorySelect', 'courseInstructorSelect', 'courseDesc', 'coursePrice', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
+            setFieldValid(id);
+        });
 
         updateCourseStatusPreview();
         if (courseModal) courseModal.show();
@@ -915,111 +1527,161 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function populateCourseSelects() {
         const catSelect = document.getElementById('courseCategorySelect');
-        if (catSelect && allCategories.length > 0) {
-            catSelect.innerHTML = allCategories.map(cat => `
+        if (catSelect) {
+            const currentVal = catSelect.value;
+            catSelect.innerHTML = `<option value="">-- Select Category / Discipline --</option>` + allCategories.map(cat => `
                 <option value="${cat.id}">${escapeHtml(cat.name)}</option>
             `).join('');
+            if (currentVal) catSelect.value = currentVal;
         }
 
         const insSelect = document.getElementById('courseInstructorSelect');
-        if (insSelect && allInstructors.length > 0) {
-            insSelect.innerHTML = allInstructors.map(ins => `
+        if (insSelect) {
+            const currentVal = insSelect.value;
+            insSelect.innerHTML = `<option value="">-- Select Assigned Instructor --</option>` + allInstructors.map(ins => `
                 <option value="${ins.id}">${escapeHtml(ins.name)} (${escapeHtml(ins.title || 'Faculty Lead')})</option>
             `).join('');
+            if (currentVal) insSelect.value = currentVal;
         }
     }
 
-    const courseForm = document.getElementById('courseForm');
-    if (courseForm) {
-        courseForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const { isValid, firstInvalidEl } = validateCourseForm();
+    // Submit Course Payload (Draft or Published)
+    async function submitCourseWithPublishStatus(isPublished) {
+        // Validate all 4 prior steps
+        for (let s = 1; s <= 4; s++) {
+            const { isValid, firstInvalidEl } = validateCourseStep(s);
             if (!isValid) {
-                if (firstInvalidEl) firstInvalidEl.focus();
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.toast('Please correct the errors in the course form.', 'error');
+                goToCourseStep(s);
+                if (firstInvalidEl) {
+                    firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstInvalidEl.focus();
                 }
+                if (window.AdminStore) window.AdminStore.constructor.toast(`Please correct the highlighted errors in Step ${s}.`, 'error');
                 return;
             }
+        }
 
-            const id = document.getElementById('courseId').value;
-            const title = document.getElementById('courseTitle').value.trim();
-            const pubSwitch = document.getElementById('coursePublished');
-            const isPublished = pubSwitch ? (pubSwitch.checked ? 1 : 0) : 1;
+        const id = document.getElementById('courseId').value;
+        const title = document.getElementById('courseTitle').value.trim();
+        const thumbUrlVal = document.getElementById('courseThumbnailUrl')?.value.trim() || 'assets/images/courses/fullstack.jpg';
+        const videoUrlVal = document.getElementById('courseVideoUrl')?.value.trim() || '';
 
-            const payload = {
-                title: title,
-                category_id: parseInt(document.getElementById('courseCategorySelect').value) || 1,
-                instructor_id: parseInt(document.getElementById('courseInstructorSelect').value) || 1,
-                difficulty: document.getElementById('courseDifficulty').value,
-                duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
-                duration_hours: document.getElementById('courseDuration').value.trim() || '8 Weeks',
-                lesson_count: parseInt(document.getElementById('courseLessons').value) || 12,
-                price: parseFloat(document.getElementById('coursePrice').value) || 0.00,
-                badge: document.getElementById('courseBadge').value.trim(),
-                badge_text: document.getElementById('courseBadge').value.trim(),
-                enrollment_start_date: document.getElementById('courseEnrollmentStart').value || null,
-                enrollment_deadline: document.getElementById('courseEnrollmentDeadline').value || null,
-                start_date: document.getElementById('courseStartDate').value || null,
-                end_date: document.getElementById('courseEndDate').value || null,
-                description: document.getElementById('courseDesc').value.trim(),
-                is_published: isPublished
-            };
+        const payload = {
+            title: title,
+            category_id: parseInt(document.getElementById('courseCategorySelect').value) || 1,
+            instructor_id: parseInt(document.getElementById('courseInstructorSelect').value) || 1,
+            difficulty: document.getElementById('courseDifficulty').value,
+            duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
+            duration_hours: document.getElementById('courseDuration').value.trim() || '8 Weeks',
+            lesson_count: parseInt(document.getElementById('courseLessons').value) || 12,
+            price: parseFloat(document.getElementById('coursePrice').value) || 0.00,
+            badge: document.getElementById('courseBadge').value.trim(),
+            badge_text: document.getElementById('courseBadge').value.trim(),
+            prerequisites: document.getElementById('coursePrerequisites').value.trim(),
+            thumbnail_url: thumbUrlVal,
+            video_url: videoUrlVal,
+            enrollment_start_date: document.getElementById('courseEnrollmentStart').value || null,
+            enrollment_deadline: document.getElementById('courseEnrollmentDeadline').value || null,
+            start_date: document.getElementById('courseStartDate').value || null,
+            end_date: document.getElementById('courseEndDate').value || null,
+            description: document.getElementById('courseDesc').value.trim(),
+            is_published: isPublished
+        };
 
-            const saveBtn = document.getElementById('saveCourseBtn');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
+        const createCourseBtnEl = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
+        const saveDraftBtnEl = document.getElementById('saveDraftBtn');
+        const isEditing = Boolean(id);
+
+        if (createCourseBtnEl) createCourseBtnEl.disabled = true;
+        if (saveDraftBtnEl) saveDraftBtnEl.disabled = true;
+
+        if (isPublished) {
+            if (createCourseBtnEl) {
+                createCourseBtnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${isEditing ? 'Saving...' : 'Creating Course...'}`;
             }
+        } else {
+            if (saveDraftBtnEl) {
+                saveDraftBtnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving Draft...`;
+            }
+        }
 
-            try {
-                if (id) {
-                    if (window.AdminStore) {
-                        window.AdminStore.updateCourse(id, payload);
-                        allCourses = window.AdminStore.getCourses();
-                    }
-                    if (courseModal) courseModal.hide();
-                    applyCourseFilters();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated successfully.`);
-                } else {
-                    if (window.AdminStore) {
-                        const newCourse = window.AdminStore.createCourse(payload);
-                        window.AdminStore.createChapter({
-                            course_id: newCourse.id,
-                            chapter_num: 1,
-                            title: 'Foundations & Architecture Overview',
-                            duration: '2 Hours',
-                            lesson_count: 3,
-                            description: 'Core introductory concepts and system setup.'
-                        });
-                        window.AdminStore.createChapter({
-                            course_id: newCourse.id,
-                            chapter_num: 2,
-                            title: 'Hands-on Implementation & Best Practices',
-                            duration: '3 Hours',
-                            lesson_count: 4,
-                            description: 'Step-by-step practical laboratory exercise.'
-                        });
-                        allCourses = window.AdminStore.getCourses();
-                    }
-                    if (courseModal) courseModal.hide();
-                    applyCourseFilters();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Created', `"${title}" has been created with default starter modules.`);
+        let apiSuccess = false;
+        try {
+            const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
+            const method = id ? 'PUT' : 'POST';
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            
+            const res = await fetch(url, { 
+                method, 
+                headers: getHeaders(), 
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) apiSuccess = true;
+        } catch (netErr) {
+            // Backend offline or timeout: gracefully continue with local storage save
+            apiSuccess = false;
+        }
+
+        // Local Storage / AdminStore Persistence (Offline-First Guarantee)
+        try {
+            if (id) {
+                if (window.AdminStore) {
+                    window.AdminStore.updateCourse(id, payload);
+                    allCourses = window.AdminStore.getCourses();
                 }
-
-                const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {
-                if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to Save Course', err.message);
-            } finally {
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Course`;
+                if (courseModal) courseModal.hide();
+                applyCourseFilters();
+                if (window.AdminStore) {
+                    const statusText = isPublished ? 'published to student catalog' : 'saved as private draft';
+                    const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
+                    window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated and ${statusText}${noticeSuffix}.`);
+                }
+            } else {
+                if (window.AdminStore) {
+                    const newCourse = window.AdminStore.createCourse(payload);
+                    window.AdminStore.createChapter({
+                        course_id: newCourse.id,
+                        chapter_num: 1,
+                        title: 'Module 1 — Foundations & Core Principles',
+                        duration: '2 Weeks',
+                        lesson_count: 3,
+                        description: 'Foundational architecture, setup, and key concepts.'
+                    });
+                    window.AdminStore.createChapter({
+                        course_id: newCourse.id,
+                        chapter_num: 2,
+                        title: 'Module 2 — Advanced Practical Application',
+                        duration: '3 Weeks',
+                        lesson_count: 4,
+                        description: 'Hands-on practical development and comprehensive project building.'
+                    });
+                    allCourses = window.AdminStore.getCourses();
+                }
+                if (courseModal) courseModal.hide();
+                applyCourseFilters();
+                if (window.AdminStore) {
+                    const statusText = isPublished ? 'published to student catalog' : 'saved as draft';
+                    const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
+                    window.AdminStore.constructor.notifySuccess('Course Created Successfully', `"${title}" has been created and ${statusText}${noticeSuffix}.`);
                 }
             }
-        });
+        } catch (err) {
+            if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to Save Course', err.message);
+        } finally {
+            if (createCourseBtnEl) {
+                createCourseBtnEl.disabled = false;
+                createCourseBtnEl.innerHTML = isEditing 
+                    ? `<i class="bi bi-check-circle me-1"></i> Save Changes` 
+                    : `<i class="bi bi-plus-circle me-1"></i> Create Course`;
+            }
+            if (saveDraftBtnEl) {
+                saveDraftBtnEl.disabled = false;
+                saveDraftBtnEl.innerHTML = `<i class="bi bi-save me-1"></i> Save as Draft`;
+            }
+        }
     }
 
     window.toggleCourseStatus = async function (id) {
@@ -1046,7 +1708,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.AdminStore) {
             confirmed = await window.AdminStore.constructor.confirmDialog(
                 'Delete Course?',
-                `Are you sure you want to delete "${name}" and all its syllabus chapters?`,
+                `Are you sure you want to delete "${name}" and all its syllabus modules?`,
                 'Yes, Delete Course',
                 '#DC2626'
             );
@@ -1084,166 +1746,481 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // ==========================================
-    // 3. CHAPTER / MODULE MANAGEMENT
-    // ==========================================
-    window.openChaptersModal = function (courseId) {
-        activeChapterCourseId = courseId;
+    // ==========================================================================
+    // 3. COURSE CONTENT BUILDER (Interactive Visual Syllabus Hierarchy)
+    // ==========================================================================
+    window.openCourseContentBuilder = function (courseId) {
+        activeBuilderCourseId = courseId;
         const course = allCourses.find(c => c.id === courseId);
         if (!course) return;
 
-        const titleEl = document.getElementById('chaptersModalTitle');
-        const subEl = document.getElementById('chaptersModalSubtitle');
-        if (titleEl) titleEl.textContent = `Modules: ${course.title}`;
-        if (subEl) subEl.textContent = `Instructor: ${course.instructor_name} | Category: ${course.category_name}`;
+        activeBuilderCourse = course;
+        const titleEl = document.getElementById('builderCourseTitle');
+        const catEl = document.getElementById('builderCourseCategory');
+        if (titleEl) titleEl.textContent = `Course Content: ${course.title}`;
+        if (catEl) catEl.textContent = course.category_name || 'Academic';
 
-        hideChapterForm();
-        renderChaptersList(courseId);
-        if (chaptersModal) chaptersModal.show();
+        renderCourseContentTree(courseId);
+        if (contentBuilderModal) contentBuilderModal.show();
     };
 
-    function renderChaptersList(courseId) {
-        const tbody = document.getElementById('chaptersTableBody');
-        const countEl = document.getElementById('chapterListCount');
-        if (!tbody) return;
+    function renderCourseContentTree(courseId) {
+        const container = document.getElementById('courseContentTreeContainer');
+        const statsBadge = document.getElementById('builderStatsBadge');
+        if (!container) return;
 
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(courseId) : [];
-        if (countEl) countEl.textContent = `Syllabus Chapters (${chapters.length})`;
+        let totalLessons = 0;
+        chapters.forEach(ch => { totalLessons += (ch.lesson_count || 3); });
+
+        if (statsBadge) {
+            statsBadge.textContent = `${chapters.length} Modules • ${totalLessons} Lessons`;
+        }
 
         if (chapters.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No chapters added yet for this course. Click "Add Chapter" above to create one.</td></tr>`;
+            container.innerHTML = `
+                <div class="text-center py-5 bg-white rounded-3 border">
+                    <i class="bi bi-diagram-3 fs-1 text-muted opacity-50 d-block mb-2"></i>
+                    <h6 class="fw-bold text-dark">No Curriculum Modules Added</h6>
+                    <p class="text-muted small mb-3">Begin structuring this course by adding the first chapter or module.</p>
+                    <button class="btn btn-sm btn-primary" onclick="openAddModuleModal()">
+                        <i class="bi bi-plus-circle me-1"></i> Add First Module
+                    </button>
+                </div>
+            `;
             return;
         }
 
-        tbody.innerHTML = chapters.map(ch => `
-            <tr>
-                <td class="fw-bold text-muted" style="font-size: 12px;">#${ch.chapter_num}</td>
-                <td>
-                    <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(ch.title)}</div>
-                    <div class="text-muted" style="font-size: 11px;">${escapeHtml(ch.description || 'Module curriculum overview')}</div>
-                </td>
-                <td class="text-muted" style="font-size: 12px;">${escapeHtml(ch.duration || '2 Hours')}</td>
-                <td><span class="badge bg-light text-primary border px-2 py-1" style="font-size: 11px;">${ch.lesson_count || 4} Lessons</span></td>
-                <td>
-                    <div class="d-flex gap-1">
-                        <button class="action-btn" title="Edit Chapter" onclick="editChapter(${ch.id})">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                        <button class="action-btn delete" title="Delete Chapter" onclick="deleteChapter(${ch.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
+        let html = '';
+
+        // 1. Modules & Lessons Accordion
+        html += chapters.map((ch, idx) => {
+            const lessons = [
+                { id: idx * 10 + 1, title: `Lesson ${ch.chapter_num}.1 — Foundations & Setup`, duration: '30 Mins', desc: 'Environment initialization and theoretical fundamentals.', video: 'intro-lecture.mp4', videoSize: '18.4 MB', pdf: 'syllabus-guide.pdf', pdfSize: '1.2 MB' },
+                { id: idx * 10 + 2, title: `Lesson ${ch.chapter_num}.2 — Core Concepts & Architecture`, duration: '45 Mins', desc: 'In-depth review of component structures.', video: 'architecture.mp4', videoSize: '24.1 MB', pdf: 'lecture-slides.pdf', pdfSize: '2.5 MB' },
+                { id: idx * 10 + 3, title: `Lesson ${ch.chapter_num}.3 — Practical Lab Implementation`, duration: '50 Mins', desc: 'Hands-on programming laboratory.', video: null, pdf: 'exercise-worksheet.pdf', pdfSize: '850 KB' }
+            ];
+
+            return `
+                <div class="module-tree-card">
+                    <div class="module-tree-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">Module ${ch.chapter_num}</span>
+                            <span class="fw-bold text-dark" style="font-size: 13.5px;">${escapeHtml(ch.title)}</span>
+                            <span class="text-muted small">(${escapeHtml(ch.duration || '2 Weeks')})</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddLessonModal(${ch.id})" title="Add Lesson to this Module">
+                                <i class="bi bi-plus-circle me-1"></i> Add Lesson
+                            </button>
+                            <button class="btn btn-sm btn-light border py-0 px-2" style="font-size: 11px;" onclick="openEditModuleModal(${ch.id})" title="Edit Module">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light border text-danger py-0 px-2" style="font-size: 11px;" onclick="deleteModule(${ch.id})" title="Delete Module">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                </td>
-            </tr>
-        `).join('');
+                    <div class="lesson-tree-body">
+                        ${lessons.map(l => `
+                            <div class="lesson-tree-item">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-file-earmark-play text-primary"></i>
+                                        <span class="fw-semibold text-dark" style="font-size: 13px;">${escapeHtml(l.title)}</span>
+                                        <span class="text-muted" style="font-size: 11px;">&bull; ${escapeHtml(l.duration)}</span>
+                                    </div>
+                                    <div class="text-muted mt-1" style="font-size: 11.5px;">${escapeHtml(l.desc)}</div>
+                                    
+                                    <!-- Resource Badges -->
+                                    <div class="mt-2 d-flex flex-wrap">
+                                        ${l.video ? `
+                                            <span class="resource-pill video" title="Attached Streaming Video">
+                                                <i class="bi bi-camera-video"></i> ${escapeHtml(l.video)} (${l.videoSize})
+                                            </span>
+                                        ` : ''}
+                                        ${l.pdf ? `
+                                            <span class="resource-pill pdf" title="Attached Learning Material">
+                                                <i class="bi bi-file-earmark-pdf"></i> ${escapeHtml(l.pdf)} (${l.pdfSize})
+                                            </span>
+                                        ` : ''}
+                                        <button class="btn btn-link text-primary p-0 ms-1 align-middle" style="font-size: 11px; text-decoration: none;" onclick="openEditLessonModal(${l.id})" title="Attach Additional Materials">
+                                            <i class="bi bi-paperclip"></i> + Add Material
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                    <button class="action-btn" title="Edit Lesson" onclick="openEditLessonModal(${l.id})">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="action-btn delete" title="Delete Lesson" onclick="deleteLesson(${l.id})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // 2. Quizzes & Tests Hierarchy Section
+        html += `
+            <div class="module-tree-card mt-3">
+                <div class="module-tree-header bg-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-purple bg-opacity-10 text-purple border px-2 py-1" style="font-size: 11px; color: #7C3AED; background-color: #F5F3FF; border-color: #DDD6FE;">Assessment</span>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-clipboard-check text-primary me-1"></i> Course Quizzes & QCM Knowledge Checks</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddQuizModal()">
+                        <i class="bi bi-plus-circle me-1"></i> Add Quiz
+                    </button>
+                </div>
+                <div class="p-3 bg-white">
+                    <div class="p-3 bg-light rounded-2 border mb-2">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1" style="font-size: 13px;">Module 1 Knowledge Check (QCM)</h6>
+                                <div class="text-muted" style="font-size: 11px;"><i class="bi bi-clock me-1"></i> 20 Minutes &bull; Passing Score: 70% &bull; 4 Options Single Choice</div>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Active</span>
+                        </div>
+                        <div class="p-2 bg-white rounded border">
+                            <div class="fw-semibold text-dark small mb-1">Q1: Which HTML5 tag is used to specify a section of navigation links?</div>
+                            <div class="row g-1 small text-muted">
+                                <div class="col-6"><span class="qcm-option-badge">A</span> &lt;navigation&gt;</div>
+                                <div class="col-6"><span class="qcm-option-badge correct"><i class="bi bi-check"></i></span> &lt;nav&gt; (Correct)</div>
+                                <div class="col-6"><span class="qcm-option-badge">C</span> &lt;navigate&gt;</div>
+                                <div class="col-6"><span class="qcm-option-badge">D</span> &lt;links&gt;</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 3. Coursework & Assignments Hierarchy Section
+        html += `
+            <div class="module-tree-card mt-3">
+                <div class="module-tree-header bg-white">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1" style="font-size: 11px;">Coursework</span>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-journal-text text-warning me-1"></i> Course Assignments & Project Submissions</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddAssignmentModal()">
+                        <i class="bi bi-plus-circle me-1"></i> Add Assignment
+                    </button>
+                </div>
+                <div class="p-3 bg-white">
+                    <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold text-dark" style="font-size: 13px;">Final Project — Full-Stack Web Architecture</div>
+                            <div class="text-muted" style="font-size: 11px;">
+                                <i class="bi bi-award me-1"></i> Total Points: 100 &bull; 
+                                <i class="bi bi-calendar3 ms-2 me-1"></i> Due in 4 Weeks &bull; 
+                                <span class="resource-pill doc ms-2"><i class="bi bi-file-earmark-zip"></i> starter-project.zip (2.8 MB)</span>
+                            </div>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">Active</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
     }
 
-    window.showAddChapterForm = function () {
-        const container = document.getElementById('chapterFormContainer');
-        const form = document.getElementById('chapterForm');
+    // Module CRUD Handlers
+    window.openAddModuleModal = function () {
+        const form = document.getElementById('moduleEditorForm');
         if (form) form.reset();
-        document.getElementById('chapterFormId').value = '';
-        document.getElementById('chapterFormCourseId').value = activeChapterCourseId;
+        document.getElementById('moduleEditorId').value = '';
+        document.getElementById('moduleEditorCourseId').value = activeBuilderCourseId;
         
-        const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(activeChapterCourseId) : [];
-        document.getElementById('chapterNum').value = chapters.length + 1;
-        document.getElementById('chapterFormTitle').textContent = 'Add New Chapter Module';
+        const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(activeBuilderCourseId) : [];
+        document.getElementById('moduleEditorOrder').value = chapters.length + 1;
+        document.getElementById('moduleEditorTitle').textContent = 'Add New Module';
         
-        if (container) container.style.display = 'block';
+        if (moduleEditorModal) moduleEditorModal.show();
     };
 
-    window.hideChapterForm = function () {
-        const container = document.getElementById('chapterFormContainer');
-        if (container) container.style.display = 'none';
-    };
-
-    window.editChapter = function (chapterId) {
+    window.openEditModuleModal = function (moduleId) {
         if (!window.AdminStore) return;
-        const chapter = window.AdminStore.state.chapters.find(ch => ch.id === chapterId);
-        if (!chapter) return;
+        const ch = window.AdminStore.state.chapters.find(c => c.id === moduleId);
+        if (!ch) return;
 
-        document.getElementById('chapterFormId').value = chapter.id;
-        document.getElementById('chapterFormCourseId').value = chapter.course_id;
-        document.getElementById('chapterNum').value = chapter.chapter_num;
-        document.getElementById('chapterTitle').value = chapter.title;
-        document.getElementById('chapterDuration').value = chapter.duration;
-        document.getElementById('chapterLessons').value = chapter.lesson_count;
-        document.getElementById('chapterDesc').value = chapter.description || '';
-        document.getElementById('chapterFormTitle').textContent = 'Edit Chapter Module';
+        document.getElementById('moduleEditorId').value = ch.id;
+        document.getElementById('moduleEditorCourseId').value = ch.course_id;
+        document.getElementById('moduleEditorTitleInput').value = ch.title;
+        document.getElementById('moduleEditorOrder').value = ch.chapter_num;
+        document.getElementById('moduleEditorDuration').value = ch.duration || '2 Weeks';
+        document.getElementById('moduleEditorDesc').value = ch.description || '';
+        document.getElementById('moduleEditorTitle').textContent = 'Edit Module';
 
-        const container = document.getElementById('chapterFormContainer');
-        if (container) container.style.display = 'block';
+        if (moduleEditorModal) moduleEditorModal.show();
     };
 
-    const chapterForm = document.getElementById('chapterForm');
-    if (chapterForm) {
-        chapterForm.addEventListener('submit', async function (e) {
+    const moduleEditorForm = document.getElementById('moduleEditorForm');
+    if (moduleEditorForm) {
+        moduleEditorForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-
-            const chapterId = document.getElementById('chapterFormId').value;
-            const courseId = parseInt(document.getElementById('chapterFormCourseId').value) || activeChapterCourseId;
-            const title = document.getElementById('chapterTitle').value.trim();
+            const id = document.getElementById('moduleEditorId').value;
+            const courseId = parseInt(document.getElementById('moduleEditorCourseId').value) || activeBuilderCourseId;
+            const title = document.getElementById('moduleEditorTitleInput').value.trim();
 
             const payload = {
                 course_id: courseId,
-                chapter_num: parseInt(document.getElementById('chapterNum').value) || 1,
+                chapter_num: parseInt(document.getElementById('moduleEditorOrder').value) || 1,
                 title: title,
-                duration: document.getElementById('chapterDuration').value.trim(),
-                lesson_count: parseInt(document.getElementById('chapterLessons').value) || 3,
-                description: document.getElementById('chapterDesc').value.trim()
+                duration: document.getElementById('moduleEditorDuration').value.trim(),
+                description: document.getElementById('moduleEditorDesc').value.trim(),
+                lesson_count: 3
             };
 
-            if (chapterId) {
-                if (window.AdminStore) {
-                    window.AdminStore.updateChapter(chapterId, payload);
-                }
-                if (window.AdminStore) window.AdminStore.constructor.toast('Chapter updated successfully', 'success');
+            if (id) {
+                if (window.AdminStore) window.AdminStore.updateChapter(id, payload);
+                if (window.AdminStore) window.AdminStore.constructor.toast('Module updated successfully', 'success');
             } else {
-                if (window.AdminStore) {
-                    window.AdminStore.createChapter(payload);
-                }
-                if (window.AdminStore) window.AdminStore.constructor.toast('Chapter added to course', 'success');
+                if (window.AdminStore) window.AdminStore.createChapter(payload);
+                if (window.AdminStore) window.AdminStore.constructor.toast('Module added to syllabus', 'success');
             }
 
-            hideChapterForm();
-            renderChaptersList(courseId);
+            if (moduleEditorModal) moduleEditorModal.hide();
+            renderCourseContentTree(courseId);
             allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
             applyCourseFilters();
 
             try {
-                const url = chapterId ? `${API_BASE}/admin/chapters/${chapterId}` : `${API_BASE}/admin/chapters`;
-                const method = chapterId ? 'PUT' : 'POST';
+                const url = id ? `${API_BASE}/admin/chapters/${id}` : `${API_BASE}/admin/chapters`;
+                const method = id ? 'PUT' : 'POST';
                 await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
             } catch (err) {}
         });
     }
 
-    window.deleteChapter = async function (chapterId) {
+    window.deleteModule = async function (moduleId) {
         let confirmed = false;
         if (window.AdminStore) {
-            confirmed = await window.AdminStore.constructor.confirmDialog(
-                'Delete Chapter?',
-                'Are you sure you want to remove this chapter from the course syllabus?',
-                'Yes, Delete',
-                '#DC2626'
-            );
+            confirmed = await window.AdminStore.constructor.confirmDialog('Delete Module?', 'Are you sure you want to delete this module and its lessons?', 'Yes, Delete', '#DC2626');
         } else {
-            confirmed = confirm('Are you sure you want to delete this chapter?');
+            confirmed = confirm('Are you sure you want to delete this module?');
         }
-
         if (!confirmed) return;
 
         if (window.AdminStore) {
-            window.AdminStore.deleteChapter(chapterId);
-            window.AdminStore.constructor.toast('Chapter deleted', 'success');
-            renderChaptersList(activeChapterCourseId);
+            window.AdminStore.deleteChapter(moduleId);
+            window.AdminStore.constructor.toast('Module deleted', 'success');
+            renderCourseContentTree(activeBuilderCourseId);
             allCourses = window.AdminStore.getCourses();
             applyCourseFilters();
         }
 
         try {
-            await fetch(`${API_BASE}/admin/chapters/${chapterId}`, { method: 'DELETE', headers: getHeaders() });
-        } catch (e) {}
+            await fetch(`${API_BASE}/admin/chapters/${moduleId}`, { method: 'DELETE', headers: getHeaders() });
+        } catch (err) {}
+    };
+
+    // Lesson CRUD Handlers with Video & Material Previews
+    window.openAddLessonModal = function (moduleId) {
+        const form = document.getElementById('lessonEditorForm');
+        if (form) form.reset();
+        document.getElementById('lessonEditorId').value = '';
+        document.getElementById('lessonEditorModuleId').value = moduleId;
+        document.getElementById('lessonEditorCourseId').value = activeBuilderCourseId;
+        document.getElementById('lessonEditorTitle').textContent = 'Add Lesson & Learning Materials';
+
+        // Reset previews
+        const vidPreview = document.getElementById('videoPreviewContainer');
+        if (vidPreview) vidPreview.style.display = 'none';
+        const matPreview = document.getElementById('materialPreviewContainer');
+        if (matPreview) matPreview.style.display = 'none';
+
+        if (lessonEditorModal) lessonEditorModal.show();
+    };
+
+    window.openEditLessonModal = function (lessonId) {
+        document.getElementById('lessonEditorId').value = lessonId;
+        document.getElementById('lessonEditorTitleInput').value = `Lesson 1.${lessonId} — Interactive Architecture Deep-Dive`;
+        document.getElementById('lessonEditorDuration').value = '45 Mins';
+        document.getElementById('lessonEditorDesc').value = 'Complete technical walkthrough and code architecture lecture.';
+        document.getElementById('lessonEditorTitle').textContent = 'Edit Lesson & Materials';
+
+        const vidPreview = document.getElementById('videoPreviewContainer');
+        if (vidPreview) vidPreview.style.display = 'block';
+        const vidPlayer = document.getElementById('videoPreviewPlayer');
+        if (vidPlayer) vidPlayer.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+
+        const matPreview = document.getElementById('materialPreviewContainer');
+        if (matPreview) matPreview.style.display = 'flex';
+
+        if (lessonEditorModal) lessonEditorModal.show();
+    };
+
+    // Lesson Video & Material file listeners
+    const lessonVideoInput = document.getElementById('lessonVideoInput');
+    const lessonVideoDropzone = document.getElementById('lessonVideoDropzone');
+    const replaceLessonVideoBtn = document.getElementById('replaceLessonVideoBtn');
+
+    function handleLessonVideo(file) {
+        if (!file || !file.type.startsWith('video/')) {
+            if (window.AdminStore) window.AdminStore.constructor.toast('Please select a valid video file (MP4, WebM, MOV)', 'error');
+            return;
+        }
+        if (file.size > 100 * 1024 * 1024) {
+            if (window.AdminStore) window.AdminStore.constructor.toast('Video exceeds 100 MB limit', 'error');
+            return;
+        }
+
+        const previewContainer = document.getElementById('videoPreviewContainer');
+        const player = document.getElementById('videoPreviewPlayer');
+        const info = document.getElementById('videoFileInfo');
+        
+        if (player) player.src = URL.createObjectURL(file);
+        if (info) info.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+        if (previewContainer) previewContainer.style.display = 'block';
+    }
+
+    if (lessonVideoInput) {
+        lessonVideoInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                handleLessonVideo(this.files[0]);
+            }
+        });
+    }
+
+    if (replaceLessonVideoBtn && lessonVideoInput) {
+        replaceLessonVideoBtn.addEventListener('click', () => lessonVideoInput.click());
+    }
+
+    if (lessonVideoDropzone) {
+        lessonVideoDropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+        lessonVideoDropzone.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+        lessonVideoDropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleLessonVideo(e.dataTransfer.files[0]);
+            }
+        });
+    }
+
+    const removeVideoBtn = document.getElementById('removeVideoBtn');
+    if (removeVideoBtn) {
+        removeVideoBtn.addEventListener('click', function () {
+            if (lessonVideoInput) lessonVideoInput.value = '';
+            const previewContainer = document.getElementById('videoPreviewContainer');
+            if (previewContainer) previewContainer.style.display = 'none';
+        });
+    }
+
+    const lessonMaterialInput = document.getElementById('lessonMaterialInput');
+    if (lessonMaterialInput) {
+        lessonMaterialInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const previewContainer = document.getElementById('materialPreviewContainer');
+                const nameEl = document.getElementById('materialFileName');
+                const sizeEl = document.getElementById('materialFileSize');
+                
+                if (nameEl) nameEl.textContent = file.name;
+                if (sizeEl) sizeEl.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+                if (previewContainer) previewContainer.style.display = 'flex';
+            }
+        });
+    }
+
+    const removeMaterialBtn = document.getElementById('removeMaterialBtn');
+    if (removeMaterialBtn) {
+        removeMaterialBtn.addEventListener('click', function () {
+            if (lessonMaterialInput) lessonMaterialInput.value = '';
+            const previewContainer = document.getElementById('materialPreviewContainer');
+            if (previewContainer) previewContainer.style.display = 'none';
+        });
+    }
+
+    const lessonEditorForm = document.getElementById('lessonEditorForm');
+    if (lessonEditorForm) {
+        lessonEditorForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const title = document.getElementById('lessonEditorTitleInput').value.trim();
+            if (window.AdminStore) window.AdminStore.constructor.toast(`Lesson "${title}" saved with materials`, 'success');
+            if (lessonEditorModal) lessonEditorModal.hide();
+            renderCourseContentTree(activeBuilderCourseId);
+        });
+    }
+
+    window.deleteLesson = function (lessonId) {
+        if (window.AdminStore) window.AdminStore.constructor.toast('Lesson removed from module', 'info');
+        renderCourseContentTree(activeBuilderCourseId);
+    };
+
+    // Quiz & Assignment Handlers
+    window.openAddQuizModal = function () {
+        const form = document.getElementById('quizEditorForm');
+        if (form) form.reset();
+        document.getElementById('quizEditorCourseId').value = activeBuilderCourseId;
+        if (quizEditorModal) quizEditorModal.show();
+    };
+
+    const quizEditorForm = document.getElementById('quizEditorForm');
+    if (quizEditorForm) {
+        quizEditorForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const title = document.getElementById('quizEditorTitleInput').value.trim();
+            if (window.AdminStore) window.AdminStore.constructor.toast(`Quiz "${title}" created with QCM questions`, 'success');
+            if (quizEditorModal) quizEditorModal.hide();
+            renderCourseContentTree(activeBuilderCourseId);
+        });
+    }
+
+    window.openAddAssignmentModal = function () {
+        const form = document.getElementById('assignmentEditorForm');
+        if (form) form.reset();
+        document.getElementById('assignmentEditorCourseId').value = activeBuilderCourseId;
+        const prev = document.getElementById('assignmentPreviewContainer');
+        if (prev) prev.style.display = 'none';
+        if (assignmentEditorModal) assignmentEditorModal.show();
+    };
+
+    const assignmentFileInput = document.getElementById('assignmentFileInput');
+    if (assignmentFileInput) {
+        assignmentFileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                const preview = document.getElementById('assignmentPreviewContainer');
+                const nameEl = document.getElementById('assignmentFileName');
+                const sizeEl = document.getElementById('assignmentFileSize');
+                if (nameEl) nameEl.textContent = file.name;
+                if (sizeEl) sizeEl.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+                if (preview) preview.style.display = 'flex';
+            }
+        });
+    }
+
+    const removeAssignmentBtn = document.getElementById('removeAssignmentBtn');
+    if (removeAssignmentBtn) {
+        removeAssignmentBtn.addEventListener('click', function () {
+            if (assignmentFileInput) assignmentFileInput.value = '';
+            const preview = document.getElementById('assignmentPreviewContainer');
+            if (preview) preview.style.display = 'none';
+        });
+    }
+
+    const assignmentEditorForm = document.getElementById('assignmentEditorForm');
+    if (assignmentEditorForm) {
+        assignmentEditorForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const title = document.getElementById('assignmentEditorTitleInput').value.trim();
+            if (window.AdminStore) window.AdminStore.constructor.toast(`Assignment "${title}" created successfully`, 'success');
+            if (assignmentEditorModal) assignmentEditorModal.hide();
+            renderCourseContentTree(activeBuilderCourseId);
+        });
     };
 
     // ==========================================
@@ -1275,6 +2252,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderCategoriesTable(allCategories);
         populateCategoryFilterOptions();
+        populateCourseSelects();
     }
 
     function renderCategoriesTable(categories) {
@@ -1375,6 +2353,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (categoryModal) categoryModal.hide();
                     renderCategoriesTable(allCategories);
                     populateCategoryFilterOptions();
+                    populateCourseSelects();
                     if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Updated', `"${name}" has been updated.`);
                 } else {
                     if (window.AdminStore) {
@@ -1384,6 +2363,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (categoryModal) categoryModal.hide();
                     renderCategoriesTable(allCategories);
                     populateCategoryFilterOptions();
+                    populateCourseSelects();
                     if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
                 }
 
@@ -1479,6 +2459,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         renderInstructorsTable(allInstructors);
+        populateCourseSelects();
     }
 
     function renderInstructorsTable(instructors) {

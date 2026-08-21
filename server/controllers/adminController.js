@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { dbAsync } = require('../db/database');
+const { verifyTeacherCourseAccess } = require('./quizExamController');
 
 // ==========================================
 // 1. DASHBOARD METRICS & STATS (Calculated dynamically)
@@ -641,15 +642,28 @@ exports.getCourseDetails = async (req, res) => {
 
         course.computed_status = calculateCourseStatus(course);
 
-        // 1. Chapters & Modules Tab
+        // 1. Chapters & Modules Tab (with Lessons, Learning Materials, and Videos)
         const chapters = await dbAsync.all(`
             SELECT * FROM modules WHERE course_id = ? ORDER BY order_num ASC, id ASC
         `, [id]);
+        
+        let totalDynamicLessons = 0;
         for (const chap of chapters) {
             chap.lessons = await dbAsync.all(`
                 SELECT * FROM lessons WHERE module_id = ? ORDER BY order_num ASC, id ASC
             `, [chap.id]);
+            totalDynamicLessons += chap.lessons.length;
+
+            for (const les of chap.lessons) {
+                les.materials = await dbAsync.all(`
+                    SELECT * FROM lesson_materials WHERE lesson_id = ? ORDER BY order_num ASC, id ASC
+                `, [les.id]);
+                les.video = await dbAsync.get(`
+                    SELECT * FROM lesson_videos WHERE lesson_id = ?
+                `, [les.id]);
+            }
         }
+        course.dynamic_lesson_count = totalDynamicLessons;
 
         // 2. Enrolled Students Tab
         const students = await dbAsync.all(`
@@ -662,30 +676,55 @@ exports.getCourseDetails = async (req, res) => {
             ORDER BY e.enrollment_date DESC
         `, [id]);
 
-        // 3. Exams Tab
-        const exams = [
-            { id: 1, title: 'Midterm Examination', format: 'Online Proctoring', duration: '90 Mins', passing_score: 70, weight: '30%', status: 'Scheduled', exam_date: course.start_date || '2026-10-01' },
-            { id: 2, title: 'Final Capstone Assessment', format: 'Project Submission + Oral Defense', duration: '120 Mins', passing_score: 75, weight: '40%', status: 'Upcoming', exam_date: course.end_date || '2026-11-10' }
-        ];
-
-        // 4. Quizzes Tab
-        const quizzes = await dbAsync.all(`
-            SELECT q.*, (SELECT COUNT(*) FROM lessons l WHERE l.id = q.lesson_id) as lesson_title
-            FROM quizzes q
-            WHERE q.course_id = ?
+        // 3. Real Scheduled Exams Tab
+        const exams = await dbAsync.all(`
+            SELECT ex.*, 
+                   (SELECT COUNT(*) FROM exam_submissions es WHERE es.exam_id = ex.id) as submissions_count,
+                   (SELECT AVG(es.percentage) FROM exam_submissions es WHERE es.exam_id = ex.id) as avg_score
+            FROM exams ex
+            WHERE ex.course_id = ?
+            ORDER BY ex.start_datetime ASC
         `, [id]);
 
-        // 5. Schedule Tab
+        // 4. Real Course Quizzes Tab
+        const quizzes = await dbAsync.all(`
+            SELECT q.*, l.title as lesson_title
+            FROM quizzes q
+            LEFT JOIN lessons l ON q.lesson_id = l.id
+            WHERE q.course_id = ?
+            ORDER BY q.created_at DESC
+        `, [id]);
+
+        // 5. Real Assignments Tab
+        const assignments = await dbAsync.all(`
+            SELECT a.*, u.full_name as teacher_name,
+                   (SELECT COUNT(*) FROM assignment_submissions asub WHERE asub.assignment_id = a.id) as submissions_count
+            FROM assignments a
+            LEFT JOIN users u ON a.teacher_id = u.id
+            WHERE a.course_id = ?
+            ORDER BY a.due_date ASC
+        `, [id]);
+
+        // 6. Real Course Announcements Tab
+        const announcements = await dbAsync.all(`
+            SELECT ca.*, u.full_name as author_name
+            FROM course_announcements ca
+            LEFT JOIN users u ON ca.published_by = u.id
+            WHERE ca.course_id = ?
+            ORDER BY ca.published_at DESC
+        `, [id]);
+
+        // 7. Schedule Tab
         const schedule = {
-            enrollment_opens: course.enrollment_start_date || '2026-08-20',
-            enrollment_deadline: course.enrollment_deadline || '2026-09-05',
-            course_starts: course.start_date || '2026-09-10',
-            course_ends: course.end_date || '2026-11-10',
+            enrollment_opens: course.enrollment_start_date || '',
+            enrollment_deadline: course.enrollment_deadline || '',
+            course_starts: course.start_date || '',
+            course_ends: course.end_date || '',
             weekly_sessions: 'Tuesdays & Thursdays, 18:00 - 20:00 (GMT+7)',
             room: 'Virtual Lab 102 & Zoom Auditorium'
         };
 
-        // 6. Payments & Financials Tab
+        // 8. Payments & Financials Tab
         const payments = await dbAsync.all(`
             SELECT p.*, u.full_name as student_name, u.email as student_email
             FROM payments p
@@ -698,7 +737,7 @@ exports.getCourseDetails = async (req, res) => {
             .filter(p => p.payment_status === 'Paid')
             .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-        // 7. Reports & Analytics Tab
+        // 9. Reports & Analytics
         const completedCount = students.filter(s => s.progress_percentage >= 100 || s.enrollment_status === 'Completed').length;
         const avgProgress = students.length > 0
             ? Math.round(students.reduce((sum, s) => sum + (Number(s.progress_percentage) || 0), 0) / students.length)
@@ -709,17 +748,22 @@ exports.getCourseDetails = async (req, res) => {
             completed_count: completedCount,
             completion_rate: students.length > 0 ? Math.round((completedCount / students.length) * 100) : 0,
             average_progress: avgProgress,
-            total_revenue: totalRevenue
+            total_revenue: totalRevenue,
+            total_lessons: totalDynamicLessons
         };
 
         res.json({
             success: true,
             data: {
                 overview: course,
+                course: course,
                 chapters,
+                modules: chapters,
                 students,
                 exams,
                 quizzes,
+                assignments,
+                announcements,
                 schedule,
                 payments: {
                     transactions: payments,
@@ -1099,6 +1143,13 @@ exports.createChapter = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Course ID and chapter title are required.' });
         }
 
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
         const result = await dbAsync.run(
             `INSERT INTO modules (course_id, title, description, duration, order_num, status)
              VALUES (?, ?, ?, ?, ?, ?)`,
@@ -1120,6 +1171,17 @@ exports.updateChapter = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, description, duration, order_num, status } = req.body;
+
+        const chapter = await dbAsync.get(`SELECT course_id FROM modules WHERE id = ?`, [id]);
+        if (!chapter) return res.status(404).json({ success: false, message: 'Chapter not found.' });
+
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, chapter.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
         await dbAsync.run(
             `UPDATE modules SET
                 title = COALESCE(?, title),
@@ -1141,6 +1203,13 @@ exports.deleteChapter = async (req, res) => {
         const { id } = req.params;
         const chapter = await dbAsync.get(`SELECT course_id FROM modules WHERE id = ?`, [id]);
         if (!chapter) return res.status(404).json({ success: false, message: 'Chapter not found.' });
+
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, chapter.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
 
         await dbAsync.run(`DELETE FROM modules WHERE id = ?`, [id]);
 
@@ -2097,6 +2166,17 @@ exports.createExam = async (req, res) => {
         if (!title || !course_id || !start_datetime || !end_datetime) {
             return res.status(400).json({ success: false, message: 'Title, Course, Start Date & End Date are required.' });
         }
+
+        // Priority 5: Backend Date Validation (Start < End)
+        const start = new Date(start_datetime);
+        const end = new Date(end_datetime);
+        if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid Exam Window: Start Date/Time must be strictly before End Date/Time.'
+            });
+        }
+
         const result = await dbAsync.run(`
             INSERT INTO exams (title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -2113,6 +2193,18 @@ exports.updateExam = async (req, res) => {
     try {
         const { id } = req.params;
         const { title, course_id, chapter_id, instructor_id, exam_type, description, total_questions, total_marks, passing_score, duration_minutes, start_datetime, end_datetime, attempts_allowed, status } = req.body;
+
+        if (start_datetime && end_datetime) {
+            const start = new Date(start_datetime);
+            const end = new Date(end_datetime);
+            if (isNaN(start.getTime()) || isNaN(end.getTime()) || start >= end) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid Exam Window: Start Date/Time must be strictly before End Date/Time.'
+                });
+            }
+        }
+
         await dbAsync.run(`
             UPDATE exams SET title = ?, course_id = ?, chapter_id = ?, instructor_id = ?, exam_type = ?, description = ?, total_questions = ?, total_marks = ?, passing_score = ?, duration_minutes = ?, start_datetime = ?, end_datetime = ?, attempts_allowed = ?, status = ?
             WHERE id = ?
@@ -2300,5 +2392,446 @@ exports.getReportsData = async (req, res) => {
     } catch (error) {
         console.error('getReportsData error:', error);
         res.status(500).json({ success: false, message: 'Failed to generate reports.' });
+    }
+};
+
+// ==========================================
+// 10. LESSONS MANAGEMENT CRUD & REORDERING
+// ==========================================
+
+exports.createLesson = async (req, res) => {
+    try {
+        const { module_id, title, video_url = '', description = '', duration = '20 Mins', order_num } = req.body;
+        if (!module_id || !title || !title.trim()) {
+            return res.status(400).json({ success: false, message: 'Module ID and Lesson Title are required.' });
+        }
+
+        const moduleItem = await dbAsync.get(`SELECT course_id FROM modules WHERE id = ?`, [module_id]);
+        if (!moduleItem) return res.status(404).json({ success: false, message: 'Module not found.' });
+
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, moduleItem.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        const maxOrder = await dbAsync.get(`SELECT MAX(order_num) as max_order FROM lessons WHERE module_id = ?`, [module_id]);
+        const nextOrder = order_num !== undefined ? Number(order_num) : ((maxOrder && maxOrder.max_order !== null) ? maxOrder.max_order + 1 : 1);
+
+        const result = await dbAsync.run(`
+            INSERT INTO lessons (module_id, title, video_url, description, duration, order_num)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [module_id, title.trim(), video_url, description, duration, nextOrder]);
+
+        // Audit log
+        if (req.user) {
+            await dbAsync.run(`
+                INSERT INTO audit_logs (user_id, user_name, user_role, action, entity_type, entity_id, details)
+                VALUES (?, ?, ?, 'CREATE_LESSON', 'Lesson', ?, ?)
+            `, [req.user.id || 1, req.user.full_name || 'Admin', req.user.role || 'ADMIN', result.lastID, `Created lesson "${title}" in module ${module_id}`]);
+        }
+
+        res.status(201).json({ success: true, message: 'Lesson created successfully.', id: result.lastID });
+    } catch (error) {
+        console.error('createLesson error:', error);
+        res.status(500).json({ success: false, message: 'Failed to create lesson.' });
+    }
+};
+
+exports.updateLesson = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, video_url, description, duration, order_num } = req.body;
+
+        const existing = await dbAsync.get(`
+            SELECT l.*, m.course_id FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE l.id = ?
+        `, [id]);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Lesson not found.' });
+        }
+
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, existing.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        await dbAsync.run(`
+            UPDATE lessons
+            SET title = ?, video_url = ?, description = ?, duration = ?, order_num = ?
+            WHERE id = ?
+        `, [
+            title !== undefined ? title.trim() : existing.title,
+            video_url !== undefined ? video_url : existing.video_url,
+            description !== undefined ? description : existing.description,
+            duration !== undefined ? duration : existing.duration,
+            order_num !== undefined ? Number(order_num) : existing.order_num,
+            id
+        ]);
+
+        res.json({ success: true, message: 'Lesson updated successfully.' });
+    } catch (error) {
+        console.error('updateLesson error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update lesson.' });
+    }
+};
+
+exports.deleteLesson = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const existing = await dbAsync.get(`
+            SELECT l.*, m.course_id FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE l.id = ?
+        `, [id]);
+        if (!existing) return res.status(404).json({ success: false, message: 'Lesson not found.' });
+
+        if (req.user) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, existing.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        await dbAsync.run(`DELETE FROM lessons WHERE id = ?`, [id]);
+        res.json({ success: true, message: 'Lesson deleted successfully.' });
+    } catch (error) {
+        console.error('deleteLesson error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete lesson.' });
+    }
+};
+
+exports.reorderLessons = async (req, res) => {
+    try {
+        const { orders } = req.body; // Array of { id, order_num }
+        if (!Array.isArray(orders)) {
+            return res.status(400).json({ success: false, message: 'Orders array is required.' });
+        }
+
+        for (const item of orders) {
+            await dbAsync.run(`UPDATE lessons SET order_num = ? WHERE id = ?`, [Number(item.order_num), item.id]);
+        }
+
+        res.json({ success: true, message: 'Lessons reordered successfully.' });
+    } catch (error) {
+        console.error('reorderLessons error:', error);
+        res.status(500).json({ success: false, message: 'Failed to reorder lessons.' });
+    }
+};
+
+// ==========================================
+// 11. LEARNING MATERIALS (PDF, Worksheets, Docs)
+// ==========================================
+
+exports.getLessonMaterials = async (req, res) => {
+    try {
+        const { lessonId, courseId } = req.params;
+        let materials;
+        if (lessonId) {
+            materials = await dbAsync.all(`SELECT * FROM lesson_materials WHERE lesson_id = ? ORDER BY order_num ASC, id ASC`, [lessonId]);
+        } else if (courseId) {
+            materials = await dbAsync.all(`SELECT lm.*, l.title as lesson_title FROM lesson_materials lm JOIN lessons l ON lm.lesson_id = l.id WHERE lm.course_id = ? ORDER BY lm.id ASC`, [courseId]);
+        } else {
+            materials = await dbAsync.all(`SELECT * FROM lesson_materials ORDER BY id DESC LIMIT 50`);
+        }
+        res.json({ success: true, data: materials });
+    } catch (error) {
+        console.error('getLessonMaterials error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch learning materials.' });
+    }
+};
+
+exports.createLessonMaterial = async (req, res) => {
+    try {
+        const { lesson_id, course_id, title, type = 'PDF', file_name, file_url, file_size = '1.5 MB' } = req.body;
+        if (!lesson_id || !title || !file_name || !file_url) {
+            return res.status(400).json({ success: false, message: 'Lesson ID, Title, File Name, and File URL are required.' });
+        }
+
+        let targetCourseId = course_id;
+        if (!targetCourseId) {
+            const les = await dbAsync.get(`SELECT m.course_id FROM lessons l JOIN modules m ON l.module_id = m.id WHERE l.id = ?`, [lesson_id]);
+            if (les) targetCourseId = les.course_id;
+        }
+
+        if (req.user && targetCourseId) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, targetCourseId);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        const result = await dbAsync.run(`
+            INSERT INTO lesson_materials (lesson_id, course_id, title, type, file_name, file_url, file_size, uploaded_by, is_published, order_num)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0)
+        `, [lesson_id, targetCourseId || null, title.trim(), type, file_name.trim(), file_url.trim(), file_size, req.user ? req.user.id : null]);
+
+        res.status(201).json({ success: true, message: 'Learning material attached successfully.', id: result.lastID });
+    } catch (error) {
+        console.error('createLessonMaterial error:', error);
+        res.status(500).json({ success: false, message: 'Failed to attach learning material.' });
+    }
+};
+
+exports.deleteLessonMaterial = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const mat = await dbAsync.get(`SELECT * FROM lesson_materials WHERE id = ?`, [id]);
+        if (!mat) return res.status(404).json({ success: false, message: 'Material not found.' });
+
+        if (req.user && mat.course_id) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, mat.course_id);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        await dbAsync.run(`DELETE FROM lesson_materials WHERE id = ?`, [id]);
+        res.json({ success: true, message: 'Material deleted successfully.' });
+    } catch (error) {
+        console.error('deleteLessonMaterial error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete material.' });
+    }
+};
+
+// ==========================================
+// 12. LESSON VIDEOS
+// ==========================================
+
+exports.getLessonVideo = async (req, res) => {
+    try {
+        const { lessonId } = req.params;
+        const video = await dbAsync.get(`SELECT * FROM lesson_videos WHERE lesson_id = ?`, [lessonId]);
+        res.json({ success: true, data: video || null });
+    } catch (error) {
+        console.error('getLessonVideo error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch lesson video.' });
+    }
+};
+
+exports.saveLessonVideo = async (req, res) => {
+    try {
+        const { lesson_id, course_id, video_title, video_url, storage_path = '', duration_minutes = 15, resolution = '1080p', platform = 'Direct Stream' } = req.body;
+        if (!lesson_id || !video_url) {
+            return res.status(400).json({ success: false, message: 'Lesson ID and Video URL are required.' });
+        }
+
+        let targetCourseId = course_id;
+        if (!targetCourseId) {
+            const les = await dbAsync.get(`SELECT m.course_id FROM lessons l JOIN modules m ON l.module_id = m.id WHERE l.id = ?`, [lesson_id]);
+            if (les) targetCourseId = les.course_id;
+        }
+
+        if (req.user && targetCourseId) {
+            const isAuth = await verifyTeacherCourseAccess(req.user.id, req.user.role, targetCourseId);
+            if (!isAuth) {
+                return res.status(403).json({ success: false, message: 'Forbidden: You are not assigned to teach this course.' });
+            }
+        }
+
+        const existing = await dbAsync.get(`SELECT id FROM lesson_videos WHERE lesson_id = ?`, [lesson_id]);
+        if (existing) {
+            await dbAsync.run(`
+                UPDATE lesson_videos
+                SET video_title = ?, video_url = ?, storage_path = ?, duration_minutes = ?, resolution = ?, platform = ?
+                WHERE lesson_id = ?
+            `, [video_title || 'Lesson Video', video_url, storage_path, duration_minutes, resolution, platform, lesson_id]);
+            res.json({ success: true, message: 'Lesson video updated successfully.' });
+        } else {
+            const result = await dbAsync.run(`
+                INSERT INTO lesson_videos (lesson_id, course_id, video_title, video_url, storage_path, duration_minutes, resolution, platform)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `, [lesson_id, targetCourseId || null, video_title || 'Lesson Video', video_url, storage_path, duration_minutes, resolution, platform]);
+            res.status(201).json({ success: true, message: 'Lesson video created successfully.', id: result.lastID });
+        }
+    } catch (error) {
+        console.error('saveLessonVideo error:', error);
+        res.status(500).json({ success: false, message: 'Failed to save lesson video.' });
+    }
+};
+
+// ==========================================
+// 13. COURSE ANNOUNCEMENTS
+// ==========================================
+
+exports.getCourseAnnouncements = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const announcements = await dbAsync.all(`
+            SELECT ca.*, u.full_name as author_name, u.avatar_url as author_avatar
+            FROM course_announcements ca
+            LEFT JOIN users u ON ca.published_by = u.id
+            WHERE ca.course_id = ?
+            ORDER BY ca.published_at DESC
+        `, [courseId]);
+        res.json({ success: true, data: announcements });
+    } catch (error) {
+        console.error('getCourseAnnouncements error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch course announcements.' });
+    }
+};
+
+exports.createCourseAnnouncement = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const { title, message, priority = 'Normal' } = req.body;
+        if (!title || !message) {
+            return res.status(400).json({ success: false, message: 'Title and Message are required.' });
+        }
+
+        const publishedBy = (req.user && req.user.id) ? req.user.id : 1;
+        const result = await dbAsync.run(`
+            INSERT INTO course_announcements (course_id, title, message, priority, published_by, status)
+            VALUES (?, ?, ?, ?, ?, 'Published')
+        `, [courseId, title.trim(), message.trim(), priority, publishedBy]);
+
+        res.status(201).json({ success: true, message: 'Announcement published.', id: result.lastID });
+    } catch (error) {
+        console.error('createCourseAnnouncement error:', error);
+        res.status(500).json({ success: false, message: 'Failed to post announcement.' });
+    }
+};
+
+exports.deleteCourseAnnouncement = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await dbAsync.run(`DELETE FROM course_announcements WHERE id = ?`, [id]);
+        res.json({ success: true, message: 'Announcement removed.' });
+    } catch (error) {
+        console.error('deleteCourseAnnouncement error:', error);
+        res.status(500).json({ success: false, message: 'Failed to remove announcement.' });
+    }
+};
+
+// ==========================================
+// 14. CERTIFICATES ENGINE & VERIFICATION
+// ==========================================
+
+exports.getAllCertificates = async (req, res) => {
+    try {
+        const certificates = await dbAsync.all(`
+            SELECT cert.*, u.full_name as student_name, u.university_id, u.email as student_email, c.title as course_title
+            FROM certificates cert
+            LEFT JOIN users u ON cert.student_id = u.id
+            LEFT JOIN courses c ON cert.course_id = c.id
+            ORDER BY cert.issue_date DESC
+        `);
+        res.json({ success: true, data: certificates });
+    } catch (error) {
+        console.error('getAllCertificates error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch certificates.' });
+    }
+};
+
+exports.issueCertificate = async (req, res) => {
+    try {
+        const { student_id, course_id, grade_achieved = 'A (Distinction)' } = req.body;
+        if (!student_id || !course_id) {
+            return res.status(400).json({ success: false, message: 'Student ID and Course ID are required.' });
+        }
+
+        // Generate unique certificate serial number
+        const certNum = `AUB-CERT-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+        const today = new Date().toISOString().split('T')[0];
+
+        const result = await dbAsync.run(`
+            INSERT INTO certificates (certificate_number, student_id, course_id, issue_date, completion_date, grade_achieved, status, pdf_url)
+            VALUES (?, ?, ?, ?, ?, ?, 'Issued', ?)
+            ON CONFLICT(student_id, course_id) DO UPDATE SET
+                certificate_number = excluded.certificate_number,
+                issue_date = excluded.issue_date,
+                grade_achieved = excluded.grade_achieved,
+                status = 'Issued'
+        `, [certNum, student_id, course_id, today, today, grade_achieved, `https://aub.edu.kh/certificates/${certNum}.pdf`]);
+
+        // Mark enrollment as completed
+        await dbAsync.run(`
+            UPDATE enrollments SET status = 'Completed', progress_percentage = 100.0, completed_at = CURRENT_TIMESTAMP
+            WHERE user_id = ? AND course_id = ?
+        `, [student_id, course_id]);
+
+        res.status(201).json({ success: true, message: 'Certificate issued successfully.', certificate_number: certNum });
+    } catch (error) {
+        console.error('issueCertificate error:', error);
+        res.status(500).json({ success: false, message: 'Failed to issue certificate.' });
+    }
+};
+
+// ==========================================
+// 15. AUDIT LOGS
+// ==========================================
+
+exports.getAuditLogs = async (req, res) => {
+    try {
+        const logs = await dbAsync.all(`
+            SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT 100
+        `);
+        res.json({ success: true, data: logs });
+    } catch (error) {
+        console.error('getAuditLogs error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch audit logs.' });
+    }
+};
+
+// ==========================================
+// 16. STUDENT LESSON PROGRESS & WATCH POSITION
+// ==========================================
+
+exports.updateStudentLessonProgress = async (req, res) => {
+    try {
+        const { student_id, lesson_id, course_id, is_completed, last_watched_seconds } = req.body;
+        const studentId = student_id || (req.user ? req.user.id : null);
+        if (!studentId || !lesson_id || !course_id) {
+            return res.status(400).json({ success: false, message: 'Student ID, Lesson ID, and Course ID are required.' });
+        }
+
+        await dbAsync.run(`
+            INSERT INTO student_lesson_progress (student_id, lesson_id, course_id, is_completed, completed_at, last_watched_seconds)
+            VALUES (?, ?, ?, ?, ${is_completed ? "CURRENT_TIMESTAMP" : "NULL"}, ?)
+            ON CONFLICT(student_id, lesson_id) DO UPDATE SET
+                is_completed = excluded.is_completed,
+                completed_at = CASE WHEN excluded.is_completed = 1 THEN CURRENT_TIMESTAMP ELSE student_lesson_progress.completed_at END,
+                last_watched_seconds = excluded.last_watched_seconds
+        `, [studentId, lesson_id, course_id, is_completed ? 1 : 0, last_watched_seconds || 0]);
+
+        // Recompute course progress percentage
+        const totalLessonsRow = await dbAsync.get(`
+            SELECT COUNT(l.id) as total_count
+            FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE m.course_id = ?
+        `, [course_id]);
+
+        const completedLessonsRow = await dbAsync.get(`
+            SELECT COUNT(*) as completed_count
+            FROM student_lesson_progress
+            WHERE student_id = ? AND course_id = ? AND is_completed = 1
+        `, [studentId, course_id]);
+
+        const total = (totalLessonsRow && totalLessonsRow.total_count) || 1;
+        const completed = (completedLessonsRow && completedLessonsRow.completed_count) || 0;
+        const progressPercentage = Math.min(100.0, Math.round((completed / total) * 100));
+
+        await dbAsync.run(`
+            UPDATE enrollments
+            SET progress_percentage = ?,
+                status = CASE WHEN ? >= 100 THEN 'Completed' ELSE status END
+            WHERE user_id = ? AND course_id = ?
+        `, [progressPercentage, progressPercentage, studentId, course_id]);
+
+        res.json({
+            success: true,
+            message: 'Progress recorded.',
+            progress_percentage: progressPercentage,
+            completed_lessons: completed,
+            total_lessons: total
+        });
+    } catch (error) {
+        console.error('updateStudentLessonProgress error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update progress.' });
     }
 };

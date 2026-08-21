@@ -59,11 +59,41 @@ router.post('/admin/courses/:id/duplicate', authenticateToken, requireAdmin, adm
 router.patch('/admin/courses/:id/archive', authenticateToken, requireAdmin, adminController.archiveCourse);
 router.patch('/admin/courses/:id/toggle-publish', authenticateToken, requireAdmin, adminController.toggleCoursePublish);
 
-// Course Chapters CRUD
+// Course Chapters & Lessons CRUD
 router.get('/admin/courses/:courseId/chapters', authenticateToken, requireAdmin, adminController.getCourseChapters);
 router.post('/admin/chapters', authenticateToken, requireAdmin, adminController.createChapter);
 router.put('/admin/chapters/:id', authenticateToken, requireAdmin, adminController.updateChapter);
 router.delete('/admin/chapters/:id', authenticateToken, requireAdmin, adminController.deleteChapter);
+router.post('/admin/lessons', authenticateToken, requireAdmin, adminController.createLesson);
+router.put('/admin/lessons/:id', authenticateToken, requireAdmin, adminController.updateLesson);
+router.delete('/admin/lessons/:id', authenticateToken, requireAdmin, adminController.deleteLesson);
+router.post('/admin/lessons/reorder', authenticateToken, requireAdmin, adminController.reorderLessons);
+
+// Learning Materials & PDFs
+router.get('/admin/lessons/:lessonId/materials', authenticateToken, requireAdmin, adminController.getLessonMaterials);
+router.get('/admin/courses/:courseId/materials', authenticateToken, requireAdmin, adminController.getLessonMaterials);
+router.post('/admin/materials', authenticateToken, requireAdmin, adminController.createLessonMaterial);
+router.delete('/admin/materials/:id', authenticateToken, requireAdmin, adminController.deleteLessonMaterial);
+
+// Lesson Video Metadata
+router.get('/admin/lessons/:lessonId/video', authenticateToken, requireAdmin, adminController.getLessonVideo);
+router.post('/admin/lessons/:lessonId/video', authenticateToken, requireAdmin, adminController.saveLessonVideo);
+
+// Course Announcements
+router.get('/admin/courses/:courseId/announcements', authenticateToken, requireAdmin, adminController.getCourseAnnouncements);
+router.post('/admin/courses/:courseId/announcements', authenticateToken, requireAdmin, adminController.createCourseAnnouncement);
+router.delete('/admin/announcements/:id', authenticateToken, requireAdmin, adminController.deleteCourseAnnouncement);
+
+// Certificates CRUD & Issuance
+router.get('/admin/certificates', authenticateToken, requireAdmin, adminController.getAllCertificates);
+router.post('/admin/certificates/issue', authenticateToken, requireAdmin, adminController.issueCertificate);
+
+// Audit Logs
+router.get('/admin/audit-logs', authenticateToken, requireAdmin, adminController.getAuditLogs);
+
+// Learning Progress
+router.post('/admin/progress', authenticateToken, adminController.updateStudentLessonProgress);
+router.post('/student/progress', authenticateToken, adminController.updateStudentLessonProgress);
 
 // Categories CRUD
 router.get('/admin/categories', authenticateToken, requireAdmin, adminController.getAllCategories);
@@ -123,6 +153,7 @@ router.get('/admin/reports', authenticateToken, requireAdmin, adminController.ge
 
 const teacherAssignmentController = require('../controllers/teacherAssignmentController');
 const teacherController = require('../controllers/teacherController');
+const quizExamController = require('../controllers/quizExamController');
 
 // ==========================================
 // 4. 1-ON-1 MENTORSHIP & CONSULTATIONS ROUTES
@@ -146,7 +177,18 @@ router.get('/teacher/assignments/:id/submissions', authenticateToken, teacherAss
 router.put('/teacher/submissions/:id/grade', authenticateToken, teacherAssignmentController.gradeSubmission);
 
 // ==========================================
-// 6. TEACHER MANAGEMENT & ACADEMIC RELATIONSHIPS (Admin & Protected)
+// 6. TEACHER & STUDENT QUIZ/EXAM SUBSYSTEM
+// ==========================================
+router.post('/teacher/quizzes', authenticateToken, quizExamController.createTeacherQuiz);
+router.post('/teacher/quizzes/:id/questions', authenticateToken, quizExamController.addQuizQuestion);
+router.get('/teacher/quizzes/:id/results', authenticateToken, quizExamController.getTeacherQuizResults);
+router.get('/student/quizzes/:id', authenticateToken, quizExamController.getStudentQuiz);
+router.post('/student/quizzes/:id/submit', authenticateToken, quizExamController.submitStudentQuiz);
+router.get('/student/exams/:id/start', authenticateToken, quizExamController.startStudentExam);
+router.post('/student/exams/:id/submit', authenticateToken, quizExamController.submitStudentQuiz);
+
+// ==========================================
+// 7. TEACHER MANAGEMENT & ACADEMIC RELATIONSHIPS (Admin & Protected)
 // ==========================================
 router.get('/departments', teacherController.getDepartments);
 router.get('/teachers/statistics', authenticateToken, teacherController.getTeacherStatistics);

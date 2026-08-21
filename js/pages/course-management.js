@@ -547,6 +547,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
             }
 
+            let apiSuccess = false;
+            try {
+                const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
+                const method = id ? 'PUT' : 'POST';
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                
+                const res = await fetch(url, { 
+                    method, 
+                    headers: getHeaders(), 
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                if (res.ok) apiSuccess = true;
+            } catch (netErr) {
+                // Offline fallback
+                apiSuccess = false;
+            }
+
             try {
                 if (id) {
                     if (window.AdminStore) {
@@ -556,7 +576,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (courseModal) courseModal.hide();
                     updateKPICards();
                     applyCourseFilters();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" details have been updated successfully.`);
+                    if (window.AdminStore) {
+                        const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
+                        window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" details have been updated successfully${noticeSuffix}.`);
+                    }
                 } else {
                     if (window.AdminStore) {
                         const newCourse = window.AdminStore.createCourse(payload);
@@ -581,12 +604,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (courseModal) courseModal.hide();
                     updateKPICards();
                     applyCourseFilters();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Course Created', `"${title}" has been created with default starter modules.`);
+                    if (window.AdminStore) {
+                        const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
+                        window.AdminStore.constructor.notifySuccess('Course Created', `"${title}" has been created with default starter modules${noticeSuffix}.`);
+                    }
                 }
-
-                const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
             } catch (err) {
                 if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to Save Course', err.message);
             } finally {
@@ -626,9 +648,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const course = details.overview;
         document.getElementById('detailModalTitle').textContent = `Course Inspector: ${course.title}`;
-        document.getElementById('detailModalSubtitle').textContent = `${course.category_name} &bull; Led by ${course.instructor_name} &bull; ${course.duration || '8 Weeks'}`;
+        document.getElementById('detailModalSubtitle').textContent = `${course.category_name} • Led by ${course.instructor_name} • ${course.duration || '8 Weeks'}`;
 
-        // Render Tab 1: Overview
+        // 1. Overview Tab
         document.getElementById('content-overview').innerHTML = `
             <div class="row g-3">
                 <div class="col-md-4">
@@ -636,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="p-3 bg-light rounded-3 border">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Course Price:</span>
-                            <span class="fw-bold text-dark">${course.price > 0 ? `$${Number(course.price).toFixed(2)}` : 'Free'}</span>
+                            <span class="fw-bold text-dark">${course.price > 0 ? `$${Number(course.price).toFixed(2)}` : '<span class="badge bg-success">Free Course</span>'}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted small">Difficulty:</span>
@@ -657,15 +679,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="d-flex align-items-center gap-2 mb-3">
                         <img src="${escapeHtml(course.instructor_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100')}" class="rounded-circle" style="width: 28px; height: 28px;">
                         <span class="small text-dark fw-semibold">${escapeHtml(course.instructor_name)}</span>
-                        <span class="text-muted small">&bull; ${escapeHtml(course.category_name)}</span>
+                        <span class="text-muted small">• ${escapeHtml(course.category_name)}</span>
                     </div>
 
-                    <h6 class="fw-bold text-xs text-uppercase text-muted mb-2">Description & Syllabus Overview</h6>
-                    <p class="text-secondary bg-light p-3 rounded-2 border" style="font-size: 13px; line-height: 1.6;">
-                        ${escapeHtml(course.description || 'Comprehensive curriculum designed for student excellence and practical engineering skills.')}
+                    <h6 class="fw-bold text-xs text-uppercase text-muted mb-2">Description & Learning Objectives</h6>
+                    <p class="text-secondary bg-light p-3 rounded-2 border" style="font-size: 13.5px; line-height: 1.6;">
+                        ${escapeHtml(course.description || 'Comprehensive curriculum designed for student excellence and practical skills.')}
                     </p>
 
-                    <h6 class="fw-bold text-xs text-uppercase text-muted mb-2">Lifecycle Dates</h6>
+                    <h6 class="fw-bold text-xs text-uppercase text-muted mb-2">Academic Deadlines & Milestones</h6>
                     <div class="row g-2">
                         <div class="col-6 col-md-3">
                             <div class="p-2 border rounded bg-white text-center">
@@ -696,25 +718,62 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         `;
 
-        // Render Tab 2: Chapters
+        // 2. Lessons & Syllabus Tab
         const chapters = details.chapters || [];
         document.getElementById('content-chapters').innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Course Chapters (${chapters.length})</span>
-                <span class="text-muted small">Total Lessons: ${chapters.reduce((sum, ch) => sum + (ch.lesson_count || 0), 0)}</span>
+                <div>
+                    <span class="fw-bold text-dark fs-6">Syllabus Modules (${chapters.length})</span>
+                    <span class="text-muted small ms-2">Calculated Total Lessons: <strong class="text-dark">${details.reports ? details.reports.total_lessons : chapters.reduce((sum, ch) => sum + (ch.lessons ? ch.lessons.length : 0), 0)}</strong></span>
+                </div>
             </div>
             ${chapters.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No modules registered yet.</div>' : `
-                <div class="d-flex flex-column gap-2">
-                    ${chapters.map(ch => `
-                        <div class="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="badge bg-secondary me-2">Module ${ch.chapter_num}</span>
-                                <span class="fw-bold text-dark">${escapeHtml(ch.title)}</span>
-                                <div class="text-muted small mt-1">${escapeHtml(ch.description || '')}</div>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-white text-primary border">${ch.lesson_count || 3} Lessons</span>
-                                <div class="text-muted small mt-1">${escapeHtml(ch.duration || '2 Hours')}</div>
+                <div class="accordion" id="detailChaptersAccordion">
+                    ${chapters.map((ch, idx) => `
+                        <div class="accordion-item border rounded mb-2 overflow-hidden">
+                            <h2 class="accordion-header" id="headingChap${ch.id}">
+                                <button class="accordion-button ${idx === 0 ? '' : 'collapsed'} bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChap${ch.id}">
+                                    <span class="badge bg-primary me-2">Module ${ch.order_num || ch.chapter_num || (idx+1)}</span>
+                                    <strong class="text-dark me-2">${escapeHtml(ch.title)}</strong>
+                                    <span class="badge bg-white text-secondary border ms-auto me-2">${ch.lessons ? ch.lessons.length : 0} Lessons</span>
+                                </button>
+                            </h2>
+                            <div id="collapseChap${ch.id}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#detailChaptersAccordion">
+                                <div class="accordion-body p-3 bg-white">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <p class="text-muted small mb-0">${escapeHtml(ch.description || '')}</p>
+                                        <button class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 12px;" onclick="openAddLessonModal(${ch.id})">
+                                            <i class="bi bi-plus-lg me-1"></i> Add Lesson
+                                        </button>
+                                    </div>
+                                    ${(!ch.lessons || ch.lessons.length === 0) ? '<div class="text-muted small py-2 text-center border rounded bg-light">No lessons in this module. Click "Add Lesson" to create one.</div>' : `
+                                        <div class="list-group list-group-flush border rounded">
+                                            ${ch.lessons.map(l => `
+                                                <div class="list-group-item d-flex align-items-center justify-content-between py-2 px-3">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="bi bi-play-circle-fill text-primary"></i>
+                                                        <div>
+                                                            <div class="fw-semibold text-dark" style="font-size: 13px;">${escapeHtml(l.title)}</div>
+                                                            <div class="text-muted small" style="font-size: 11.5px;">
+                                                                <span class="me-2"><i class="bi bi-clock me-1"></i>${escapeHtml(l.duration || '20 Mins')}</span>
+                                                                ${l.video ? '<span class="badge bg-info bg-opacity-10 text-info me-1"><i class="bi bi-camera-video me-1"></i>Video Attached</span>' : ''}
+                                                                ${(l.materials && l.materials.length > 0) ? `<span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-file-earmark-pdf me-1"></i>${l.materials.length} Material${l.materials.length > 1 ? 's' : ''}</span>` : ''}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <button class="btn btn-light btn-sm border py-0 px-2" title="Attach Material" onclick="openAddMaterialModal(${l.id}, ${course.id})" style="font-size: 11px;">
+                                                            <i class="bi bi-paperclip"></i>
+                                                        </button>
+                                                        <button class="btn btn-light btn-sm border py-0 px-2 text-danger" title="Delete Lesson" onclick="deleteLessonAction(${l.id})" style="font-size: 11px;">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    `}
+                                </div>
                             </div>
                         </div>
                     `).join('')}
@@ -722,47 +781,60 @@ document.addEventListener('DOMContentLoaded', function () {
             `}
         `;
 
-        // Render Tab 3: Students
-        const students = details.students || [];
-        document.getElementById('content-students').innerHTML = `
+        // 3. Learning Materials Tab
+        let allMaterials = [];
+        chapters.forEach(ch => {
+            if (ch.lessons) {
+                ch.lessons.forEach(l => {
+                    if (l.materials) {
+                        l.materials.forEach(m => allMaterials.push({ ...m, lesson_title: l.title }));
+                    }
+                });
+            }
+        });
+        if (allMaterials.length === 0 && window.AdminStore && window.AdminStore.state.materials) {
+            allMaterials = window.AdminStore.state.materials.filter(m => m.course_id == course.id);
+        }
+
+        document.getElementById('content-materials').innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Enrolled Students (${students.length})</span>
+                <span class="fw-bold text-dark fs-6">Attached Learning Materials & Guides (${allMaterials.length})</span>
             </div>
-            ${students.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No students enrolled yet.</div>' : `
+            ${allMaterials.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No downloadable PDF materials attached to this course yet. Use the "Attach Material" button in the Lessons tab.</div>' : `
                 <div class="admin-table-responsive">
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>STUDENT</th>
-                                <th>STUDENT ID</th>
-                                <th>ENROLLMENT DATE</th>
-                                <th>PROGRESS</th>
-                                <th>STATUS</th>
+                                <th>DOCUMENT TITLE</th>
+                                <th>LESSON</th>
+                                <th>TYPE</th>
+                                <th>FILE SIZE</th>
+                                <th class="text-end">ACTION</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${students.map(s => `
+                            ${allMaterials.map(m => `
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="${escapeHtml(s.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80')}" class="rounded-circle border" style="width: 28px; height: 28px;">
+                                            <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
                                             <div>
-                                                <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(s.student_name)}</div>
-                                                <div class="text-muted" style="font-size: 11px;">${escapeHtml(s.student_email)}</div>
+                                                <div class="fw-bold text-dark" style="font-size: 13px;">${escapeHtml(m.title)}</div>
+                                                <div class="text-muted small" style="font-size: 11px;">${escapeHtml(m.file_name)}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="badge bg-light text-secondary border">${escapeHtml(s.student_uni_id)}</span></td>
-                                    <td class="text-muted small">${s.enrollment_date}</td>
-                                    <td style="min-width: 140px;">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="progress flex-grow-1" style="height: 6px;">
-                                                <div class="progress-bar bg-success" style="width: ${s.progress_percentage || 0}%;"></div>
-                                            </div>
-                                            <span class="small fw-bold text-dark">${s.progress_percentage || 0}%</span>
-                                        </div>
+                                    <td><span class="badge bg-light text-dark border">${escapeHtml(m.lesson_title || 'General')}</span></td>
+                                    <td><span class="badge bg-danger bg-opacity-10 text-danger">${escapeHtml(m.type || 'PDF')}</span></td>
+                                    <td class="text-muted small">${escapeHtml(m.file_size || '1.8 MB')}</td>
+                                    <td class="text-end">
+                                        <a href="${escapeHtml(m.file_url)}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 12px;">
+                                            <i class="bi bi-download me-1"></i> View / Download
+                                        </a>
+                                        <button class="btn btn-light btn-sm border text-danger py-0 px-2 ms-1" onclick="deleteMaterialAction(${m.id})" style="font-size: 12px;">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </td>
-                                    <td><span class="badge bg-success bg-opacity-10 text-success">${s.status || 'Active'}</span></td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -771,46 +843,22 @@ document.addEventListener('DOMContentLoaded', function () {
             `}
         `;
 
-        // Render Tab 4: Exams
-        const exams = details.exams || [];
-        document.getElementById('content-exams').innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Course Examinations (${exams.length})</span>
-            </div>
-            <div class="row g-3">
-                ${exams.map(e => `
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded border">
-                            <div class="d-flex justify-content-between mb-2">
-                                <h6 class="fw-bold text-dark mb-0">${escapeHtml(e.title)}</h6>
-                                <span class="badge bg-primary bg-opacity-10 text-primary">${e.status}</span>
-                            </div>
-                            <div class="text-muted small mb-2"><i class="bi bi-clock me-1"></i>Duration: ${e.duration} &bull; Weight: ${e.weight}</div>
-                            <div class="text-muted small mb-1"><i class="bi bi-check2-circle me-1"></i>Format: ${escapeHtml(e.format)}</div>
-                            <div class="text-muted small"><i class="bi bi-calendar me-1"></i>Date: ${e.exam_date} &bull; Passing Score: ${e.passing_score}%</div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        // Render Tab 5: Quizzes
+        // 4. Quizzes Tab
         const quizzes = details.quizzes || [];
         document.getElementById('content-quizzes').innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Module Assessments & Quizzes (${quizzes.length})</span>
+                <span class="fw-bold text-dark fs-6">Module Quizzes (${quizzes.length})</span>
             </div>
-            ${quizzes.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No quizzes created yet.</div>' : `
-                <div class="d-flex flex-column gap-2">
+            ${quizzes.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No practice quizzes created yet.</div>' : `
+                <div class="row g-2">
                     ${quizzes.map(q => `
-                        <div class="p-3 bg-light rounded border d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="fw-bold text-dark">${escapeHtml(q.title)}</span>
-                                <div class="text-muted small">Associated Module: ${escapeHtml(q.lesson_title)}</div>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-light text-dark border">${q.question_count} Questions</span>
-                                <div class="text-muted small mt-1">Max: ${q.max_points} pts</div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <strong class="text-dark">${escapeHtml(q.title)}</strong>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">${q.passing_score || 60}% Pass Mark</span>
+                                </div>
+                                <div class="text-muted small"><i class="bi bi-collection me-1"></i>${q.questions_count || 10} Questions • ${q.time_limit_minutes || 30} Mins</div>
                             </div>
                         </div>
                     `).join('')}
@@ -818,49 +866,178 @@ document.addEventListener('DOMContentLoaded', function () {
             `}
         `;
 
-        // Render Tab 6: Schedule
+        // 5. Assignments Tab
+        const assignments = details.assignments || [];
+        document.getElementById('content-assignments').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-dark fs-6">Assignments & Projects (${assignments.length})</span>
+            </div>
+            ${assignments.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No assignments posted for this course.</div>' : `
+                <div class="admin-table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ASSIGNMENT TITLE</th>
+                                <th>DUE DATE</th>
+                                <th>TOTAL POINTS</th>
+                                <th>SUBMISSIONS</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${assignments.map(a => `
+                                <tr>
+                                    <td><strong class="text-dark">${escapeHtml(a.title)}</strong></td>
+                                    <td class="text-muted small">${a.due_date ? String(a.due_date).split('T')[0] : 'N/A'}</td>
+                                    <td><span class="badge bg-light text-dark border">${a.total_points || 100} pts</span></td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary">${a.submissions_count || 0} Submissions</span></td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success">${a.status || 'Published'}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `}
+        `;
+
+        // 6. Scheduled Exams Tab
+        const exams = details.exams || [];
+        document.getElementById('content-exams').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-dark fs-6">Formal Examination Windows (${exams.length})</span>
+            </div>
+            ${exams.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No formal examination windows scheduled for this course.</div>' : `
+                <div class="row g-3">
+                    ${exams.map(e => `
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h6 class="fw-bold text-dark mb-0">${escapeHtml(e.title)}</h6>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">${e.status || 'Scheduled'}</span>
+                                </div>
+                                <div class="text-muted small mb-2"><i class="bi bi-clock me-1"></i>Duration: ${e.duration_minutes || 60} Mins • Max Attempts: ${e.attempts_allowed || 2}</div>
+                                <div class="text-muted small mb-1"><i class="bi bi-calendar-event me-1"></i>Window: ${e.start_datetime ? String(e.start_datetime).split('T')[0] : 'N/A'} to ${e.end_datetime ? String(e.end_datetime).split('T')[0] : 'N/A'}</div>
+                                <div class="text-muted small"><i class="bi bi-trophy me-1"></i>Passing Score: ${e.passing_score || 50}% • Submissions: ${e.submissions_count || 0}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `}
+        `;
+
+        // 7. Students & Progress Tab
+        const students = details.students || [];
+        document.getElementById('content-students').innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold text-dark fs-6">Enrolled Students & Progress Tracking (${students.length})</span>
+            </div>
+            ${students.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No students enrolled in this cohort yet.</div>' : `
+                <div class="admin-table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>STUDENT</th>
+                                <th>STUDENT ID</th>
+                                <th>ENROLLMENT DATE</th>
+                                <th>LEARNING PROGRESS</th>
+                                <th>PAYMENT</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${students.map(s => `
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="${escapeHtml(s.avatar_url || s.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80')}" class="rounded-circle border" style="width: 28px; height: 28px;">
+                                            <div>
+                                                <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(s.student_name)}</div>
+                                                <div class="text-muted" style="font-size: 11px;">${escapeHtml(s.student_email)}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-secondary border">${escapeHtml(s.university_id || s.student_uni_id || 'ID')}</span></td>
+                                    <td class="text-muted small">${s.enrollment_date ? String(s.enrollment_date).split('T')[0] : 'N/A'}</td>
+                                    <td style="min-width: 140px;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 6px;">
+                                                <div class="progress-bar ${s.progress_percentage >= 100 ? 'bg-success' : 'bg-primary'}" style="width: ${s.progress_percentage || 0}%;"></div>
+                                            </div>
+                                            <span class="small fw-bold text-dark">${s.progress_percentage || 0}%</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-success bg-opacity-10 text-success">${s.payment_status || 'Paid'}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm ${s.progress_percentage >= 100 ? 'btn-success' : 'btn-outline-secondary'} py-0 px-2" style="font-size: 11.5px;" onclick="issueCertificateAction(${s.student_id || s.user_id}, ${course.id})">
+                                            <i class="bi bi-award me-1"></i> Issue Certificate
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `}
+        `;
+
+        // 8. Schedule & Announcements Tab
+        const announcements = details.announcements || [];
         const sched = details.schedule || {};
         document.getElementById('content-schedule').innerHTML = `
-            <div class="p-4 bg-light rounded border">
-                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-calendar3 me-2 text-primary"></i>Academic Cohort Timetable</h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded border">
-                            <span class="text-muted small">Weekly Lecture Sessions:</span>
-                            <div class="fw-bold text-dark fs-6 mt-1">${escapeHtml(sched.weekly_sessions || 'Tuesdays & Thursdays, 18:00 - 20:00 (GMT+7)')}</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-broadcast text-primary me-2"></i>Course Announcements</h6>
+                            <button class="btn btn-primary btn-sm py-0 px-2" style="font-size: 12px;" onclick="openAddAnnouncementModal(${course.id})">
+                                <i class="bi bi-plus-lg me-1"></i> Post
+                            </button>
                         </div>
+                        ${announcements.length === 0 ? '<div class="text-muted small text-center py-3 border rounded bg-white">No announcements posted.</div>' : `
+                            <div class="d-flex flex-column gap-2">
+                                ${announcements.map(a => `
+                                    <div class="p-2.5 bg-white rounded border">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong class="text-dark" style="font-size: 13px;">${escapeHtml(a.title)}</strong>
+                                            <span class="badge ${a.priority === 'Urgent' ? 'bg-danger' : a.priority === 'Important' ? 'bg-warning text-dark' : 'bg-primary'}">${a.priority || 'Normal'}</span>
+                                        </div>
+                                        <p class="text-secondary small mb-1" style="font-size: 12px;">${escapeHtml(a.message)}</p>
+                                        <div class="text-muted" style="font-size: 11px;">By ${escapeHtml(a.author_name || 'Faculty')} • ${a.published_at ? String(a.published_at).split('T')[0] : 'Today'}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded border">
-                            <span class="text-muted small">Location / Virtual Auditorium:</span>
-                            <div class="fw-bold text-dark fs-6 mt-1">${escapeHtml(sched.room || 'Virtual Lab 102 & Zoom Auditorium')}</div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded border h-100">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-calendar3 text-primary me-2"></i>Timetable & Logistics</h6>
+                        <div class="p-3 bg-white rounded border mb-2">
+                            <span class="text-muted small">Lecture Sessions:</span>
+                            <div class="fw-bold text-dark mt-1">${escapeHtml(sched.weekly_sessions || 'Tuesdays & Thursdays, 18:00 - 20:00 (GMT+7)')}</div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
+                        <div class="p-3 bg-white rounded border mb-2">
+                            <span class="text-muted small">Location:</span>
+                            <div class="fw-bold text-dark mt-1">${escapeHtml(sched.room || 'Virtual Lab 102 & Zoom Auditorium')}</div>
+                        </div>
                         <div class="p-3 bg-white rounded border">
                             <span class="text-muted small">Enrollment Window:</span>
                             <div class="fw-bold text-dark mt-1">${sched.enrollment_opens || '2026-08-20'} to ${sched.enrollment_deadline || '2026-09-05'}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-white rounded border">
-                            <span class="text-muted small">Semester Teaching Duration:</span>
-                            <div class="fw-bold text-dark mt-1">${sched.course_starts || '2026-09-10'} to ${sched.course_ends || '2026-11-10'}</div>
                         </div>
                     </div>
                 </div>
             </div>
         `;
 
-        // Render Tab 7: Payments
+        // 9. Payments & Revenue Tab
         const paymentsData = details.payments || { transactions: [], total_revenue: 0 };
         const txns = paymentsData.transactions || [];
         document.getElementById('content-payments').innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Course Revenue: <span class="text-success">$${Number(paymentsData.total_revenue).toFixed(2)}</span></span>
+                <span class="fw-bold text-dark fs-6">Gross Tuition Revenue: <span class="text-success">$${Number(paymentsData.total_revenue).toFixed(2)}</span></span>
                 <span class="text-muted small">${txns.length} Transaction${txns.length === 1 ? '' : 's'}</span>
             </div>
-            ${txns.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No payment transactions recorded for this course.</div>' : `
+            ${txns.length === 0 ? '<div class="text-center py-4 text-muted border rounded bg-light">No tuition transactions recorded for this course.</div>' : `
                 <div class="admin-table-responsive">
                     <table class="admin-table">
                         <thead>
@@ -881,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <td class="fw-bold text-success">$${Number(t.amount).toFixed(2)}</td>
                                     <td><span class="badge bg-light text-dark border">${escapeHtml(t.payment_method || 'ABA PAY')}</span></td>
                                     <td><span class="badge bg-success bg-opacity-10 text-success">${t.payment_status || 'Paid'}</span></td>
-                                    <td class="text-muted small">${t.payment_date}</td>
+                                    <td class="text-muted small">${t.payment_date ? String(t.payment_date).split('T')[0] : 'Today'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -890,50 +1067,7 @@ document.addEventListener('DOMContentLoaded', function () {
             `}
         `;
 
-        // Render Tab 8: Reports
-        const reports = details.reports || { total_enrolled: 0, completed_count: 0, completion_rate: 0, average_progress: 0, total_revenue: 0 };
-        document.getElementById('content-reports').innerHTML = `
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <div class="p-3 bg-light rounded border text-center">
-                        <span class="text-muted small">Total Admissions</span>
-                        <h3 class="fw-bold text-dark mb-0 mt-1">${reports.total_enrolled}</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-light rounded border text-center">
-                        <span class="text-muted small">Graduated / Completed</span>
-                        <h3 class="fw-bold text-success mb-0 mt-1">${reports.completed_count}</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-light rounded border text-center">
-                        <span class="text-muted small">Completion Rate</span>
-                        <h3 class="fw-bold text-primary mb-0 mt-1">${reports.completion_rate}%</h3>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3 bg-light rounded border text-center">
-                        <span class="text-muted small">Total Revenue</span>
-                        <h3 class="fw-bold text-success mb-0 mt-1">$${Number(reports.total_revenue).toFixed(2)}</h3>
-                    </div>
-                </div>
-                <div class="col-12 mt-3">
-                    <div class="p-3 bg-light rounded border">
-                        <h6 class="fw-bold text-dark mb-2">Class Performance Summary</h6>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="text-muted small">Average Student Progress:</span>
-                            <div class="progress flex-grow-1" style="height: 10px;">
-                                <div class="progress-bar bg-primary" style="width: ${reports.average_progress}%;"></div>
-                            </div>
-                            <span class="fw-bold text-dark">${reports.average_progress}%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Switch to Overview tab
+        // Reset to tab 1
         const firstTab = document.getElementById('tab-overview');
         if (firstTab) {
             const tabInstance = new bootstrap.Tab(firstTab);
@@ -949,6 +1083,158 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (courseDetailModal) courseDetailModal.show();
+    };
+
+    // Helper Modals Handlers
+    const lessonModalEl = document.getElementById('lessonModal');
+    const lessonModal = lessonModalEl ? new bootstrap.Modal(lessonModalEl) : null;
+
+    window.openAddLessonModal = function (moduleId) {
+        document.getElementById('lessonModuleId').value = moduleId;
+        document.getElementById('lessonId').value = '';
+        document.getElementById('lessonTitle').value = '';
+        document.getElementById('lessonDuration').value = '25 Mins';
+        document.getElementById('lessonOrder').value = '1';
+        document.getElementById('lessonVideoUrl').value = '';
+        document.getElementById('lessonDesc').value = '';
+        document.getElementById('lessonModalTitle').textContent = 'Add Lesson';
+        if (lessonModal) lessonModal.show();
+    };
+
+    const lessonForm = document.getElementById('lessonForm');
+    if (lessonForm) {
+        lessonForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const moduleId = document.getElementById('lessonModuleId').value;
+            const title = document.getElementById('lessonTitle').value.trim();
+            const duration = document.getElementById('lessonDuration').value.trim();
+            const order_num = document.getElementById('lessonOrder').value;
+            const video_url = document.getElementById('lessonVideoUrl').value.trim();
+            const description = document.getElementById('lessonDesc').value.trim();
+
+            try {
+                const res = await fetch(`${API_BASE}/admin/lessons`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ module_id: moduleId, title, duration, order_num, video_url, description })
+                });
+                if (lessonModal) lessonModal.hide();
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Lesson Added', `"${title}" has been added to the syllabus.`);
+                if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+            } catch (err) {
+                if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to add lesson', err.message);
+            }
+        });
+    }
+
+    window.deleteLessonAction = async function (lessonId) {
+        const confirmed = confirm('Delete this lesson from the syllabus?');
+        if (!confirmed) return;
+        try {
+            await fetch(`${API_BASE}/admin/lessons/${lessonId}`, { method: 'DELETE', headers: getHeaders() });
+            if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+        } catch (e) {}
+    };
+
+    const materialModalEl = document.getElementById('materialModal');
+    const materialModal = materialModalEl ? new bootstrap.Modal(materialModalEl) : null;
+
+    window.openAddMaterialModal = function (lessonId, courseId) {
+        document.getElementById('materialLessonId').value = lessonId;
+        document.getElementById('materialCourseId').value = courseId;
+        document.getElementById('materialTitle').value = '';
+        document.getElementById('materialFileName').value = '';
+        document.getElementById('materialFileUrl').value = '';
+        if (materialModal) materialModal.show();
+    };
+
+    const materialForm = document.getElementById('materialForm');
+    if (materialForm) {
+        materialForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const lesson_id = document.getElementById('materialLessonId').value;
+            const course_id = document.getElementById('materialCourseId').value;
+            const title = document.getElementById('materialTitle').value.trim();
+            const type = document.getElementById('materialType').value;
+            const file_name = document.getElementById('materialFileName').value.trim();
+            const file_url = document.getElementById('materialFileUrl').value.trim();
+            const file_size = document.getElementById('materialSize').value.trim();
+
+            try {
+                await fetch(`${API_BASE}/admin/materials`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ lesson_id, course_id, title, type, file_name, file_url, file_size })
+                });
+                if (materialModal) materialModal.hide();
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Material Attached', `"${title}" has been attached successfully.`);
+                if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+            } catch (err) {
+                if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to attach material', err.message);
+            }
+        });
+    }
+
+    window.deleteMaterialAction = async function (materialId) {
+        const confirmed = confirm('Delete this learning material?');
+        if (!confirmed) return;
+        try {
+            await fetch(`${API_BASE}/admin/materials/${materialId}`, { method: 'DELETE', headers: getHeaders() });
+            if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+        } catch (e) {}
+    };
+
+    const announcementModalEl = document.getElementById('announcementModal');
+    const announcementModal = announcementModalEl ? new bootstrap.Modal(announcementModalEl) : null;
+
+    window.openAddAnnouncementModal = function (courseId) {
+        document.getElementById('announcementCourseId').value = courseId;
+        document.getElementById('announcementTitle').value = '';
+        document.getElementById('announcementMessage').value = '';
+        if (announcementModal) announcementModal.show();
+    };
+
+    const announcementForm = document.getElementById('announcementForm');
+    if (announcementForm) {
+        announcementForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const courseId = document.getElementById('announcementCourseId').value;
+            const title = document.getElementById('announcementTitle').value.trim();
+            const priority = document.getElementById('announcementPriority').value;
+            const message = document.getElementById('announcementMessage').value.trim();
+
+            try {
+                await fetch(`${API_BASE}/admin/courses/${courseId}/announcements`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ title, priority, message })
+                });
+                if (announcementModal) announcementModal.hide();
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Announcement Posted', 'Published announcement for enrolled students.');
+                if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+            } catch (err) {
+                if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to post announcement', err.message);
+            }
+        });
+    }
+
+    window.issueCertificateAction = async function (studentId, courseId) {
+        try {
+            const res = await fetch(`${API_BASE}/admin/certificates/issue`, {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ student_id: studentId, course_id: courseId, grade_achieved: 'A (Distinction)' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Certificate Issued', `Certificate ${data.certificate_number} has been generated.`);
+                if (activeCourseIdInDetail) openCourseDetailModal(activeCourseIdInDetail);
+            } else {
+                if (window.AdminStore) window.AdminStore.constructor.notifyError('Could not issue certificate', data.message);
+            }
+        } catch (err) {
+            if (window.AdminStore) window.AdminStore.constructor.notifyError('Error', err.message);
+        }
     };
 
     // ==========================================
