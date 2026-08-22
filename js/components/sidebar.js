@@ -98,7 +98,56 @@ document.addEventListener('DOMContentLoaded', function () {
         applySidebarCollapsedState(false);
     }
 
-    // 6. Close Mobile Sidebar on Link Click & Setup Titles for Collapsed Tooltips
+    // 6. Sidebar Menu Scroll Position Persistence Across Multi-Page Navigations
+    const sidebarMenu = sidebar ? sidebar.querySelector('.admin-sidebar-menu') : null;
+
+    function saveSidebarScroll() {
+        if (sidebarMenu) {
+            try {
+                sessionStorage.setItem('aub_sidebar_scroll', String(sidebarMenu.scrollTop));
+            } catch (e) {}
+        }
+    }
+
+    function restoreSidebarScroll(activeItem) {
+        if (!sidebarMenu) return;
+        try {
+            const savedScroll = sessionStorage.getItem('aub_sidebar_scroll');
+            if (savedScroll !== null) {
+                const scrollVal = parseInt(savedScroll, 10);
+                if (!isNaN(scrollVal)) {
+                    sidebarMenu.scrollTop = scrollVal;
+                }
+            }
+
+            // Only if active item is NOT visible within the current scroll window, bring it minimally into view
+            if (activeItem) {
+                const menuRect = sidebarMenu.getBoundingClientRect();
+                const itemRect = activeItem.getBoundingClientRect();
+                // Check if completely outside top or bottom
+                if (itemRect.top < menuRect.top || itemRect.bottom > menuRect.bottom) {
+                    activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                    saveSidebarScroll();
+                }
+            }
+        } catch (e) {
+            console.warn('Sidebar scroll restore note:', e);
+        }
+    }
+
+    // Attach scroll saving on user scroll and beforeunload/pagehide
+    if (sidebarMenu) {
+        let scrollTimeout = null;
+        sidebarMenu.addEventListener('scroll', function () {
+            if (scrollTimeout) cancelAnimationFrame(scrollTimeout);
+            scrollTimeout = requestAnimationFrame(saveSidebarScroll);
+        }, { passive: true });
+
+        window.addEventListener('beforeunload', saveSidebarScroll);
+        window.addEventListener('pagehide', saveSidebarScroll);
+    }
+
+    // 7. Close Mobile Sidebar on Link Click, Save Scroll & Setup Titles for Collapsed Tooltips
     if (sidebar) {
         const navLinks = sidebar.querySelectorAll('.admin-nav-item');
         navLinks.forEach(link => {
@@ -108,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             link.addEventListener('click', function () {
+                saveSidebarScroll();
                 if (window.innerWidth < 992) {
                     closeMobileSidebar();
                 }
@@ -120,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 7. Automatic Active Navigation Item Detection with Hash Support & ARIA
+    // 8. Automatic Active Navigation Item Detection with Hash Support, ARIA & Scroll Restoration
     function updateActiveNavigation() {
         try {
             const currentPath = window.location.pathname.toLowerCase();
@@ -180,6 +230,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     item.removeAttribute('aria-current');
                 }
             });
+
+            // Restore / align sidebar menu scroll position stably
+            restoreSidebarScroll(matchedItem);
         } catch (e) {
             console.warn('Active route detection note:', e);
         }
