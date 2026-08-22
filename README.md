@@ -32,33 +32,52 @@ AUBDigitalAcademyFrontend/
 │       └── landing.css
 │
 ├── ⚡ js/                              # Frontend scripts & state management
-│   ├── app.js                          # Core application initializer
 │   ├── components/                     # Interactive UI components
 │   │   ├── animations.js               # Scroll triggers & micro-interactions
 │   │   ├── carousel.js                 # Multi-card interactive carousels
 │   │   ├── hero-3d.js                  # 3D interactive hero cards
-│   │   └── sidebar.js                  # Responsive portal navigation drawer
+│   │   ├── sidebar.js                  # Responsive portal navigation & state persistence
+│   │   └── teacher-sidebar.js          # Faculty navigation controller
 │   ├── data/                           # Client storage & mock store
-│   │   └── mock-store.js               # Client fallback data store
+│   │   └── mock-store.js               # Client fallback & LMS curriculum data store
 │   └── pages/                          # Page-level controllers
-│       ├── academic-management.js      # Faculty & curriculum manager
+│       ├── academic-management.js      # Faculty & 6-step LMS curriculum builder
 │       ├── admin-dashboard.js          # Admin KPI analytics & metrics
+│       ├── course-management.js        # Course catalog manager
 │       ├── enrollment-management.js    # Student admissions & registration
+│       ├── exam-management.js          # Exam & quiz controller
 │       ├── login.js                    # Auth & token management
+│       ├── payment-management.js       # Payments & invoices manager
+│       ├── payroll-management.js       # Faculty payroll controller
+│       ├── reports.js                  # Academic & financial reports
+│       ├── schedule-management.js      # Timetable & scheduling
 │       ├── settings.js                 # System configurations
 │       ├── student-assignments.js      # Student submission controller
+│       ├── student-course-detail.js    # Student course curriculum viewer
 │       ├── student-one-on-one.js       # Student consultation booking
+│       ├── student-quiz.js             # Student interactive quiz taker
 │       ├── teacher-assignments.js      # Faculty coursework & grading controller
+│       ├── teacher-courses.js          # Faculty course manager
+│       ├── teacher-dashboard.js        # Faculty stats & schedule
 │       ├── teacher-management.js       # Faculty directory & course assignment
 │       ├── teacher-one-on-one.js       # Teacher schedule management
+│       ├── teacher-quizzes.js          # Faculty quiz manager
+│       ├── teacher-students.js         # Faculty student list
+│       ├── teacher-submissions.js      # Submission grading controller
 │       ├── user-management.js          # Multi-role user & student management
 │       └── welcome-dynamic.js          # Landing page dynamic rendering
 │
 ├── 📄 pages/                            # Portal & web views
 │   ├── admin/                          # Administration Portal
-│   │   ├── academic-management.html    # Academic programs & degrees
+│   │   ├── academic-management.html    # Academic programs, degrees & LMS curriculum
+│   │   ├── course-management.html      # Course directory
 │   │   ├── dashboard.html              # University KPI & statistics overview
 │   │   ├── enrollment-management.html  # Admissions & enrollments
+│   │   ├── exam-management.html        # Exam & quiz management
+│   │   ├── payment-management.html     # Student payments & invoices
+│   │   ├── payroll-management.html     # Faculty payroll manager
+│   │   ├── reports.html                # Academic & financial analytics
+│   │   ├── schedule-management.html    # Timetable & calendar
 │   │   ├── settings.html               # University portal settings
 │   │   ├── teacher-management.html     # Teacher Directory & course assignments
 │   │   └── user-management.html        # Comprehensive User & Student Management
@@ -70,13 +89,20 @@ AUBDigitalAcademyFrontend/
 │   │   └── reset-password.html         # Secure password reset form
 │   ├── student/                        # Student Portal Workspace
 │   │   ├── assignment.html             # Coursework assignments & submissions
+│   │   ├── course-detail.html          # Interactive course curriculum
 │   │   ├── dashboard.html              # Student course progress & schedule
 │   │   ├── my-courses.html             # Active course modules & lessons
-│   │   └── one-on-one.html             # Faculty consultation booking
+│   │   ├── one-on-one.html             # Faculty consultation booking
+│   │   └── quiz.html                   # Online quiz testing interface
 │   └── teacher/                        # Faculty & Instructor Workspace
 │       ├── assignments.html            # Coursework creation & grading
 │       ├── dashboard.html              # Faculty schedule & student stats
-│       └── one-on-one.html             # Office hours & consultation requests
+│       ├── my-courses.html             # Assigned courses
+│       ├── my-students.html            # Enrolled students directory
+│       ├── one-on-one.html             # Office hours & consultation requests
+│       ├── profile.html                # Teacher profile & qualifications
+│       ├── quizzes.html                # Quiz manager
+│       └── submissions.html            # Grading & feedback queue
 │
 ├── 🗄️ data/                             # SQLite persistent storage
 │   └── aub_academy.sqlite              # Relational SQLite database
