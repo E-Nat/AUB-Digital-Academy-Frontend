@@ -68,6 +68,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const assignmentEditorModalEl = document.getElementById('assignmentEditorModal');
     const assignmentEditorModal = assignmentEditorModalEl ? new bootstrap.Modal(assignmentEditorModalEl) : null;
 
+    // Course Creation Wizard Sub-Modals
+    const wizardModuleModalEl = document.getElementById('wizardModuleModal');
+    const wizardModuleModal = wizardModuleModalEl ? new bootstrap.Modal(wizardModuleModalEl) : null;
+
+    const wizardLessonModalEl = document.getElementById('wizardLessonModal');
+    const wizardLessonModal = wizardLessonModalEl ? new bootstrap.Modal(wizardLessonModalEl) : null;
+
+    const wizardQuizModalEl = document.getElementById('wizardQuizModal');
+    const wizardQuizModal = wizardQuizModalEl ? new bootstrap.Modal(wizardQuizModalEl) : null;
+
+    const wizardAssignmentModalEl = document.getElementById('wizardAssignmentModal');
+    const wizardAssignmentModal = wizardAssignmentModalEl ? new bootstrap.Modal(wizardAssignmentModalEl) : null;
+
     let activeBuilderCourseId = null;
     let activeBuilderCourse = null;
 
@@ -597,7 +610,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         tbody.innerHTML = courses.map(c => {
-            const chapterCount = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id).length : 4;
+            const chapterCount = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id).length : (c.module_count || 0);
+            const lessonCount = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id).length : (c.lesson_count || 0);
+            const quizCount = window.AdminStore ? window.AdminStore.getAllQuizzesByCourseId(c.id).length : (c.quiz_count || 0);
+            const assignmentCount = window.AdminStore ? window.AdminStore.getAllAssignmentsByCourseId(c.id).length : (c.assignment_count || 0);
             return `
                 <tr>
                     <td>
@@ -615,9 +631,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td><span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill" style="font-size: 11px;">${escapeHtml(c.category_name || 'General')}</span></td>
                     <td class="text-muted" style="font-size: 12px;">${escapeHtml(c.instructor_name || 'Faculty Staff')}</td>
                     <td>
-                        <button class="btn btn-sm btn-light border py-1 px-2 d-inline-flex align-items-center gap-1" style="font-size: 11.5px;" onclick="openCourseContentBuilder(${c.id})" title="Open Course Content Builder">
-                            <i class="bi bi-diagram-3 text-primary"></i>
-                            <span class="fw-bold text-dark">${chapterCount}</span> Modules (${c.lesson_count || 12} Lessons)
+                        <button class="btn btn-sm btn-light border py-1 px-2 d-inline-flex align-items-center gap-1.5" style="font-size: 11px;" onclick="openCourseContentBuilder(${c.id})" title="Open Curriculum Builder">
+                            <span class="fw-bold text-dark">${chapterCount} M</span>
+                            <span class="text-muted">&bull;</span>
+                            <span class="fw-semibold text-primary">${lessonCount} L</span>
+                            <span class="text-muted">&bull;</span>
+                            <span class="fw-semibold" style="color: #7C3AED;">${quizCount} Q</span>
+                            <span class="text-muted">&bull;</span>
+                            <span class="fw-semibold" style="color: #D97706;">${assignmentCount} A</span>
                         </button>
                     </td>
                     <td><span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px;">${escapeHtml(c.difficulty || 'Beginner')}</span></td>
@@ -632,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <button class="action-btn" title="View Course Details" onclick="openViewCourseModal(${c.id})">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <button class="action-btn text-primary" title="Course Content Builder (Modules, Lessons, Quizzes, Assignments)" onclick="openCourseContentBuilder(${c.id})">
+                            <button class="action-btn text-primary" title="Curriculum Content Builder (Modules, Lessons, Quizzes, Assignments)" onclick="openCourseContentBuilder(${c.id})">
                                 <i class="bi bi-journal-bookmark"></i>
                             </button>
                             <button class="action-btn" title="Edit Course" onclick="openEditCourseModal(${c.id})">
@@ -692,6 +713,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         activeCourseInView = c;
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
+        const allLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id) : [];
+        const allQuizzes = window.AdminStore ? window.AdminStore.getAllQuizzesByCourseId(c.id) : [];
+        const allAssignments = window.AdminStore ? window.AdminStore.getAllAssignmentsByCourseId(c.id) : [];
 
         const body = document.getElementById('viewCourseModalBody');
         const titleEl = document.getElementById('viewCourseModalTitle');
@@ -727,29 +751,55 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="text-xs fw-bold text-uppercase text-muted mb-0">Syllabus Chapters (${chapters.length})</h6>
-                        <span class="text-muted" style="font-size: 11.5px;">Total Lessons: ${c.lesson_count || 12}</span>
+                        <h6 class="text-xs fw-bold text-uppercase text-muted mb-0">Curriculum Units (${chapters.length} Modules &bull; ${allLessons.length} Lessons &bull; ${allQuizzes.length} Quizzes &bull; ${allAssignments.length} Assignments)</h6>
                     </div>
 
                     ${chapters.length === 0 ? `
                         <div class="text-center py-3 text-muted border rounded-2 bg-light" style="font-size: 12px;">
-                            No chapters registered yet for this course.
+                            No curriculum modules registered yet for this course.
                         </div>
                     ` : `
-                        <div class="d-flex flex-column gap-2" style="max-height: 240px; overflow-y: auto;">
-                            ${chapters.map(ch => `
-                                <div class="p-2 px-3 bg-light rounded-2 border d-flex align-items-center justify-content-between">
-                                    <div>
-                                        <span class="badge bg-secondary me-2" style="font-size: 10px;">Ch ${ch.chapter_num}</span>
-                                        <span class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(ch.title)}</span>
-                                        <div class="text-muted text-truncate mt-1" style="font-size: 11px; max-width: 480px;">${escapeHtml(ch.description || '')}</div>
+                        <div class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                            ${chapters.map((ch, idx) => {
+                                const chLessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
+                                const chQuizzes = window.AdminStore ? window.AdminStore.getQuizzesByModuleId(ch.id) : [];
+                                const chAssignments = window.AdminStore ? window.AdminStore.getAssignmentsByModuleId(ch.id) : [];
+                                return `
+                                    <div class="p-3 bg-light rounded-2 border">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <div>
+                                                <span class="badge bg-primary me-2" style="font-size: 10px;">Module ${ch.chapter_num || idx + 1}</span>
+                                                <span class="fw-bold text-dark" style="font-size: 13px;">${escapeHtml(ch.title)}</span>
+                                            </div>
+                                            <span class="badge bg-white text-secondary border" style="font-size: 11px;">${escapeHtml(ch.duration || '2 Weeks')}</span>
+                                        </div>
+                                        ${ch.description ? `<p class="text-muted small mb-2" style="font-size: 11.5px;">${escapeHtml(ch.description)}</p>` : ''}
+                                        <div class="d-flex flex-column gap-1 ms-2 border-start ps-2" style="border-color: #CBD5E1 !important;">
+                                            ${chLessons.map(l => {
+                                                const icon = l.content_type === 'Document' ? 'bi-file-earmark-pdf text-danger' : l.content_type === 'Text' ? 'bi-file-text text-secondary' : 'bi-camera-video text-primary';
+                                                return `
+                                                    <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                                        <span class="text-truncate me-2"><i class="bi ${icon} me-1"></i> <span class="fw-medium text-dark">${escapeHtml(l.title)}</span></span>
+                                                        <span class="badge bg-white text-muted border flex-shrink-0" style="font-size: 10px;">${escapeHtml(l.content_type || 'Video')} &bull; ${escapeHtml(l.duration || '45 Mins')}</span>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                            ${chQuizzes.map(q => `
+                                                <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                                    <span class="text-truncate me-2"><i class="bi bi-question-square me-1" style="color: #7C3AED;"></i> <span class="fw-medium text-dark">${escapeHtml(q.title)}</span></span>
+                                                    <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #7C3AED;">Quiz &bull; ${(q.questions || []).length} Qs &bull; Pass ${q.passing_score || 70}%</span>
+                                                </div>
+                                            `).join('')}
+                                            ${chAssignments.map(a => `
+                                                <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                                    <span class="text-truncate me-2"><i class="bi bi-journal-check me-1" style="color: #D97706;"></i> <span class="fw-medium text-dark">${escapeHtml(a.title)}</span></span>
+                                                    <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #D97706;">Assignment &bull; ${a.max_score || 100} Pts${a.due_date ? ` &bull; Due ${a.due_date}` : ''}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
                                     </div>
-                                    <div class="text-end flex-shrink-0 ms-2">
-                                        <span class="badge bg-white text-primary border" style="font-size: 11px;">${ch.lesson_count || 3} Lessons</span>
-                                        <div class="text-muted" style="font-size: 10.5px; margin-top: 2px;">${escapeHtml(ch.duration || '2 Hours')}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </div>
                     `}
                 </div>
@@ -780,11 +830,1020 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ==========================================================================
-    // MULTI-STEP COURSE CREATION STEPPER CONTROLLER
+    // MULTI-STEP COURSE CREATION STEPPER CONTROLLER (6 STEPS)
+    // Step 1: Basic Info | Step 2: Course Structure | Step 3: Details & Pricing
+    // Step 4: Course Media | Step 5: Schedule & Dates | Step 6: Review & Publish
     // ==========================================================================
     let currentCourseStep = 1;
-    const totalCourseSteps = 5;
+    const totalCourseSteps = 6;
     const completedCourseSteps = new Set();
+
+    // In-memory curriculum structure state for course creation / edit wizard
+    let wizardModules = [];
+
+    // Structure Statistics Sync (Calculates Modules, Lessons, Quizzes, Assignments)
+    function updateWizardStructureStats() {
+        const totalModules = wizardModules.length;
+        const totalLessons = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0);
+        const totalQuizzes = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.quizzes) ? m.quizzes.length : 0), 0);
+        const totalAssignments = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.assignments) ? m.assignments.length : 0), 0);
+        const statsSummaryText = `${totalModules} Modules \u2022 ${totalLessons} Lessons \u2022 ${totalQuizzes} Quizzes \u2022 ${totalAssignments} Assignments`;
+
+        // Step 2 Badge
+        const sumCountText = document.getElementById('wizardSummaryCountText');
+        if (sumCountText) sumCountText.textContent = statsSummaryText;
+
+        // Step 3 Read-only Summary Badge & Detailed Metric Cards
+        const step3Badge = document.getElementById('step3StructureSummaryBadge');
+        if (step3Badge) step3Badge.textContent = statsSummaryText;
+
+        const mEl = document.getElementById('step3MetricModules');
+        const lEl = document.getElementById('step3MetricLessons');
+        const qEl = document.getElementById('step3MetricQuizzes');
+        const aEl = document.getElementById('step3MetricAssignments');
+        if (mEl) mEl.textContent = totalModules;
+        if (lEl) lEl.textContent = totalLessons;
+        if (qEl) qEl.textContent = totalQuizzes;
+        if (aEl) aEl.textContent = totalAssignments;
+
+        // Step 6 Review Summary
+        const reviewStructure = document.getElementById('reviewCourseStructure');
+        if (reviewStructure) reviewStructure.textContent = statsSummaryText;
+
+        return { totalModules, totalLessons, totalQuizzes, totalAssignments, statsSummaryText };
+    }
+
+    // Render Wizard Modules, Lessons, Quizzes & Assignments in Step 2
+    function renderWizardModules() {
+        const container = document.getElementById('wizardModulesContainer');
+        updateWizardStructureStats();
+        if (!container) return;
+
+        if (wizardModules.length === 0) {
+            container.innerHTML = `
+                <div class="wizard-empty-box p-4 text-center bg-white rounded border">
+                    <i class="bi bi-diagram-3 fs-2 text-primary opacity-50 d-block mb-2"></i>
+                    <h6 class="fw-bold text-dark mb-1">No Modules in Curriculum Yet</h6>
+                    <p class="text-muted small mb-3">Organize this course by adding its first module, lessons, quizzes, and assignments.</p>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="openWizardAddModuleModal()">
+                        <i class="bi bi-plus-circle me-1"></i> Add First Module
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = wizardModules.map((mod, mIdx) => {
+            const lessons = Array.isArray(mod.lessons) ? mod.lessons : [];
+            const quizzes = Array.isArray(mod.quizzes) ? mod.quizzes : [];
+            const assignments = Array.isArray(mod.assignments) ? mod.assignments : [];
+            const totalItems = lessons.length + quizzes.length + assignments.length;
+
+            return `
+                <div class="wizard-module-card border rounded bg-white shadow-sm overflow-hidden" data-module-index="${mIdx}">
+                    <!-- Module Header -->
+                    <div class="wizard-module-header p-3 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                            <span class="badge bg-primary px-2 py-1 flex-shrink-0" style="font-size: 11px;">Module ${mIdx + 1}</span>
+                            <span class="fw-bold text-dark text-truncate" style="font-size: 13.5px;">${escapeHtml(mod.title)}</span>
+                            <span class="badge bg-white text-secondary border flex-shrink-0" style="font-size: 11px;">${escapeHtml(mod.duration || '2 Weeks')}</span>
+                            <div class="d-none d-md-flex align-items-center gap-1 flex-shrink-0">
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 10px;">${lessons.length} ${lessons.length === 1 ? 'Lesson' : 'Lessons'}</span>
+                                <span class="badge bg-purple bg-opacity-10 border border-opacity-25" style="font-size: 10px; color: #7C3AED; border-color: #7C3AED !important; background-color: rgba(124, 58, 237, 0.1);">${quizzes.length} ${quizzes.length === 1 ? 'Quiz' : 'Quizzes'}</span>
+                                <span class="badge bg-warning bg-opacity-10 border border-opacity-25" style="font-size: 10px; color: #D97706; border-color: #D97706 !important; background-color: rgba(217, 119, 6, 0.1);">${assignments.length} ${assignments.length === 1 ? 'Assignment' : 'Assignments'}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                            <!-- Add Content Dropdown / Action Buttons -->
+                            <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openWizardAddLessonModal(${mIdx})" title="Add Lesson to Module">
+                                <i class="bi bi-plus-circle me-1"></i> Lesson
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-purple py-0 px-2" style="font-size: 11px; color: #7C3AED; border-color: #7C3AED;" onclick="openWizardAddQuizModal(${mIdx})" title="Add Quiz to Module">
+                                <i class="bi bi-plus-circle me-1"></i> Quiz
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size: 11px; color: #D97706; border-color: #D97706;" onclick="openWizardAddAssignmentModal(${mIdx})" title="Add Assignment to Module">
+                                <i class="bi bi-plus-circle me-1"></i> Assignment
+                            </button>
+                            
+                            <!-- Reorder / Edit / Delete Module -->
+                            <button type="button" class="wizard-reorder-btn btn btn-sm btn-light border py-0 px-1.5 ms-1" title="Move Module Up" ${mIdx === 0 ? 'disabled' : ''} onclick="moveWizardModule(${mIdx}, -1)">
+                                <i class="bi bi-arrow-up"></i>
+                            </button>
+                            <button type="button" class="wizard-reorder-btn btn btn-sm btn-light border py-0 px-1.5" title="Move Module Down" ${mIdx === wizardModules.length - 1 ? 'disabled' : ''} onclick="moveWizardModule(${mIdx}, 1)">
+                                <i class="bi bi-arrow-down"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border py-0 px-2" style="font-size: 11px;" onclick="openWizardEditModuleModal(${mIdx})" title="Edit Module">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light border text-danger py-0 px-2" style="font-size: 11px;" onclick="deleteWizardModule(${mIdx})" title="Delete Module">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Module Body (Lessons, Quizzes, Assignments) -->
+                    <div class="wizard-module-body p-3">
+                        ${mod.description ? `<p class="text-muted small mb-3" style="font-size: 11.5px;">${escapeHtml(mod.description)}</p>` : ''}
+                        
+                        ${totalItems === 0 ? `
+                            <div class="text-muted small py-3 px-3 bg-light rounded border text-center" style="font-size: 11.5px;">
+                                No content in this module yet. Add a 
+                                <a href="javascript:void(0)" class="fw-semibold text-primary" onclick="openWizardAddLessonModal(${mIdx})">+ Lesson</a>, 
+                                <a href="javascript:void(0)" class="fw-semibold" style="color: #7C3AED;" onclick="openWizardAddQuizModal(${mIdx})">+ Quiz</a>, or 
+                                <a href="javascript:void(0)" class="fw-semibold" style="color: #D97706;" onclick="openWizardAddAssignmentModal(${mIdx})">+ Assignment</a>.
+                            </div>
+                        ` : `
+                            <div class="d-flex flex-column gap-2">
+                                <!-- 1. Lessons -->
+                                ${lessons.map((les, lIdx) => {
+                                    const contentType = les.content_type || (les.video_url ? 'Video' : les.pdf_url ? 'Document' : 'Text');
+                                    const icon = contentType === 'Document' ? 'bi-file-earmark-pdf text-danger' : contentType === 'Text' ? 'bi-file-text text-secondary' : 'bi-camera-video text-primary';
+                                    const mediaTag = les.video_size ? `${contentType} &bull; ${les.video_size}` : les.pdf_size ? `${contentType} &bull; ${les.pdf_size}` : contentType;
+                                    return `
+                                        <div class="p-2.5 bg-light rounded border d-flex align-items-center justify-content-between flex-wrap gap-2" data-lesson-index="${lIdx}">
+                                            <div class="d-flex align-items-center gap-2.5 flex-grow-1 min-w-0">
+                                                <div class="p-1.5 bg-white rounded border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px;">
+                                                    <i class="bi ${icon} fs-6"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="fw-semibold text-dark text-truncate" style="font-size: 12.5px;">
+                                                        ${escapeHtml(les.title)}
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 11px;">
+                                                        <span><i class="bi bi-clock me-1"></i>${escapeHtml(les.duration || '45 Mins')}</span>
+                                                        <span>&bull;</span>
+                                                        <span class="badge bg-white text-muted border px-1.5 py-0.5" style="font-size: 10px;">${escapeHtml(mediaTag)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                <button type="button" class="btn btn-sm btn-light border py-0 px-1.5" title="Move Lesson Up" ${lIdx === 0 ? 'disabled' : ''} onclick="moveWizardLesson(${mIdx}, ${lIdx}, -1)">
+                                                    <i class="bi bi-arrow-up" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-light border py-0 px-1.5" title="Move Lesson Down" ${lIdx === lessons.length - 1 ? 'disabled' : ''} onclick="moveWizardLesson(${mIdx}, ${lIdx}, 1)">
+                                                    <i class="bi bi-arrow-down" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-light border py-0 px-2" title="Edit Lesson" onclick="openWizardEditLessonModal(${mIdx}, ${lIdx})">
+                                                    <i class="bi bi-pencil" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-light border text-danger py-0 px-2" title="Delete Lesson" onclick="deleteWizardLesson(${mIdx}, ${lIdx})">
+                                                    <i class="bi bi-trash" style="font-size: 11px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+
+                                <!-- 2. Quizzes -->
+                                ${quizzes.map((quiz, qIdx) => {
+                                    const qCount = Array.isArray(quiz.questions) ? quiz.questions.length : 0;
+                                    return `
+                                        <div class="p-2.5 rounded border d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: #FAF5FF; border-color: #E9D5FF !important;" data-quiz-index="${qIdx}">
+                                            <div class="d-flex align-items-center gap-2.5 flex-grow-1 min-w-0">
+                                                <div class="p-1.5 bg-white rounded border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; border-color: #E9D5FF !important;">
+                                                    <i class="bi bi-question-square fs-6" style="color: #7C3AED;"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="fw-semibold text-dark text-truncate" style="font-size: 12.5px;">
+                                                        ${escapeHtml(quiz.title)}
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 11px;">
+                                                        <span><i class="bi bi-clock me-1"></i>${escapeHtml(quiz.duration_mins || 20)} Mins</span>
+                                                        <span>&bull;</span>
+                                                        <span class="badge bg-white border px-1.5 py-0.5" style="font-size: 10px; color: #7C3AED; border-color: #E9D5FF !important;">
+                                                            ${qCount} ${qCount === 1 ? 'Question' : 'Questions'} &bull; Pass: ${quiz.passing_score || 70}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-1.5" title="Move Quiz Up" ${qIdx === 0 ? 'disabled' : ''} onclick="moveWizardQuiz(${mIdx}, ${qIdx}, -1)">
+                                                    <i class="bi bi-arrow-up" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-1.5" title="Move Quiz Down" ${qIdx === quizzes.length - 1 ? 'disabled' : ''} onclick="moveWizardQuiz(${mIdx}, ${qIdx}, 1)">
+                                                    <i class="bi bi-arrow-down" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-2" title="Edit Quiz" onclick="openWizardEditQuizModal(${mIdx}, ${qIdx})">
+                                                    <i class="bi bi-pencil" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border text-danger py-0 px-2" title="Delete Quiz" onclick="deleteWizardQuiz(${mIdx}, ${qIdx})">
+                                                    <i class="bi bi-trash" style="font-size: 11px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+
+                                <!-- 3. Assignments -->
+                                ${assignments.map((assign, aIdx) => {
+                                    return `
+                                        <div class="p-2.5 rounded border d-flex align-items-center justify-content-between flex-wrap gap-2" style="background-color: #FFFBEB; border-color: #FDE68A !important;" data-assignment-index="${aIdx}">
+                                            <div class="d-flex align-items-center gap-2.5 flex-grow-1 min-w-0">
+                                                <div class="p-1.5 bg-white rounded border d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; border-color: #FDE68A !important;">
+                                                    <i class="bi bi-journal-check fs-6" style="color: #D97706;"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="fw-semibold text-dark text-truncate" style="font-size: 12.5px;">
+                                                        ${escapeHtml(assign.title)}
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 11px;">
+                                                        <span><i class="bi bi-award me-1"></i>${assign.max_score || 100} Points</span>
+                                                        ${assign.due_date ? `<span>&bull;</span><span><i class="bi bi-calendar-event me-1"></i>Due ${escapeHtml(assign.due_date)}</span>` : ''}
+                                                        ${assign.attachment_name ? `<span>&bull;</span><span class="badge bg-white border px-1.5 py-0.5" style="font-size: 10px; color: #D97706; border-color: #FDE68A !important;"><i class="bi bi-paperclip me-0.5"></i>${escapeHtml(assign.attachment_name)}</span>` : ''}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-1.5" title="Move Assignment Up" ${aIdx === 0 ? 'disabled' : ''} onclick="moveWizardAssignment(${mIdx}, ${aIdx}, -1)">
+                                                    <i class="bi bi-arrow-up" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-1.5" title="Move Assignment Down" ${aIdx === assignments.length - 1 ? 'disabled' : ''} onclick="moveWizardAssignment(${mIdx}, ${aIdx}, 1)">
+                                                    <i class="bi bi-arrow-down" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border py-0 px-2" title="Edit Assignment" onclick="openWizardEditAssignmentModal(${mIdx}, ${aIdx})">
+                                                    <i class="bi bi-pencil" style="font-size: 11px;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-white border text-danger py-0 px-2" title="Delete Assignment" onclick="deleteWizardAssignment(${mIdx}, ${aIdx})">
+                                                    <i class="bi bi-trash" style="font-size: 11px;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Wizard Module CRUD & Reorder Actions
+    window.openWizardAddModuleModal = function () {
+        const form = document.getElementById('wizardModuleForm');
+        if (form) form.reset();
+        document.getElementById('wizardModuleEditIndex').value = '';
+        document.getElementById('wizardModuleModalTitle').textContent = 'Add Curriculum Module';
+        document.getElementById('wizardModuleDurationInput').value = '2 Weeks';
+        const titleInput = document.getElementById('wizardModuleTitleInput');
+        if (titleInput) {
+            titleInput.classList.remove('is-invalid');
+            titleInput.value = `Module ${wizardModules.length + 1} — `;
+        }
+        if (wizardModuleModal) wizardModuleModal.show();
+    };
+
+    window.openWizardEditModuleModal = function (modIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod) return;
+        document.getElementById('wizardModuleEditIndex').value = String(modIndex);
+        document.getElementById('wizardModuleModalTitle').textContent = `Edit Module ${modIndex + 1}`;
+        document.getElementById('wizardModuleTitleInput').value = mod.title || '';
+        document.getElementById('wizardModuleDurationInput').value = mod.duration || '2 Weeks';
+        document.getElementById('wizardModuleDescInput').value = mod.description || '';
+        const titleInput = document.getElementById('wizardModuleTitleInput');
+        if (titleInput) titleInput.classList.remove('is-invalid');
+        if (wizardModuleModal) wizardModuleModal.show();
+    };
+
+    window.deleteWizardModule = async function (modIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod) return;
+        const lesCount = (mod.lessons || []).length;
+        const qCount = (mod.quizzes || []).length;
+        const aCount = (mod.assignments || []).length;
+        const totalSubItems = lesCount + qCount + aCount;
+
+        const confirmed = window.AdminStore ? await window.AdminStore.constructor.confirmDialog(
+            'Delete Module?',
+            `Are you sure you want to remove "${mod.title}"${totalSubItems > 0 ? ` and all its ${totalSubItems} curriculum items` : ''}?`,
+            'Yes, Remove',
+            '#DC2626'
+        ) : confirm(`Delete module "${mod.title}"?`);
+
+        if (confirmed) {
+            wizardModules.splice(modIndex, 1);
+            wizardModules.forEach((m, idx) => { m.chapter_num = idx + 1; });
+            renderWizardModules();
+            if (window.AdminStore) window.AdminStore.constructor.toast('Module removed from wizard', 'info');
+        }
+    };
+
+    window.moveWizardModule = function (modIndex, direction) {
+        const targetIndex = modIndex + direction;
+        if (targetIndex < 0 || targetIndex >= wizardModules.length) return;
+        const temp = wizardModules[modIndex];
+        wizardModules[modIndex] = wizardModules[targetIndex];
+        wizardModules[targetIndex] = temp;
+        wizardModules.forEach((m, idx) => { m.chapter_num = idx + 1; });
+        renderWizardModules();
+    };
+
+    // ==========================================================================
+    // WIZARD LESSON CRUD, CONTENT TYPE SELECTOR & FILE UPLOADS
+    // ==========================================================================
+    window.setWizardLessonContentType = function (type) {
+        const typeInput = document.getElementById('wizardLessonContentTypeVal');
+        if (typeInput) typeInput.value = type;
+
+        const btnVideo = document.getElementById('btnTypeVideo');
+        const btnDoc = document.getElementById('btnTypeDocument');
+        const btnText = document.getElementById('btnTypeText');
+
+        if (btnVideo) btnVideo.classList.toggle('active', type === 'Video');
+        if (btnDoc) btnDoc.classList.toggle('active', type === 'Document');
+        if (btnText) btnText.classList.toggle('active', type === 'Text');
+
+        const videoSec = document.getElementById('wizardLessonVideoSection');
+        const docSec = document.getElementById('wizardLessonDocumentSection');
+        const textSec = document.getElementById('wizardLessonTextSection');
+
+        if (videoSec) videoSec.style.display = type === 'Video' ? 'block' : 'none';
+        if (docSec) docSec.style.display = type === 'Document' ? 'block' : 'none';
+        if (textSec) textSec.style.display = type === 'Text' ? 'block' : 'none';
+    };
+
+    window.openWizardAddLessonModal = function (modIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod) return;
+        const form = document.getElementById('wizardLessonForm');
+        if (form) form.reset();
+        document.getElementById('wizardLessonModuleIndex').value = String(modIndex);
+        document.getElementById('wizardLessonEditIndex').value = '';
+        document.getElementById('wizardLessonModalTitle').textContent = `Add Lesson to Module ${modIndex + 1}`;
+        document.getElementById('wizardLessonDurationInput').value = '45 Mins';
+        
+        // Reset preview boxes
+        const videoPrevBox = document.getElementById('wizardLessonVideoPreviewBox');
+        if (videoPrevBox) videoPrevBox.style.display = 'none';
+        const docPrevBox = document.getElementById('wizardLessonDocPreviewBox');
+        if (docPrevBox) docPrevBox.style.display = 'none';
+
+        setWizardLessonContentType('Video');
+
+        const titleInput = document.getElementById('wizardLessonTitleInput');
+        if (titleInput) {
+            titleInput.classList.remove('is-invalid');
+            const lesCount = (mod.lessons || []).length;
+            titleInput.value = `${modIndex + 1}.${lesCount + 1} `;
+        }
+        if (wizardLessonModal) wizardLessonModal.show();
+    };
+
+    window.openWizardEditLessonModal = function (modIndex, lesIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.lessons || !mod.lessons[lesIndex]) return;
+        const les = mod.lessons[lesIndex];
+        document.getElementById('wizardLessonModuleIndex').value = String(modIndex);
+        document.getElementById('wizardLessonEditIndex').value = String(lesIndex);
+        document.getElementById('wizardLessonModalTitle').textContent = `Edit Lesson (${modIndex + 1}.${lesIndex + 1})`;
+        document.getElementById('wizardLessonTitleInput').value = les.title || '';
+        document.getElementById('wizardLessonDurationInput').value = les.duration || '45 Mins';
+        document.getElementById('wizardLessonDescInput').value = les.description || '';
+        
+        const contentType = les.content_type || (les.video_url ? 'Video' : les.pdf_url ? 'Document' : 'Text');
+        setWizardLessonContentType(contentType);
+
+        // Preload video preview if available
+        const videoPrevBox = document.getElementById('wizardLessonVideoPreviewBox');
+        const videoPlayer = document.getElementById('wizardLessonVideoPlayer');
+        const videoName = document.getElementById('wizardLessonVideoFileName');
+        const videoSize = document.getElementById('wizardLessonVideoFileSize');
+        const videoUrlInput = document.getElementById('wizardLessonVideoUrlInput');
+        if (les.video_url) {
+            if (videoUrlInput) videoUrlInput.value = les.video_url;
+            if (videoPlayer) videoPlayer.src = les.video_url.startsWith('blob:') ? les.video_url : `../../${les.video_url}`;
+            if (videoName) videoName.textContent = les.video_url.split('/').pop() || 'lesson_video.mp4';
+            if (videoSize) videoSize.textContent = les.video_size || '18.4 MB';
+            if (videoPrevBox) videoPrevBox.style.display = 'block';
+        } else {
+            if (videoPrevBox) videoPrevBox.style.display = 'none';
+        }
+
+        // Preload document preview if available
+        const docPrevBox = document.getElementById('wizardLessonDocPreviewBox');
+        const docName = document.getElementById('wizardLessonDocFileName');
+        const docSize = document.getElementById('wizardLessonDocFileSize');
+        if (les.pdf_url) {
+            if (docName) docName.textContent = les.pdf_url.split('/').pop() || 'lesson_document.pdf';
+            if (docSize) docSize.textContent = les.pdf_size || '2.1 MB';
+            if (docPrevBox) docPrevBox.style.display = 'flex';
+        } else {
+            if (docPrevBox) docPrevBox.style.display = 'none';
+        }
+
+        // Preload text content
+        const textInput = document.getElementById('wizardLessonTextInput');
+        if (textInput) textInput.value = les.text_content || '';
+
+        const titleInput = document.getElementById('wizardLessonTitleInput');
+        if (titleInput) titleInput.classList.remove('is-invalid');
+        if (wizardLessonModal) wizardLessonModal.show();
+    };
+
+    window.deleteWizardLesson = function (modIndex, lesIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.lessons) return;
+        mod.lessons.splice(lesIndex, 1);
+        renderWizardModules();
+        if (window.AdminStore) window.AdminStore.constructor.toast('Lesson removed', 'info');
+    };
+
+    window.moveWizardLesson = function (modIndex, lesIndex, direction) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.lessons) return;
+        const targetIndex = lesIndex + direction;
+        if (targetIndex < 0 || targetIndex >= mod.lessons.length) return;
+        const temp = mod.lessons[lesIndex];
+        mod.lessons[lesIndex] = mod.lessons[targetIndex];
+        mod.lessons[targetIndex] = temp;
+        renderWizardModules();
+    };
+
+    // ==========================================================================
+    // WIZARD QUIZ CRUD & DYNAMIC QUESTIONS BUILDER
+    // ==========================================================================
+    let wizardQuizActiveQuestions = [];
+
+    function renderWizardQuizQuestions() {
+        const container = document.getElementById('wizardQuizQuestionsContainer');
+        const countSpan = document.getElementById('wizardQuizQuestionCount');
+        if (!container) return;
+        if (countSpan) countSpan.textContent = wizardQuizActiveQuestions.length;
+
+        if (wizardQuizActiveQuestions.length === 0) {
+            container.innerHTML = `
+                <div class="text-center p-3 bg-light rounded border text-muted small">
+                    No questions added yet. Click <strong>+ Add Question</strong> to add multiple choice questions.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = wizardQuizActiveQuestions.map((q, idx) => `
+            <div class="p-3 bg-white rounded border" data-question-index="${idx}">
+                <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom">
+                    <span class="fw-bold text-dark small"><i class="bi bi-question-circle text-primary me-1"></i> Question ${idx + 1}</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small">Points:</span>
+                        <input type="number" class="form-control form-control-sm text-center py-0" style="width: 60px;" value="${q.points || 10}" min="1" onchange="updateWizardQuizQuestionPoints(${idx}, this.value)">
+                        ${wizardQuizActiveQuestions.length > 1 ? `
+                            <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 ms-1" style="font-size: 11px;" onclick="deleteWizardQuizQuestion(${idx})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label text-muted small mb-1">Question Prompt <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control form-control-sm" value="${escapeHtml(q.question || '')}" placeholder="e.g. Which HTML5 tag is used for navigation links?" onchange="updateWizardQuizQuestionField(${idx}, 'question', this.value)">
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text fw-bold">A</span>
+                            <input type="text" class="form-control" value="${escapeHtml(q.option_a || '')}" placeholder="Option A" onchange="updateWizardQuizQuestionField(${idx}, 'option_a', this.value)">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text fw-bold">B</span>
+                            <input type="text" class="form-control" value="${escapeHtml(q.option_b || '')}" placeholder="Option B" onchange="updateWizardQuizQuestionField(${idx}, 'option_b', this.value)">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text fw-bold">C</span>
+                            <input type="text" class="form-control" value="${escapeHtml(q.option_c || '')}" placeholder="Option C" onchange="updateWizardQuizQuestionField(${idx}, 'option_c', this.value)">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text fw-bold">D</span>
+                            <input type="text" class="form-control" value="${escapeHtml(q.option_d || '')}" placeholder="Option D" onchange="updateWizardQuizQuestionField(${idx}, 'option_d', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label text-muted small mb-0">Correct Answer:</label>
+                    <select class="form-select form-select-sm" style="width: 140px;" onchange="updateWizardQuizQuestionField(${idx}, 'correct_answer', this.value)">
+                        <option value="A" ${q.correct_answer === 'A' ? 'selected' : ''}>Option A</option>
+                        <option value="B" ${q.correct_answer === 'B' ? 'selected' : ''}>Option B</option>
+                        <option value="C" ${q.correct_answer === 'C' ? 'selected' : ''}>Option C</option>
+                        <option value="D" ${q.correct_answer === 'D' ? 'selected' : ''}>Option D</option>
+                    </select>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.addWizardQuizQuestion = function (qData) {
+        wizardQuizActiveQuestions.push(qData || {
+            question: '',
+            option_a: '',
+            option_b: '',
+            option_c: '',
+            option_d: '',
+            correct_answer: 'A',
+            points: 10
+        });
+        renderWizardQuizQuestions();
+    };
+
+    window.deleteWizardQuizQuestion = function (qIdx) {
+        wizardQuizActiveQuestions.splice(qIdx, 1);
+        renderWizardQuizQuestions();
+    };
+
+    window.updateWizardQuizQuestionField = function (idx, field, value) {
+        if (wizardQuizActiveQuestions[idx]) {
+            wizardQuizActiveQuestions[idx][field] = value;
+        }
+    };
+
+    window.updateWizardQuizQuestionPoints = function (idx, value) {
+        if (wizardQuizActiveQuestions[idx]) {
+            wizardQuizActiveQuestions[idx].points = parseInt(value) || 10;
+        }
+    };
+
+    window.openWizardAddQuizModal = function (modIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod) return;
+        const form = document.getElementById('wizardQuizForm');
+        if (form) form.reset();
+        document.getElementById('wizardQuizModuleIndex').value = String(modIndex);
+        document.getElementById('wizardQuizEditIndex').value = '';
+        document.getElementById('wizardQuizModalTitle').textContent = `Add Quiz to Module ${modIndex + 1}`;
+        document.getElementById('wizardQuizDurationInput').value = '20';
+        document.getElementById('wizardQuizPassingScoreInput').value = '70';
+
+        const qCount = (mod.quizzes || []).length;
+        const titleInput = document.getElementById('wizardQuizTitleInput');
+        if (titleInput) {
+            titleInput.classList.remove('is-invalid');
+            titleInput.value = `Quiz ${qCount + 1} — Knowledge Check`;
+        }
+
+        wizardQuizActiveQuestions = [
+            {
+                question: 'Which element is used to structure content in HTML5?',
+                option_a: '<header>',
+                option_b: '<div>',
+                option_c: '<section>',
+                option_d: 'All of the above',
+                correct_answer: 'D',
+                points: 10
+            }
+        ];
+        renderWizardQuizQuestions();
+
+        if (wizardQuizModal) wizardQuizModal.show();
+    };
+
+    window.openWizardEditQuizModal = function (modIndex, qIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.quizzes || !mod.quizzes[qIndex]) return;
+        const quiz = mod.quizzes[qIndex];
+        document.getElementById('wizardQuizModuleIndex').value = String(modIndex);
+        document.getElementById('wizardQuizEditIndex').value = String(qIndex);
+        document.getElementById('wizardQuizModalTitle').textContent = `Edit Quiz (${quiz.title})`;
+        document.getElementById('wizardQuizTitleInput').value = quiz.title || '';
+        document.getElementById('wizardQuizDurationInput').value = quiz.duration_mins || 20;
+        document.getElementById('wizardQuizPassingScoreInput').value = quiz.passing_score || 70;
+        document.getElementById('wizardQuizDescInput').value = quiz.description || '';
+
+        wizardQuizActiveQuestions = Array.isArray(quiz.questions) && quiz.questions.length > 0
+            ? JSON.parse(JSON.stringify(quiz.questions))
+            : [
+                {
+                    question: 'Question prompt',
+                    option_a: 'Option A',
+                    option_b: 'Option B',
+                    option_c: 'Option C',
+                    option_d: 'Option D',
+                    correct_answer: 'A',
+                    points: 10
+                }
+            ];
+        renderWizardQuizQuestions();
+
+        const titleInput = document.getElementById('wizardQuizTitleInput');
+        if (titleInput) titleInput.classList.remove('is-invalid');
+        if (wizardQuizModal) wizardQuizModal.show();
+    };
+
+    window.deleteWizardQuiz = function (modIndex, qIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.quizzes) return;
+        mod.quizzes.splice(qIndex, 1);
+        renderWizardModules();
+        if (window.AdminStore) window.AdminStore.constructor.toast('Quiz removed', 'info');
+    };
+
+    window.moveWizardQuiz = function (modIndex, qIndex, direction) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.quizzes) return;
+        const targetIndex = qIndex + direction;
+        if (targetIndex < 0 || targetIndex >= mod.quizzes.length) return;
+        const temp = mod.quizzes[qIndex];
+        mod.quizzes[qIndex] = mod.quizzes[targetIndex];
+        mod.quizzes[targetIndex] = temp;
+        renderWizardModules();
+    };
+
+    // ==========================================================================
+    // WIZARD ASSIGNMENT CRUD & ATTACHMENT HANDLERS
+    // ==========================================================================
+    let wizardAssignmentActiveAttachment = null;
+
+    window.openWizardAddAssignmentModal = function (modIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod) return;
+        const form = document.getElementById('wizardAssignmentForm');
+        if (form) form.reset();
+        document.getElementById('wizardAssignmentModuleIndex').value = String(modIndex);
+        document.getElementById('wizardAssignmentEditIndex').value = '';
+        document.getElementById('wizardAssignmentModalTitle').textContent = `Add Assignment to Module ${modIndex + 1}`;
+        document.getElementById('wizardAssignmentMaxScoreInput').value = '100';
+
+        const assignCount = (mod.assignments || []).length;
+        const titleInput = document.getElementById('wizardAssignmentTitleInput');
+        if (titleInput) {
+            titleInput.classList.remove('is-invalid');
+            titleInput.value = `Assignment ${assignCount + 1} — Practical Application`;
+        }
+
+        const prevBox = document.getElementById('wizardAssignmentPreviewBox');
+        if (prevBox) prevBox.style.display = 'none';
+        wizardAssignmentActiveAttachment = null;
+
+        if (wizardAssignmentModal) wizardAssignmentModal.show();
+    };
+
+    window.openWizardEditAssignmentModal = function (modIndex, aIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.assignments || !mod.assignments[aIndex]) return;
+        const assign = mod.assignments[aIndex];
+        document.getElementById('wizardAssignmentModuleIndex').value = String(modIndex);
+        document.getElementById('wizardAssignmentEditIndex').value = String(aIndex);
+        document.getElementById('wizardAssignmentModalTitle').textContent = `Edit Assignment (${assign.title})`;
+        document.getElementById('wizardAssignmentTitleInput').value = assign.title || '';
+        document.getElementById('wizardAssignmentMaxScoreInput').value = assign.max_score || 100;
+        document.getElementById('wizardAssignmentDueDateInput').value = assign.due_date ? String(assign.due_date).split('T')[0] : '';
+        document.getElementById('wizardAssignmentInstructionsInput').value = assign.instructions || '';
+
+        const prevBox = document.getElementById('wizardAssignmentPreviewBox');
+        const fileNameEl = document.getElementById('wizardAssignmentFileName');
+        const fileSizeEl = document.getElementById('wizardAssignmentFileSize');
+        if (assign.attachment_name) {
+            if (fileNameEl) fileNameEl.textContent = assign.attachment_name;
+            if (fileSizeEl) fileSizeEl.textContent = assign.attachment_size || '2.4 MB';
+            if (prevBox) prevBox.style.display = 'flex';
+            wizardAssignmentActiveAttachment = {
+                name: assign.attachment_name,
+                size: assign.attachment_size || '2.4 MB'
+            };
+        } else {
+            if (prevBox) prevBox.style.display = 'none';
+            wizardAssignmentActiveAttachment = null;
+        }
+
+        const titleInput = document.getElementById('wizardAssignmentTitleInput');
+        if (titleInput) titleInput.classList.remove('is-invalid');
+        if (wizardAssignmentModal) wizardAssignmentModal.show();
+    };
+
+    window.deleteWizardAssignment = function (modIndex, aIndex) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.assignments) return;
+        mod.assignments.splice(aIndex, 1);
+        renderWizardModules();
+        if (window.AdminStore) window.AdminStore.constructor.toast('Assignment removed', 'info');
+    };
+
+    window.moveWizardAssignment = function (modIndex, aIndex, direction) {
+        const mod = wizardModules[modIndex];
+        if (!mod || !mod.assignments) return;
+        const targetIndex = aIndex + direction;
+        if (targetIndex < 0 || targetIndex >= mod.assignments.length) return;
+        const temp = mod.assignments[aIndex];
+        mod.assignments[aIndex] = mod.assignments[targetIndex];
+        mod.assignments[targetIndex] = temp;
+        renderWizardModules();
+    };
+
+    // Setup Wizard Upload Dropzones and Listeners
+    function setupWizardMediaListeners() {
+        // Lesson Video Dropzone & Input
+        const lVideoInput = document.getElementById('wizardLessonVideoInput');
+        const lVideoDropzone = document.getElementById('wizardLessonVideoDropzone');
+        const lVideoPrevBox = document.getElementById('wizardLessonVideoPreviewBox');
+        const lVideoPlayer = document.getElementById('wizardLessonVideoPlayer');
+        const lVideoName = document.getElementById('wizardLessonVideoFileName');
+        const lVideoSize = document.getElementById('wizardLessonVideoFileSize');
+        const replaceLVideoBtn = document.getElementById('replaceWizardLessonVideoBtn');
+        const removeLVideoBtn = document.getElementById('removeWizardLessonVideoBtn');
+
+        function handleLessonVideoFile(file) {
+            if (!file) return;
+            const blobUrl = URL.createObjectURL(file);
+            if (lVideoPlayer) lVideoPlayer.src = blobUrl;
+            if (lVideoName) lVideoName.textContent = file.name;
+            if (lVideoSize) lVideoSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+            if (lVideoPrevBox) lVideoPrevBox.style.display = 'block';
+            const urlInput = document.getElementById('wizardLessonVideoUrlInput');
+            if (urlInput) urlInput.value = `assets/videos/${file.name}`;
+        }
+
+        if (lVideoInput) {
+            lVideoInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleLessonVideoFile(this.files[0]);
+            });
+        }
+        if (replaceLVideoBtn && lVideoInput) {
+            replaceLVideoBtn.addEventListener('click', () => lVideoInput.click());
+        }
+        if (removeLVideoBtn) {
+            removeLVideoBtn.addEventListener('click', function () {
+                if (lVideoInput) lVideoInput.value = '';
+                if (lVideoPrevBox) lVideoPrevBox.style.display = 'none';
+                if (lVideoPlayer) lVideoPlayer.src = '';
+                const urlInput = document.getElementById('wizardLessonVideoUrlInput');
+                if (urlInput) urlInput.value = '';
+            });
+        }
+
+        // Lesson Document Dropzone & Input
+        const lDocInput = document.getElementById('wizardLessonDocInput');
+        const lDocPrevBox = document.getElementById('wizardLessonDocPreviewBox');
+        const lDocName = document.getElementById('wizardLessonDocFileName');
+        const lDocSize = document.getElementById('wizardLessonDocFileSize');
+        const replaceLDocBtn = document.getElementById('replaceWizardLessonDocBtn');
+        const removeLDocBtn = document.getElementById('removeWizardLessonDocBtn');
+
+        function handleLessonDocFile(file) {
+            if (!file) return;
+            if (lDocName) lDocName.textContent = file.name;
+            if (lDocSize) lDocSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+            if (lDocPrevBox) lDocPrevBox.style.display = 'flex';
+        }
+
+        if (lDocInput) {
+            lDocInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleLessonDocFile(this.files[0]);
+            });
+        }
+        if (replaceLDocBtn && lDocInput) {
+            replaceLDocBtn.addEventListener('click', () => lDocInput.click());
+        }
+        if (removeLDocBtn) {
+            removeLDocBtn.addEventListener('click', function () {
+                if (lDocInput) lDocInput.value = '';
+                if (lDocPrevBox) lDocPrevBox.style.display = 'none';
+            });
+        }
+
+        // Assignment Attachment Dropzone & Input
+        const aFileInput = document.getElementById('wizardAssignmentFileInput');
+        const aPrevBox = document.getElementById('wizardAssignmentPreviewBox');
+        const aFileName = document.getElementById('wizardAssignmentFileName');
+        const aFileSize = document.getElementById('wizardAssignmentFileSize');
+        const replaceAFileBtn = document.getElementById('replaceWizardAssignmentFileBtn');
+        const removeAFileBtn = document.getElementById('removeWizardAssignmentFileBtn');
+
+        function handleAssignmentFile(file) {
+            if (!file) return;
+            wizardAssignmentActiveAttachment = {
+                name: file.name,
+                size: `${(file.size / 1024 / 1024).toFixed(1)} MB`
+            };
+            if (aFileName) aFileName.textContent = file.name;
+            if (aFileSize) aFileSize.textContent = wizardAssignmentActiveAttachment.size;
+            if (aPrevBox) aPrevBox.style.display = 'flex';
+        }
+
+        if (aFileInput) {
+            aFileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleAssignmentFile(this.files[0]);
+            });
+        }
+        if (replaceAFileBtn && aFileInput) {
+            replaceAFileBtn.addEventListener('click', () => aFileInput.click());
+        }
+        if (removeAFileBtn) {
+            removeAFileBtn.addEventListener('click', function () {
+                if (aFileInput) aFileInput.value = '';
+                if (aPrevBox) aPrevBox.style.display = 'none';
+                wizardAssignmentActiveAttachment = null;
+            });
+        }
+    }
+    setupWizardMediaListeners();
+
+    // ==========================================================================
+    // SUB-MODAL FORMS LISTENERS
+    // ==========================================================================
+    const wizardModuleForm = document.getElementById('wizardModuleForm');
+    if (wizardModuleForm) {
+        wizardModuleForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const editIndexVal = document.getElementById('wizardModuleEditIndex').value;
+            const title = document.getElementById('wizardModuleTitleInput').value.trim();
+            const duration = document.getElementById('wizardModuleDurationInput').value.trim() || '2 Weeks';
+            const description = document.getElementById('wizardModuleDescInput').value.trim();
+
+            if (!title || title.length < 2) {
+                const titleInput = document.getElementById('wizardModuleTitleInput');
+                if (titleInput) titleInput.classList.add('is-invalid');
+                return;
+            }
+
+            if (editIndexVal !== '') {
+                const idx = parseInt(editIndexVal);
+                if (wizardModules[idx]) {
+                    wizardModules[idx].title = title;
+                    wizardModules[idx].duration = duration;
+                    wizardModules[idx].description = description;
+                }
+            } else {
+                wizardModules.push({
+                    chapter_num: wizardModules.length + 1,
+                    title: title,
+                    duration: duration,
+                    description: description,
+                    lessons: [],
+                    quizzes: [],
+                    assignments: []
+                });
+            }
+
+            if (wizardModuleModal) wizardModuleModal.hide();
+            renderWizardModules();
+            if (window.AdminStore) window.AdminStore.constructor.toast(editIndexVal !== '' ? 'Module updated' : 'Module added to curriculum', 'success');
+        });
+    }
+
+    const wizardLessonForm = document.getElementById('wizardLessonForm');
+    if (wizardLessonForm) {
+        wizardLessonForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const modIndex = parseInt(document.getElementById('wizardLessonModuleIndex').value);
+            const editIndexVal = document.getElementById('wizardLessonEditIndex').value;
+            const title = document.getElementById('wizardLessonTitleInput').value.trim();
+            const duration = document.getElementById('wizardLessonDurationInput').value.trim() || '45 Mins';
+            const description = document.getElementById('wizardLessonDescInput').value.trim();
+            const contentType = document.getElementById('wizardLessonContentTypeVal')?.value || 'Video';
+            const videoUrl = document.getElementById('wizardLessonVideoUrlInput')?.value.trim() || '';
+            const videoSize = document.getElementById('wizardLessonVideoFileSize')?.textContent || '18.4 MB';
+            const docName = document.getElementById('wizardLessonDocFileName')?.textContent || 'document.pdf';
+            const docSize = document.getElementById('wizardLessonDocFileSize')?.textContent || '1.2 MB';
+            const textContent = document.getElementById('wizardLessonTextInput')?.value.trim() || '';
+
+            if (!title || title.length < 2) {
+                const titleInput = document.getElementById('wizardLessonTitleInput');
+                if (titleInput) titleInput.classList.add('is-invalid');
+                return;
+            }
+
+            const mod = wizardModules[modIndex];
+            if (!mod) return;
+            if (!Array.isArray(mod.lessons)) mod.lessons = [];
+
+            const lessonObj = {
+                title: title,
+                duration: duration,
+                description: description,
+                content_type: contentType,
+                video_url: contentType === 'Video' ? (videoUrl || 'assets/videos/lesson1.mp4') : '',
+                video_size: contentType === 'Video' ? videoSize : '',
+                pdf_url: contentType === 'Document' ? `assets/docs/${docName}` : '',
+                pdf_size: contentType === 'Document' ? docSize : '',
+                text_content: contentType === 'Text' ? textContent : ''
+            };
+
+            if (editIndexVal !== '') {
+                const lIdx = parseInt(editIndexVal);
+                if (mod.lessons[lIdx]) {
+                    mod.lessons[lIdx] = Object.assign(mod.lessons[lIdx], lessonObj);
+                }
+            } else {
+                mod.lessons.push(lessonObj);
+            }
+
+            if (wizardLessonModal) wizardLessonModal.hide();
+            renderWizardModules();
+            if (window.AdminStore) window.AdminStore.constructor.toast(editIndexVal !== '' ? 'Lesson updated' : 'Lesson added to module', 'success');
+        });
+    }
+
+    const wizardQuizForm = document.getElementById('wizardQuizForm');
+    if (wizardQuizForm) {
+        wizardQuizForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const modIndex = parseInt(document.getElementById('wizardQuizModuleIndex').value);
+            const editIndexVal = document.getElementById('wizardQuizEditIndex').value;
+            const title = document.getElementById('wizardQuizTitleInput').value.trim();
+            const duration = parseInt(document.getElementById('wizardQuizDurationInput').value) || 20;
+            const passingScore = parseInt(document.getElementById('wizardQuizPassingScoreInput').value) || 70;
+            const description = document.getElementById('wizardQuizDescInput').value.trim();
+
+            if (!title || title.length < 2) {
+                const titleInput = document.getElementById('wizardQuizTitleInput');
+                if (titleInput) titleInput.classList.add('is-invalid');
+                return;
+            }
+
+            const mod = wizardModules[modIndex];
+            if (!mod) return;
+            if (!Array.isArray(mod.quizzes)) mod.quizzes = [];
+
+            const quizObj = {
+                title: title,
+                duration_mins: duration,
+                passing_score: passingScore,
+                description: description,
+                questions: wizardQuizActiveQuestions.length > 0 ? JSON.parse(JSON.stringify(wizardQuizActiveQuestions)) : [
+                    {
+                        question: 'Sample Question',
+                        option_a: 'Option A',
+                        option_b: 'Option B',
+                        option_c: 'Option C',
+                        option_d: 'Option D',
+                        correct_answer: 'A',
+                        points: 10
+                    }
+                ]
+            };
+
+            if (editIndexVal !== '') {
+                const qIdx = parseInt(editIndexVal);
+                if (mod.quizzes[qIdx]) {
+                    mod.quizzes[qIdx] = Object.assign(mod.quizzes[qIdx], quizObj);
+                }
+            } else {
+                mod.quizzes.push(quizObj);
+            }
+
+            if (wizardQuizModal) wizardQuizModal.hide();
+            renderWizardModules();
+            if (window.AdminStore) window.AdminStore.constructor.toast(editIndexVal !== '' ? 'Quiz updated' : 'Quiz added to module', 'success');
+        });
+    }
+
+    const wizardAssignmentForm = document.getElementById('wizardAssignmentForm');
+    if (wizardAssignmentForm) {
+        wizardAssignmentForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const modIndex = parseInt(document.getElementById('wizardAssignmentModuleIndex').value);
+            const editIndexVal = document.getElementById('wizardAssignmentEditIndex').value;
+            const title = document.getElementById('wizardAssignmentTitleInput').value.trim();
+            const maxScore = parseInt(document.getElementById('wizardAssignmentMaxScoreInput').value) || 100;
+            const dueDate = document.getElementById('wizardAssignmentDueDateInput').value;
+            const instructions = document.getElementById('wizardAssignmentInstructionsInput').value.trim();
+
+            if (!title || title.length < 2) {
+                const titleInput = document.getElementById('wizardAssignmentTitleInput');
+                if (titleInput) titleInput.classList.add('is-invalid');
+                return;
+            }
+
+            if (!instructions || instructions.length < 5) {
+                const instrInput = document.getElementById('wizardAssignmentInstructionsInput');
+                if (instrInput) instrInput.classList.add('is-invalid');
+                return;
+            }
+
+            const mod = wizardModules[modIndex];
+            if (!mod) return;
+            if (!Array.isArray(mod.assignments)) mod.assignments = [];
+
+            const assignmentObj = {
+                title: title,
+                max_score: maxScore,
+                due_date: dueDate,
+                instructions: instructions,
+                attachment_name: wizardAssignmentActiveAttachment ? wizardAssignmentActiveAttachment.name : '',
+                attachment_size: wizardAssignmentActiveAttachment ? wizardAssignmentActiveAttachment.size : ''
+            };
+
+            if (editIndexVal !== '') {
+                const aIdx = parseInt(editIndexVal);
+                if (mod.assignments[aIdx]) {
+                    mod.assignments[aIdx] = Object.assign(mod.assignments[aIdx], assignmentObj);
+                }
+            } else {
+                mod.assignments.push(assignmentObj);
+            }
+
+            if (wizardAssignmentModal) wizardAssignmentModal.hide();
+            renderWizardModules();
+            if (window.AdminStore) window.AdminStore.constructor.toast(editIndexVal !== '' ? 'Assignment updated' : 'Assignment added to module', 'success');
+        });
+    }
 
     // Dynamic Course Status Preview Calculator
     function updateCourseStatusPreview() {
@@ -831,9 +1890,9 @@ document.addEventListener('DOMContentLoaded', function () {
         badgeEl.textContent = status;
     }
 
-    // Stepper Navigation & UI Manager
+    // Stepper Navigation & UI Manager (6 Steps)
     window.goToCourseStep = function (step) {
-        if (step < 1 || step > 5) return;
+        if (step < 1 || step > 6) return;
 
         // If advancing forward, validate all intermediate steps
         if (step > currentCourseStep) {
@@ -852,7 +1911,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCourseStepperUI();
 
         // Switch active step pane
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 6; i++) {
             const pane = document.getElementById(`step${i}Pane`);
             if (pane) {
                 if (i === step) pane.classList.add('active');
@@ -874,13 +1933,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (continueBtn) continueBtn.style.display = 'inline-block';
             if (saveDraftBtn) saveDraftBtn.style.display = 'none';
             if (createCourseBtn) createCourseBtn.style.display = 'none';
-        } else if (step >= 2 && step <= 4) {
+        } else if (step >= 2 && step <= 5) {
             if (cancelBtn) cancelBtn.style.display = 'inline-block';
             if (backBtn) backBtn.style.display = 'inline-block';
             if (continueBtn) continueBtn.style.display = 'inline-block';
             if (saveDraftBtn) saveDraftBtn.style.display = 'none';
             if (createCourseBtn) createCourseBtn.style.display = 'none';
-        } else if (step === 5) {
+        } else if (step === 6) {
             if (cancelBtn) cancelBtn.style.display = 'inline-block';
             if (backBtn) backBtn.style.display = 'inline-block';
             if (continueBtn) continueBtn.style.display = 'none';
@@ -898,13 +1957,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateCourseStepperUI() {
         const stepTitles = [
             'Basic Information',
+            'Course Structure',
             'Course Details & Pricing',
             'Course Media',
             'Schedule & Dates',
             'Review & Publish'
         ];
 
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 6; i++) {
             const stepEl = document.getElementById(`stepperStep${i}`);
             if (stepEl) {
                 stepEl.classList.remove('active', 'completed');
@@ -915,7 +1975,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            if (i <= 4) {
+            if (i <= 5) {
                 const lineEl = document.getElementById(`stepperLine${i}`);
                 if (lineEl) {
                     if (completedCourseSteps.has(i) && currentCourseStep > i) {
@@ -929,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const compactBadge = document.getElementById('compactStepBadge');
         if (compactBadge) {
-            compactBadge.textContent = `Step ${currentCourseStep} of 5: ${stepTitles[currentCourseStep - 1]}`;
+            compactBadge.textContent = `Step ${currentCourseStep} of 6: ${stepTitles[currentCourseStep - 1]}`;
         }
     }
 
@@ -942,7 +2002,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Step-by-Step Field Validation
+    // Step-by-Step Field Validation (6 Steps)
     function validateCourseStep(stepNumber) {
         let isValid = true;
         let firstInvalidEl = null;
@@ -1000,6 +2060,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (stepNumber === 2) {
+            // Course Structure validation: ensure at least 1 module exists and all titles are valid
+            if (wizardModules.length === 0) {
+                if (window.AdminStore) window.AdminStore.constructor.toast('Please add at least 1 module to the course structure.', 'error');
+                isValid = false;
+            } else {
+                for (let i = 0; i < wizardModules.length; i++) {
+                    if (!wizardModules[i].title || wizardModules[i].title.trim().length < 2) {
+                        if (window.AdminStore) window.AdminStore.constructor.toast(`Module ${i + 1} requires a valid title.`, 'error');
+                        isValid = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (stepNumber === 3) {
+            // Details & Pricing validation
             const price = document.getElementById('coursePrice');
             if (price && (parseFloat(price.value) < 0 || isNaN(parseFloat(price.value)))) {
                 setFieldInvalid('coursePrice', 'coursePriceFeedback', 'Price cannot be negative.');
@@ -1010,7 +2087,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        if (stepNumber === 4) {
+        if (stepNumber === 5) {
+            // Schedule & Dates validation
             if (!validateCourseDates()) {
                 isValid = false;
                 if (!firstInvalidEl) firstInvalidEl = document.getElementById('courseEnrollmentDeadline');
@@ -1051,7 +2129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return datesValid;
     }
 
-    // Step 5 Review Summary Card Population
+    // Step 6 Review Summary Card Population
     function populateCourseSummaryReview() {
         const title = document.getElementById('courseTitle')?.value.trim() || 'Untitled Course';
         const difficulty = document.getElementById('courseDifficulty')?.value || 'Beginner';
@@ -1060,7 +2138,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const insSelect = document.getElementById('courseInstructorSelect');
         const insName = (insSelect && insSelect.selectedIndex > 0) ? insSelect.options[insSelect.selectedIndex].text : 'Faculty Member';
         const duration = document.getElementById('courseDuration')?.value.trim() || '8 Weeks';
-        const lessons = document.getElementById('courseLessons')?.value || '12';
         const price = parseFloat(document.getElementById('coursePrice')?.value || '0').toFixed(2);
         const prerequisites = document.getElementById('coursePrerequisites')?.value.trim() || 'None';
         const desc = document.getElementById('courseDesc')?.value.trim() || 'No description provided.';
@@ -1070,6 +2147,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const courseStart = document.getElementById('courseStartDate')?.value;
         const courseEnd = document.getElementById('courseEndDate')?.value;
 
+        const { statsSummaryText } = updateWizardStructureStats();
+
         // Set text values
         const revTitle = document.getElementById('reviewCourseTitle');
         const revCat = document.getElementById('reviewCourseCategory');
@@ -1077,7 +2156,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const revDiff = document.getElementById('reviewCourseDifficulty');
         const revDesc = document.getElementById('reviewCourseDesc');
         const revDur = document.getElementById('reviewCourseDuration');
-        const revLess = document.getElementById('reviewCourseLessons');
+        const revStruct = document.getElementById('reviewCourseStructure');
         const revPrice = document.getElementById('reviewCoursePrice');
         const revPrereq = document.getElementById('reviewCoursePrerequisites');
         const revSched = document.getElementById('reviewCourseSchedule');
@@ -1088,13 +2167,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (revDiff) revDiff.textContent = difficulty;
         if (revDesc) revDesc.textContent = desc;
         if (revDur) revDur.textContent = duration;
-        if (revLess) revLess.textContent = `${lessons} Lessons`;
+        if (revStruct) revStruct.textContent = statsSummaryText;
         if (revPrice) revPrice.textContent = `$${price}`;
         if (revPrereq) revPrereq.textContent = prerequisites;
 
         if (revSched) {
             if (courseStart && courseEnd) {
-                revSched.textContent = `${courseStart} → ${courseEnd}`;
+                revSched.textContent = `${courseStart} \u2192 ${courseEnd}`;
             } else if (enrStart) {
                 revSched.textContent = `Starts: ${enrStart}`;
             } else {
@@ -1126,9 +2205,60 @@ document.addEventListener('DOMContentLoaded', function () {
                 revVideoStatus.innerHTML = `<span class="text-muted"><i class="bi bi-dash-circle me-1"></i> No introduction video</span>`;
             }
         }
+
+        // Curriculum Tree hierarchy rendering in Step 6
+        const treeContainer = document.getElementById('reviewCurriculumTreeContainer');
+        if (treeContainer) {
+            if (wizardModules.length === 0) {
+                treeContainer.innerHTML = '<div class="text-muted small py-2 text-center">No modules configured yet in Step 2.</div>';
+            } else {
+                treeContainer.innerHTML = wizardModules.map((m, mIdx) => {
+                    const lessons = Array.isArray(m.lessons) ? m.lessons : [];
+                    const quizzes = Array.isArray(m.quizzes) ? m.quizzes : [];
+                    const assignments = Array.isArray(m.assignments) ? m.assignments : [];
+                    return `
+                        <div class="p-2.5 rounded bg-light border">
+                            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                <div class="fw-bold text-dark" style="font-size: 12.5px;">
+                                    <span class="badge bg-primary me-1.5" style="font-size: 10px;">Module ${mIdx + 1}</span>
+                                    ${escapeHtml(m.title)}
+                                </div>
+                                <span class="badge bg-white text-secondary border" style="font-size: 10.5px;">${escapeHtml(m.duration || '2 Weeks')}</span>
+                            </div>
+                            <div class="d-flex flex-column gap-1 ms-3 border-start ps-2.5" style="border-color: #E2E8F0 !important;">
+                                ${lessons.map((l, lIdx) => {
+                                    const icon = l.content_type === 'Document' ? 'bi-file-earmark-pdf text-danger' : l.content_type === 'Text' ? 'bi-file-text text-secondary' : 'bi-camera-video text-primary';
+                                    return `
+                                        <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                            <span class="text-truncate me-2"><i class="bi ${icon} me-1"></i> <span class="fw-medium text-dark">${escapeHtml(l.title)}</span></span>
+                                            <span class="badge bg-white text-muted border flex-shrink-0" style="font-size: 10px;">${escapeHtml(l.content_type || 'Video')} &bull; ${escapeHtml(l.duration || '45 Mins')}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                                ${quizzes.map((q, qIdx) => `
+                                    <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                        <span class="text-truncate me-2"><i class="bi bi-question-square me-1" style="color: #7C3AED;"></i> <span class="fw-medium text-dark">${escapeHtml(q.title)}</span></span>
+                                        <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #7C3AED;">Quiz &bull; ${(q.questions || []).length} Qs &bull; Pass ${q.passing_score || 70}%</span>
+                                    </div>
+                                `).join('')}
+                                ${assignments.map((a, aIdx) => `
+                                    <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
+                                        <span class="text-truncate me-2"><i class="bi bi-journal-check me-1" style="color: #D97706;"></i> <span class="fw-medium text-dark">${escapeHtml(a.title)}</span></span>
+                                        <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #D97706;">Assignment &bull; ${a.max_score || 100} Pts${a.due_date ? ` &bull; Due ${a.due_date}` : ''}</span>
+                                    </div>
+                                `).join('')}
+                                ${lessons.length === 0 && quizzes.length === 0 && assignments.length === 0 ? `
+                                    <div class="text-muted fst-italic" style="font-size: 11px;">No curriculum items in this module.</div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
     }
 
-    // Step 5 Publish Status Choice
+    // Step 6 Publish Status Choice
     window.setPublishStatusChoice = function (val) {
         const pubInput = document.getElementById('coursePublishedVal');
         if (pubInput) pubInput.value = val;
@@ -1148,6 +2278,26 @@ document.addEventListener('DOMContentLoaded', function () {
             if (cardPublish) cardPublish.classList.remove('selected');
         }
     };
+
+    function setFieldInvalid(fieldId, feedbackId, message) {
+        const field = document.getElementById(fieldId);
+        const feedback = document.getElementById(feedbackId);
+        if (field) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+        }
+        if (feedback && message) {
+            feedback.textContent = message;
+        }
+    }
+
+    function setFieldValid(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+    }
 
     // Real-Time Form Validation UX
     function setupCourseFormValidation() {
@@ -1413,6 +2563,91 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseForm').reset();
         document.getElementById('courseId').value = '';
         
+        // Initialize default curriculum structure (2 Modules, with real Lessons, Quiz, and Assignment)
+        wizardModules = [
+            {
+                chapter_num: 1,
+                title: 'Module 1 — HTML & CSS Basics',
+                duration: '2 Weeks',
+                description: 'Core concepts of semantic HTML, page structure, modern CSS styling, and responsive layout foundations.',
+                lessons: [
+                    { 
+                        title: '1.1 Getting Started with HTML5 Structure', 
+                        duration: '45 Mins', 
+                        description: 'Semantic tags, document hierarchy, and markup best practices.',
+                        content_type: 'Video',
+                        video_url: 'assets/videos/lesson1.mp4',
+                        video_size: '18.4 MB'
+                    },
+                    { 
+                        title: '1.2 Modern CSS Styling & Flexbox', 
+                        duration: '50 Mins', 
+                        description: 'Responsive container layouts with Flexbox and CSS Grid.',
+                        content_type: 'Document',
+                        pdf_url: 'assets/docs/css-cheatsheet.pdf',
+                        pdf_size: '2.1 MB'
+                    }
+                ],
+                quizzes: [
+                    {
+                        title: 'Quiz 1 — HTML & CSS Knowledge Check',
+                        description: 'Test your understanding of semantic markup and responsive layout rules.',
+                        duration_mins: 20,
+                        passing_score: 70,
+                        questions: [
+                            {
+                                question: 'Which semantic element should represent independent, self-contained content in HTML5?',
+                                option_a: '<section>',
+                                option_b: '<article>',
+                                option_c: '<div>',
+                                option_d: '<aside>',
+                                correct_answer: 'B',
+                                points: 10
+                            },
+                            {
+                                question: 'What CSS property allows flex items to wrap across multiple lines?',
+                                option_a: 'flex-wrap: wrap',
+                                option_b: 'flex-direction: column',
+                                option_c: 'display: grid',
+                                option_d: 'align-items: center',
+                                correct_answer: 'A',
+                                points: 10
+                            }
+                        ]
+                    }
+                ],
+                assignments: []
+            },
+            {
+                chapter_num: 2,
+                title: 'Module 2 — JavaScript Core & Interactivity',
+                duration: '3 Weeks',
+                description: 'DOM manipulation, asynchronous JavaScript, event handling, and modern ES6+ features.',
+                lessons: [
+                    { 
+                        title: '2.1 DOM Selection & Event Listeners', 
+                        duration: '45 Mins', 
+                        description: 'Selecting DOM nodes and responding to user actions.',
+                        content_type: 'Video',
+                        video_url: 'assets/videos/lesson2.mp4',
+                        video_size: '24.1 MB'
+                    }
+                ],
+                quizzes: [],
+                assignments: [
+                    {
+                        title: 'Assignment 1 — Interactive Responsive Layout',
+                        instructions: 'Create a responsive 3-section personal portfolio website that adapts cleanly across mobile and desktop viewports.',
+                        due_date: '2026-09-30',
+                        max_score: 100,
+                        attachment_name: 'starter-portfolio.zip',
+                        attachment_size: '1.8 MB'
+                    }
+                ]
+            }
+        ];
+        renderWizardModules();
+
         // Reset Stepper to Step 1
         completedCourseSteps.clear();
         goToCourseStep(1);
@@ -1420,7 +2655,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseModalTitle').textContent = 'Add New Specialized Course';
         document.getElementById('coursePrice').value = '0.00';
         document.getElementById('courseDuration').value = '8 Weeks';
-        document.getElementById('courseLessons').value = '12';
+        document.getElementById('courseBadge').value = '';
+        document.getElementById('coursePrerequisites').value = '';
         
         // Reset thumbnail preview
         const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
@@ -1461,12 +2697,81 @@ document.addEventListener('DOMContentLoaded', function () {
         const c = allCourses.find(course => course.id === id);
         if (!c) return;
 
+        // Load existing curriculum modules, lessons, quizzes, assignments from store into wizardModules
+        const existingChapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
+        if (existingChapters.length > 0) {
+            wizardModules = existingChapters.map((ch, idx) => {
+                const lessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
+                const quizzes = window.AdminStore ? window.AdminStore.getQuizzesByModuleId(ch.id) : [];
+                const assignments = window.AdminStore ? window.AdminStore.getAssignmentsByModuleId(ch.id) : [];
+                return {
+                    id: ch.id,
+                    chapter_num: idx + 1,
+                    title: ch.title,
+                    duration: ch.duration || '2 Weeks',
+                    description: ch.description || '',
+                    lessons: lessons.map(l => ({
+                        id: l.id,
+                        module_id: ch.id,
+                        course_id: c.id,
+                        title: l.title,
+                        duration: l.duration || '45 Mins',
+                        description: l.description || '',
+                        content_type: l.content_type || (l.video_url ? 'Video' : l.pdf_url ? 'Document' : 'Text'),
+                        video_url: l.video_url || '',
+                        video_size: l.video_size || '',
+                        pdf_url: l.pdf_url || '',
+                        pdf_size: l.pdf_size || '',
+                        text_content: l.text_content || ''
+                    })),
+                    quizzes: quizzes.map(q => ({
+                        id: q.id,
+                        module_id: ch.id,
+                        course_id: c.id,
+                        title: q.title,
+                        description: q.description || '',
+                        duration_mins: q.duration_mins || 20,
+                        passing_score: q.passing_score || 70,
+                        questions: Array.isArray(q.questions) ? q.questions : []
+                    })),
+                    assignments: assignments.map(a => ({
+                        id: a.id,
+                        module_id: ch.id,
+                        course_id: c.id,
+                        title: a.title,
+                        instructions: a.instructions || '',
+                        due_date: a.due_date ? String(a.due_date).split('T')[0] : '',
+                        max_score: a.max_score || 100,
+                        attachment_name: a.attachment_name || '',
+                        attachment_size: a.attachment_size || ''
+                    }))
+                };
+            });
+        } else {
+            wizardModules = [
+                {
+                    chapter_num: 1,
+                    title: 'Module 1 — Foundations & Core Principles',
+                    duration: '2 Weeks',
+                    description: 'Foundational architecture and setup.',
+                    lessons: [
+                        { title: '1.1 Introduction', duration: '30 Mins', description: 'Overview and setup.', content_type: 'Video', video_url: 'assets/videos/lesson1.mp4' },
+                        { title: '1.2 Core Principles', duration: '45 Mins', description: 'Foundational concepts.', content_type: 'Document', pdf_url: 'assets/docs/cheatsheet.pdf' }
+                    ],
+                    quizzes: [],
+                    assignments: []
+                }
+            ];
+        }
+        renderWizardModules();
+
         // Reset Stepper to Step 1 and prefill
         completedCourseSteps.clear();
         completedCourseSteps.add(1);
         completedCourseSteps.add(2);
         completedCourseSteps.add(3);
         completedCourseSteps.add(4);
+        completedCourseSteps.add(5);
         goToCourseStep(1);
 
         populateCourseSelects();
@@ -1476,7 +2781,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('courseCategorySelect').value = c.category_id || (allCategories[0] ? allCategories[0].id : 1);
         document.getElementById('courseInstructorSelect').value = c.instructor_id || (allInstructors[0] ? allInstructors[0].id : 1);
         document.getElementById('courseDuration').value = c.duration || c.duration_hours || '8 Weeks';
-        document.getElementById('courseLessons').value = c.lesson_count !== undefined ? c.lesson_count : 12;
         document.getElementById('coursePrice').value = c.price !== undefined ? parseFloat(c.price).toFixed(2) : '0.00';
         document.getElementById('courseBadge').value = c.badge || c.badge_text || '';
         document.getElementById('coursePrerequisites').value = c.prerequisites || '';
@@ -1545,10 +2849,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Submit Course Payload (Draft or Published)
+    // Submit Course Payload (Draft or Published) with Modules, Lessons, Quizzes, Assignments
     async function submitCourseWithPublishStatus(isPublished) {
-        // Validate all 4 prior steps
-        for (let s = 1; s <= 4; s++) {
+        // Validate all 5 prior steps
+        for (let s = 1; s <= 5; s++) {
             const { isValid, firstInvalidEl } = validateCourseStep(s);
             if (!isValid) {
                 goToCourseStep(s);
@@ -1556,7 +2860,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstInvalidEl.focus();
                 }
-                if (window.AdminStore) window.AdminStore.constructor.toast(`Please correct the highlighted errors in Step ${s}.`, 'error');
+                if (window.AdminStore) window.AdminStore.constructor.toast(`Please correct the highlighted items in Step ${s}.`, 'error');
                 return;
             }
         }
@@ -1566,6 +2870,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const thumbUrlVal = document.getElementById('courseThumbnailUrl')?.value.trim() || 'assets/images/courses/fullstack.jpg';
         const videoUrlVal = document.getElementById('courseVideoUrl')?.value.trim() || '';
 
+        const totalModules = wizardModules.length;
+        const totalLessons = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0);
+        const totalQuizzes = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.quizzes) ? m.quizzes.length : 0), 0);
+        const totalAssignments = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.assignments) ? m.assignments.length : 0), 0);
+
         const payload = {
             title: title,
             category_id: parseInt(document.getElementById('courseCategorySelect').value) || 1,
@@ -1573,7 +2882,10 @@ document.addEventListener('DOMContentLoaded', function () {
             difficulty: document.getElementById('courseDifficulty').value,
             duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
             duration_hours: document.getElementById('courseDuration').value.trim() || '8 Weeks',
-            lesson_count: parseInt(document.getElementById('courseLessons').value) || 12,
+            module_count: totalModules,
+            lesson_count: totalLessons,
+            quiz_count: totalQuizzes,
+            assignment_count: totalAssignments,
             price: parseFloat(document.getElementById('coursePrice').value) || 0.00,
             badge: document.getElementById('courseBadge').value.trim(),
             badge_text: document.getElementById('courseBadge').value.trim(),
@@ -1585,7 +2897,8 @@ document.addEventListener('DOMContentLoaded', function () {
             start_date: document.getElementById('courseStartDate').value || null,
             end_date: document.getElementById('courseEndDate').value || null,
             description: document.getElementById('courseDesc').value.trim(),
-            is_published: isPublished
+            is_published: isPublished,
+            modules: wizardModules
         };
 
         const createCourseBtnEl = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
@@ -1637,27 +2950,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.AdminStore) {
                     const statusText = isPublished ? 'published to student catalog' : 'saved as private draft';
                     const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
-                    window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated and ${statusText}${noticeSuffix}.`);
+                    window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated with ${totalModules} modules, ${totalLessons} lessons, ${totalQuizzes} quizzes, and ${totalAssignments} assignments, and ${statusText}${noticeSuffix}.`);
                 }
             } else {
                 if (window.AdminStore) {
                     const newCourse = window.AdminStore.createCourse(payload);
-                    window.AdminStore.createChapter({
-                        course_id: newCourse.id,
-                        chapter_num: 1,
-                        title: 'Module 1 — Foundations & Core Principles',
-                        duration: '2 Weeks',
-                        lesson_count: 3,
-                        description: 'Foundational architecture, setup, and key concepts.'
-                    });
-                    window.AdminStore.createChapter({
-                        course_id: newCourse.id,
-                        chapter_num: 2,
-                        title: 'Module 2 — Advanced Practical Application',
-                        duration: '3 Weeks',
-                        lesson_count: 4,
-                        description: 'Hands-on practical development and comprehensive project building.'
-                    });
                     allCourses = window.AdminStore.getCourses();
                 }
                 if (courseModal) courseModal.hide();
@@ -1665,7 +2962,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.AdminStore) {
                     const statusText = isPublished ? 'published to student catalog' : 'saved as draft';
                     const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
-                    window.AdminStore.constructor.notifySuccess('Course Created Successfully', `"${title}" has been created and ${statusText}${noticeSuffix}.`);
+                    window.AdminStore.constructor.notifySuccess('Course Created Successfully', `"${title}" has been created with ${totalModules} modules, ${totalLessons} lessons, ${totalQuizzes} quizzes, and ${totalAssignments} assignments, and ${statusText}${noticeSuffix}.`);
                 }
             }
         } catch (err) {
@@ -1708,7 +3005,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.AdminStore) {
             confirmed = await window.AdminStore.constructor.confirmDialog(
                 'Delete Course?',
-                `Are you sure you want to delete "${name}" and all its syllabus modules?`,
+                `Are you sure you want to delete "${name}" and all its syllabus modules & lessons?`,
                 'Yes, Delete Course',
                 '#DC2626'
             );
@@ -1748,6 +3045,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ==========================================================================
     // 3. COURSE CONTENT BUILDER (Interactive Visual Syllabus Hierarchy)
+    // Synchronized with AdminMockStore Chapters & Lessons
     // ==========================================================================
     window.openCourseContentBuilder = function (courseId) {
         activeBuilderCourseId = courseId;
@@ -1770,11 +3068,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!container) return;
 
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(courseId) : [];
-        let totalLessons = 0;
-        chapters.forEach(ch => { totalLessons += (ch.lesson_count || 3); });
+        const allCourseLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(courseId) : [];
 
         if (statsBadge) {
-            statsBadge.textContent = `${chapters.length} Modules • ${totalLessons} Lessons`;
+            statsBadge.textContent = `${chapters.length} Modules \u2022 ${allCourseLessons.length} Lessons`;
         }
 
         if (chapters.length === 0) {
@@ -1795,19 +3092,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // 1. Modules & Lessons Accordion
         html += chapters.map((ch, idx) => {
-            const lessons = [
-                { id: idx * 10 + 1, title: `Lesson ${ch.chapter_num}.1 — Foundations & Setup`, duration: '30 Mins', desc: 'Environment initialization and theoretical fundamentals.', video: 'intro-lecture.mp4', videoSize: '18.4 MB', pdf: 'syllabus-guide.pdf', pdfSize: '1.2 MB' },
-                { id: idx * 10 + 2, title: `Lesson ${ch.chapter_num}.2 — Core Concepts & Architecture`, duration: '45 Mins', desc: 'In-depth review of component structures.', video: 'architecture.mp4', videoSize: '24.1 MB', pdf: 'lecture-slides.pdf', pdfSize: '2.5 MB' },
-                { id: idx * 10 + 3, title: `Lesson ${ch.chapter_num}.3 — Practical Lab Implementation`, duration: '50 Mins', desc: 'Hands-on programming laboratory.', video: null, pdf: 'exercise-worksheet.pdf', pdfSize: '850 KB' }
-            ];
+            const lessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
 
             return `
                 <div class="module-tree-card">
                     <div class="module-tree-header">
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">Module ${ch.chapter_num}</span>
+                            <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">Module ${ch.chapter_num || (idx + 1)}</span>
                             <span class="fw-bold text-dark" style="font-size: 13.5px;">${escapeHtml(ch.title)}</span>
                             <span class="text-muted small">(${escapeHtml(ch.duration || '2 Weeks')})</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 10.5px;">${lessons.length} ${lessons.length === 1 ? 'Lesson' : 'Lessons'}</span>
                         </div>
                         <div class="d-flex align-items-center gap-1">
                             <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddLessonModal(${ch.id})" title="Add Lesson to this Module">
@@ -1822,26 +3116,30 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </div>
                     <div class="lesson-tree-body">
-                        ${lessons.map(l => `
+                        ${lessons.length === 0 ? `
+                            <div class="p-3 text-center text-muted small bg-light">
+                                No lessons created in this module yet. <a href="javascript:void(0)" class="fw-semibold text-primary" onclick="openAddLessonModal(${ch.id})">+ Add First Lesson</a>
+                            </div>
+                        ` : lessons.map(l => `
                             <div class="lesson-tree-item">
-                                <div class="flex-grow-1">
+                                <div class="flex-grow-1 min-w-0">
                                     <div class="d-flex align-items-center gap-2">
                                         <i class="bi bi-file-earmark-play text-primary"></i>
                                         <span class="fw-semibold text-dark" style="font-size: 13px;">${escapeHtml(l.title)}</span>
-                                        <span class="text-muted" style="font-size: 11px;">&bull; ${escapeHtml(l.duration)}</span>
+                                        <span class="text-muted" style="font-size: 11px;">&bull; ${escapeHtml(l.duration || '45 Mins')}</span>
                                     </div>
-                                    <div class="text-muted mt-1" style="font-size: 11.5px;">${escapeHtml(l.desc)}</div>
+                                    ${l.description ? `<div class="text-muted mt-1" style="font-size: 11.5px;">${escapeHtml(l.description)}</div>` : ''}
                                     
                                     <!-- Resource Badges -->
                                     <div class="mt-2 d-flex flex-wrap">
-                                        ${l.video ? `
+                                        ${l.video_url ? `
                                             <span class="resource-pill video" title="Attached Streaming Video">
-                                                <i class="bi bi-camera-video"></i> ${escapeHtml(l.video)} (${l.videoSize})
+                                                <i class="bi bi-camera-video"></i> ${escapeHtml(l.video_url.split('/').pop() || 'video.mp4')} ${l.video_size ? `(${l.video_size})` : ''}
                                             </span>
                                         ` : ''}
-                                        ${l.pdf ? `
+                                        ${l.pdf_url ? `
                                             <span class="resource-pill pdf" title="Attached Learning Material">
-                                                <i class="bi bi-file-earmark-pdf"></i> ${escapeHtml(l.pdf)} (${l.pdfSize})
+                                                <i class="bi bi-file-earmark-pdf"></i> ${escapeHtml(l.pdf_url.split('/').pop() || 'document.pdf')} ${l.pdf_size ? `(${l.pdf_size})` : ''}
                                             </span>
                                         ` : ''}
                                         <button class="btn btn-link text-primary p-0 ms-1 align-middle" style="font-size: 11px; text-decoration: none;" onclick="openEditLessonModal(${l.id})" title="Attach Additional Materials">
@@ -1870,7 +3168,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="module-tree-header bg-white">
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-purple bg-opacity-10 text-purple border px-2 py-1" style="font-size: 11px; color: #7C3AED; background-color: #F5F3FF; border-color: #DDD6FE;">Assessment</span>
-                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-clipboard-check text-primary me-1"></i> Course Quizzes & QCM Knowledge Checks</span>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-clipboard-check text-primary me-1"></i> Course Quizzes &amp; QCM Knowledge Checks</span>
                     </div>
                     <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddQuizModal()">
                         <i class="bi bi-plus-circle me-1"></i> Add Quiz
@@ -1905,7 +3203,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="module-tree-header bg-white">
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1" style="font-size: 11px;">Coursework</span>
-                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-journal-text text-warning me-1"></i> Course Assignments & Project Submissions</span>
+                        <span class="fw-bold text-dark" style="font-size: 13.5px;"><i class="bi bi-journal-text text-warning me-1"></i> Course Assignments &amp; Project Submissions</span>
                     </div>
                     <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddAssignmentModal()">
                         <i class="bi bi-plus-circle me-1"></i> Add Assignment
@@ -1914,7 +3212,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="p-3 bg-white">
                     <div class="p-3 bg-light rounded-2 border d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="fw-bold text-dark" style="font-size: 13px;">Final Project — Full-Stack Web Architecture</div>
+                            <div class="fw-bold text-dark" style="font-size: 13px;">Final Project — Applied Academic Implementation</div>
                             <div class="text-muted" style="font-size: 11px;">
                                 <i class="bi bi-award me-1"></i> Total Points: 100 &bull; 
                                 <i class="bi bi-calendar3 ms-2 me-1"></i> Due in 4 Weeks &bull; 
@@ -1930,7 +3228,7 @@ document.addEventListener('DOMContentLoaded', function () {
         container.innerHTML = html;
     }
 
-    // Module CRUD Handlers
+    // Module CRUD Handlers in Content Builder
     window.openAddModuleModal = function () {
         const form = document.getElementById('moduleEditorForm');
         if (form) form.reset();
@@ -2020,7 +3318,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (err) {}
     };
 
-    // Lesson CRUD Handlers with Video & Material Previews
+    // Lesson CRUD Handlers with Video & Material Previews in Content Builder
     window.openAddLessonModal = function (moduleId) {
         const form = document.getElementById('lessonEditorForm');
         if (form) form.reset();
@@ -2028,6 +3326,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('lessonEditorModuleId').value = moduleId;
         document.getElementById('lessonEditorCourseId').value = activeBuilderCourseId;
         document.getElementById('lessonEditorTitle').textContent = 'Add Lesson & Learning Materials';
+        document.getElementById('lessonEditorDuration').value = '45 Mins';
 
         // Reset previews
         const vidPreview = document.getElementById('videoPreviewContainer');
@@ -2039,19 +3338,24 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     window.openEditLessonModal = function (lessonId) {
+        let les = null;
+        if (window.AdminStore && window.AdminStore.state.lessons) {
+            les = window.AdminStore.state.lessons.find(l => l.id === lessonId);
+        }
+        
         document.getElementById('lessonEditorId').value = lessonId;
-        document.getElementById('lessonEditorTitleInput').value = `Lesson 1.${lessonId} — Interactive Architecture Deep-Dive`;
-        document.getElementById('lessonEditorDuration').value = '45 Mins';
-        document.getElementById('lessonEditorDesc').value = 'Complete technical walkthrough and code architecture lecture.';
+        document.getElementById('lessonEditorModuleId').value = les ? les.module_id : '';
+        document.getElementById('lessonEditorCourseId').value = activeBuilderCourseId;
+        document.getElementById('lessonEditorTitleInput').value = les ? les.title : `Lesson ${lessonId}`;
+        document.getElementById('lessonEditorDuration').value = les ? (les.duration || '45 Mins') : '45 Mins';
+        document.getElementById('lessonEditorDesc').value = les ? (les.description || '') : '';
         document.getElementById('lessonEditorTitle').textContent = 'Edit Lesson & Materials';
 
         const vidPreview = document.getElementById('videoPreviewContainer');
-        if (vidPreview) vidPreview.style.display = 'block';
-        const vidPlayer = document.getElementById('videoPreviewPlayer');
-        if (vidPlayer) vidPlayer.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+        if (vidPreview) vidPreview.style.display = (les && les.video_url) ? 'block' : 'none';
 
         const matPreview = document.getElementById('materialPreviewContainer');
-        if (matPreview) matPreview.style.display = 'flex';
+        if (matPreview) matPreview.style.display = (les && les.pdf_url) ? 'flex' : 'none';
 
         if (lessonEditorModal) lessonEditorModal.show();
     };
@@ -2148,16 +3452,44 @@ document.addEventListener('DOMContentLoaded', function () {
     if (lessonEditorForm) {
         lessonEditorForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            const id = document.getElementById('lessonEditorId').value;
+            const moduleId = parseInt(document.getElementById('lessonEditorModuleId').value);
             const title = document.getElementById('lessonEditorTitleInput').value.trim();
-            if (window.AdminStore) window.AdminStore.constructor.toast(`Lesson "${title}" saved with materials`, 'success');
+            const duration = document.getElementById('lessonEditorDuration').value.trim() || '45 Mins';
+            const desc = document.getElementById('lessonEditorDesc').value.trim();
+            const videoUrl = document.getElementById('lessonVideoUrl')?.value.trim() || '';
+
+            const payload = {
+                module_id: moduleId,
+                course_id: activeBuilderCourseId,
+                title: title,
+                duration: duration,
+                description: desc,
+                video_url: videoUrl
+            };
+
+            if (id && window.AdminStore) {
+                window.AdminStore.updateLesson(parseInt(id), payload);
+            } else if (window.AdminStore) {
+                window.AdminStore.createLesson(payload);
+            }
+
+            if (window.AdminStore) window.AdminStore.constructor.toast(`Lesson "${title}" saved`, 'success');
             if (lessonEditorModal) lessonEditorModal.hide();
             renderCourseContentTree(activeBuilderCourseId);
+            allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
+            applyCourseFilters();
         });
     }
 
     window.deleteLesson = function (lessonId) {
-        if (window.AdminStore) window.AdminStore.constructor.toast('Lesson removed from module', 'info');
+        if (window.AdminStore) {
+            window.AdminStore.deleteLesson(lessonId);
+            window.AdminStore.constructor.toast('Lesson removed from module', 'info');
+        }
         renderCourseContentTree(activeBuilderCourseId);
+        allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
+        applyCourseFilters();
     };
 
     // Quiz & Assignment Handlers
@@ -2658,9 +3990,58 @@ document.addEventListener('DOMContentLoaded', function () {
         return div.innerHTML;
     }
 
+    // Handle Hash Navigation & Tab Deep Linking (Courses, Programs, Categories, Instructors)
+    function handleInitialRouteAndTab() {
+        try {
+            const hash = (window.location.hash || '').toLowerCase();
+            const params = new URLSearchParams(window.location.search || '');
+            const action = (params.get('action') || '').toLowerCase();
+            const tab = (params.get('tab') || '').toLowerCase();
+
+            if (hash === '#programs-pane' || hash === '#programs' || tab === 'programs') {
+                const tabBtn = document.getElementById('programs-tab');
+                if (tabBtn) {
+                    const triggerTab = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                    triggerTab.show();
+                }
+            } else if (hash === '#categories-pane' || hash === '#categories' || tab === 'categories') {
+                const tabBtn = document.getElementById('categories-tab');
+                if (tabBtn) {
+                    const triggerTab = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                    triggerTab.show();
+                }
+            } else if (hash === '#instructors-pane' || hash === '#instructors' || tab === 'instructors') {
+                const tabBtn = document.getElementById('instructors-tab');
+                if (tabBtn) {
+                    const triggerTab = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                    triggerTab.show();
+                }
+            } else if (hash === '#courses-pane' || hash === '#courses' || tab === 'courses' || hash === '#create-course' || action === 'create-course' || action === 'create') {
+                const tabBtn = document.getElementById('courses-tab');
+                if (tabBtn) {
+                    const triggerTab = bootstrap.Tab.getOrCreateInstance(tabBtn);
+                    triggerTab.show();
+                }
+            }
+
+            // Auto-trigger course creation modal if specified in query param or hash
+            if (action === 'create-course' || action === 'create' || hash === '#create-course') {
+                setTimeout(() => {
+                    if (typeof window.openCreateCourseModal === 'function') {
+                        window.openCreateCourseModal();
+                    }
+                }, 300);
+            }
+        } catch (e) {
+            console.warn('Academic tab route handling note:', e);
+        }
+    }
+
     // Initialize All Tabs
     loadPrograms();
     loadCategories();
     loadInstructors();
     loadCourses();
+    handleInitialRouteAndTab();
+    window.addEventListener('hashchange', handleInitialRouteAndTab);
 });

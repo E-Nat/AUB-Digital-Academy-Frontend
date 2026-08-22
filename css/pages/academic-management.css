@@ -511,3 +511,125 @@
         padding: 10px 20px;
     }
 }
+
+/* 9. Wizard Course Structure Styles (Step 2) */
+.wizard-module-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    transition: border-color 150ms ease;
+}
+
+.wizard-module-card:hover {
+    border-color: #CBD5E1;
+}
+
+.wizard-module-header {
+    background-color: #F8FAFC;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #E2E8F0;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wizard-module-body {
+    padding: 12px 14px;
+    background-color: #FFFFFF;
+}
+
+.wizard-lesson-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wizard-lesson-item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #F1F5F9;
+    background-color: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: all 140ms ease;
+}
+
+.wizard-lesson-item:hover {
+    background-color: #F1F5F9;
+    border-color: #E2E8F0;
+}
+
+.wizard-reorder-btn {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #64748B;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 140ms ease;
+}
+
+.wizard-reorder-btn:hover:not(:disabled) {
+    background: #2563EB;
+    border-color: #2563EB;
+    color: #FFFFFF;
+}
+
+.wizard-reorder-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.wizard-empty-box {
+    border: 2px dashed #CBD5E1;
+    border-radius: 8px;
+    padding: 32px 20px;
+    text-align: center;
+    background-color: #F8FAFC;
+}
+
+/* 10. LMS Curriculum Quiz & Assignment Additions */
+.btn-outline-purple {
+    color: #7C3AED;
+    border-color: #C084FC;
+    background-color: transparent;
+}
+.btn-outline-purple:hover, .btn-outline-purple:focus {
+    color: #FFFFFF;
+    background-color: #7C3AED;
+    border-color: #7C3AED;
+}
+
+.text-purple {
+    color: #7C3AED !important;
+}
+
+.bg-purple {
+    background-color: #7C3AED !important;
+}
+
+.border-purple {
+    border-color: #C084FC !important;
+}
+
+#reviewCurriculumTreeContainer::-webkit-scrollbar,
+#wizardQuizQuestionsContainer::-webkit-scrollbar {
+    width: 6px;
+}
+#reviewCurriculumTreeContainer::-webkit-scrollbar-thumb,
+#wizardQuizQuestionsContainer::-webkit-scrollbar-thumb {
+    background-color: #CBD5E1;
+    border-radius: 4px;
+}

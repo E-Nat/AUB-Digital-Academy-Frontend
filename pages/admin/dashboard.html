@@ -46,10 +46,6 @@
                     <i class="bi bi-mortarboard" aria-hidden="true"></i>
                     <span>Academic Management</span>
                 </a>
-                <a href="course-management.html" class="admin-nav-item">
-                    <i class="bi bi-book" aria-hidden="true"></i>
-                    <span>Course Management</span>
-                </a>
                 <a href="exam-management.html" class="admin-nav-item">
                     <i class="bi bi-clipboard-check" aria-hidden="true"></i>
                     <span>Exam & Quiz Management</span>
@@ -116,6 +112,9 @@
                 <div class="admin-topbar-left">
                     <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Navigation Menu">
                         <i class="bi bi-list"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light border d-none d-lg-inline-flex align-items-center justify-content-center me-1" id="sidebarCollapseToggle" title="Toggle Compact Sidebar" style="width: 36px; height: 36px; border-radius: 8px;">
+                        <i class="bi bi-layout-sidebar-inset"></i>
                     </button>
                     <div class="admin-search-wrapper">
                         <i class="bi bi-search"></i>
@@ -211,7 +210,7 @@
                     </div>
 
                     <!-- 3. Active Courses -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='course-management.html'" title="View Active Courses" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card" onclick="window.location.href='academic-management.html#courses-pane'" title="View Active Courses" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Active Courses</span>
                             <div class="dashboard-kpi-icon blue">
@@ -314,7 +313,7 @@
                         <a href="user-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
                             <i class="bi bi-person-plus"></i> Add User
                         </a>
-                        <a href="course-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">
+                        <a href="academic-management.html?action=create-course" class="btn btn-outline-primary dashboard-quick-action-btn">
                             <i class="bi bi-journal-plus"></i> Add Course
                         </a>
                         <a href="exam-management.html" class="btn btn-outline-primary dashboard-quick-action-btn">

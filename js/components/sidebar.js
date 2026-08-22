@@ -69,19 +69,33 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // 5. Desktop/Tablet Sidebar Collapse Toggle
+    // 5. Desktop/Tablet Sidebar Collapse Toggle & Global Preference Persistence
+    function applySidebarCollapsedState(isCollapsed) {
+        if (isCollapsed) {
+            adminWrapper.classList.add('admin-sidebar-collapsed');
+            if (sidebar) sidebar.classList.add('collapsed');
+        } else {
+            adminWrapper.classList.remove('admin-sidebar-collapsed');
+            if (sidebar) sidebar.classList.remove('collapsed');
+        }
+    }
+
     if (collapseToggle && sidebar) {
         collapseToggle.addEventListener('click', function (e) {
             e.stopPropagation();
-            adminWrapper.classList.toggle('admin-sidebar-collapsed');
-            const isCollapsed = adminWrapper.classList.contains('admin-sidebar-collapsed');
-            localStorage.setItem('aub_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+            const currentlyCollapsed = adminWrapper.classList.contains('admin-sidebar-collapsed') || (sidebar && sidebar.classList.contains('collapsed'));
+            const newState = !currentlyCollapsed;
+            applySidebarCollapsedState(newState);
+            localStorage.setItem('aub_sidebar_collapsed', newState ? 'true' : 'false');
         });
+    }
 
-        // Restore collapsed preference
-        if (localStorage.getItem('aub_sidebar_collapsed') === 'true' && window.innerWidth >= 992) {
-            adminWrapper.classList.add('admin-sidebar-collapsed');
-        }
+    // Restore collapsed preference across ALL admin pages (Default: EXPANDED)
+    const savedCollapsed = localStorage.getItem('aub_sidebar_collapsed');
+    if (savedCollapsed === 'true' && window.innerWidth >= 992) {
+        applySidebarCollapsedState(true);
+    } else {
+        applySidebarCollapsedState(false);
     }
 
     // 6. Close Mobile Sidebar on Link Click & Setup Titles for Collapsed Tooltips
@@ -110,40 +124,50 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateActiveNavigation() {
         try {
             const currentPath = window.location.pathname.toLowerCase();
-            const currentHash = window.location.hash.toLowerCase();
+            const currentHash = (window.location.hash || '').toLowerCase();
             const currentFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'dashboard.html';
             const navItems = document.querySelectorAll('.admin-nav-item');
             
             let matchedItem = null;
 
-            navItems.forEach(item => {
-                const href = item.getAttribute('href');
-                if (!href) return;
-
-                const urlParts = href.toLowerCase().split('#');
-                const itemFile = urlParts[0].substring(urlParts[0].lastIndexOf('/') + 1) || '';
-                const itemHash = urlParts[1] ? '#' + urlParts[1] : '';
-
-                // Exact match with hash (e.g. payment-management.html#invoices)
-                if (currentHash && itemHash === currentHash && (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html'))) {
-                    matchedItem = item;
-                } else if (!matchedItem && !currentHash && !itemHash && (itemFile === currentFile || (currentFile === '' && itemFile === 'dashboard.html'))) {
-                    matchedItem = item;
-                } else if (!matchedItem && !currentHash && itemFile === currentFile && !itemHash) {
-                    matchedItem = item;
-                }
-            });
-
-            // Fallback for file match without hash
-            if (!matchedItem) {
+            // 1. Check for exact file + hash match (e.g. payment-management.html#invoices)
+            if (currentHash) {
                 navItems.forEach(item => {
-                    const href = item.getAttribute('href');
-                    if (!href) return;
-                    const itemFile = href.split('#')[0].substring(href.split('#')[0].lastIndexOf('/') + 1).toLowerCase();
-                    if (itemFile === currentFile) {
-                        matchedItem = item;
+                    const href = (item.getAttribute('href') || '').toLowerCase();
+                    const [itemFile, itemHash] = href.split('#');
+                    const cleanItemFile = itemFile.substring(itemFile.lastIndexOf('/') + 1) || '';
+                    if (itemHash && ('#' + itemHash) === currentHash) {
+                        if (cleanItemFile === currentFile || (currentFile === '' && cleanItemFile === 'dashboard.html')) {
+                            matchedItem = item;
+                        }
                     }
                 });
+            }
+
+            // 2. If no exact hash match, match primary page links (ignoring internal tab hashes)
+            if (!matchedItem) {
+                navItems.forEach(item => {
+                    const href = (item.getAttribute('href') || '').toLowerCase();
+                    const [itemFile, itemHash] = href.split('#');
+                    const cleanItemFile = itemFile.substring(itemFile.lastIndexOf('/') + 1) || '';
+                    if (!itemHash) {
+                        if (cleanItemFile === currentFile || 
+                            (currentFile === '' && cleanItemFile === 'dashboard.html') || 
+                            (currentFile === 'index.html' && cleanItemFile === 'dashboard.html')) {
+                            matchedItem = item;
+                        }
+                    }
+                });
+            }
+
+            // 3. Fallbacks for aliases (e.g. course-management.html -> Academic Management)
+            if (!matchedItem) {
+                if (currentFile === 'course-management.html') {
+                    navItems.forEach(item => {
+                        const href = (item.getAttribute('href') || '').toLowerCase();
+                        if (href.includes('academic-management.html')) matchedItem = item;
+                    });
+                }
             }
 
             // Apply active class & aria-current
