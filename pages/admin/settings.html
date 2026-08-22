@@ -3,90 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - AUB Digital Academy</title>
-    
-    <!-- Bootstrap 5 CSS -->
+    <title>Settings — AUB Digital Academy Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Custom Admin CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
+    <!-- Mobile Sidebar Backdrop -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="admin-wrapper">
-        
-        <!-- SIDEBAR -->
-        <aside class="admin-sidebar">
-            <div class="admin-sidebar-brand">
-                <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
-                <div class="admin-brand-text-wrapper">
-                    <span class="admin-brand-aub">AUB</span>
-                    <span class="admin-brand-divider"></span>
-                    <div class="admin-brand-titles">
-                        <div class="admin-brand-digital">DIGITAL</div>
-                        <div class="admin-brand-academy">ACADEMY</div>
-                    </div>
-                </div>
-            </div>
+        <!-- Sidebar (rendered by admin-layout.js) -->
+        <aside class="admin-sidebar"></aside>
 
-            <nav class="admin-sidebar-menu">
-                <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people"></i>
-                    <span>User Management</span>
-                </a>
-                <a href="academic-management.html" class="admin-nav-item">
-                    <i class="bi bi-mortarboard"></i>
-                    <span>Academic Management</span>
-                </a>
-                <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check"></i>
-                    <span>Enrollment Management</span>
-                </a>
-                <a href="settings.html" class="admin-nav-item active">
-                    <i class="bi bi-gear"></i>
-                    <span>Settings</span>
-                </a>
-            </nav>
-
-            <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='../authentication/login.html';">
-                    <i class="bi bi-box-arrow-left"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- MAIN VIEW -->
+        <!-- Main -->
         <main class="admin-main">
-            
             <header class="admin-topbar">
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
                 <div class="admin-search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search settings...">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="admin-search-input" placeholder="Search settings…" autocomplete="off">
+                    <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
                 </div>
-
                 <div class="admin-topbar-actions">
-                    <button class="admin-notification-btn"><i class="bi bi-bell-fill"></i><span class="admin-notification-badge">3</span></button>
-                    <div class="admin-topbar-profile">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin">
-                        <div class="d-none d-md-block text-start lh-1">
-                            <div class="name">Admin</div>
-                            <div class="role">System Administrator</div>
+                    <button class="admin-icon-btn" aria-label="Notifications"><i class="bi bi-bell"></i></button>
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&size=64" alt="Admin" class="admin-topbar-avatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block">
+                            <div class="profile-name">Admin</div>
+                            <div class="profile-role">System Administrator</div>
                         </div>
                     </div>
                 </div>
             </header>
 
             <div class="admin-content">
-                <div class="admin-header-row">
+                <div class="admin-page-header">
                     <div>
                         <h1 class="admin-page-title">Settings</h1>
                         <p class="admin-page-subtitle">Configure system parameters and platform preferences.</p>
@@ -96,41 +52,53 @@
                 <div class="row g-4">
                     <div class="col-lg-6">
                         <div class="admin-card">
-                            <h3 class="admin-card-title mb-3">Administrator Profile</h3>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Display Name</label>
-                                <input type="text" class="form-control" value="Admin System" readonly>
+                            <div class="admin-card-header">
+                                <div class="admin-card-title">Administrator Profile</div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Email Address</label>
-                                <input type="email" class="form-control" value="admin@aub.edu.kh" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-sm fw-semibold">Role</label>
-                                <input type="text" class="form-control" value="System Administrator" readonly>
+                            <div class="admin-card-body">
+                                <div class="adm-form-group">
+                                    <label class="adm-form-label">Display Name</label>
+                                    <input type="text" class="adm-form-control" value="Admin System" readonly>
+                                </div>
+                                <div class="adm-form-group">
+                                    <label class="adm-form-label">Email Address</label>
+                                    <input type="email" class="adm-form-control" value="admin@aub.edu.kh" readonly>
+                                </div>
+                                <div class="adm-form-group">
+                                    <label class="adm-form-label">Role</label>
+                                    <input type="text" class="adm-form-control" value="System Administrator" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-6">
                         <div class="admin-card">
-                            <h3 class="admin-card-title mb-3">Platform Information</h3>
-                            <div class="d-flex flex-column gap-2 text-sm">
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">Platform Name</span>
-                                    <span class="fw-bold text-dark">AUB Digital Academy</span>
-                                </div>
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">Database Engine</span>
-                                    <span class="fw-bold text-success"><i class="bi bi-check-circle-fill me-1"></i> SQLite3 (Normalized Relational)</span>
-                                </div>
-                                <div class="d-flex justify-content-between py-2 border-bottom">
-                                    <span class="text-muted">API Status</span>
-                                    <span class="fw-bold text-success"><i class="bi bi-broadcast me-1"></i> REST API Active</span>
-                                </div>
-                                <div class="d-flex justify-content-between py-2">
-                                    <span class="text-muted">Authentication</span>
-                                    <span class="fw-bold text-dark">JWT + Bcrypt Hashing</span>
+                            <div class="admin-card-header">
+                                <div class="admin-card-title">Platform Information</div>
+                            </div>
+                            <div class="admin-card-body">
+                                <div class="d-flex flex-column gap-1" style="font-size:13.5px">
+                                    <div class="d-flex justify-content-between py-2 border-bottom">
+                                        <span class="text-muted">Platform Name</span>
+                                        <span class="fw-600 text-dark">AUB Digital Academy</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom">
+                                        <span class="text-muted">Database Engine</span>
+                                        <span style="color:var(--adm-green);font-weight:600"><i class="bi bi-check-circle-fill me-1"></i>SQLite3 (Normalized)</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom">
+                                        <span class="text-muted">API Status</span>
+                                        <span style="color:var(--adm-green);font-weight:600"><i class="bi bi-broadcast me-1"></i>REST API Active</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2 border-bottom">
+                                        <span class="text-muted">Authentication</span>
+                                        <span class="fw-600 text-dark">JWT + Bcrypt</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-2">
+                                        <span class="text-muted">Backend</span>
+                                        <span class="fw-600 text-dark">Node.js + Express</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -140,7 +108,9 @@
         </main>
     </div>
 
-    <!-- Bootstrap 5 JS -->
+    <div id="admToastContainer" class="adm-toast-container"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/admin-layout.js"></script>
 </body>
 </html>

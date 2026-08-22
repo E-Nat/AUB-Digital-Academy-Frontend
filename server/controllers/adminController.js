@@ -7,28 +7,82 @@ const { dbAsync } = require('../db/database');
 
 exports.getDashboardMetrics = async (req, res) => {
     try {
-        const totalUsersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM users`);
-        const totalCoursesRow = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1`);
-        const totalStudentsRow = await dbAsync.get(`
+        const totalUsersRow       = await dbAsync.get(`SELECT COUNT(*) as count FROM users`);
+        const totalCoursesRow     = await dbAsync.get(`SELECT COUNT(*) as count FROM courses WHERE is_published = 1`);
+        const totalStudentsRow    = await dbAsync.get(`
             SELECT COUNT(*) as count FROM users u
-            JOIN roles r ON u.role_id = r.id
-            WHERE r.name = 'STUDENT'
+            JOIN roles r ON u.role_id = r.id WHERE r.name = 'STUDENT'
         `);
-        const totalTeachersRow = await dbAsync.get(`
-            SELECT COUNT(*) as count FROM instructors
-        `);
-        const totalChaptersRow = await dbAsync.get(`SELECT COUNT(*) as count FROM modules`);
+        const totalTeachersRow    = await dbAsync.get(`SELECT COUNT(*) as count FROM instructors`);
+        const totalChaptersRow    = await dbAsync.get(`SELECT COUNT(*) as count FROM modules`);
         const totalEnrollmentsRow = await dbAsync.get(`SELECT COUNT(*) as count FROM enrollments`);
+
+        // ── Operational KPIs derived from existing tables ──────────────────
+        // Pending enrollments: enrollments with status 'Pending'
+        const pendingEnrollmentsRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM enrollments WHERE LOWER(status) = 'pending'`
+        );
+        // Active courses: published courses
+        const activeCoursesRow  = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM courses WHERE is_published = 1`
+        );
+        // Completed courses: courses where at least one enrollment is 100% progress
+        const completedCoursesRow = await dbAsync.get(
+            `SELECT COUNT(DISTINCT course_id) as count FROM enrollments WHERE progress_percentage >= 100`
+        );
+        // Upcoming exams: quizzes (used as proxy for exams) count
+        const upcomingExamsRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM quizzes`
+        );
+        // Pending results: enrollments with status 'Active' and 0 progress (proxy for ungraded)
+        const pendingResultsRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM enrollments WHERE LOWER(status) = 'active' AND progress_percentage = 0`
+        );
+
+        // ── Financial Intelligence — derived from enrollment payments proxy ─
+        // Since we don't have a payments table yet, derive from enrollment data:
+        // "Paid" = completed enrollments (proxy for tuition paid)
+        // "Pending" = active enrollments without completion (proxy for outstanding)
+        const paidEnrollsRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM enrollments WHERE LOWER(status) = 'completed' OR progress_percentage >= 100`
+        );
+        const pendingEnrollsRow = await dbAsync.get(
+            `SELECT COUNT(*) as count FROM enrollments WHERE LOWER(status) IN ('active', 'pending') AND progress_percentage < 100`
+        );
+
+        // Course price proxy: $63.33/enrollment (matching existing UI display)
+        const PRICE_PER_ENROLLMENT = 63.33;
+        const paidCount     = paidEnrollsRow.count    || 0;
+        const pendingCount  = pendingEnrollsRow.count || 0;
+        const totalPaidRevenue      = +(paidCount   * PRICE_PER_ENROLLMENT).toFixed(2);
+        const pendingPaymentsAmount = +(pendingCount * PRICE_PER_ENROLLMENT).toFixed(2);
+        const outstandingInvoices   = pendingCount;
+        const totalGrossVolume      = +(totalPaidRevenue + pendingPaymentsAmount).toFixed(2);
 
         res.json({
             success: true,
             data: {
-                totalUsers: totalUsersRow.count,
-                totalCourses: totalCoursesRow.count,
-                totalStudents: totalStudentsRow.count,
-                totalTeachers: totalTeachersRow.count,
-                totalChapters: totalChaptersRow.count,
-                totalEnrollments: totalEnrollmentsRow.count
+                // Base metrics (existing)
+                totalUsers:       totalUsersRow.count,
+                totalCourses:     totalCoursesRow.count,
+                totalStudents:    totalStudentsRow.count,
+                totalTeachers:    totalTeachersRow.count,
+                totalChapters:    totalChaptersRow.count,
+                totalEnrollments: totalEnrollmentsRow.count,
+
+                // Operational KPIs (new)
+                pendingEnrollments: pendingEnrollmentsRow.count,
+                pendingPayments:    pendingEnrollsRow.count,
+                activeCourses:      activeCoursesRow.count,
+                completedCourses:   completedCoursesRow.count,
+                upcomingExams:      upcomingExamsRow.count,
+                pendingResults:     pendingResultsRow.count,
+
+                // Financial Intelligence (new)
+                totalPaidRevenue,
+                pendingPaymentsAmount,
+                outstandingInvoices,
+                totalGrossVolume
             }
         });
     } catch (error) {
