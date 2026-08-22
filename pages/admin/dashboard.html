@@ -151,244 +151,213 @@
             <!-- CONTENT BODY -->
             <div class="admin-content">
                 
-                <!-- 1. EXECUTIVE HEADER WRAP -->
-                <div class="executive-header-wrap">
-                    <div class="executive-title-group">
-                        <div class="executive-meta-row">
-                            <span class="meta-pill-badge primary">
-                                <i class="bi bi-mortarboard-fill"></i> AUB Digital Academy
-                            </span>
-                            <span class="meta-pill-badge term">
-                                Fall Semester 2026 • Week 8
-                            </span>
-                            <span class="meta-pill-badge live">
-                                <span class="meta-live-dot"></span> Live Sync
-                            </span>
+                <!-- 1. HEADER -->
+                <div class="dashboard-header-row">
+                    <div class="dashboard-header-left">
+                        <div class="dashboard-institution-badge">
+                            <i class="bi bi-mortarboard-fill"></i> AUB Digital Academy
                         </div>
-                        <h1 class="executive-page-title">Executive Command Center</h1>
-                        <p class="executive-page-subtitle">Real-time student intake, curriculum analytics, and institutional financial health</p>
+                        <h1 class="dashboard-page-title">Executive Command Center</h1>
+                        <p class="dashboard-page-subtitle">Real-time academic management, student enrollment pipelines, and institutional overview</p>
                     </div>
-
-                    <div class="executive-date-card">
-                        <div class="executive-date-icon">
-                            <i class="bi bi-calendar3"></i>
-                        </div>
-                        <div>
-                            <div class="executive-date-text-label">Campus Date</div>
-                            <div class="executive-date-text-val" id="currentDateBadge">August 23, 2026 | Sunday</div>
-                        </div>
+                    <div class="dashboard-date-badge">
+                        <i class="bi bi-calendar3"></i>
+                        <span id="currentDateBadge">August 23, 2026 | Sunday</span>
                     </div>
                 </div>
 
-                <!-- 2. BENTO SCOPE FILTER TOOLBAR -->
-                <div class="bento-filter-toolbar">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-xs fw-bold text-uppercase text-muted" style="letter-spacing: 0.05em; font-size: 11.5px;">
-                            <i class="bi bi-funnel-fill text-primary me-1"></i> Timeframe Scope:
-                        </span>
-                        <div class="bento-filter-nav">
+                <!-- 2. TIMEFRAME FILTER -->
+                <div class="dashboard-filter-bar">
+                    <div class="dashboard-filter-group">
+                        <span class="dashboard-filter-label">TIMEFRAME:</span>
+                        <div class="dashboard-filter-buttons">
                             <button class="dashboard-date-pill active" data-timeframe="all_time" id="btnDateAll">All Time</button>
                             <button class="dashboard-date-pill" data-timeframe="today" id="btnDateToday">Today</button>
                             <button class="dashboard-date-pill" data-timeframe="this_week" id="btnDateWeek">This Week</button>
                             <button class="dashboard-date-pill" data-timeframe="this_month" id="btnDateMonth">This Month</button>
-                            <button class="dashboard-date-pill" data-timeframe="custom" id="btnDateCustom"><i class="bi bi-sliders me-1"></i> Custom</button>
+                            <button class="dashboard-date-pill" data-timeframe="custom" id="btnDateCustom">Custom Range</button>
                         </div>
                     </div>
-                    <div class="d-none d-lg-flex bento-filter-status">
-                        <i class="bi bi-info-circle text-primary"></i>
-                        <span id="activeDateRangeDisplay">Showing: All Time Institutional Data</span>
+                    <div class="dashboard-filter-info">
+                        <span id="activeDateRangeDisplay">Showing: All Time Operational Data</span>
                     </div>
                 </div>
 
-                <!-- 3. SECTION: OPERATIONAL OVERVIEW (6 Bento KPI Cards) -->
-                <div class="bento-section-header">
-                    <div class="bento-section-title-wrap">
-                        <h2 class="bento-section-title">Operational Overview</h2>
-                    </div>
-                    <span class="bento-section-subtitle">Real-time status across key academic workflows</span>
+                <!-- 3. OPERATIONAL OVERVIEW (6 Compact KPI Cards) -->
+                <div class="dashboard-section-header">
+                    <h2 class="dashboard-section-title">OPERATIONAL OVERVIEW</h2>
                 </div>
 
-                <div class="bento-kpi-grid">
+                <div class="dashboard-kpi-grid">
                     <!-- 1. Pending Enrollments -->
-                    <div class="bento-kpi-card orange" onclick="window.location.href='enrollment-management.html'" title="Review Pending Enrollments" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Pending Enrollments</span>
-                            <div class="bento-kpi-icon-wrap orange">
+                    <div class="dashboard-kpi-card orange" onclick="window.location.href='enrollment-management.html'" title="Review Pending Enrollments" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Enrollments</span>
+                            <div class="dashboard-kpi-icon orange">
                                 <i class="bi bi-person-lines-fill" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiPendingEnrollments">0</div>
-                        </div>
-                        <div class="bento-micro-badge attention">
-                            <i class="bi bi-exclamation-circle-fill"></i> Requires review
+                        <div class="dashboard-kpi-value" id="kpiPendingEnrollments">1</div>
+                        <div class="dashboard-kpi-badge orange">
+                            <span class="badge-dot"></span> Requires review
                         </div>
                     </div>
 
                     <!-- 2. Pending Payments -->
-                    <div class="bento-kpi-card amber" onclick="window.location.href='payment-management.html'" title="View Pending Payments" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Pending Payments</span>
-                            <div class="bento-kpi-icon-wrap amber">
+                    <div class="dashboard-kpi-card amber" onclick="window.location.href='payment-management.html'" title="View Pending Payments" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Payments</span>
+                            <div class="dashboard-kpi-icon amber">
                                 <i class="bi bi-credit-card-2-front" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiPendingPayments">0</div>
-                        </div>
-                        <div class="bento-micro-badge pending">
-                            <i class="bi bi-clock-history"></i> Awaiting settlement
+                        <div class="dashboard-kpi-value" id="kpiPendingPayments">1</div>
+                        <div class="dashboard-kpi-badge amber">
+                            <span class="badge-dot"></span> Awaiting payment
                         </div>
                     </div>
 
                     <!-- 3. Active Courses -->
-                    <div class="bento-kpi-card blue" onclick="window.location.href='academic-management.html#courses-pane'" title="View Active Courses" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Active Courses</span>
-                            <div class="bento-kpi-icon-wrap blue">
-                                <i class="bi bi-journal-code" aria-hidden="true"></i>
+                    <div class="dashboard-kpi-card blue" onclick="window.location.href='academic-management.html#courses-pane'" title="View Active Courses" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Active Courses</span>
+                            <div class="dashboard-kpi-icon blue">
+                                <i class="bi bi-journal-bookmark" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiActiveCourses">0</div>
-                        </div>
-                        <div class="bento-micro-badge success">
-                            <i class="bi bi-check-circle-fill"></i> In session / Open
+                        <div class="dashboard-kpi-value" id="kpiActiveCourses">13</div>
+                        <div class="dashboard-kpi-badge blue">
+                            <span class="badge-dot"></span> Open
                         </div>
                     </div>
 
                     <!-- 4. Completed Courses -->
-                    <div class="bento-kpi-card green" onclick="window.location.href='academic-management.html'" title="View Completed Courses" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Completed Courses</span>
-                            <div class="bento-kpi-icon-wrap green">
-                                <i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+                    <div class="dashboard-kpi-card green" onclick="window.location.href='academic-management.html'" title="View Completed Courses" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Completed Courses</span>
+                            <div class="dashboard-kpi-icon green">
+                                <i class="bi bi-mortarboard" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiCompletedCourses">0</div>
-                        </div>
-                        <div class="bento-micro-badge success">
-                            <i class="bi bi-archive-fill"></i> Completed batches
+                        <div class="dashboard-kpi-value" id="kpiCompletedCourses">1</div>
+                        <div class="dashboard-kpi-badge green">
+                            <span class="badge-dot"></span> Completed
                         </div>
                     </div>
 
                     <!-- 5. Upcoming Exams -->
-                    <div class="bento-kpi-card purple" onclick="window.location.href='exam-management.html'" title="View Upcoming Exams" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Upcoming Exams</span>
-                            <div class="bento-kpi-icon-wrap purple">
-                                <i class="bi bi-clipboard-check-fill" aria-hidden="true"></i>
+                    <div class="dashboard-kpi-card purple" onclick="window.location.href='exam-management.html'" title="View Upcoming Exams" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Upcoming Exams</span>
+                            <div class="dashboard-kpi-icon purple">
+                                <i class="bi bi-clipboard-check" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiUpcomingExams">0</div>
-                        </div>
-                        <div class="bento-micro-badge purple">
-                            <i class="bi bi-calendar3"></i> Scheduled term
+                        <div class="dashboard-kpi-value" id="kpiUpcomingExams">3</div>
+                        <div class="dashboard-kpi-badge purple">
+                            <span class="badge-dot"></span> Scheduled
                         </div>
                     </div>
 
                     <!-- 6. Pending Results -->
-                    <div class="bento-kpi-card red" onclick="window.location.href='exam-management.html'" title="View Pending Exam Submissions" tabindex="0" role="link">
-                        <div class="bento-kpi-top">
-                            <span class="bento-kpi-title">Pending Results</span>
-                            <div class="bento-kpi-icon-wrap red">
+                    <div class="dashboard-kpi-card red" onclick="window.location.href='exam-management.html'" title="View Pending Exam Submissions" tabindex="0" role="link">
+                        <div class="dashboard-kpi-top">
+                            <span class="dashboard-kpi-title">Pending Results</span>
+                            <div class="dashboard-kpi-icon red">
                                 <i class="bi bi-hourglass-split" aria-hidden="true"></i>
                             </div>
                         </div>
-                        <div class="bento-kpi-body">
-                            <div class="dashboard-kpi-value" id="kpiPendingResults">0</div>
-                        </div>
-                        <div class="bento-micro-badge danger">
-                            <i class="bi bi-file-earmark-text-fill"></i> Awaiting grading
+                        <div class="dashboard-kpi-value" id="kpiPendingResults">2</div>
+                        <div class="dashboard-kpi-badge red">
+                            <span class="badge-dot"></span> Needs grading
                         </div>
                     </div>
                 </div>
 
-                <!-- 4. SECTION: FINANCIAL OVERVIEW (Bento Grid) -->
-                <div class="bento-section-header">
-                    <div class="bento-section-title-wrap">
-                        <h2 class="bento-section-title">Financial Intelligence</h2>
-                    </div>
-                    <span class="bento-section-subtitle">Tuition volume, pending receivables, and invoice health</span>
+                <!-- 4. FINANCIAL INTELLIGENCE (4-Card Horizontal Section) -->
+                <div class="dashboard-section-header">
+                    <h2 class="dashboard-section-title">FINANCIAL INTELLIGENCE</h2>
                 </div>
 
-                <div class="bento-finance-container">
-                    <!-- Dark Hero Bento Tile -->
-                    <div class="bento-finance-hero-card">
-                        <div class="bento-finance-hero-header">
-                            <span class="bento-finance-hero-title">Total Paid Revenue</span>
-                            <span class="bento-finance-trend-badge">
-                                <i class="bi bi-arrow-up-right"></i> +14.5%
-                            </span>
+                <div class="dashboard-finance-grid">
+                    <!-- Primary Revenue Card -->
+                    <div class="dashboard-finance-card-primary">
+                        <div class="finance-card-top">
+                            <span class="finance-card-title">Total Paid Revenue</span>
+                            <span class="finance-trend-badge"><i class="bi bi-arrow-up-right"></i> +14.5%</span>
                         </div>
-                        <div class="dashboard-finance-amount" id="kpiTotalRevenue">$0.00</div>
-                        <div class="bento-finance-hero-footer">
-                            <span><strong id="kpiPaidInvoicesCount">0</strong> Paid Invoices</span>
-                            <a href="payment-management.html#invoices">View Invoices <i class="bi bi-arrow-right"></i></a>
+                        <div class="finance-amount-primary" id="kpiTotalRevenue">$190.00</div>
+                        <div class="finance-card-footer">
+                            <span><strong id="kpiPaidInvoicesCount">3</strong> Paid Invoices</span>
+                            <a href="payment-management.html#invoices" class="finance-link">View Invoices →</a>
                         </div>
                     </div>
 
-                    <!-- Companion Stat: Pending Payments -->
-                    <div class="bento-finance-stat-card">
-                        <span class="bento-finance-stat-label">Pending Receivables</span>
-                        <div class="dashboard-finance-pillar-value text-warning" id="kpiPendingRevenueAmount">$0.00</div>
-                        <span class="bento-finance-stat-meta"><span id="kpiPendingCount">0</span> pending orders</span>
+                    <!-- Pending Payments -->
+                    <div class="dashboard-finance-card">
+                        <div class="finance-card-top">
+                            <span class="finance-card-title">Pending Payments</span>
+                            <div class="finance-card-icon amber"><i class="bi bi-clock-history"></i></div>
+                        </div>
+                        <div class="finance-amount" id="kpiPendingRevenueAmount">$80.00</div>
+                        <div class="finance-card-subtext"><span id="kpiPendingCount">1</span> pending payment</div>
                     </div>
 
-                    <!-- Companion Stat: Outstanding Invoices -->
-                    <div class="bento-finance-stat-card">
-                        <span class="bento-finance-stat-label">Outstanding Invoices</span>
-                        <div class="dashboard-finance-pillar-value" id="kpiOutstandingInvoicesCount">0</div>
-                        <span class="bento-finance-stat-meta text-warning"><i class="bi bi-clock me-1"></i>Awaiting clearance</span>
+                    <!-- Outstanding Invoices -->
+                    <div class="dashboard-finance-card">
+                        <div class="finance-card-top">
+                            <span class="finance-card-title">Outstanding Invoices</span>
+                            <div class="finance-card-icon amber"><i class="bi bi-receipt"></i></div>
+                        </div>
+                        <div class="finance-amount" id="kpiOutstandingInvoicesCount">1</div>
+                        <div class="finance-card-subtext text-warning">Awaiting clearance</div>
                     </div>
 
-                    <!-- Companion Stat: Total Gross Volume -->
-                    <div class="bento-finance-stat-card">
-                        <span class="bento-finance-stat-label">Total Gross Volume</span>
-                        <div class="dashboard-finance-pillar-value" id="kpiGrossRevenueAmount">$0.00</div>
-                        <span class="bento-finance-stat-meta">All recorded transactions</span>
+                    <!-- Total Gross Volume -->
+                    <div class="dashboard-finance-card">
+                        <div class="finance-card-top">
+                            <span class="finance-card-title">Total Gross Volume</span>
+                            <div class="finance-card-icon blue"><i class="bi bi-graph-up"></i></div>
+                        </div>
+                        <div class="finance-amount" id="kpiGrossRevenueAmount">$270.00</div>
+                        <div class="finance-card-subtext">All recorded transactions</div>
                     </div>
                 </div>
 
-                <!-- 5. SECTION: QUICK ACTIONS HUB -->
-                <div class="bento-actions-bar">
-                    <div class="bento-actions-label">
-                        <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Commands
+                <!-- 5. QUICK ACTIONS -->
+                <div class="dashboard-actions-section">
+                    <div class="dashboard-actions-header">
+                        <span class="dashboard-actions-title"><i class="bi bi-lightning-charge-fill text-warning"></i> QUICK ACTIONS</span>
                     </div>
-                    <div class="bento-actions-group">
-                        <a href="academic-management.html?action=create-course" class="bento-action-pill">
+                    <div class="dashboard-actions-buttons">
+                        <a href="academic-management.html?action=create-course" class="btn dashboard-action-btn">
                             <i class="bi bi-journal-plus text-primary"></i> Add Course
                         </a>
-                        <a href="user-management.html" class="bento-action-pill">
+                        <a href="user-management.html" class="btn dashboard-action-btn">
                             <i class="bi bi-person-plus text-success"></i> Add User
                         </a>
-                        <a href="exam-management.html" class="bento-action-pill">
-                            <i class="bi bi-calendar-plus text-purple" style="color: #7C3AED;"></i> Schedule Exam
+                        <a href="exam-management.html" class="btn dashboard-action-btn">
+                            <i class="bi bi-calendar-plus text-purple"></i> Schedule Exam
                         </a>
-                        <a href="enrollment-management.html" class="bento-action-pill">
+                        <a href="enrollment-management.html" class="btn dashboard-action-btn">
                             <i class="bi bi-person-check text-warning"></i> Enroll Student
                         </a>
                     </div>
                 </div>
 
-                <!-- 6. SECTION: ANALYTICS -->
-                <div class="bento-section-header">
-                    <div class="bento-section-title-wrap">
-                        <h2 class="bento-section-title">Institutional Analytics</h2>
-                    </div>
-                    <span class="bento-section-subtitle">Student enrollment patterns, examination results, and discipline distribution</span>
+                <!-- 6. INSTITUTIONAL ANALYTICS (Two-Column Layout) -->
+                <div class="dashboard-section-header">
+                    <h2 class="dashboard-section-title">INSTITUTIONAL ANALYTICS</h2>
                 </div>
 
-                <div class="row g-4 mb-4">
-                    <!-- Left: Enrollment & Exam Trends (BAR CHART) -->
+                <div class="row g-3 mb-3">
+                    <!-- Left: Enrollment & Exam Trends -->
                     <div class="col-lg-6">
-                        <div class="bento-card h-100 mb-0">
-                            <div class="bento-card-header">
+                        <div class="dashboard-panel h-100 mb-0">
+                            <div class="dashboard-panel-header">
                                 <div>
-                                    <h3 class="bento-card-title">Enrollment & Exam Trends</h3>
-                                    <p class="bento-card-subtitle">Monthly student registrations vs. exam completions</p>
+                                    <h3 class="dashboard-panel-title">Enrollment & Exam Trends</h3>
+                                    <p class="dashboard-panel-subtitle">Monthly student registrations vs. exam completions</p>
                                 </div>
                                 <div class="chart-legend-wrap">
                                     <span class="chart-legend-item">
@@ -410,13 +379,13 @@
                         </div>
                     </div>
 
-                    <!-- Right: Students by Major (DONUT CHART) -->
+                    <!-- Right: Students by Major -->
                     <div class="col-lg-6">
-                        <div class="bento-card h-100 mb-0">
-                            <div class="bento-card-header">
+                        <div class="dashboard-panel h-100 mb-0">
+                            <div class="dashboard-panel-header">
                                 <div>
-                                    <h3 class="bento-card-title">Students by Major</h3>
-                                    <p class="bento-card-subtitle">Active student enrollment by academic specialization</p>
+                                    <h3 class="dashboard-panel-title">Students by Major</h3>
+                                    <p class="dashboard-panel-subtitle">Active student enrollment by academic specialization</p>
                                 </div>
                                 <select class="admin-dropdown-select" id="majorTimeframeSelect" aria-label="Filter students by major timeframe">
                                     <option value="this_month">This Month</option>
@@ -429,7 +398,7 @@
                             
                             <div class="donut-chart-box">
                                 <div class="donut-svg-wrap">
-                                    <svg viewBox="0 0 36 36" style="width: 130px; height: 130px; transform: rotate(-90deg);" id="studentsMajorDonutSvg" role="img" aria-label="Students by Major Donut Chart">
+                                    <svg viewBox="0 0 36 36" style="width: 120px; height: 120px; transform: rotate(-90deg);" id="studentsMajorDonutSvg" role="img" aria-label="Students by Major Donut Chart">
                                         <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E5EAF1" stroke-width="3.6"></circle>
                                     </svg>
                                     <div class="donut-center-info">
@@ -446,11 +415,11 @@
                 </div>
 
                 <!-- Enrollment by Discipline Breakdown Card -->
-                <div class="bento-card mb-4">
-                    <div class="bento-card-header">
+                <div class="dashboard-panel mb-3">
+                    <div class="dashboard-panel-header">
                         <div>
-                            <h3 class="bento-card-title">Enrollment by Discipline</h3>
-                            <p class="bento-card-subtitle">Student distribution across academic course disciplines</p>
+                            <h3 class="dashboard-panel-title">Enrollment by Discipline</h3>
+                            <p class="dashboard-panel-subtitle">Student distribution across academic course disciplines</p>
                         </div>
                         <select class="admin-dropdown-select" id="enrollmentTimeframeSelect" aria-label="Filter enrollment discipline timeframe">
                             <option value="this_month">This Month</option>
@@ -465,29 +434,22 @@
                     </div>
                 </div>
 
-                <!-- 7. SECTION: RECENT OPERATIONAL ACTIVITY -->
-                <div class="bento-section-header">
-                    <div class="bento-section-title-wrap">
-                        <h2 class="bento-section-title">Recent Activity</h2>
-                    </div>
-                    <span class="bento-section-subtitle">Live registrations and upcoming evaluation timetables</span>
-                </div>
-
-                <div class="row g-4">
-                    <!-- Recent Enrollments Table -->
+                <!-- 7 & 8. RECENT ENROLLMENTS & UPCOMING EXAMS (Two-Column Layout) -->
+                <div class="row g-3">
+                    <!-- 7. Recent Enrollments -->
                     <div class="col-xl-7 col-12">
-                        <div class="bento-card mb-0 h-100">
-                            <div class="bento-card-header">
+                        <div class="dashboard-panel mb-0 h-100">
+                            <div class="dashboard-panel-header">
                                 <div>
-                                    <h3 class="bento-card-title">Recent Enrollments</h3>
-                                    <p class="bento-card-subtitle">Latest student course registrations</p>
+                                    <h3 class="dashboard-panel-title">Recent Enrollments</h3>
+                                    <p class="dashboard-panel-subtitle">Latest student course registrations</p>
                                 </div>
-                                <a href="enrollment-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 12.5px; font-weight: 600;">
-                                    View All <i class="bi bi-arrow-right ms-1"></i>
+                                <a href="enrollment-management.html" class="dashboard-view-all-link">
+                                    View All →
                                 </a>
                             </div>
-                            <div class="bento-table-container">
-                                <table class="bento-table dashboard-table-responsive-cards" aria-label="Recent Enrollments Table">
+                            <div class="dashboard-table-container">
+                                <table class="dashboard-table dashboard-table-responsive-cards" aria-label="Recent Enrollments Table">
                                     <thead>
                                         <tr>
                                             <th scope="col" style="width: 28%;">STUDENT</th>
@@ -506,24 +468,24 @@
                         </div>
                     </div>
 
-                    <!-- Upcoming Exams Table (No horizontal overflow) -->
+                    <!-- 8. Upcoming Exams -->
                     <div class="col-xl-5 col-12">
-                        <div class="bento-card mb-0 h-100">
-                            <div class="bento-card-header">
+                        <div class="dashboard-panel mb-0 h-100">
+                            <div class="dashboard-panel-header">
                                 <div>
-                                    <h3 class="bento-card-title">Upcoming Exams</h3>
-                                    <p class="bento-card-subtitle">Scheduled evaluations</p>
+                                    <h3 class="dashboard-panel-title">Upcoming Exams</h3>
+                                    <p class="dashboard-panel-subtitle">Scheduled evaluations</p>
                                 </div>
-                                <a href="exam-management.html" class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size: 12.5px; font-weight: 600;">
-                                    Manage <i class="bi bi-arrow-right ms-1"></i>
+                                <a href="exam-management.html" class="dashboard-view-all-link">
+                                    Manage Exams →
                                 </a>
                             </div>
-                            <div class="bento-table-container bento-table-compact">
-                                <table class="bento-table dashboard-table-responsive-cards" aria-label="Upcoming Exams Table">
+                            <div class="dashboard-table-container dashboard-table-compact">
+                                <table class="dashboard-table dashboard-table-responsive-cards" aria-label="Upcoming Exams Table">
                                     <thead>
                                         <tr>
                                             <th scope="col" style="width: 38%;">EXAM</th>
-                                            <th scope="col" style="width: 28%;">DATE</th>
+                                            <th scope="col" style="width: 28%;">DATE & TIME</th>
                                             <th scope="col" style="width: 16%;">STUDENTS</th>
                                             <th scope="col" style="width: 18%;">STATUS</th>
                                             <th scope="col" class="text-end">ACTION</th>
@@ -544,33 +506,33 @@
 
     <!-- CUSTOM DATE RANGE MODAL -->
     <div class="modal fade" id="customDateModal" tabindex="-1" aria-labelledby="customDateModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
                 <div class="modal-header border-bottom py-3 px-4">
-                    <h5 class="modal-title fw-bold" id="customDateModalLabel" style="font-size: 16px;">
+                    <h5 class="modal-title fw-bold" id="customDateModalLabel" style="font-size: 15px;">
                         <i class="bi bi-calendar-range text-primary me-2"></i> Custom Date Range
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <p class="text-muted mb-3" style="font-size: 13.5px;">Filter operational dashboard analytics and metrics within a specific timeframe.</p>
+                    <p class="text-muted mb-3" style="font-size: 13px;">Filter operational dashboard analytics and metrics within a specific timeframe.</p>
                     <div class="row g-3">
                         <div class="col-12 col-sm-6">
-                            <label class="form-label fw-semibold" style="font-size: 13px;">Start Date *</label>
-                            <input type="date" class="form-control" id="customStartDate" style="border-radius: 8px; height: 40px;">
+                            <label class="form-label fw-semibold" style="font-size: 12.5px;">Start Date *</label>
+                            <input type="date" class="form-control" id="customStartDate" style="border-radius: 6px; height: 38px; font-size: 13px;">
                         </div>
                         <div class="col-12 col-sm-6">
-                            <label class="form-label fw-semibold" style="font-size: 13px;">End Date *</label>
-                            <input type="date" class="form-control" id="customEndDate" style="border-radius: 8px; height: 40px;">
+                            <label class="form-label fw-semibold" style="font-size: 12.5px;">End Date *</label>
+                            <input type="date" class="form-control" id="customEndDate" style="border-radius: 6px; height: 38px; font-size: 13px;">
                         </div>
                     </div>
-                    <div id="customDateError" class="text-danger mt-2 d-none" style="font-size: 12.5px; font-weight: 500;">
+                    <div id="customDateError" class="text-danger mt-2 d-none" style="font-size: 12px; font-weight: 500;">
                         <i class="bi bi-exclamation-triangle-fill me-1"></i> Start Date must be earlier than or equal to End Date.
                     </div>
                 </div>
-                <div class="modal-footer border-top py-3 px-4 d-flex justify-content-end gap-2">
-                    <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px;">Cancel</button>
-                    <button type="button" class="btn btn-primary px-4" id="applyCustomDateBtn" style="border-radius: 8px; font-weight: 600; font-size: 13px;">Apply Filter</button>
+                <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light border px-3" data-bs-dismiss="modal" style="border-radius: 6px; font-weight: 600; font-size: 12.5px;">Cancel</button>
+                    <button type="button" class="btn btn-primary px-3" id="applyCustomDateBtn" style="border-radius: 6px; font-weight: 600; font-size: 12.5px;">Apply Filter</button>
                 </div>
             </div>
         </div>

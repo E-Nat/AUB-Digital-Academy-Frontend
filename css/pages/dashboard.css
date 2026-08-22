@@ -1,60 +1,51 @@
 /* ==========================================================================
    AUB DIGITAL ACADEMY - ADMINISTRATION PORTAL DASHBOARD STYLESHEET
-   Modern Executive Bento-Grid Design System (Linear / Vercel / Higher-Ed)
+   Professional University Administration / LMS Design System
+   8px-based Spacing, Compact High-Hierarchy Cards, Subtle Accents
    ========================================================================== */
 
-/* 1. Global Tokens & Surfaces */
+/* 1. Global Design Tokens & Surfaces */
 :root {
     --dash-bg: #F8FAFC;
     --dash-surface: #FFFFFF;
-    --dash-surface-elevated: #FFFFFF;
     --dash-surface-subtle: #F1F5F9;
     --dash-border: #E2E8F0;
     --dash-border-subtle: #F1F5F9;
-    --dash-border-strong: #CBD5E1;
     
-    --dash-navy-900: #0B132B;
-    --dash-navy-800: #1C2541;
-    --dash-navy-700: #3A506B;
+    --dash-navy-dark: #0F172A;
+    --dash-navy-mid: #1E293B;
     
-    --dash-text-primary: #0F172A;
+    --dash-text-main: #0F172A;
     --dash-text-secondary: #475569;
     --dash-text-muted: #64748B;
     --dash-text-faint: #94A3B8;
 
-    --dash-indigo: #4F46E5;
-    --dash-indigo-hover: #4338CA;
-    --dash-indigo-light: #EEF2FF;
-    
     --dash-primary: #2563EB;
     --dash-primary-hover: #1D4ED8;
     --dash-primary-light: #EFF6FF;
     
-    --dash-emerald: #059669;
-    --dash-emerald-light: #ECFDF5;
+    --dash-success: #059669;
+    --dash-success-light: #ECFDF5;
     
-    --dash-amber: #D97706;
-    --dash-amber-light: #FFFBEB;
+    --dash-warning: #D97706;
+    --dash-warning-light: #FFFBEB;
     
     --dash-orange: #EA580C;
     --dash-orange-light: #FFF7ED;
     
-    --dash-violet: #7C3AED;
-    --dash-violet-light: #F5F3FF;
+    --dash-purple: #7C3AED;
+    --dash-purple-light: #F5F3FF;
     
-    --dash-rose: #E11D48;
-    --dash-rose-light: #FFF1F2;
+    --dash-danger: #DC2626;
+    --dash-danger-light: #FEF2F2;
 
-    --dash-radius-sm: 8px;
-    --dash-radius-md: 12px;
-    --dash-radius-lg: 16px;
-    --dash-radius-xl: 20px;
-    --dash-radius-full: 9999px;
+    --dash-radius-sm: 6px;
+    --dash-radius-md: 10px;
+    --dash-radius-lg: 12px;
+    --dash-radius-pill: 9999px;
 
-    --dash-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --dash-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02);
-    --dash-shadow-hover: 0 12px 24px -6px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.03);
-    --dash-shadow-lg: 0 20px 30px -10px rgba(15, 23, 42, 0.12);
+    --dash-shadow-subtle: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    --dash-shadow-hover: 0 6px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
 }
 
 .admin-body {
@@ -67,174 +58,129 @@
 
 .admin-content {
     background-color: var(--dash-bg);
-    padding: 24px 32px;
-    max-width: 1680px;
+    padding: 20px 24px;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
 @media (max-width: 768px) {
     .admin-content {
-        padding: 16px 12px;
+        padding: 14px 12px;
     }
 }
 
 /* ==========================================================================
-   2. EXECUTIVE HEADER & HERO WELCOME STRIP
+   1. DASHBOARD HEADER
    ========================================================================== */
-.executive-header-wrap {
+.dashboard-header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
 }
 
-.executive-title-group {
+.dashboard-header-left {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
-.executive-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.meta-pill-badge {
+.dashboard-institution-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
-    border-radius: var(--dash-radius-full);
+    gap: 5px;
     font-size: 11.5px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.01em;
+    font-weight: 700;
+    color: var(--dash-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
 }
 
-.meta-pill-badge.primary {
-    background: var(--dash-indigo-light);
-    color: var(--dash-indigo);
-    border: 1px solid rgba(79, 70, 229, 0.18);
-}
-
-.meta-pill-badge.term {
-    background: #FFFFFF;
-    color: var(--dash-text-secondary);
-    border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-shadow-xs);
-}
-
-.meta-pill-badge.live {
-    background: var(--dash-emerald-light);
-    color: var(--dash-emerald);
-    border: 1px solid rgba(5, 150, 105, 0.18);
-}
-
-.meta-live-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: var(--dash-emerald);
-    animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes livePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(0.85); }
-}
-
-.executive-page-title {
-    font-size: 26px;
+.dashboard-page-title {
+    font-size: 22px;
     font-weight: 800;
-    color: var(--dash-text-primary);
-    letter-spacing: -0.03em;
+    color: var(--dash-text-main);
+    letter-spacing: -0.02em;
     line-height: 1.2;
     margin: 0;
 }
 
-.executive-page-subtitle {
-    font-size: 13.5px;
+.dashboard-page-subtitle {
+    font-size: 13px;
     font-weight: 400;
     color: var(--dash-text-muted);
     margin: 0;
     line-height: 1.4;
 }
 
-.executive-date-card {
+.dashboard-date-badge {
     background: var(--dash-surface);
     border: 1px solid var(--dash-border);
     border-radius: var(--dash-radius-md);
-    padding: 8px 14px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--dash-text-secondary);
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    box-shadow: var(--dash-shadow-xs);
+    gap: 6px;
+    box-shadow: var(--dash-shadow-subtle);
     flex-shrink: 0;
 }
 
-.executive-date-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--dash-indigo-light);
-    color: var(--dash-indigo);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
-}
-
-.executive-date-text-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    color: var(--dash-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    line-height: 1;
-}
-
-.executive-date-text-val {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--dash-text-primary);
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+.dashboard-date-badge i {
+    color: var(--dash-primary);
+    font-size: 14px;
 }
 
 /* ==========================================================================
-   3. MODERN SCOPE FILTER TOOLBAR (Segmented Bento Style)
+   2. TIMEFRAME FILTER BAR
    ========================================================================== */
-.bento-filter-toolbar {
+.dashboard-filter-bar {
     background: var(--dash-surface);
     border: 1px solid var(--dash-border);
-    border-radius: var(--dash-radius-lg);
+    border-radius: var(--dash-radius-md);
     padding: 8px 12px;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    box-shadow: var(--dash-shadow-card);
+    box-shadow: var(--dash-shadow-subtle);
 }
 
-.bento-filter-nav {
+.dashboard-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dashboard-filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dash-text-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.dashboard-filter-buttons {
     display: flex;
     align-items: center;
     gap: 4px;
     background: var(--dash-surface-subtle);
-    padding: 3px;
-    border-radius: 10px;
+    padding: 2px;
+    border-radius: 8px;
     overflow-x: auto;
     max-width: 100%;
 }
 
-.bento-filter-nav::-webkit-scrollbar {
+.dashboard-filter-buttons::-webkit-scrollbar {
     height: 2px;
 }
 
@@ -242,13 +188,13 @@
     background: transparent;
     border: none;
     color: var(--dash-text-secondary);
-    border-radius: 8px;
-    height: 32px;
-    padding: 0 14px;
-    font-size: 12.5px;
+    border-radius: 6px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 140ms ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -257,101 +203,80 @@
 }
 
 .dashboard-date-pill:hover {
-    color: var(--dash-text-primary);
-    background: rgba(255, 255, 255, 0.6);
+    color: var(--dash-text-main);
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .dashboard-date-pill.active {
     background: #FFFFFF;
-    color: var(--dash-indigo);
+    color: var(--dash-primary);
     font-weight: 700;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
 .dashboard-date-pill:focus-visible {
-    outline: 2px solid var(--dash-indigo);
+    outline: 2px solid var(--dash-primary);
     outline-offset: 2px;
 }
 
-.bento-filter-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12.5px;
+.dashboard-filter-info {
+    font-size: 12px;
+    color: var(--dash-text-muted);
     font-weight: 500;
-    color: var(--dash-text-muted);
-    padding-right: 6px;
+    white-space: nowrap;
 }
 
 /* ==========================================================================
-   4. BENTO SECTION HEADERS
+   3. SECTION HEADERS
    ========================================================================== */
-.bento-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    gap: 12px;
+.dashboard-section-header {
+    margin-bottom: 10px;
 }
 
-.bento-section-title-wrap {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.bento-section-title {
-    font-size: 15px;
+.dashboard-section-title {
+    font-size: 12px;
     font-weight: 800;
-    color: var(--dash-text-primary);
-    letter-spacing: -0.02em;
-    margin: 0;
+    color: var(--dash-text-secondary);
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.bento-section-subtitle {
-    font-size: 12.5px;
-    color: var(--dash-text-muted);
-    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
 }
 
 /* ==========================================================================
-   5. BENTO KPI CARDS GRID (6 Cards - Sleek Bento Tiles)
+   4. OPERATIONAL OVERVIEW (6 Compact KPI Cards - 3x2 Grid)
    ========================================================================== */
-.bento-kpi-grid {
+.dashboard-kpi-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 18px;
     width: 100%;
 }
 
-@media (max-width: 1024px) {
-    .bento-kpi-grid {
+@media (max-width: 991px) {
+    .dashboard-kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
     }
 }
 
 @media (max-width: 576px) {
-    .bento-kpi-grid {
+    .dashboard-kpi-grid {
         grid-template-columns: 1fr;
-        gap: 12px;
     }
 }
 
-.bento-kpi-card {
+.dashboard-kpi-card {
     background: var(--dash-surface);
     border: 1px solid var(--dash-border);
-    border-radius: var(--dash-radius-lg);
-    padding: 18px 20px;
+    border-radius: var(--dash-radius-md);
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 126px;
-    box-shadow: var(--dash-shadow-card);
-    transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease;
+    min-height: 108px;
+    box-shadow: var(--dash-shadow-subtle);
+    transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
@@ -359,372 +284,384 @@
     overflow: hidden;
 }
 
-.bento-kpi-card::before {
+/* Thin Top Colored Accent Line */
+.dashboard-kpi-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: transparent;
-    transition: height 180ms ease;
+    height: 2.5px;
+    background: #CBD5E1;
 }
 
-.bento-kpi-card.orange::before { background: var(--dash-orange); }
-.bento-kpi-card.amber::before  { background: var(--dash-amber); }
-.bento-kpi-card.blue::before   { background: var(--dash-primary); }
-.bento-kpi-card.green::before  { background: var(--dash-emerald); }
-.bento-kpi-card.purple::before { background: var(--dash-violet); }
-.bento-kpi-card.red::before    { background: var(--dash-rose); }
+.dashboard-kpi-card.orange::before { background: var(--dash-orange); }
+.dashboard-kpi-card.amber::before  { background: var(--dash-warning); }
+.dashboard-kpi-card.blue::before   { background: var(--dash-primary); }
+.dashboard-kpi-card.green::before  { background: var(--dash-success); }
+.dashboard-kpi-card.purple::before { background: var(--dash-purple); }
+.dashboard-kpi-card.red::before    { background: var(--dash-danger); }
 
-.bento-kpi-card:hover {
-    transform: translateY(-3px);
+.dashboard-kpi-card:hover {
+    transform: translateY(-2px);
     box-shadow: var(--dash-shadow-hover);
-    border-color: var(--dash-border-strong);
+    border-color: #CBD5E1;
 }
 
-.bento-kpi-card:hover::before {
-    height: 4px;
-}
-
-.bento-kpi-card:focus-visible {
-    outline: 2px solid var(--dash-indigo);
+.dashboard-kpi-card:focus-visible {
+    outline: 2px solid var(--dash-primary);
     outline-offset: 2px;
 }
 
-.bento-kpi-top {
+.dashboard-kpi-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
-.bento-kpi-title {
-    font-size: 13px;
-    font-weight: 700;
+.dashboard-kpi-title {
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--dash-text-secondary);
-    letter-spacing: -0.01em;
+    line-height: 1.2;
 }
 
-.bento-kpi-icon-wrap {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+.dashboard-kpi-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 13.5px;
     flex-shrink: 0;
 }
 
-.bento-kpi-icon-wrap.orange { background: var(--dash-orange-light); color: var(--dash-orange); }
-.bento-kpi-icon-wrap.amber  { background: var(--dash-amber-light); color: var(--dash-amber); }
-.bento-kpi-icon-wrap.blue   { background: var(--dash-primary-light); color: var(--dash-primary); }
-.bento-kpi-icon-wrap.green  { background: var(--dash-emerald-light); color: var(--dash-emerald); }
-.bento-kpi-icon-wrap.purple { background: var(--dash-violet-light); color: var(--dash-violet); }
-.bento-kpi-icon-wrap.red    { background: var(--dash-rose-light); color: var(--dash-rose); }
+.dashboard-kpi-icon.orange { background: var(--dash-orange-light); color: var(--dash-orange); }
+.dashboard-kpi-icon.amber  { background: var(--dash-warning-light); color: var(--dash-warning); }
+.dashboard-kpi-icon.blue   { background: var(--dash-primary-light); color: var(--dash-primary); }
+.dashboard-kpi-icon.green  { background: var(--dash-success-light); color: var(--dash-success); }
+.dashboard-kpi-icon.purple { background: var(--dash-purple-light); color: var(--dash-purple); }
+.dashboard-kpi-icon.red    { background: var(--dash-danger-light); color: var(--dash-danger); }
 
-.bento-kpi-body {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 8px;
+.dashboard-kpi-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--dash-text-main);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
     margin-bottom: 6px;
 }
 
-.dashboard-kpi-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--dash-text-primary);
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.03em;
-}
-
-.bento-micro-badge {
+.dashboard-kpi-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11.5px;
+    gap: 4px;
+    font-size: 11px;
     font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 6px;
+    padding: 1.5px 7px;
+    border-radius: 4px;
     line-height: 1.3;
     width: fit-content;
 }
 
-.bento-micro-badge.attention { background: var(--dash-orange-light); color: #C2410C; border: 1px solid #FDBA74; }
-.bento-micro-badge.pending   { background: var(--dash-amber-light); color: #B45309; border: 1px solid #FDE68A; }
-.bento-micro-badge.success   { background: var(--dash-emerald-light); color: #047857; border: 1px solid #A7F3D0; }
-.bento-micro-badge.purple    { background: var(--dash-violet-light); color: #6D28D9; border: 1px solid #DDD6FE; }
-.bento-micro-badge.danger    { background: var(--dash-rose-light); color: #BE123C; border: 1px solid #FECDD3; }
+.badge-dot {
+    width: 4.5px;
+    height: 4.5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dashboard-kpi-badge.orange { background: var(--dash-orange-light); color: #C2410C; border: 1px solid #FED7AA; }
+.dashboard-kpi-badge.orange .badge-dot { background: #EA580C; }
+
+.dashboard-kpi-badge.amber  { background: var(--dash-warning-light); color: #B45309; border: 1px solid #FDE68A; }
+.dashboard-kpi-badge.amber .badge-dot { background: #D97706; }
+
+.dashboard-kpi-badge.blue   { background: var(--dash-primary-light); color: #1D4ED8; border: 1px solid #BFDBFE; }
+.dashboard-kpi-badge.blue .badge-dot { background: #2563EB; }
+
+.dashboard-kpi-badge.green  { background: var(--dash-success-light); color: #047857; border: 1px solid #A7F3D0; }
+.dashboard-kpi-badge.green .badge-dot { background: #059669; }
+
+.dashboard-kpi-badge.purple { background: var(--dash-purple-light); color: #6D28D9; border: 1px solid #DDD6FE; }
+.dashboard-kpi-badge.purple .badge-dot { background: #7C3AED; }
+
+.dashboard-kpi-badge.red    { background: var(--dash-danger-light); color: #B91C1C; border: 1px solid #FECACA; }
+.dashboard-kpi-badge.red .badge-dot { background: #DC2626; }
 
 /* ==========================================================================
-   6. BENTO FINANCIAL INTELLIGENCE CARD (Dual Hero Layout)
+   5. FINANCIAL INTELLIGENCE (4-Card Horizontal Section)
    ========================================================================== */
-.bento-finance-container {
+.dashboard-finance-grid {
     display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: 1.35fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
 @media (max-width: 1199px) {
-    .bento-finance-container {
+    .dashboard-finance-grid {
         grid-template-columns: 1fr 1fr;
     }
 }
 
 @media (max-width: 640px) {
-    .bento-finance-container {
+    .dashboard-finance-grid {
         grid-template-columns: 1fr;
     }
 }
 
-.bento-finance-hero-card {
-    background: linear-gradient(135deg, #0B132B 0%, #1C2541 60%, #243B55 100%);
-    border-radius: var(--dash-radius-lg);
-    padding: 20px 24px;
+/* Primary Revenue Card (Deep Blue / Navy Premium Card) */
+.dashboard-finance-card-primary {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+    border-radius: var(--dash-radius-md);
+    padding: 14px 16px;
     color: #FFFFFF;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 130px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 14px rgba(11, 19, 43, 0.16);
+    min-height: 104px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.bento-finance-hero-card::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    right: -15%;
-    width: 160px;
-    height: 160px;
-    background: radial-gradient(circle, rgba(79, 70, 229, 0.35) 0%, rgba(79, 70, 229, 0) 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.bento-finance-hero-header {
+.finance-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: relative;
-    z-index: 2;
+    margin-bottom: 2px;
 }
 
-.bento-finance-hero-title {
-    font-size: 11px;
+.finance-card-title {
+    font-size: 11.5px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
     color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-.bento-finance-trend-badge {
+.finance-trend-badge {
     background: rgba(16, 185, 129, 0.2);
     border: 1px solid rgba(16, 185, 129, 0.3);
     color: #34D399;
     font-size: 11px;
     font-weight: 700;
-    padding: 2px 7px;
+    padding: 1.5px 6px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     gap: 3px;
 }
 
-.dashboard-finance-amount {
-    font-size: 30px;
+.finance-amount-primary {
+    font-size: 26px;
     font-weight: 800;
     color: #FFFFFF;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
-    margin: 4px 0 6px 0;
-    position: relative;
-    z-index: 2;
+    margin: 4px 0;
 }
 
-.bento-finance-hero-footer {
+.finance-card-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: 11.5px;
     color: #CBD5E1;
-    position: relative;
-    z-index: 2;
 }
 
-.bento-finance-hero-footer a {
+.finance-link {
     color: #93C5FD;
     text-decoration: none;
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    transition: color 150ms ease;
 }
 
-.bento-finance-hero-footer a:hover {
+.finance-link:hover {
     color: #FFFFFF;
     text-decoration: underline;
 }
 
-.bento-finance-stat-card {
+/* Companion Finance Cards */
+.dashboard-finance-card {
     background: var(--dash-surface);
     border: 1px solid var(--dash-border);
-    border-radius: var(--dash-radius-lg);
-    padding: 18px 20px;
+    border-radius: var(--dash-radius-md);
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: var(--dash-shadow-card);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    min-height: 104px;
+    box-shadow: var(--dash-shadow-subtle);
+    transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
-.bento-finance-stat-card:hover {
+.dashboard-finance-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--dash-shadow-hover);
 }
 
-.bento-finance-stat-label {
-    font-size: 12.5px;
-    font-weight: 600;
+.dashboard-finance-card .finance-card-title {
     color: var(--dash-text-secondary);
 }
 
-.dashboard-finance-pillar-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--dash-text-primary);
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    margin: 6px 0;
+.finance-card-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
 }
 
-.bento-finance-stat-meta {
+.finance-card-icon.amber { background: var(--dash-warning-light); color: var(--dash-warning); }
+.finance-card-icon.blue  { background: var(--dash-primary-light); color: var(--dash-primary); }
+
+.finance-amount {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--dash-text-main);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    margin: 4px 0;
+}
+
+.finance-card-subtext {
     font-size: 11.5px;
     color: var(--dash-text-muted);
     font-weight: 500;
 }
 
 /* ==========================================================================
-   7. QUICK COMMAND HUB (Linear / Raycast Style Action Pills)
+   6. QUICK ACTIONS SECTION
    ========================================================================== */
-.bento-actions-bar {
+.dashboard-actions-section {
     background: var(--dash-surface);
     border: 1px solid var(--dash-border);
-    border-radius: var(--dash-radius-lg);
-    padding: 12px 18px;
-    margin-bottom: 24px;
+    border-radius: var(--dash-radius-md);
+    padding: 10px 14px;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    box-shadow: var(--dash-shadow-card);
+    box-shadow: var(--dash-shadow-subtle);
 }
 
-.bento-actions-label {
-    font-size: 12.5px;
-    font-weight: 700;
-    text-transform: uppercase;
+.dashboard-actions-header {
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-actions-title {
+    font-size: 11.5px;
+    font-weight: 800;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: var(--dash-text-secondary);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
-.bento-actions-group {
+.dashboard-actions-buttons {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.bento-action-pill {
-    height: 38px;
-    padding: 0 14px;
-    font-size: 13px;
+.dashboard-action-btn {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12.5px;
     font-weight: 600;
-    border-radius: 10px;
+    border-radius: 6px;
     border: 1px solid var(--dash-border);
     background: #FFFFFF;
-    color: var(--dash-text-primary);
+    color: var(--dash-text-main);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
-    transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+    gap: 6px;
+    transition: all 140ms ease;
     text-decoration: none;
     white-space: nowrap;
-    box-shadow: var(--dash-shadow-xs);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
-.bento-action-pill i {
-    font-size: 14px;
-}
-
-.bento-action-pill:hover {
-    background: var(--dash-indigo-light);
-    border-color: #C7D2FE;
-    color: var(--dash-indigo);
-    transform: translateY(-1px);
-    box-shadow: var(--dash-shadow-card);
+.dashboard-action-btn:hover {
+    background: var(--dash-primary-light);
+    border-color: #BFDBFE;
+    color: var(--dash-primary);
 }
 
 /* ==========================================================================
-   8. BENTO ANALYTICS CARDS & CHARTS
+   7. INSTITUTIONAL ANALYTICS PANELS & CHARTS
    ========================================================================== */
-.bento-card {
+.dashboard-panel {
     background: var(--dash-surface);
-    border-radius: var(--dash-radius-lg);
+    border-radius: var(--dash-radius-md);
     border: 1px solid var(--dash-border);
-    padding: 22px;
-    box-shadow: var(--dash-shadow-card);
-    margin-bottom: 24px;
+    padding: 16px 18px;
+    box-shadow: var(--dash-shadow-subtle);
+    margin-bottom: 18px;
     width: 100%;
     box-sizing: border-box;
-    position: relative;
 }
 
-.bento-card-header {
+.dashboard-panel-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
-.bento-card-title {
-    font-size: 16px;
+.dashboard-panel-title {
+    font-size: 15px;
     font-weight: 700;
-    color: var(--dash-text-primary);
-    letter-spacing: -0.02em;
+    color: var(--dash-text-main);
+    letter-spacing: -0.01em;
     margin: 0 0 2px 0;
+    line-height: 1.2;
+}
+
+.dashboard-panel-subtitle {
+    font-size: 12px;
+    color: var(--dash-text-muted);
+    margin: 0;
     line-height: 1.3;
 }
 
-.bento-card-subtitle {
-    font-size: 12.5px;
-    color: var(--dash-text-muted);
-    margin: 0;
-    line-height: 1.4;
+.dashboard-view-all-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dash-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.dashboard-view-all-link:hover {
+    text-decoration: underline;
+    color: var(--dash-primary-hover);
 }
 
 /* Chart Legend Styling */
 .chart-legend-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 12px;
+    gap: 10px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--dash-text-secondary);
     flex-wrap: wrap;
@@ -733,13 +670,13 @@
 .chart-legend-item {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
 }
 
 .chart-legend-dot {
     width: 8px;
     height: 8px;
-    border-radius: 3px;
+    border-radius: 2px;
     display: inline-block;
     flex-shrink: 0;
 }
@@ -748,7 +685,7 @@
 .barchart-container {
     position: relative;
     width: 100%;
-    min-height: 220px;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -756,26 +693,26 @@
 
 .barchart-svg {
     width: 100%;
-    height: 210px;
+    height: 190px;
     overflow: visible;
 }
 
 .barchart-grid-line {
     stroke: #E2E8F0;
-    stroke-dasharray: 4 4;
+    stroke-dasharray: 3 3;
     stroke-width: 1;
 }
 
 .barchart-axis-text {
     fill: #64748B;
-    font-size: 11px;
+    font-size: 10.5px;
     font-family: inherit;
     font-weight: 600;
     text-anchor: middle;
 }
 
 .barchart-bar {
-    transition: opacity 160ms ease;
+    transition: opacity 140ms ease;
     cursor: pointer;
 }
 
@@ -783,23 +720,21 @@
     opacity: 0.85;
 }
 
-/* Frosted Chart Floating Tooltip */
+/* Floating Chart Tooltip */
 .chart-floating-tooltip {
     position: absolute;
-    background: rgba(15, 23, 42, 0.94);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #0F172A;
     color: #FFFFFF;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    line-height: 1.4;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    line-height: 1.35;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     pointer-events: none;
     z-index: 50;
     display: none;
     transform: translate(-50%, -100%);
-    margin-top: -8px;
+    margin-top: -6px;
     white-space: nowrap;
 }
 
@@ -808,8 +743,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    min-height: 210px;
+    gap: 16px;
+    min-height: 190px;
 }
 
 @media (max-width: 768px) {
@@ -821,8 +756,8 @@
 
 .donut-svg-wrap {
     position: relative;
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     flex-shrink: 0;
 }
 
@@ -837,28 +772,27 @@
 }
 
 .donut-center-label {
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     color: var(--dash-text-muted);
     margin-bottom: 2px;
 }
 
 .donut-center-value {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
-    color: var(--dash-text-primary);
+    color: var(--dash-text-main);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
 }
 
 .donut-legend-list {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    max-height: 210px;
+    gap: 5px;
+    max-height: 190px;
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -867,12 +801,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
     background: #F8FAFC;
     border: 1px solid transparent;
-    transition: background 150ms ease, border-color 150ms ease;
+    transition: background 140ms ease;
 }
 
 .donut-legend-item:hover {
@@ -884,38 +818,38 @@
 .discipline-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
 }
 
 .discipline-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
 }
 
 .discipline-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 13px;
+    font-size: 12.5px;
 }
 
 .discipline-name {
     font-weight: 600;
-    color: var(--dash-text-primary);
+    color: var(--dash-text-main);
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
 }
 
 .discipline-count {
     font-weight: 700;
-    color: var(--dash-text-primary);
+    color: var(--dash-text-main);
     font-variant-numeric: tabular-nums;
 }
 
 .discipline-progress-track {
-    height: 7px;
+    height: 6px;
     background: #F1F5F9;
     border-radius: 999px;
     overflow: hidden;
@@ -924,63 +858,63 @@
 .discipline-progress-fill {
     height: 100%;
     border-radius: 999px;
-    transition: width 350ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition: width 300ms ease;
 }
 
 /* ==========================================================================
-   9. OPERATIONAL DATA TABLES (Hairline Clean Tables)
+   8 & 9. TABLES & COMPACT CONTAINERS
    ========================================================================== */
-.bento-table-container {
+.dashboard-table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
-.bento-table-compact {
+.dashboard-table-compact {
     overflow-x: hidden;
 }
 
 @media (max-width: 768px) {
-    .bento-table-compact {
+    .dashboard-table-compact {
         overflow-x: auto;
     }
 }
 
-.bento-table {
+.dashboard-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 13.5px;
+    font-size: 13px;
 }
 
-.bento-table th {
+.dashboard-table th {
     background: #F8FAFC;
-    color: var(--dash-text-muted);
+    color: var(--dash-text-secondary);
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 10px 14px;
+    letter-spacing: 0.04em;
+    padding: 8px 10px;
     border-bottom: 1px solid var(--dash-border);
     white-space: nowrap;
 }
 
-.bento-table td {
-    padding: 12px 14px;
+.dashboard-table td {
+    padding: 10px 10px;
     border-bottom: 1px solid var(--dash-border-subtle);
-    color: var(--dash-text-primary);
+    color: var(--dash-text-main);
     vertical-align: middle;
 }
 
-.bento-table tbody tr {
+.dashboard-table tbody tr {
     transition: background 120ms ease;
 }
 
-.bento-table tbody tr:hover {
+.dashboard-table tbody tr:hover {
     background: #F8FAFC;
 }
 
-.bento-table tbody tr:last-child td {
+.dashboard-table tbody tr:last-child td {
     border-bottom: none;
 }
 
@@ -988,89 +922,88 @@
 .table-student-cell {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
 }
 
 .table-student-avatar {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1.5px solid #E2E8F0;
+    border: 1px solid #E2E8F0;
     flex-shrink: 0;
 }
 
 .table-student-name {
-    font-weight: 700;
-    font-size: 13.5px;
-    color: var(--dash-text-primary);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--dash-text-main);
     line-height: 1.2;
 }
 
 .table-student-id {
-    font-size: 11.5px;
+    font-size: 11px;
     color: var(--dash-text-muted);
-    font-weight: 500;
 }
 
 /* Modern Status Badges */
 .status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 3px 8px;
+    gap: 4px;
+    padding: 2px 7px;
     border-radius: 999px;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 600;
     line-height: 1.2;
     white-space: nowrap;
 }
 
 .status-pill .dot {
-    width: 5px;
-    height: 5px;
+    width: 4.5px;
+    height: 4.5px;
     border-radius: 50%;
     display: inline-block;
 }
 
-.status-pill.active { background: var(--dash-emerald-light); color: #047857; }
+.status-pill.active { background: var(--dash-success-light); color: #047857; }
 .status-pill.active .dot { background-color: #047857; }
 
 .status-pill.completed { background: var(--dash-primary-light); color: #1D4ED8; }
 .status-pill.completed .dot { background-color: #1D4ED8; }
 
-.status-pill.pending { background: var(--dash-amber-light); color: #B45309; }
+.status-pill.pending { background: var(--dash-warning-light); color: #B45309; }
 .status-pill.pending .dot { background-color: #B45309; }
 
-.status-pill.scheduled { background: var(--dash-violet-light); color: #6D28D9; }
+.status-pill.scheduled { background: var(--dash-purple-light); color: #6D28D9; }
 .status-pill.scheduled .dot { background-color: #6D28D9; }
 
-.status-pill.open { background: var(--dash-emerald-light); color: #047857; }
+.status-pill.open { background: var(--dash-success-light); color: #047857; }
 .status-pill.open .dot { background-color: #047857; }
 
 .table-action-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
     border: 1px solid var(--dash-border);
     background: #FFFFFF;
     color: var(--dash-text-secondary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
+    font-size: 12px;
     text-decoration: none;
-    transition: all 140ms ease;
+    transition: all 120ms ease;
 }
 
 .table-action-btn:hover {
-    background: var(--dash-indigo-light);
-    color: var(--dash-indigo);
-    border-color: #C7D2FE;
+    background: var(--dash-primary-light);
+    color: var(--dash-primary);
+    border-color: #BFDBFE;
 }
 
-/* Mobile Responsive Cards for Tables */
+/* Mobile Responsive Transformation for Tables */
 @media (max-width: 768px) {
     .dashboard-table-responsive-cards thead {
         display: none;
@@ -1079,7 +1012,7 @@
     .dashboard-table-responsive-cards tbody {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
     }
 
     .dashboard-table-responsive-cards tr {
@@ -1087,24 +1020,24 @@
         flex-direction: column;
         background: #FFFFFF;
         border: 1px solid var(--dash-border);
-        border-radius: 12px;
-        padding: 14px;
-        box-shadow: var(--dash-shadow-xs);
+        border-radius: 8px;
+        padding: 10px 12px;
+        box-shadow: var(--dash-shadow-subtle);
     }
 
     .dashboard-table-responsive-cards td {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 0;
+        padding: 4px 0;
         border: none;
     }
 
     .dashboard-table-responsive-cards td:first-child {
         padding-top: 0;
-        padding-bottom: 8px;
+        padding-bottom: 6px;
         border-bottom: 1px solid var(--dash-border-subtle);
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }
 
     .dashboard-table-responsive-cards td::before {

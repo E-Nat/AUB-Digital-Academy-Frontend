@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             // A. Operational Status Cards (6 Cards)
             animateCounter('kpiPendingEnrollments', metricsData.pendingEnrollments || 1);
             animateCounter('kpiPendingPayments', metricsData.pendingPayments || 1);
-            animateCounter('kpiActiveCourses', metricsData.activeCourses || metricsData.totalCourses || 5);
+            animateCounter('kpiActiveCourses', metricsData.activeCourses || metricsData.totalCourses || 13);
             animateCounter('kpiCompletedCourses', metricsData.completedCourses || 1);
             animateCounter('kpiUpcomingExams', metricsData.upcomingExams || 3);
             animateCounter('kpiPendingResults', metricsData.pendingExamResults || 2);
@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                         <div class="fw-semibold text-dark text-truncate" style="font-size: 13px; max-width: 130px;" title="${escapeHtml(ex.title)}">${escapeHtml(ex.title)}</div>
                         <div class="text-muted text-truncate" style="font-size: 11.5px; max-width: 130px;" title="${escapeHtml(ex.course_title || '')}">${escapeHtml(ex.course_title || 'Academic Course')}</div>
                     </td>
-                    <td data-label="Date" class="text-nowrap" style="font-size: 12px; color: #475569;">
+                    <td data-label="Date & Time" class="text-nowrap" style="font-size: 12px; color: #475569;">
                         <div>${dateStr.split('·')[0].trim()}</div>
                         <small class="text-muted">${ex.duration_minutes || 60} mins</small>
                     </td>
