@@ -434,23 +434,23 @@ document.addEventListener('DOMContentLoaded', async function () {
                             <div class="table-student-cell">
                                 <img src="${e.student_avatar || e.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="table-student-avatar" alt="Avatar" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
                                 <div class="min-w-0" style="min-width: 0;">
-                                    <div class="table-student-name">${escapeHtml(e.student_name || 'Student')}</div>
-                                    <div class="table-student-id">${escapeHtml(e.student_id || e.student_uni_id || e.student_email || 'AUB-STU')}</div>
+                                    <div class="table-student-name text-truncate" style="max-width: 130px;" title="${escapeHtml(e.student_name || 'Student')}">${escapeHtml(e.student_name || 'Student')}</div>
+                                    <div class="table-student-id text-truncate" style="max-width: 130px;">${escapeHtml(e.student_id || e.student_uni_id || e.student_email || 'AUB-STU')}</div>
                                 </div>
                             </div>
                         </td>
                         <td data-label="Course">
-                            <span class="fw-semibold text-dark" style="font-size: 13.5px;">${escapeHtml(e.course_title || 'Academic Course')}</span>
+                            <span class="fw-semibold text-dark text-truncate d-inline-block" style="font-size: 13px; max-width: 160px;" title="${escapeHtml(e.course_title || 'Course')}">${escapeHtml(e.course_title || 'Academic Course')}</span>
                         </td>
-                        <td data-label="Enrolled" class="text-muted text-nowrap" style="font-size: 13px;">
+                        <td data-label="Enrolled" class="text-muted text-nowrap" style="font-size: 12.5px;">
                             ${formatDate(e.enrollment_date)}
                         </td>
-                        <td data-label="Progress" style="width: 140px; min-width: 120px;">
+                        <td data-label="Progress" style="width: 120px; min-width: 100px;">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 999px;">
+                                <div class="progress flex-grow-1" style="height: 5px; background: #F1F5F9; border-radius: 999px;">
                                     <div class="progress-bar ${Number(e.progress_percentage) === 100 ? 'bg-success' : 'bg-primary'}" style="width: ${e.progress_percentage || 0}%; border-radius: 999px;"></div>
                                 </div>
-                                <span class="fw-semibold text-secondary" style="font-size: 12px; font-variant-numeric: tabular-nums;">${e.progress_percentage || 0}%</span>
+                                <span class="fw-semibold text-secondary" style="font-size: 11.5px; font-variant-numeric: tabular-nums;">${e.progress_percentage || 0}%</span>
                             </div>
                         </td>
                         <td data-label="Status" class="text-nowrap">
@@ -513,16 +513,16 @@ document.addEventListener('DOMContentLoaded', async function () {
             return `
                 <tr>
                     <td data-label="Exam">
-                        <div class="fw-semibold text-dark" style="font-size: 13.5px;">${escapeHtml(ex.title)}</div>
-                        <div class="text-muted text-truncate" style="font-size: 12px; max-width: 180px;">${escapeHtml(ex.course_title || 'Academic Course')}</div>
+                        <div class="fw-semibold text-dark text-truncate" style="font-size: 13px; max-width: 130px;" title="${escapeHtml(ex.title)}">${escapeHtml(ex.title)}</div>
+                        <div class="text-muted text-truncate" style="font-size: 11.5px; max-width: 130px;" title="${escapeHtml(ex.course_title || '')}">${escapeHtml(ex.course_title || 'Academic Course')}</div>
                     </td>
-                    <td data-label="Date & Time" class="text-nowrap" style="font-size: 12.5px; color: #475569;">
-                        <div>${dateStr.split('·')[0] || dateStr}</div>
+                    <td data-label="Date" class="text-nowrap" style="font-size: 12px; color: #475569;">
+                        <div>${dateStr.split('·')[0].trim()}</div>
                         <small class="text-muted">${ex.duration_minutes || 60} mins</small>
                     </td>
-                    <td data-label="Students" class="text-nowrap" style="font-size: 12.5px; font-variant-numeric: tabular-nums;">
-                        <span class="badge bg-light text-dark border" style="font-size: 11.5px; font-weight: 600;">
-                            <i class="bi bi-people-fill text-primary me-1"></i> ${ex.enrolled_students_count || 5}
+                    <td data-label="Students" class="text-nowrap" style="font-size: 12px; font-variant-numeric: tabular-nums;">
+                        <span class="badge bg-light text-dark border px-2 py-1" style="font-size: 11px; font-weight: 600;">
+                            <i class="bi bi-people-fill text-primary me-1"></i>${ex.enrolled_students_count || 5}
                         </span>
                     </td>
                     <td data-label="Status" class="text-nowrap">
