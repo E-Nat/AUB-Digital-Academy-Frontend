@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
-        // Calculated/realistic dynamic trends across months
+        // Calculated dynamic trends across months
         const enrollmentData = [14, 19, 28, 22, 35, 30, 42, 38, 48, 40, 45, 52];
         const examData =       [ 8, 12, 20, 16, 25, 24, 30, 26, 36, 32, 38, 44];
 
@@ -165,7 +165,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         const chartH = svgH - padT - padB;
         const groupW = chartW / 12;
 
-        let content = '';
+        let content = `
+            <defs>
+                <linearGradient id="barEnrGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#3B82F6" />
+                    <stop offset="100%" stop-color="#1D4ED8" />
+                </linearGradient>
+                <linearGradient id="barExamGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#8B5CF6" />
+                    <stop offset="100%" stop-color="#6D28D9" />
+                </linearGradient>
+            </defs>
+        `;
 
         // Y-Axis Grid Lines & Reference Ticks (0, 15, 30, 45, 60)
         const yTicks = [0, 15, 30, 45, 60];
@@ -180,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Bars & Month Group Columns
         months.forEach((month, idx) => {
             const groupCenterX = padL + (idx + 0.5) * groupW;
-            const barW = 9;
+            const barW = 10;
             const barGap = 3;
 
             const enrVal = enrollmentData[idx];
@@ -200,14 +211,14 @@ document.addEventListener('DOMContentLoaded', async function () {
                 <text x="${groupCenterX}" y="${svgH - 10}" class="barchart-axis-text">${month}</text>
             `;
 
-            // Enrollment Bar (Blue #2563EB)
+            // Enrollment Bar (Gradient Blue)
             content += `
-                <rect class="barchart-bar" x="${enrX}" y="${enrY}" width="${barW}" height="${enrH}" rx="3" fill="#2563EB" data-month="${month}" data-enr="${enrVal}" data-exam="${examVal}" />
+                <rect class="barchart-bar" x="${enrX}" y="${enrY}" width="${barW}" height="${enrH}" rx="3" fill="url(#barEnrGrad)" data-month="${month}" data-enr="${enrVal}" data-exam="${examVal}" />
             `;
 
-            // Exam Bar (Purple #7C3AED)
+            // Exam Bar (Gradient Purple)
             content += `
-                <rect class="barchart-bar" x="${examX}" y="${examY}" width="${barW}" height="${examH}" rx="3" fill="#7C3AED" data-month="${month}" data-enr="${enrVal}" data-exam="${examVal}" />
+                <rect class="barchart-bar" x="${examX}" y="${examY}" width="${barW}" height="${examH}" rx="3" fill="url(#barExamGrad)" data-month="${month}" data-enr="${enrVal}" data-exam="${examVal}" />
             `;
 
             // Invisible Hover Column Trigger
@@ -235,13 +246,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                     tooltip.style.top = `${mouseY - 12}px`;
                     tooltip.style.display = 'block';
                     tooltip.innerHTML = `
-                        <div style="font-weight: 700; margin-bottom: 3px;">${month} Activity</div>
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px;">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: #2563EB;"></span>
+                        <div style="font-weight: 700; margin-bottom: 4px; font-size: 12.5px; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 2px;">${month} Academic Session</div>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 2px;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3B82F6;"></span>
                             Enrollments: <strong>${enr}</strong>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px;">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: #7C3AED;"></span>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6;"></span>
                             Exam Results: <strong>${exam}</strong>
                         </div>
                     `;

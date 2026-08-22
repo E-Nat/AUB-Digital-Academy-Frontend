@@ -5,13 +5,17 @@
 
 /* 1. Dashboard Global Layout Tokens & Containers */
 :root {
-    --dash-bg: #F7F9FC;
+    --dash-bg: #F8FAFC;
     --dash-card-bg: #FFFFFF;
-    --dash-border: #E7ECF2;
+    --dash-navy: #0B1628;
+    --dash-navy-dark: #07101F;
+    --dash-gold: #F59E0B;
+    --dash-gold-dark: #D97706;
+    --dash-border: #E2E8F0;
     --dash-border-subtle: #F1F5F9;
     --dash-text-main: #0F172A;
-    --dash-text-secondary: #64748B;
-    --dash-text-muted: #94A3B8;
+    --dash-text-secondary: #475569;
+    --dash-text-muted: #64748B;
     --dash-primary: #2563EB;
     --dash-primary-hover: #1D4ED8;
     --dash-primary-light: #EFF6FF;
@@ -29,7 +33,7 @@
     --dash-radius-lg: 16px;
     --dash-radius-pill: 999px;
     --dash-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-    --dash-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+    --dash-shadow-hover: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
 }
 
 .admin-body {
@@ -42,7 +46,7 @@
 
 .admin-content {
     background-color: var(--dash-bg);
-    padding: 24px 28px;
+    padding: 24px 32px;
 }
 
 @media (max-width: 768px) {
@@ -51,54 +55,146 @@
     }
 }
 
-/* 2. Dashboard Header */
-.dashboard-header-row {
+/* ==========================================================================
+   2. EXECUTIVE UNIVERSITY HERO BANNER
+   ========================================================================== */
+.dashboard-hero-banner {
+    background: linear-gradient(135deg, #0B1628 0%, #132743 60%, #1A365D 100%);
+    border-radius: var(--dash-radius-lg);
+    padding: 26px 30px;
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 14px;
+    gap: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(11, 22, 40, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.dashboard-page-title {
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--dash-text-main);
+.dashboard-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dashboard-hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 20%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dashboard-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 680px;
+}
+
+.dashboard-hero-title {
+    font-size: 26px;
+    font-weight: 800;
     letter-spacing: -0.025em;
-    line-height: 1.2;
-    margin: 0 0 4px 0;
+    line-height: 1.25;
+    margin: 0 0 8px 0;
+    color: #FFFFFF;
 }
 
-.dashboard-page-subtitle {
-    font-size: 15.5px;
+.dashboard-hero-subtitle {
+    font-size: 14.5px;
     font-weight: 400;
-    color: var(--dash-text-secondary);
-    line-height: 1.4;
-    margin: 0;
+    color: #CBD5E1;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
 }
 
-.dashboard-date-badge {
-    background: var(--dash-card-bg);
-    border: 1px solid var(--dash-border);
-    border-radius: 12px;
-    padding: 9px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--dash-text-secondary);
+.dashboard-hero-chips {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-chip {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: var(--dash-shadow);
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    color: #E2E8F0;
+    backdrop-filter: blur(4px);
+}
+
+.hero-chip i {
+    color: #F59E0B;
+    font-size: 14px;
+}
+
+.hero-chip strong {
+    color: #FFFFFF;
+}
+
+.dashboard-hero-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
     flex-shrink: 0;
 }
 
-.dashboard-date-badge i {
-    color: var(--dash-primary);
-    font-size: 16px;
+.dashboard-date-badge-hero {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 10px 16px;
+    backdrop-filter: blur(4px);
 }
 
-/* 3. Date Range Filter Toolbar */
+.dashboard-date-badge-hero .date-label {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+}
+
+.dashboard-date-badge-hero .date-value {
+    font-size: 14px;
+    letter-spacing: -0.01em;
+}
+
+@media (max-width: 991px) {
+    .dashboard-hero-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .dashboard-hero-actions {
+        align-items: flex-start;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+/* ==========================================================================
+   3. DATE RANGE FILTER TOOLBAR
+   ========================================================================== */
 .dashboard-filter-toolbar {
     background: var(--dash-card-bg);
     border: 1px solid var(--dash-border);
@@ -211,23 +307,46 @@
     background: var(--dash-card-bg);
     border-radius: var(--dash-radius);
     border: 1px solid var(--dash-border);
-    padding: 18px 20px;
+    padding: 20px 22px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 128px;
+    min-height: 136px;
     box-shadow: var(--dash-shadow);
     transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
     position: relative;
+    overflow: hidden;
 }
 
+.dashboard-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #CBD5E1;
+    transition: height 180ms ease;
+}
+
+.dashboard-kpi-card.orange::before { background: var(--dash-orange); }
+.dashboard-kpi-card.amber::before  { background: var(--dash-warning); }
+.dashboard-kpi-card.blue::before   { background: var(--dash-primary); }
+.dashboard-kpi-card.green::before  { background: var(--dash-success); }
+.dashboard-kpi-card.purple::before { background: var(--dash-purple); }
+.dashboard-kpi-card.red::before    { background: var(--dash-danger); }
+
 .dashboard-kpi-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow: var(--dash-shadow-hover);
     border-color: #CBD5E1;
+}
+
+.dashboard-kpi-card:hover::before {
+    height: 4px;
 }
 
 .dashboard-kpi-card:focus-visible {
@@ -239,24 +358,25 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .dashboard-kpi-title {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--dash-text-secondary);
     line-height: 1.25;
+    letter-spacing: -0.01em;
 }
 
 .dashboard-kpi-icon {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 19px;
+    font-size: 20px;
     flex-shrink: 0;
 }
 
@@ -267,21 +387,34 @@
 .dashboard-kpi-icon.purple { background: var(--dash-purple-light); color: var(--dash-purple); }
 .dashboard-kpi-icon.red    { background: var(--dash-danger-light); color: var(--dash-danger); }
 
+.dashboard-kpi-value-wrap {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
 .dashboard-kpi-value {
-    font-size: 30px;
-    font-weight: 700;
+    font-size: 32px;
+    font-weight: 800;
     color: var(--dash-text-main);
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
+}
+
+.dashboard-kpi-subtext {
+    font-size: 12.5px;
+    color: var(--dash-text-muted);
+    font-weight: 500;
 }
 
 .dashboard-kpi-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 600;
     padding: 3px 9px;
     border-radius: 8px;
@@ -324,13 +457,14 @@
     background: var(--dash-card-bg);
     border: 1px solid var(--dash-border);
     border-radius: var(--dash-radius-lg);
-    padding: 22px 26px;
+    padding: 24px 28px;
     margin-bottom: 24px;
     box-shadow: var(--dash-shadow);
     display: grid;
     grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
-    gap: 24px;
+    gap: 26px;
     align-items: center;
+    position: relative;
 }
 
 @media (max-width: 1199px) {
@@ -350,7 +484,7 @@
 
 .dashboard-finance-hero {
     border-right: 1px solid var(--dash-border-subtle);
-    padding-right: 22px;
+    padding-right: 24px;
 }
 
 @media (max-width: 1199px) {
