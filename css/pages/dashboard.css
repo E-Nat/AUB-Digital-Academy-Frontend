@@ -242,7 +242,25 @@
     text-decoration: none;
     color: inherit;
     position: relative;
+    overflow: hidden;
 }
+
+.dashboard-kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2.5px;
+    background: transparent;
+}
+
+.dashboard-kpi-card.orange::before { background: var(--dash-orange); }
+.dashboard-kpi-card.amber::before  { background: var(--dash-warning); }
+.dashboard-kpi-card.blue::before   { background: var(--dash-primary); }
+.dashboard-kpi-card.green::before  { background: var(--dash-success); }
+.dashboard-kpi-card.purple::before { background: var(--dash-purple); }
+.dashboard-kpi-card.red::before    { background: var(--dash-danger); }
 
 .dashboard-kpi-card:hover {
     transform: translateY(-2px);

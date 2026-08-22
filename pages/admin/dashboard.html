@@ -151,11 +151,19 @@
             <!-- CONTENT BODY -->
             <div class="admin-content">
                 
-                <!-- 1. DASHBOARD HEADER (Title & Date Badge) -->
+                <!-- 1. DASHBOARD HEADER (Institutional Academic Title & Date Badge) -->
                 <div class="dashboard-header-row">
                     <div>
-                        <h1 class="dashboard-page-title">Dashboard</h1>
-                        <p class="dashboard-page-subtitle">Operational overview for AUB Digital Academy</p>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded" style="font-size: 11.5px; border: 1px solid rgba(37, 99, 235, 0.18);">
+                                <i class="bi bi-mortarboard-fill me-1"></i> AUB Digital Academy
+                            </span>
+                            <span class="badge bg-light text-secondary border fw-medium px-2 py-1 rounded" style="font-size: 11px;">
+                                Fall Semester 2026 • Term Week 8
+                            </span>
+                        </div>
+                        <h1 class="dashboard-page-title">Administration Dashboard</h1>
+                        <p class="dashboard-page-subtitle">Institutional oversight, enrollment operations, academic evaluations, and financial performance</p>
                     </div>
                     <div class="dashboard-date-badge">
                         <i class="bi bi-calendar3"></i>
@@ -186,7 +194,7 @@
 
                 <div class="dashboard-kpi-grid">
                     <!-- 1. Pending Enrollments -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='enrollment-management.html'" title="Review Pending Enrollments" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card orange" onclick="window.location.href='enrollment-management.html'" title="Review Pending Enrollments" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Pending Enrollments</span>
                             <div class="dashboard-kpi-icon orange">
@@ -200,7 +208,7 @@
                     </div>
 
                     <!-- 2. Pending Payments -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='payment-management.html'" title="View Pending Payments" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card amber" onclick="window.location.href='payment-management.html'" title="View Pending Payments" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Pending Payments</span>
                             <div class="dashboard-kpi-icon amber">
@@ -214,7 +222,7 @@
                     </div>
 
                     <!-- 3. Active Courses -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='academic-management.html#courses-pane'" title="View Active Courses" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card blue" onclick="window.location.href='academic-management.html#courses-pane'" title="View Active Courses" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Active Courses</span>
                             <div class="dashboard-kpi-icon blue">
@@ -228,7 +236,7 @@
                     </div>
 
                     <!-- 4. Completed Courses -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='academic-management.html'" title="View Completed Courses" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card green" onclick="window.location.href='academic-management.html'" title="View Completed Courses" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Completed Courses</span>
                             <div class="dashboard-kpi-icon green">
@@ -242,7 +250,7 @@
                     </div>
 
                     <!-- 5. Upcoming Exams -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='exam-management.html'" title="View Upcoming Exams" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card purple" onclick="window.location.href='exam-management.html'" title="View Upcoming Exams" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Upcoming Exams</span>
                             <div class="dashboard-kpi-icon purple">
@@ -256,7 +264,7 @@
                     </div>
 
                     <!-- 6. Pending Results -->
-                    <div class="dashboard-kpi-card" onclick="window.location.href='exam-management.html'" title="View Pending Exam Submissions" tabindex="0" role="link">
+                    <div class="dashboard-kpi-card red" onclick="window.location.href='exam-management.html'" title="View Pending Exam Submissions" tabindex="0" role="link">
                         <div class="dashboard-kpi-top">
                             <span class="dashboard-kpi-title">Pending Results</span>
                             <div class="dashboard-kpi-icon red">
