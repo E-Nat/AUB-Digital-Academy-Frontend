@@ -56,11 +56,58 @@ const ADMIN_NAV = [
 /* ============================================================
    2. RENDER SIDEBAR INTO <aside class="admin-sidebar">
    ============================================================ */
+function getActiveAdminNavHref() {
+    const currentPath = window.location.pathname.toLowerCase();
+    const currentHash = (window.location.hash || '').toLowerCase();
+    const currentFile = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'dashboard.html';
+
+    // Hash or exact file mappings
+    if (currentHash === '#invoices' || currentFile === 'invoices.html') {
+        return 'invoices.html';
+    }
+    if (currentFile === 'payment-management.html' || currentFile === 'payments.html') {
+        return currentHash === '#invoices' ? 'invoices.html' : 'payments.html';
+    }
+    if (currentFile === 'payroll-management.html' || currentFile === 'teacher-payroll.html') {
+        return 'teacher-payroll.html';
+    }
+    if (currentFile === 'exam-management.html' || currentFile === 'exam-quiz-management.html') {
+        return 'exam-quiz-management.html';
+    }
+    if (currentFile === 'schedule-management.html' || currentFile === 'schedule.html') {
+        return 'schedule.html';
+    }
+    if (currentFile === 'course-management.html') {
+        return 'course-management.html';
+    }
+    if (currentFile === 'index.html' || currentFile === '') {
+        return 'dashboard.html';
+    }
+    return currentFile;
+}
+
+function updateAdminSidebarActiveState() {
+    const sidebar = document.querySelector('.admin-sidebar');
+    if (!sidebar) return;
+    const activePage = getActiveAdminNavHref();
+    sidebar.querySelectorAll('.admin-nav-item').forEach(item => {
+        const href = (item.getAttribute('href') || item.getAttribute('data-page') || '').toLowerCase();
+        const itemFile = href.substring(href.lastIndexOf('/') + 1);
+        if (itemFile === activePage) {
+            item.classList.add('active');
+            item.setAttribute('aria-current', 'page');
+        } else {
+            item.classList.remove('active');
+            item.removeAttribute('aria-current');
+        }
+    });
+}
+
 function renderAdminSidebar() {
     const sidebar = document.querySelector('.admin-sidebar');
     if (!sidebar) return;
 
-    const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+    const activePage = getActiveAdminNavHref();
 
     // Brand
     const brandHTML = `
@@ -77,13 +124,14 @@ function renderAdminSidebar() {
         </div>`;
 
     // Nav items
-    let navHTML = '<nav class="admin-sidebar-nav">';
+    let navHTML = '<nav class="admin-sidebar-nav" aria-label="Main Navigation">';
     ADMIN_NAV.forEach(group => {
         navHTML += `<div class="admin-nav-section">${group.section}</div>`;
         group.items.forEach(item => {
-            const isActive = currentPage === item.href ? 'active' : '';
+            const isActive = (item.href === activePage) ? 'active' : '';
+            const ariaCurrent = isActive ? ' aria-current="page"' : '';
             navHTML += `
-                <a href="${item.href}" class="admin-nav-item ${isActive}" data-page="${item.href}">
+                <a href="${item.href}" class="admin-nav-item ${isActive}" data-page="${item.href}"${ariaCurrent}>
                     <i class="bi ${item.icon}"></i>
                     <span>${item.label}</span>
                 </a>`;
@@ -94,7 +142,7 @@ function renderAdminSidebar() {
     // Footer
     const footerHTML = `
         <div class="admin-sidebar-footer">
-            <button class="admin-logout-btn" id="sidebarLogoutBtn">
+            <button class="admin-logout-btn" id="sidebarLogoutBtn" type="button" aria-label="Sign Out">
                 <i class="bi bi-box-arrow-left"></i>
                 <span>Logout</span>
             </button>
@@ -104,6 +152,45 @@ function renderAdminSidebar() {
 
     // Logout handler
     document.getElementById('sidebarLogoutBtn')?.addEventListener('click', handleAdminLogout);
+
+    // Sidebar scroll persistence & restoration (No jumping, predictable position)
+    const navEl = sidebar.querySelector('.admin-sidebar-nav, .admin-sidebar-menu, .sidebar-scroll');
+    if (navEl) {
+        try {
+            const savedScroll = sessionStorage.getItem('aub_sidebar_scroll');
+            if (savedScroll !== null) {
+                const scrollVal = parseInt(savedScroll, 10);
+                if (!isNaN(scrollVal)) {
+                    navEl.scrollTop = scrollVal;
+                }
+            }
+        } catch (e) {}
+
+        navEl.addEventListener('scroll', function () {
+            try {
+                sessionStorage.setItem('aub_sidebar_scroll', String(navEl.scrollTop));
+            } catch (e) {}
+        }, { passive: true });
+
+        navEl.querySelectorAll('.admin-nav-item').forEach(link => {
+            link.addEventListener('click', function () {
+                try {
+                    sessionStorage.setItem('aub_sidebar_scroll', String(navEl.scrollTop));
+                } catch (e) {}
+            });
+        });
+
+        window.addEventListener('beforeunload', function () {
+            try {
+                sessionStorage.setItem('aub_sidebar_scroll', String(navEl.scrollTop));
+            } catch (e) {}
+        });
+        window.addEventListener('pagehide', function () {
+            try {
+                sessionStorage.setItem('aub_sidebar_scroll', String(navEl.scrollTop));
+            } catch (e) {}
+        });
+    }
 }
 
 /* ============================================================
@@ -327,6 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdminSidebar();
     initHamburger();
     initSearchShortcut();
+    window.addEventListener('hashchange', updateAdminSidebarActiveState);
 
     // Close dropdowns on outside click
     document.addEventListener('click', e => {

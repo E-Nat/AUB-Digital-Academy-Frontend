@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 6. Sidebar Menu Scroll Position Persistence Across Multi-Page Navigations
-    const sidebarMenu = sidebar ? sidebar.querySelector('.admin-sidebar-menu') : null;
+    const sidebarMenu = sidebar ? sidebar.querySelector('.admin-sidebar-menu, .admin-sidebar-nav, .sidebar-scroll') : null;
 
     function saveSidebarScroll() {
         if (sidebarMenu) {
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function restoreSidebarScroll(activeItem) {
+    function restoreSidebarScroll() {
         if (!sidebarMenu) return;
         try {
             const savedScroll = sessionStorage.getItem('aub_sidebar_scroll');
@@ -117,17 +117,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const scrollVal = parseInt(savedScroll, 10);
                 if (!isNaN(scrollVal)) {
                     sidebarMenu.scrollTop = scrollVal;
-                }
-            }
-
-            // Only if active item is NOT visible within the current scroll window, bring it minimally into view
-            if (activeItem) {
-                const menuRect = sidebarMenu.getBoundingClientRect();
-                const itemRect = activeItem.getBoundingClientRect();
-                // Check if completely outside top or bottom
-                if (itemRect.top < menuRect.top || itemRect.bottom > menuRect.bottom) {
-                    activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-                    saveSidebarScroll();
                 }
             }
         } catch (e) {
@@ -210,12 +199,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
-            // 3. Fallbacks for aliases (e.g. course-management.html -> Academic Management)
+            // 3. Fallbacks for aliases
             if (!matchedItem) {
                 if (currentFile === 'course-management.html') {
                     navItems.forEach(item => {
                         const href = (item.getAttribute('href') || '').toLowerCase();
-                        if (href.includes('academic-management.html')) matchedItem = item;
+                        if (href.includes('academic-management.html') || href.includes('course-management.html')) matchedItem = item;
+                    });
+                } else if (currentFile === 'exam-management.html' || currentFile === 'exam-quiz-management.html') {
+                    navItems.forEach(item => {
+                        const href = (item.getAttribute('href') || '').toLowerCase();
+                        if (href.includes('exam-management.html') || href.includes('exam-quiz-management.html')) matchedItem = item;
+                    });
+                } else if (currentFile === 'payment-management.html' || currentFile === 'payments.html') {
+                    navItems.forEach(item => {
+                        const href = (item.getAttribute('href') || '').toLowerCase();
+                        if (href.includes('payment-management.html') || href.includes('payments.html')) matchedItem = item;
+                    });
+                } else if (currentFile === 'payroll-management.html' || currentFile === 'teacher-payroll.html') {
+                    navItems.forEach(item => {
+                        const href = (item.getAttribute('href') || '').toLowerCase();
+                        if (href.includes('payroll-management.html') || href.includes('teacher-payroll.html')) matchedItem = item;
+                    });
+                } else if (currentFile === 'schedule-management.html' || currentFile === 'schedule.html') {
+                    navItems.forEach(item => {
+                        const href = (item.getAttribute('href') || '').toLowerCase();
+                        if (href.includes('schedule-management.html') || href.includes('schedule.html')) matchedItem = item;
                     });
                 }
             }
@@ -231,8 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // Restore / align sidebar menu scroll position stably
-            restoreSidebarScroll(matchedItem);
+            // Restore / align sidebar menu scroll position stably without jumping
+            restoreSidebarScroll();
         } catch (e) {
             console.warn('Active route detection note:', e);
         }

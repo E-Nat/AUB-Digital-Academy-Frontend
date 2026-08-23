@@ -59,6 +59,43 @@
             });
         }
 
+        // Sidebar Scroll Position Persistence (Predictable, No jumping)
+        const scrollMenu = sidebar ? sidebar.querySelector('.admin-sidebar-menu, .admin-sidebar-nav, .sidebar-scroll') : null;
+        if (scrollMenu) {
+            try {
+                const savedScroll = sessionStorage.getItem('aub_teacher_sidebar_scroll');
+                if (savedScroll !== null) {
+                    const val = parseInt(savedScroll, 10);
+                    if (!isNaN(val)) scrollMenu.scrollTop = val;
+                }
+            } catch (e) {}
+
+            scrollMenu.addEventListener('scroll', function () {
+                try {
+                    sessionStorage.setItem('aub_teacher_sidebar_scroll', String(scrollMenu.scrollTop));
+                } catch (e) {}
+            }, { passive: true });
+
+            sidebar.querySelectorAll('.admin-nav-item').forEach(link => {
+                link.addEventListener('click', function () {
+                    try {
+                        sessionStorage.setItem('aub_teacher_sidebar_scroll', String(scrollMenu.scrollTop));
+                    } catch (e) {}
+                });
+            });
+
+            window.addEventListener('beforeunload', function () {
+                try {
+                    sessionStorage.setItem('aub_teacher_sidebar_scroll', String(scrollMenu.scrollTop));
+                } catch (e) {}
+            });
+            window.addEventListener('pagehide', function () {
+                try {
+                    sessionStorage.setItem('aub_teacher_sidebar_scroll', String(scrollMenu.scrollTop));
+                } catch (e) {}
+            });
+        }
+
         // Notifications Modal / Toast Handler
         const notificationBtn = document.getElementById('teacherNotificationBtn');
         if (notificationBtn) {
