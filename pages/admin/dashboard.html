@@ -225,11 +225,12 @@
         }
         .dash-ops-icon { font-size: 15px; opacity: 0.85; }
         .dash-ops-value {
-            font-size: 28px;
+            font-size: 40px;
             font-weight: 800;
             color: var(--adm-text);
-            line-height: 1.1;
-            margin-bottom: 7px;
+            line-height: 1;
+            margin: 10px 0 16px 0;
+            letter-spacing: -1px;
         }
         .dash-ops-badge {
             display: inline-flex;
@@ -272,15 +273,30 @@
             color: var(--adm-muted);
             margin-bottom: 6px;
         }
-        .dash-fin-card.primary .dash-fin-label { color: rgba(255,255,255,0.65); }
-        .dash-fin-value {
-            font-size: 22px;
+        .dash-fin-card.primary .dash-fin-label { color: rgba(255,255,255,0.65); }        .dash-fin-value {
+            font-size: 38px;
             font-weight: 800;
             color: var(--adm-text);
-            line-height: 1.2;
-            margin-bottom: 5px;
+            line-height: 1;
+            margin: 12px 0;
+            letter-spacing: -1px;
         }
-        .dash-fin-card.primary .dash-fin-value { color: #fff; font-size: 26px; }
+        .dash-fin-sub {
+            font-size: 12px;
+            color: var(--adm-muted);
+            margin: 0;
+        }
+
+        /* Primary Finance Card */
+        .dash-fin-card.primary {
+            background: linear-gradient(135deg, var(--adm-primary-dk) 0%, var(--adm-primary) 100%);
+            border: none;
+            color: #fff;
+            padding-bottom: 20px;
+        }
+        .dash-fin-card.primary .dash-fin-label,
+        .dash-fin-card.primary .dash-fin-sub { color: rgba(255,255,255,0.85); }
+        .dash-fin-card.primary .dash-fin-value { color: #fff; font-size: 46px; }
         .dash-fin-meta {
             font-size: 12px;
             color: var(--adm-muted);
@@ -755,7 +771,7 @@
                     <!-- Pending Enrollments -->
                     <div class="dash-ops-card accent-amber">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending<br>Enrollments</div>
+                            <div class="dash-ops-label">Pending Enrollments</div>
                             <i class="bi bi-person-plus dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsPendingEnrollments">—</div>
@@ -765,7 +781,7 @@
                     <!-- Pending Payments -->
                     <div class="dash-ops-card accent-orange">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending<br>Payments</div>
+                            <div class="dash-ops-label">Pending Payments</div>
                             <i class="bi bi-credit-card dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsPendingPayments">—</div>
@@ -775,7 +791,7 @@
                     <!-- Active Courses -->
                     <div class="dash-ops-card accent-blue">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Active<br>Courses</div>
+                            <div class="dash-ops-label">Active Courses</div>
                             <i class="bi bi-play-circle dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsActiveCourses">—</div>
@@ -785,7 +801,7 @@
                     <!-- Completed Courses -->
                     <div class="dash-ops-card accent-green">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Completed<br>Courses</div>
+                            <div class="dash-ops-label">Completed Courses</div>
                             <i class="bi bi-check-circle dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsCompletedCourses">—</div>
@@ -795,7 +811,7 @@
                     <!-- Upcoming Exams -->
                     <div class="dash-ops-card accent-purple">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Upcoming<br>Exams</div>
+                            <div class="dash-ops-label">Upcoming Exams</div>
                             <i class="bi bi-clipboard-check dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsUpcomingExams">—</div>
@@ -805,7 +821,7 @@
                     <!-- Pending Results -->
                     <div class="dash-ops-card accent-red">
                         <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending<br>Results</div>
+                            <div class="dash-ops-label">Pending Results</div>
                             <i class="bi bi-hourglass-split dash-ops-icon"></i>
                         </div>
                         <div class="dash-ops-value" id="opsPendingResults">—</div>
