@@ -712,12 +712,23 @@
 
         activeCurriculumCourseId = id;
 
-        document.getElementById('detailCourseCode').textContent = course.code || `CS-${String(id).padStart(3, '0')}`;
-        document.getElementById('detailCourseTitle').textContent = course.title || 'Course Details';
-        document.getElementById('detailInstructorName').textContent = course.instructor_name || 'Prof. Alex Chen';
-        document.getElementById('detailInstructorAvatar').src = course.instructor_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100';
-        document.getElementById('detailCategory').textContent = course.category_name || 'Software Engineering';
-        document.getElementById('detailDifficulty').textContent = course.difficulty || 'Intermediate';
+        const codeEl = document.getElementById('detailCourseCode');
+        if (codeEl) codeEl.textContent = course.code || `CS-${String(id).padStart(3, '0')}`;
+
+        const titleEl = document.getElementById('detailCourseTitle');
+        if (titleEl) titleEl.textContent = course.title || 'Course Details';
+
+        const instNameEl = document.getElementById('detailInstructorName');
+        if (instNameEl) instNameEl.textContent = course.instructor_name || 'Prof. Alex Chen';
+
+        const instAvatarEl = document.getElementById('detailInstructorAvatar');
+        if (instAvatarEl) instAvatarEl.src = course.instructor_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100';
+
+        const catEl = document.getElementById('detailCategory');
+        if (catEl) catEl.textContent = course.category_name || 'Software Engineering';
+
+        const diffEl = document.getElementById('detailDifficulty');
+        if (diffEl) diffEl.textContent = course.difficulty || 'Intermediate';
         
         const statusEl = document.getElementById('detailStatus');
         if (statusEl) {
@@ -727,10 +738,17 @@
             statusEl.innerHTML = `<span class="status-dot"></span>${isArch ? 'Archived' : (isPub ? 'Published' : 'Draft')}`;
         }
 
-        document.getElementById('detailDescription').textContent = course.description || 'No description provided.';
-        document.getElementById('detailDuration').textContent = course.duration || '12 Weeks';
-        document.getElementById('detailRating').textContent = `${course.rating || 4.9} / 5.0`;
-        document.getElementById('detailStudents').textContent = `${course.enrolled_students_count || 1} Student${(course.enrolled_students_count || 1) === 1 ? '' : 's'}`;
+        const descEl = document.getElementById('detailDescription');
+        if (descEl) descEl.textContent = course.description || 'No description provided.';
+
+        const durEl = document.getElementById('detailDuration');
+        if (durEl) durEl.textContent = course.duration || '12 Weeks';
+
+        const ratingEl = document.getElementById('detailRating');
+        if (ratingEl) ratingEl.textContent = `${course.rating || 4.9} / 5.0`;
+
+        const studEl = document.getElementById('detailStudents');
+        if (studEl) studEl.textContent = `${course.enrolled_students_count || 1} Student${(course.enrolled_students_count || 1) === 1 ? '' : 's'}`;
 
         const modules = store.getModulesByCourseId(id) || [];
         let totalL = 0;
@@ -738,7 +756,9 @@
             const lessons = store.getLessonsByModuleId(m.id) || [];
             totalL += lessons.length;
         });
-        document.getElementById('detailCurriculumCount').textContent = `${modules.length} Modules • ${totalL} Lessons`;
+
+        const currCountEl = document.getElementById('detailCurriculumCount');
+        if (currCountEl) currCountEl.textContent = `${modules.length} Modules • ${totalL} Lessons`;
 
         // Render embedded curriculum accordion in detail modal
         const container = document.getElementById('detailCurriculumContainer');
@@ -825,7 +845,8 @@
         }
 
         activeCurriculumCourseId = courseId;
-        document.getElementById('curriculumModalTitle').textContent = `Curriculum — ${course.title}`;
+        const modalTitle = document.getElementById('curriculumModalTitle');
+        if (modalTitle) modalTitle.textContent = `Curriculum — ${course.title}`;
 
         // By default expand first module
         const modules = store.getModulesByCourseId(courseId) || [];
@@ -988,11 +1009,20 @@
         if (form) form.reset();
         form.classList.remove('was-validated');
 
-        document.getElementById('moduleId').value = '';
-        document.getElementById('moduleCourseId').value = cId;
-        document.getElementById('moduleModalTitle').textContent = 'Add New Module';
-        document.getElementById('moduleDurationInput').value = '2 Weeks';
-        document.getElementById('moduleStatusSelect').value = 'Published';
+        const idInput = document.getElementById('moduleId');
+        if (idInput) idInput.value = '';
+
+        const cIdInput = document.getElementById('moduleCourseId');
+        if (cIdInput) cIdInput.value = cId;
+
+        const modalTitle = document.getElementById('moduleModalTitle');
+        if (modalTitle) modalTitle.textContent = 'Add New Module';
+
+        const durInput = document.getElementById('moduleDurationInput');
+        if (durInput) durInput.value = '2 Weeks';
+
+        const statusSelect = document.getElementById('moduleStatusSelect');
+        if (statusSelect) statusSelect.value = 'Published';
 
         if (moduleModal) moduleModal.show();
     };
@@ -1007,13 +1037,29 @@
         if (form) form.reset();
         form.classList.remove('was-validated');
 
-        document.getElementById('moduleId').value = mod.id;
-        document.getElementById('moduleCourseId').value = mod.course_id;
-        document.getElementById('moduleModalTitle').textContent = `Edit Module — ${mod.title}`;
-        document.getElementById('moduleTitleInput').value = mod.title || '';
-        document.getElementById('moduleDurationInput').value = mod.duration || '2 Weeks';
-        document.getElementById('moduleStatusSelect').value = mod.status || 'Published';
-        document.getElementById('moduleDescriptionInput').value = mod.description || '';
+        const idInput = document.getElementById('moduleId');
+        if (idInput) idInput.value = mod.id;
+
+        const cIdInput = document.getElementById('moduleCourseId');
+        if (cIdInput) cIdInput.value = mod.course_id;
+
+        const modalTitle = document.getElementById('moduleModalTitle');
+        if (modalTitle) modalTitle.textContent = `Edit Module — ${mod.title}`;
+
+        const titleInput = document.getElementById('moduleTitleInput');
+        if (titleInput) titleInput.value = mod.title || '';
+
+        const durInput = document.getElementById('moduleDurationInput');
+        if (durInput) durInput.value = mod.duration || '2 Weeks';
+
+        const orderInput = document.getElementById('moduleOrderInput');
+        if (orderInput) orderInput.value = mod.chapter_num || 1;
+
+        const statusSelect = document.getElementById('moduleStatusSelect');
+        if (statusSelect) statusSelect.value = mod.status || 'Published';
+
+        const descInput = document.getElementById('moduleDescriptionInput');
+        if (descInput) descInput.value = mod.description || '';
 
         if (moduleModal) moduleModal.show();
     };
@@ -1026,12 +1072,13 @@
             return;
         }
 
-        const idVal = document.getElementById('moduleId').value;
-        const courseId = Number(document.getElementById('moduleCourseId').value);
-        const title = document.getElementById('moduleTitleInput').value.trim();
-        const duration = document.getElementById('moduleDurationInput').value.trim();
-        const status = document.getElementById('moduleStatusSelect').value;
-        const description = document.getElementById('moduleDescriptionInput').value.trim();
+        const idVal = document.getElementById('moduleId')?.value;
+        const courseId = Number(document.getElementById('moduleCourseId')?.value) || activeCurriculumCourseId;
+        const title = (document.getElementById('moduleTitleInput')?.value || '').trim();
+        const duration = (document.getElementById('moduleDurationInput')?.value || '').trim();
+        const orderVal = Number(document.getElementById('moduleOrderInput')?.value) || 1;
+        const status = document.getElementById('moduleStatusSelect')?.value || 'Published';
+        const description = (document.getElementById('moduleDescriptionInput')?.value || '').trim();
 
         if (title.length < 3) {
             showToast('Module title must be at least 3 characters.', 'warning');
@@ -1042,6 +1089,8 @@
             course_id: courseId,
             title: title,
             duration: duration || '2 Weeks',
+            order_num: orderVal,
+            chapter_num: orderVal,
             status: status,
             description: description
         };
@@ -1053,7 +1102,7 @@
                 showToast(`Module "${title}" updated!`, 'success');
             } else {
                 const newMod = store.createModule(moduleData);
-                expandedModuleIds.add(newMod.id);
+                if (newMod && newMod.id) expandedModuleIds.add(newMod.id);
                 showToast(`Module "${title}" created!`, 'success');
             }
 
@@ -1120,12 +1169,26 @@
         if (form) form.reset();
         form.classList.remove('was-validated');
 
-        document.getElementById('lessonId').value = '';
-        document.getElementById('lessonModuleId').value = moduleId;
-        document.getElementById('lessonModalTitle').textContent = 'Add New Lesson';
-        document.getElementById('lessonTypeSelect').value = 'Video';
-        document.getElementById('lessonDurationInput').value = '25 Mins';
-        document.getElementById('lessonStatusSelect').value = 'Published';
+        const idInput = document.getElementById('lessonId');
+        if (idInput) idInput.value = '';
+
+        const mIdInput = document.getElementById('lessonModuleId');
+        if (mIdInput) mIdInput.value = moduleId;
+
+        const cIdInput = document.getElementById('lessonCourseId');
+        if (cIdInput) cIdInput.value = activeCurriculumCourseId;
+
+        const modalTitle = document.getElementById('lessonModalTitle');
+        if (modalTitle) modalTitle.textContent = 'Add New Lesson';
+
+        const typeSelect = document.getElementById('lessonTypeSelect');
+        if (typeSelect) typeSelect.value = 'Video';
+
+        const durInput = document.getElementById('lessonDurationInput');
+        if (durInput) durInput.value = '25 Mins';
+
+        const statusSelect = document.getElementById('lessonStatusSelect');
+        if (statusSelect) statusSelect.value = 'Published';
 
         if (lessonModal) lessonModal.show();
     };
@@ -1139,15 +1202,38 @@
         if (form) form.reset();
         form.classList.remove('was-validated');
 
-        document.getElementById('lessonId').value = lesson.id;
-        document.getElementById('lessonModuleId').value = lesson.module_id;
-        document.getElementById('lessonModalTitle').textContent = `Edit Lesson — ${lesson.title}`;
-        document.getElementById('lessonTitleInput').value = lesson.title || '';
-        document.getElementById('lessonTypeSelect').value = lesson.type || 'Video';
-        document.getElementById('lessonDurationInput').value = lesson.duration || '20 Mins';
-        document.getElementById('lessonStatusSelect').value = lesson.status || 'Published';
-        document.getElementById('lessonDescriptionInput').value = lesson.description || '';
-        document.getElementById('lessonVideoUrlInput').value = lesson.video_url || '';
+        const idInput = document.getElementById('lessonId');
+        if (idInput) idInput.value = lesson.id;
+
+        const mIdInput = document.getElementById('lessonModuleId');
+        if (mIdInput) mIdInput.value = lesson.module_id;
+
+        const cIdInput = document.getElementById('lessonCourseId');
+        if (cIdInput) cIdInput.value = lesson.course_id || activeCurriculumCourseId;
+
+        const modalTitle = document.getElementById('lessonModalTitle');
+        if (modalTitle) modalTitle.textContent = `Edit Lesson — ${lesson.title}`;
+
+        const titleInput = document.getElementById('lessonTitleInput');
+        if (titleInput) titleInput.value = lesson.title || '';
+
+        const typeSelect = document.getElementById('lessonTypeSelect');
+        if (typeSelect) typeSelect.value = lesson.type || 'Video';
+
+        const durInput = document.getElementById('lessonDurationInput');
+        if (durInput) durInput.value = lesson.duration || '20 Mins';
+
+        const orderInput = document.getElementById('lessonOrderInput');
+        if (orderInput) orderInput.value = lesson.order_num || 1;
+
+        const statusSelect = document.getElementById('lessonStatusSelect');
+        if (statusSelect) statusSelect.value = lesson.status || 'Published';
+
+        const descInput = document.getElementById('lessonDescriptionInput');
+        if (descInput) descInput.value = lesson.description || '';
+
+        const videoUrlInput = document.getElementById('lessonContentInput') || document.getElementById('lessonVideoUrlInput');
+        if (videoUrlInput) videoUrlInput.value = lesson.video_url || lesson.content || '';
 
         if (lessonModal) lessonModal.show();
     };
@@ -1160,14 +1246,15 @@
             return;
         }
 
-        const idVal = document.getElementById('lessonId').value;
-        const moduleId = Number(document.getElementById('lessonModuleId').value);
-        const title = document.getElementById('lessonTitleInput').value.trim();
-        const type = document.getElementById('lessonTypeSelect').value;
-        const duration = document.getElementById('lessonDurationInput').value.trim();
-        const status = document.getElementById('lessonStatusSelect').value;
-        const description = document.getElementById('lessonDescriptionInput').value.trim();
-        const videoUrl = document.getElementById('lessonVideoUrlInput').value.trim();
+        const idVal = document.getElementById('lessonId')?.value;
+        const moduleId = Number(document.getElementById('lessonModuleId')?.value);
+        const title = (document.getElementById('lessonTitleInput')?.value || '').trim();
+        const type = document.getElementById('lessonTypeSelect')?.value || 'Video';
+        const duration = (document.getElementById('lessonDurationInput')?.value || '').trim();
+        const orderVal = Number(document.getElementById('lessonOrderInput')?.value) || 1;
+        const status = document.getElementById('lessonStatusSelect')?.value || 'Published';
+        const description = (document.getElementById('lessonDescriptionInput')?.value || '').trim();
+        const videoUrl = (document.getElementById('lessonContentInput')?.value || document.getElementById('lessonVideoUrlInput')?.value || '').trim();
 
         if (title.length < 3) {
             showToast('Lesson title must be at least 3 characters.', 'warning');
@@ -1180,6 +1267,7 @@
             title: title,
             type: type,
             duration: duration || '20 Mins',
+            order_num: orderVal,
             status: status,
             description: description,
             video_url: videoUrl
@@ -1253,13 +1341,25 @@
         const lesson = store.getLessonById(lessonId);
         if (!lesson) return;
 
-        document.getElementById('lessonViewTitle').textContent = lesson.title;
-        document.getElementById('lessonViewType').textContent = lesson.type || 'Video';
-        document.getElementById('lessonViewDuration').textContent = lesson.duration || '20 Mins';
-        document.getElementById('lessonViewStatus').textContent = lesson.status || 'Published';
-        document.getElementById('lessonViewDescription').textContent = lesson.description || 'No detailed lesson description provided.';
+        const titleEl = document.getElementById('viewLessonTitle') || document.getElementById('lessonViewTitle');
+        if (titleEl) titleEl.textContent = lesson.title;
 
-        const previewContainer = document.getElementById('lessonViewPreviewContainer');
+        const typeEl = document.getElementById('viewLessonTypeBadge') || document.getElementById('lessonViewType');
+        if (typeEl) typeEl.textContent = (lesson.type || 'Video').toUpperCase();
+
+        const durEl = document.getElementById('viewLessonDuration') || document.getElementById('lessonViewDuration');
+        if (durEl) durEl.textContent = lesson.duration || '20 Mins';
+
+        const statusEl = document.getElementById('viewLessonStatusBadge') || document.getElementById('lessonViewStatus');
+        if (statusEl) {
+            const isPub = (lesson.status || 'Published') === 'Published';
+            statusEl.innerHTML = `<span class="status-subtle ${isPub ? 'status-published' : 'status-draft'}"><span class="status-dot"></span>${lesson.status || 'Published'}</span>`;
+        }
+
+        const descEl = document.getElementById('viewLessonDescription') || document.getElementById('lessonViewDescription');
+        if (descEl) descEl.textContent = lesson.description || 'No detailed lesson description provided.';
+
+        const previewContainer = document.getElementById('lessonViewPreviewContainer') || document.getElementById('lessonPreviewContainer');
         if (previewContainer) {
             const type = lesson.type || 'Video';
             if (type === 'Video') {

@@ -518,13 +518,20 @@
                         </div>
 
                         <div class="row g-3">
-                            <div class="col-6">
+                            <div class="col-md-4">
                                 <label for="moduleDurationInput" class="form-label fw-semibold small text-muted">Estimated Duration</label>
                                 <input type="text" class="form-control" id="moduleDurationInput" placeholder="e.g. 2 Weeks" value="2 Weeks">
                             </div>
-                            <div class="col-6">
+                            <div class="col-md-4">
                                 <label for="moduleOrderInput" class="form-label fw-semibold small text-muted">Display Order</label>
                                 <input type="number" class="form-control" id="moduleOrderInput" min="1" value="1">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="moduleStatusSelect" class="form-label fw-semibold small text-muted">Status</label>
+                                <select class="form-select" id="moduleStatusSelect">
+                                    <option value="Published" selected>Published</option>
+                                    <option value="Draft">Draft</option>
+                                </select>
                             </div>
                         </div>
                     </div>
