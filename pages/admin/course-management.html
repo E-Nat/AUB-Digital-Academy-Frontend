@@ -4,53 +4,650 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Management — AUB Digital Academy Admin</title>
+    <!-- Bootstrap 5.3.2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Layout and Custom Page Styles -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <link href="../../css/pages/course-management.css" rel="stylesheet">
 </head>
 <body class="admin-body">
     <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
     <div class="admin-wrapper">
+        <!-- Sidebar -->
         <aside class="admin-sidebar"></aside>
+
+        <!-- Main View -->
         <main class="admin-main">
+            <!-- Topbar (Global Header) -->
             <header class="admin-topbar">
-                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar"><i class="bi bi-list"></i></button>
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar" type="button">
+                    <i class="bi bi-list"></i>
+                </button>
+
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search…" autocomplete="off">
+                    <input type="text" class="admin-search-input" id="globalSearchInput"
+                           placeholder="Search users, courses, enrollments…" autocomplete="off" aria-label="Search users, courses, enrollments">
                     <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
+                    <div class="search-results-dropdown" id="searchResultsContainer"></div>
                 </div>
+
                 <div class="admin-topbar-actions">
-                    <button class="admin-icon-btn" aria-label="Notifications"><i class="bi bi-bell"></i></button>
-                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&size=64" alt="Admin" class="admin-topbar-avatar">
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button">
+                            <i class="bi bi-bell"></i>
+                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none">0</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px 8px;border-bottom:1px solid var(--adm-border);display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:13px;font-weight:700">Notifications</span>
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" type="button" style="font-size:11px;padding:2px 8px">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" style="padding:4px 0;max-height:280px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" role="button" tabindex="0">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Johnathan+Vance&background=2563EB&color=fff&size=64"
+                             alt="Dr. Johnathan Vance" class="admin-topbar-avatar" id="topbarAvatar">
                         <div class="admin-topbar-profile-info d-none d-md-block">
-                            <div class="profile-name">Admin</div>
-                            <div class="profile-role">System Administrator</div>
+                            <div class="profile-name" id="topbarAdminName">Dr. Johnathan Vance</div>
+                            <div class="profile-role">Administrator</div>
                         </div>
                     </div>
                 </div>
             </header>
+
+            <!-- Page Content -->
             <div class="admin-content">
+                <!-- Page Header -->
                 <div class="admin-page-header">
                     <div>
                         <h1 class="admin-page-title">Course Management</h1>
-                        <p class="admin-page-subtitle">Manage course lifecycle — pricing, deadlines, enrollment windows, and publishing.</p>
+                        <p class="admin-page-subtitle">Manage specialized courses, curriculum, syllabus modules, and course catalogs.</p>
+                    </div>
+                    <div class="admin-page-actions">
+                        <button class="adm-btn adm-btn-outline" id="resetDemoDataBtn" type="button" title="Reset to original 5 demo courses">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset Demo Data
+                        </button>
+                        <button class="adm-btn adm-btn-primary" id="openAddCourseModalBtn" type="button">
+                            <i class="bi bi-plus-lg"></i> Add New Course
+                        </button>
                     </div>
                 </div>
+
+                <!-- KPI / Summary Cards -->
+                <div class="admin-kpi-grid mb-4">
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap" style="background:#EFF6FF;color:#2563EB;">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Courses</span>
+                            <h3 class="kpi-value" id="kpiTotalCourses">5</h3>
+                            <span class="kpi-subtext">Active academic catalog</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap" style="background:#ECFDF5;color:#059669;">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Published Courses</span>
+                            <h3 class="kpi-value" id="kpiActiveCourses">5</h3>
+                            <span class="kpi-subtext">Available for enrollment</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap" style="background:#F5F3FF;color:#7C3AED;">
+                            <i class="bi bi-collection-fill"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Curriculum Modules</span>
+                            <h3 class="kpi-value" id="kpiTotalModules">25</h3>
+                            <span class="kpi-subtext">Structured syllabus units</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap" style="background:#FFFBEB;color:#D97706;">
+                            <i class="bi bi-play-btn-fill"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Lessons</span>
+                            <h3 class="kpi-value" id="kpiTotalLessons">56</h3>
+                            <span class="kpi-subtext">Videos, articles & labs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Course Card -->
                 <div class="admin-card">
-                    <div class="adm-empty-state">
-                        <i class="bi bi-journal-bookmark"></i>
-                        <h5>Course Management</h5>
-                        <p>This module is coming in the next implementation phase. Stay tuned!</p>
+                    <!-- Segment Tabs -->
+                    <div class="course-segment-tabs">
+                        <button class="course-segment-tab active" data-status-filter="all" type="button">
+                            All Courses <span class="tab-count" id="tabCountAll">5</span>
+                        </button>
+                        <button class="course-segment-tab" data-status-filter="Published" type="button">
+                            Published <span class="tab-count" id="tabCountPublished">5</span>
+                        </button>
+                        <button class="course-segment-tab" data-status-filter="Draft" type="button">
+                            Drafts <span class="tab-count" id="tabCountDrafts">0</span>
+                        </button>
+                        <button class="course-segment-tab" data-status-filter="Archived" type="button">
+                            Archived <span class="tab-count" id="tabCountArchived">0</span>
+                        </button>
+                    </div>
+
+                    <!-- Filters Toolbar -->
+                    <div class="course-filter-bar">
+                        <div class="course-search-box">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="course-search-input" id="courseSearchInput"
+                                   placeholder="Search courses by name, category, instructor, difficulty...">
+                        </div>
+                        <select class="course-filter-select" id="courseCategoryFilter" aria-label="Filter by Category">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <select class="course-filter-select" id="courseDifficultyFilter" aria-label="Filter by Difficulty">
+                            <option value="all">All Difficulties</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                        <select class="course-filter-select" id="courseStatusFilter" aria-label="Filter by Status" style="display:none;">
+                            <option value="all">All Statuses</option>
+                            <option value="Published">Published</option>
+                            <option value="Draft">Draft</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                        <button class="adm-btn adm-btn-ghost adm-btn-sm" id="clearFiltersBtn" type="button" style="display:none;">
+                            <i class="bi bi-x-circle"></i> Clear Filters
+                        </button>
+                    </div>
+
+                    <!-- Courses Table Container -->
+                    <div class="table-responsive">
+                        <table class="adm-table" id="courseTable">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Category</th>
+                                    <th>Instructor</th>
+                                    <th class="text-center">Curriculum</th>
+                                    <th>Difficulty</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="courseTableBody">
+                                <!-- Dynamic Course Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="adm-empty-state" id="courseEmptyState" style="display:none; padding: 48px 24px; text-align: center;">
+                        <i class="bi bi-journal-x" style="font-size: 38px; color: #94A3B8; margin-bottom: 12px; display: inline-block;"></i>
+                        <h5 class="fw-bold text-dark mb-1" id="emptyStateHeading">No courses yet</h5>
+                        <p class="text-muted text-xs mb-3" style="max-width: 380px; margin-left: auto; margin-right: auto;" id="emptyStateMessage">
+                            Create your first academic course to start building your AUB Digital Academy catalog.
+                        </p>
+                        <div>
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="emptyAddCourseBtn" onclick="openCreateCourseModal()" type="button">
+                                <i class="bi bi-plus-lg"></i> Add New Course
+                            </button>
+                            <button class="adm-btn adm-btn-outline adm-btn-sm" id="emptyClearBtn" type="button" style="display:none;">
+                                <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- ========================================== -->
+    <!-- MODALS SECTION                             -->
+    <!-- ========================================== -->
+
+    <!-- 1. CREATE / EDIT COURSE MODAL -->
+    <div class="modal fade" id="courseModal" tabindex="-1" aria-labelledby="courseModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <h5 class="modal-title fw-bold" id="courseModalTitle">Add New Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="courseForm" novalidate>
+                    <div class="modal-body px-4 py-3">
+                        <input type="hidden" id="courseId">
+                        
+                        <!-- STEP 1 — BASIC INFORMATION -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom">
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-0.5" style="font-size:10.5px;">STEP 1</span>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size:13px;letter-spacing:0.02em;text-transform:uppercase;">Basic Information</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="courseTitleInput" class="form-label fw-semibold small text-muted">Course Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="courseTitleInput" placeholder="e.g. Web Development" required>
+                                    <div class="invalid-feedback">Please enter a course title (minimum 3 characters).</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="courseCodeInput" class="form-label fw-semibold small text-muted">Course Code</label>
+                                    <input type="text" class="form-control font-monospace" id="courseCodeInput" placeholder="e.g. CS-WD101">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="courseCategorySelect" class="form-label fw-semibold small text-muted">Category <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseCategorySelect" required>
+                                        <option value="">Select Category...</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a category.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="courseInstructorSelect" class="form-label fw-semibold small text-muted">Instructor <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseInstructorSelect" required>
+                                        <option value="">Select Instructor...</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select an instructor.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2 — COURSE DETAILS -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom">
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-0.5" style="font-size:10.5px;">STEP 2</span>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size:13px;letter-spacing:0.02em;text-transform:uppercase;">Course Details &amp; Specifications</h6>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label for="courseDifficultySelect" class="form-label fw-semibold small text-muted">Difficulty <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="courseDifficultySelect" required>
+                                        <option value="Beginner">Beginner</option>
+                                        <option value="Intermediate" selected>Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="courseDurationInput" class="form-label fw-semibold small text-muted">Duration</label>
+                                    <input type="text" class="form-control" id="courseDurationInput" placeholder="e.g. 12 Weeks" value="12 Weeks">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="coursePriceInput" class="form-label fw-semibold small text-muted">Tuition Fee ($)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="coursePriceInput" min="0" step="1" value="50.00">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="courseDescriptionInput" class="form-label fw-semibold small text-muted">Course Description <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="courseDescriptionInput" rows="2" placeholder="Provide a summary of course learning objectives and topics..." required></textarea>
+                                    <div class="invalid-feedback">Please enter a description (minimum 10 characters).</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="courseThumbnailSelect" class="form-label fw-semibold small text-muted">Cover Image</label>
+                                    <select class="form-select" id="courseThumbnailSelect">
+                                        <option value="assets/images/course_webdev.jpg">Web Development Cover</option>
+                                        <option value="assets/images/digital_learning_graphic.jpg">React & Modern Tech Graphic</option>
+                                        <option value="assets/images/course_datascience.jpg">Database & Data Science</option>
+                                        <option value="assets/images/course_cybersecurity.jpg">Cybersecurity Shield</option>
+                                        <option value="assets/images/hero_digital_learning.jpg">Software Engineering Classroom</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3 — CURRICULUM ARCHITECTURE -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom">
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-0.5" style="font-size:10.5px;">STEP 3</span>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size:13px;letter-spacing:0.02em;text-transform:uppercase;">Curriculum Plan</h6>
+                            </div>
+                            <div class="p-3 bg-light rounded-2 border">
+                                <div class="d-flex align-items-start gap-2.5">
+                                    <i class="bi bi-collection text-primary fs-5 mt-0.5"></i>
+                                    <div>
+                                        <div class="fw-semibold text-dark small">Curriculum Builder Integration</div>
+                                        <p class="text-muted text-xs mb-0">Upon saving, a starter module will be initialized automatically. You can immediately access the <strong>Curriculum Builder</strong> to organize modules, upload video lectures, articles, and interactive labs.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 4 — PUBLISHING & VISIBILITY -->
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center gap-2 mb-2 pb-1 border-bottom">
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-2 py-0.5" style="font-size:10.5px;">STEP 4</span>
+                                <h6 class="fw-bold text-dark mb-0" style="font-size:13px;letter-spacing:0.02em;text-transform:uppercase;">Publishing Status</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="courseStatusSelect" class="form-label fw-semibold small text-muted">Publication State</label>
+                                    <select class="form-select" id="courseStatusSelect">
+                                        <option value="Published" selected>Published (Visible to Students)</option>
+                                        <option value="Draft">Draft (Hidden in Catalog)</option>
+                                        <option value="Archived">Archived</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveCourseBtn">
+                            <i class="bi bi-check-lg"></i> Save Course
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. COURSE DETAIL VIEW MODAL -->
+    <div class="modal fade" id="courseDetailModal" tabindex="-1" aria-labelledby="courseDetailTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="course-code-pill font-monospace" id="detailCourseCode">CS-WD101</span>
+                        <h5 class="modal-title fw-bold m-0" id="detailCourseTitle">Web Development</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <!-- Top Overview Banner -->
+                    <div class="row g-4 mb-4 pb-3 border-bottom">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src="" id="detailInstructorAvatar" class="rounded-circle object-fit-cover border" style="width:44px;height:44px;">
+                                <div>
+                                    <div class="fw-bold text-dark" id="detailInstructorName">Prof. Alex Chen</div>
+                                    <div class="small text-muted" id="detailCategory">Software Engineering</div>
+                                </div>
+                                <div class="ms-auto d-flex gap-2">
+                                    <span class="adm-badge-blue" id="detailDifficulty">Intermediate</span>
+                                    <span class="status-indicator status-published" id="detailStatus"><span class="status-dot"></span>Published</span>
+                                </div>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1" style="font-size:13px;">Course Overview</h6>
+                            <p class="text-secondary mb-3" id="detailDescription" style="font-size:13.5px;line-height:1.6;"></p>
+                            
+                            <h6 class="fw-bold text-dark mb-2" style="font-size:13px;">Learning Outcomes</h6>
+                            <ul class="text-secondary small ps-3 mb-0" style="line-height:1.7;">
+                                <li>Master modern architectural patterns and robust component composition.</li>
+                                <li>Build production-grade responsive user interfaces with zero visual clipping.</li>
+                                <li>Apply industry standard unit testing, CI/CD pipelines, and clean code principles.</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light p-3 rounded-3 border">
+                                <h6 class="fw-bold mb-3 text-dark" style="font-size:13px;">Course Highlights</h6>
+                                <div class="d-flex justify-content-between py-1.5 border-bottom small">
+                                    <span class="text-muted"><i class="bi bi-clock me-1"></i> Duration:</span>
+                                    <strong class="text-dark" id="detailDuration">12 Weeks</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1.5 border-bottom small">
+                                    <span class="text-muted"><i class="bi bi-star-fill text-warning me-1"></i> Rating:</span>
+                                    <strong class="text-dark" id="detailRating">4.9 / 5.0</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1.5 border-bottom small">
+                                    <span class="text-muted"><i class="bi bi-people me-1"></i> Enrolled:</span>
+                                    <strong class="text-dark" id="detailStudents">1 Student</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-1.5 small">
+                                    <span class="text-muted"><i class="bi bi-layers me-1"></i> Curriculum:</span>
+                                    <strong class="text-primary" id="detailCurriculumCount">5 Modules • 15 Lessons</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Curriculum Accordion Section -->
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold m-0 text-dark"><i class="bi bi-journal-text text-primary me-2"></i>Curriculum & Syllabus Overview</h6>
+                        <button class="adm-btn adm-btn-primary adm-btn-sm" id="detailOpenCurriculumBtn" type="button">
+                            <i class="bi bi-sliders"></i> Open Curriculum Builder
+                        </button>
+                    </div>
+                    <div class="curriculum-container" id="detailCurriculumContainer">
+                        <!-- Module items will be dynamically injected here -->
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between bg-light">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="adm-btn adm-btn-outline" id="detailEditCourseBtn">
+                            <i class="bi bi-pencil"></i> Edit Course
+                        </button>
+                        <button type="button" class="adm-btn adm-btn-primary" onclick="if(activeCurriculumCourseId){if(courseDetailModal)courseDetailModal.hide();setTimeout(()=>openCurriculumManager(activeCurriculumCourseId),200);}">
+                            <i class="bi bi-journal-text"></i> Manage Curriculum
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. CURRICULUM MANAGEMENT MODAL (INTERACTIVE SYLLABUS BUILDER) -->
+    <div class="modal fade" id="curriculumModal" tabindex="-1" aria-labelledby="curriculumModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <div>
+                        <span class="adm-badge-blue" style="font-size:10.5px;">CURRICULUM BUILDER</span>
+                        <h5 class="modal-title fw-bold mt-1" id="curriculumModalTitle">Curriculum — Web Development</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="adm-btn adm-btn-primary adm-btn-sm" id="curriculumAddModuleBtn" type="button">
+                            <i class="bi bi-plus-lg"></i> Add Module
+                        </button>
+                        <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <!-- Hero Banner -->
+                    <div class="curriculum-hero-banner">
+                        <div>
+                            <span class="fw-bold text-dark" id="curriculumStats" style="font-size:14px;">5 Modules • 15 Lessons</span>
+                            <p class="small text-muted m-0">Reorder modules and lessons with up/down arrows, add lessons, and preview syllabus content in real-time.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="adm-btn adm-btn-outline adm-btn-sm" id="expandAllModulesBtn" type="button">
+                                <i class="bi bi-arrows-expand"></i> Expand All
+                            </button>
+                            <button class="adm-btn adm-btn-outline adm-btn-sm" id="collapseAllModulesBtn" type="button">
+                                <i class="bi bi-arrows-collapse"></i> Collapse All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Curriculum Modules List -->
+                    <div class="curriculum-container" id="curriculumModulesList">
+                        <!-- Injected dynamically -->
+                    </div>
+
+                    <!-- Empty State for Curriculum -->
+                    <div class="adm-empty-state" id="curriculumEmptyState" style="display:none; padding: 40px 20px; text-align: center;">
+                        <i class="bi bi-collection" style="font-size: 36px; color: #94A3B8; margin-bottom: 10px; display: inline-block;"></i>
+                        <h5 class="fw-bold text-dark mb-1">No modules yet</h5>
+                        <p class="text-muted text-xs mb-3">Start building this course curriculum by adding your first module.</p>
+                        <button class="adm-btn adm-btn-primary adm-btn-sm" id="curriculumEmptyAddBtn" type="button">
+                            <i class="bi bi-plus-lg"></i> Add Module
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. ADD / EDIT MODULE MODAL -->
+    <div class="modal fade" id="moduleModal" tabindex="-1" aria-labelledby="moduleModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <h5 class="modal-title fw-bold" id="moduleModalTitle">Add Module</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="moduleForm" novalidate>
+                    <div class="modal-body px-4 py-3">
+                        <input type="hidden" id="moduleCourseId">
+                        <input type="hidden" id="moduleId">
+
+                        <div class="mb-3">
+                            <label for="moduleTitleInput" class="form-label fw-semibold small text-muted">Module Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="moduleTitleInput" placeholder="e.g. Web Fundamentals" required>
+                            <div class="invalid-feedback">Module title is required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="moduleDescriptionInput" class="form-label fw-semibold small text-muted">Description</label>
+                            <textarea class="form-control" id="moduleDescriptionInput" rows="2" placeholder="Brief summary of topics covered in this module..."></textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="moduleDurationInput" class="form-label fw-semibold small text-muted">Estimated Duration</label>
+                                <input type="text" class="form-control" id="moduleDurationInput" placeholder="e.g. 2 Weeks" value="2 Weeks">
+                            </div>
+                            <div class="col-6">
+                                <label for="moduleOrderInput" class="form-label fw-semibold small text-muted">Display Order</label>
+                                <input type="number" class="form-control" id="moduleOrderInput" min="1" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveModuleBtn">
+                            <i class="bi bi-check-lg"></i> Save Module
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. ADD / EDIT LESSON MODAL -->
+    <div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <h5 class="modal-title fw-bold" id="lessonModalTitle">Add Lesson</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="lessonForm" novalidate>
+                    <div class="modal-body px-4 py-3">
+                        <input type="hidden" id="lessonModuleId">
+                        <input type="hidden" id="lessonCourseId">
+                        <input type="hidden" id="lessonId">
+
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label for="lessonTitleInput" class="form-label fw-semibold small text-muted">Lesson Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="lessonTitleInput" placeholder="e.g. Introduction to HTML" required>
+                                <div class="invalid-feedback">Lesson title is required.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lessonTypeSelect" class="form-label fw-semibold small text-muted">Lesson Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="lessonTypeSelect" required>
+                                    <option value="Video" selected>Video</option>
+                                    <option value="Article">Article</option>
+                                    <option value="PDF">PDF / Document</option>
+                                    <option value="Lab">Hands-on Lab</option>
+                                    <option value="Assignment">Assignment</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="lessonDurationInput" class="form-label fw-semibold small text-muted">Duration</label>
+                                <input type="text" class="form-control" id="lessonDurationInput" placeholder="e.g. 20 Mins" value="25 Mins">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lessonOrderInput" class="form-label fw-semibold small text-muted">Display Order</label>
+                                <input type="number" class="form-control" id="lessonOrderInput" min="1" value="1">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="lessonStatusSelect" class="form-label fw-semibold small text-muted">Status</label>
+                                <select class="form-select" id="lessonStatusSelect">
+                                    <option value="Published" selected>Published</option>
+                                    <option value="Draft">Draft</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="lessonDescriptionInput" class="form-label fw-semibold small text-muted">Description / Summary</label>
+                                <textarea class="form-control" id="lessonDescriptionInput" rows="2" placeholder="Brief outline of this lesson..."></textarea>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="lessonContentInput" class="form-label fw-semibold small text-muted" id="lessonContentLabel">Content / URL</label>
+                                <textarea class="form-control" id="lessonContentInput" rows="3" placeholder="Enter video link, article markdown, or document attachment path..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveLessonBtn">
+                            <i class="bi bi-check-lg"></i> Save Lesson
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. VIEW LESSON PREVIEW MODAL -->
+    <div class="modal fade" id="lessonViewModal" tabindex="-1" aria-labelledby="lessonViewTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="adm-badge-blue font-monospace" id="viewLessonTypeBadge">VIDEO</span>
+                        <h5 class="modal-title fw-bold m-0" id="viewLessonTitle">Introduction to HTML</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 text-muted small">
+                        <span><i class="bi bi-clock me-1"></i> <strong id="viewLessonDuration">20 Mins</strong></span>
+                        <span>&bull;</span>
+                        <span id="viewLessonStatusBadge"><span class="status-indicator status-published"><span class="status-dot"></span>Published</span></span>
+                    </div>
+
+                    <p class="text-secondary mb-4" id="viewLessonDescription" style="font-size:14px;line-height:1.5;"></p>
+
+                    <!-- Content Preview Area -->
+                    <div id="lessonPreviewContainer">
+                        <!-- Dynamic Player / Reader Preview -->
+                    </div>
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-light">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
     <div id="admToastContainer" class="adm-toast-container"></div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/admin-layout.js"></script>
+    <script src="../../js/pages/course-management.js"></script>
 </body>
 </html>

@@ -436,4 +436,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     loadQuizzes();
     loadQuestionBank();
     loadResults();
+
+    if (window.location.search.includes('action=schedule-exam') || window.location.hash === '#schedule-exam') {
+        setTimeout(() => {
+            if (createExamBtn) createExamBtn.click();
+        }, 300);
+    }
 });

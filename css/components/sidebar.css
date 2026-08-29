@@ -7,13 +7,13 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-width-tablet: 280px;
-    --sidebar-collapsed-width: 80px;
-    --topbar-height: 64px;
+    --sidebar-collapsed-width: 72px;
+    --topbar-height: 60px;
 
     /* Clean White/Light Sidebar Tokens */
     --admin-sidebar-bg: #FFFFFF;
-    --admin-sidebar-hover: #F1F5F9;
-    --admin-sidebar-hover-text: #0F172A;
+    --admin-sidebar-hover: #F8FAFC;
+    --admin-sidebar-hover-text: #2563EB;
     --admin-sidebar-active-bg: #EFF6FF;
     --admin-sidebar-active-text: #1D4ED8;
     --admin-sidebar-text: #334155;
@@ -24,39 +24,43 @@
 
 /* ==========================================================================
    1. SIDEBAR CONTAINER
-   ========================================================================== */
+   ========================================================================= */
 .admin-sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
     max-width: var(--sidebar-width);
+    flex: 0 0 var(--sidebar-width);
     background-color: var(--admin-sidebar-bg);
     color: var(--admin-sidebar-text);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
+    position: relative;
     height: 100vh;
     height: 100dvh;
-    z-index: 1000;
+    max-height: 100vh;
+    max-height: 100dvh;
+    z-index: 300;
     border-right: 1px solid var(--admin-sidebar-border);
     box-shadow: none;
-    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                min-width 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                max-width 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 /* ==========================================================================
    2. BRANDING / HEADER
    ========================================================================== */
 .admin-sidebar-brand {
-    padding: 0 16px;
+    padding: 0 18px;
     display: flex;
     align-items: center;
     border-bottom: 1px solid var(--admin-sidebar-border);
     height: var(--topbar-height);
     min-height: var(--topbar-height);
+    max-height: var(--topbar-height);
     box-sizing: border-box;
     flex-shrink: 0;
     background: #FFFFFF;
@@ -95,7 +99,7 @@
     letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     line-height: 1.2;
 }
 
@@ -106,7 +110,7 @@
     letter-spacing: 0.005em;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     line-height: 1.2;
 }
 
@@ -116,25 +120,27 @@
 .admin-sidebar-menu,
 .admin-sidebar-nav,
 .sidebar-scroll {
-    padding: 8px 10px 12px 10px;
+    padding: 10px 12px 16px 12px;
     display: flex;
     flex-direction: column;
     gap: 2px;
     flex: 1 1 auto;
     min-height: 0;
+    max-height: calc(100vh - var(--topbar-height) - 67px);
+    max-height: calc(100dvh - var(--topbar-height) - 67px);
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: auto !important;
     scrollbar-width: thin;
-    scrollbar-color: #E2E8F0 transparent;
+    scrollbar-color: #CBD5E1 transparent;
 }
 
 .admin-sidebar-menu::-webkit-scrollbar,
 .admin-sidebar-nav::-webkit-scrollbar,
 .sidebar-scroll::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
 
 .admin-sidebar-menu::-webkit-scrollbar-track,
@@ -146,49 +152,52 @@
 .admin-sidebar-menu::-webkit-scrollbar-thumb,
 .admin-sidebar-nav::-webkit-scrollbar-thumb,
 .sidebar-scroll::-webkit-scrollbar-thumb {
-    background: #E2E8F0;
-    border-radius: 6px;
+    background: #CBD5E1;
+    border-radius: 4px;
 }
 
 .admin-sidebar-menu::-webkit-scrollbar-thumb:hover,
 .admin-sidebar-nav::-webkit-scrollbar-thumb:hover,
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-    background: #CBD5E1;
+    background: #94A3B8;
 }
 
 /* ==========================================================================
-   4. SECTION LABELS (Muted Slate, Uppercase, 12px)
+   4. SECTION LABELS (Muted Blue-Gray, Uppercase, 12px, 0.07em tracking)
    ========================================================================== */
-.admin-sidebar-label {
+.admin-sidebar-label,
+.admin-nav-section {
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--admin-sidebar-label);
-    padding: 14px 10px 4px 10px;
+    letter-spacing: 0.07em;
+    color: #64748B;
+    padding: 16px 12px 6px 14px;
     line-height: 1;
     user-select: none;
 }
 
-.admin-sidebar-label:first-of-type {
+.admin-sidebar-label:first-of-type,
+.admin-nav-section:first-child {
     padding-top: 6px;
 }
 
 /* ==========================================================================
-   5. NAVIGATION ITEMS (38px Height, 14.5px Font, 18px Outline Icons)
+   5. NAVIGATION ITEMS (44px Height, Stable Dimensions, Zero Layout Shift)
    ========================================================================== */
 .admin-nav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    height: 38px;
-    min-height: 38px;
-    padding: 0 10px;
+    gap: 12px;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    padding: 0 12px 0 14px;
     color: var(--admin-sidebar-text);
     text-decoration: none;
     font-weight: 500;
-    font-size: 14.5px;
-    line-height: 1.4;
+    font-size: 14px;
+    line-height: 1;
     border-radius: 6px;
     white-space: nowrap;
     transition: background-color 150ms ease, color 150ms ease;
@@ -196,6 +205,7 @@
     position: relative;
     margin-bottom: 2px;
     outline: none;
+    border: 1px solid transparent;
 }
 
 .admin-nav-item:last-of-type {
@@ -204,20 +214,22 @@
 
 .admin-nav-item i {
     font-size: 18px;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: var(--admin-sidebar-text-muted);
     transition: color 150ms ease;
+    text-align: center;
 }
 
 .admin-nav-item span {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     flex: 1 1 auto;
     letter-spacing: -0.01em;
 }
@@ -229,16 +241,16 @@
 }
 
 .admin-nav-item:hover i {
-    color: var(--admin-sidebar-active-text);
+    color: var(--admin-sidebar-hover-text);
 }
 
 /* Keyboard Focus State (Accessibility) */
 .admin-nav-item:focus-visible {
     outline: 2px solid #2563EB;
-    outline-offset: 2px;
+    outline-offset: 1px;
 }
 
-/* Active State (Soft Blue Background + Left Indicator) */
+/* Active State (Soft Blue Background + Fixed Left Indicator) */
 .admin-nav-item.active {
     color: var(--admin-sidebar-active-text);
     background-color: var(--admin-sidebar-active-bg);
@@ -253,18 +265,18 @@
     content: '';
     position: absolute;
     left: 0;
-    top: 4px;
-    bottom: 4px;
-    width: 3px;
+    top: 6px;
+    bottom: 6px;
+    width: 3.5px;
     background-color: #2563EB;
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 4px 4px 0;
 }
 
 /* ==========================================================================
    6. SIDEBAR FOOTER & LOGOUT
    ========================================================================== */
 .admin-sidebar-footer {
-    padding: 8px 10px 10px 10px;
+    padding: 10px 12px 12px 12px;
     border-top: 1px solid var(--admin-sidebar-border);
     display: flex;
     flex-direction: column;
@@ -277,17 +289,18 @@
 .admin-logout-btn {
     display: flex;
     align-items: center;
-    gap: 10px;
-    height: 38px;
-    min-height: 38px;
-    padding: 0 10px;
+    gap: 12px;
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+    padding: 0 12px 0 14px;
     color: #475569;
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 6px;
-    font-size: 14.5px;
+    font-size: 14px;
     font-weight: 500;
-    line-height: 1.4;
+    line-height: 1;
     cursor: pointer;
     transition: background-color 150ms ease, color 150ms ease;
     width: 100%;
@@ -298,21 +311,24 @@
 
 .admin-logout-btn i {
     font-size: 18px;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     color: var(--admin-sidebar-text-muted);
     transition: color 150ms ease;
+    text-align: center;
 }
 
 .admin-logout-btn span {
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
     flex: 1 1 auto;
+    letter-spacing: -0.01em;
 }
 
 .admin-logout-btn:hover {
@@ -326,7 +342,7 @@
 
 .admin-logout-btn:focus-visible {
     outline: 2px solid #DC2626;
-    outline-offset: 2px;
+    outline-offset: 1px;
 }
 
 /* ==========================================================================
@@ -346,7 +362,9 @@
     transition: opacity 160ms ease;
 }
 
-.admin-sidebar-backdrop.active {
+.admin-sidebar-backdrop.active,
+.admin-sidebar-backdrop.visible,
+.admin-sidebar-backdrop.show {
     display: block;
     opacity: 1;
 }
@@ -357,9 +375,10 @@
 .admin-wrapper.admin-sidebar-collapsed .admin-sidebar,
 .admin-layout.admin-sidebar-collapsed .admin-sidebar,
 .admin-sidebar.collapsed {
-    width: var(--sidebar-collapsed-width, 80px) !important;
-    min-width: var(--sidebar-collapsed-width, 80px) !important;
-    max-width: var(--sidebar-collapsed-width, 80px) !important;
+    width: var(--sidebar-collapsed-width, 72px) !important;
+    min-width: var(--sidebar-collapsed-width, 72px) !important;
+    max-width: var(--sidebar-collapsed-width, 72px) !important;
+    flex: 0 0 var(--sidebar-collapsed-width, 72px) !important;
 }
 
 .admin-wrapper.admin-sidebar-collapsed .admin-sidebar .admin-brand-info,
@@ -400,31 +419,26 @@
     justify-content: center;
 }
 
-.admin-wrapper.admin-sidebar-collapsed .admin-main,
-.admin-layout.admin-sidebar-collapsed .admin-main,
-.admin-sidebar.collapsed ~ .admin-main {
-    margin-left: var(--sidebar-collapsed-width, 80px) !important;
-    width: calc(100% - var(--sidebar-collapsed-width, 80px)) !important;
-    max-width: calc(100% - var(--sidebar-collapsed-width, 80px)) !important;
-}
-
 /* ==========================================================================
    9. RESPONSIVE BREAKPOINTS
    ========================================================================== */
-@media (max-width: 991.98px) {
+@media (max-width: 768px) {
     .admin-sidebar {
-        position: fixed;
+        position: fixed !important;
         left: 0;
         top: 0;
         bottom: 0;
-        width: 280px !important;
+        width: 260px !important;
+        min-width: 260px !important;
         max-width: 85vw !important;
         transform: translateX(-100%);
         z-index: 1050;
-        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
+        box-shadow: none;
     }
 
-    .admin-sidebar.show {
+    .admin-sidebar.show,
+    .admin-sidebar.open {
         transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(15, 23, 42, 0.12);
     }
 }

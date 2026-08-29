@@ -8,653 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="../../css/layouts/admin.css" rel="stylesheet">
-    <style>
-        /* ============================================================
-           DASHBOARD-SPECIFIC STYLES
-           ============================================================ */
-
-        /* --- Page Identity Bar --- */
-        .dash-identity-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
-        .dash-identity-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #F1F5F9;
-            border: 1px solid var(--adm-border);
-            border-radius: 100px;
-            padding: 4px 11px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--adm-text-2);
-        }
-        .dash-identity-chip.live {
-            background: #F0FDF4;
-            border-color: #BBF7D0;
-            color: var(--adm-green);
-        }
-        .dash-identity-chip i { font-size: 11px; }
-        .dash-live-dot {
-            width: 7px; height: 7px;
-            background: var(--adm-green);
-            border-radius: 50%;
-            animation: livePulse 2s infinite;
-            flex-shrink: 0;
-        }
-        @keyframes livePulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        .dash-page-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--adm-text);
-            margin: 0 0 4px 0;
-            line-height: 1.25;
-            letter-spacing: -0.3px;
-        }
-        .dash-page-sub {
-            font-size: 13.5px;
-            color: var(--adm-muted);
-            margin: 0;
-        }
-        .dash-campus-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            padding: 10px 16px;
-            flex-shrink: 0;
-        }
-        .dash-campus-badge i { font-size: 18px; color: var(--adm-primary); }
-        .dash-campus-label {
-            font-size: 9.5px;
-            font-weight: 700;
-            letter-spacing: 0.07em;
-            text-transform: uppercase;
-            color: var(--adm-muted);
-            line-height: 1;
-            margin-bottom: 2px;
-        }
-        .dash-campus-date {
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--adm-text);
-            line-height: 1;
-        }
-
-        /* --- Timeframe Filter --- */
-        .dash-timeframe-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            padding: 7px 14px;
-            margin-bottom: 20px;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .dash-tf-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .dash-tf-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--adm-muted);
-            flex-shrink: 0;
-        }
-        .dash-tf-btns {
-            display: flex;
-            gap: 3px;
-        }
-        .dash-tf-btn {
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: var(--adm-radius-sm);
-            padding: 4px 13px;
-            font-size: 12.5px;
-            font-weight: 500;
-            color: var(--adm-muted);
-            cursor: pointer;
-            transition: all 0.15s;
-            white-space: nowrap;
-        }
-        .dash-tf-btn:hover { background: var(--adm-border-lt); color: var(--adm-text); }
-        .dash-tf-btn.active {
-            background: var(--adm-primary);
-            border-color: var(--adm-primary);
-            color: #fff;
-            font-weight: 600;
-        }
-        .dash-tf-right {
-            font-size: 12px;
-            color: var(--adm-muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-        }
-        .dash-tf-right i { color: var(--adm-primary); }
-
-        /* --- Section Header --- */
-        .dash-section-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            gap: 8px;
-        }
-        .dash-section-title {
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--adm-text);
-            margin: 0;
-        }
-        .dash-section-hint {
-            font-size: 12px;
-            color: var(--adm-muted);
-            text-align: right;
-        }
-
-        /* --- Operational KPI Cards (6-col compact) --- */
-        .dash-ops-grid {
-            display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .dash-ops-card {
-            background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            padding: 14px 14px 12px;
-            position: relative;
-            overflow: hidden;
-            cursor: default;
-            transition: box-shadow 0.15s, transform 0.15s;
-        }
-        .dash-ops-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            border-radius: var(--adm-radius) var(--adm-radius) 0 0;
-        }
-        .dash-ops-card:hover { box-shadow: var(--adm-shadow); transform: translateY(-1px); }
-
-        .dash-ops-card.accent-amber::before  { background: var(--adm-amber); }
-        .dash-ops-card.accent-amber .dash-ops-icon  { color: var(--adm-amber); }
-        .dash-ops-card.accent-orange::before { background: #F97316; }
-        .dash-ops-card.accent-orange .dash-ops-icon { color: #F97316; }
-        .dash-ops-card.accent-blue::before   { background: var(--adm-primary); }
-        .dash-ops-card.accent-blue .dash-ops-icon   { color: var(--adm-primary); }
-        .dash-ops-card.accent-green::before  { background: var(--adm-green); }
-        .dash-ops-card.accent-green .dash-ops-icon  { color: var(--adm-green); }
-        .dash-ops-card.accent-purple::before { background: var(--adm-purple); }
-        .dash-ops-card.accent-purple .dash-ops-icon { color: var(--adm-purple); }
-        .dash-ops-card.accent-red::before    { background: var(--adm-red); }
-        .dash-ops-card.accent-red .dash-ops-icon    { color: var(--adm-red); }
-
-        .dash-ops-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .dash-ops-label {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--adm-muted);
-            line-height: 1.35;
-        }
-        .dash-ops-icon { font-size: 15px; opacity: 0.85; }
-        .dash-ops-value {
-            font-size: 40px;
-            font-weight: 800;
-            color: var(--adm-text);
-            line-height: 1;
-            margin: 10px 0 16px 0;
-            letter-spacing: -1px;
-        }
-        .dash-ops-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 8px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-        .dash-ops-badge i { font-size: 9px; }
-        .dash-ops-badge.amber  { background: var(--adm-amber-lt);  color: var(--adm-amber); }
-        .dash-ops-badge.orange { background: #FFF7ED;               color: #C2410C; }
-        .dash-ops-badge.blue   { background: var(--adm-primary-lt); color: var(--adm-primary); }
-        .dash-ops-badge.green  { background: var(--adm-green-lt);   color: var(--adm-green); }
-        .dash-ops-badge.purple { background: var(--adm-purple-lt);  color: var(--adm-purple); }
-        .dash-ops-badge.red    { background: var(--adm-red-lt);     color: var(--adm-red); }
-
-        /* --- Financial Intelligence --- */
-        .dash-fin-grid {
-            display: grid;
-            grid-template-columns: 1.35fr 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .dash-fin-card {
-            background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            padding: 16px 18px;
-        }
-        .dash-fin-card.primary {
-            background: linear-gradient(140deg, #0B1F4D 0%, #1D4ED8 100%);
-            border-color: transparent;
-            color: #fff;
-        }
-        .dash-fin-label {
-            font-size: 11.5px;
-            font-weight: 600;
-            color: var(--adm-muted);
-            margin-bottom: 6px;
-        }
-        .dash-fin-card.primary .dash-fin-label { color: rgba(255,255,255,0.65); }        .dash-fin-value {
-            font-size: 38px;
-            font-weight: 800;
-            color: var(--adm-text);
-            line-height: 1;
-            margin: 12px 0;
-            letter-spacing: -1px;
-        }
-        .dash-fin-sub {
-            font-size: 12px;
-            color: var(--adm-muted);
-            margin: 0;
-        }
-
-        /* Primary Finance Card */
-        .dash-fin-card.primary {
-            background: linear-gradient(135deg, var(--adm-primary-dk) 0%, var(--adm-primary) 100%);
-            border: none;
-            color: #fff;
-            padding-bottom: 20px;
-        }
-        .dash-fin-card.primary .dash-fin-label,
-        .dash-fin-card.primary .dash-fin-sub { color: rgba(255,255,255,0.85); }
-        .dash-fin-card.primary .dash-fin-value { color: #fff; font-size: 46px; }
-        .dash-fin-meta {
-            font-size: 12px;
-            color: var(--adm-muted);
-        }
-        .dash-fin-card.primary .dash-fin-meta { color: rgba(255,255,255,0.6); }
-        .dash-fin-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 4px;
-        }
-        .dash-fin-badge {
-            font-size: 11px;
-            font-weight: 700;
-            background: rgba(255,255,255,0.15);
-            color: #86EFAC;
-            padding: 2px 7px;
-            border-radius: 100px;
-        }
-        .dash-fin-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.75);
-            margin-top: 10px;
-            cursor: pointer;
-            transition: color 0.15s;
-            text-decoration: none;
-        }
-        .dash-fin-link:hover { color: #fff; }
-        .dash-fin-highlight {
-            font-size: 18px;
-            font-weight: 800;
-            color: #F97316;
-        }
-        .dash-fin-warn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11.5px;
-            color: var(--adm-amber);
-            font-weight: 600;
-        }
-
-        /* --- Quick Actions --- */
-        .dash-qa-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            padding: 10px 16px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .dash-qa-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--adm-muted);
-            margin-right: 4px;
-            flex-shrink: 0;
-        }
-        .dash-qa-sep {
-            width: 1px; height: 22px;
-            background: var(--adm-border);
-            margin: 0 4px;
-            flex-shrink: 0;
-        }
-        .dash-qa-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: var(--adm-radius-sm);
-            border: 1px solid var(--adm-border);
-            background: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--adm-text-2);
-            cursor: pointer;
-            transition: all 0.15s;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .dash-qa-btn i { font-size: 13px; }
-        .dash-qa-btn:hover {
-            background: var(--adm-primary-lt);
-            border-color: var(--adm-primary);
-            color: var(--adm-primary);
-        }
-
-        /* --- Analytics Section --- */
-        .dash-analytics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            margin-bottom: 14px;
-        }
-
-        /* Bar Chart */
-        .dash-bar-chart {
-            display: flex;
-            align-items: flex-end;
-            gap: 5px;
-            height: 110px;
-            padding: 0 4px;
-        }
-        .dash-bar-group {
-            flex: 1;
-            display: flex;
-            gap: 2px;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        .dash-bar {
-            flex: 1;
-            border-radius: 3px 3px 0 0;
-            min-height: 2px;
-            transition: opacity 0.15s;
-            cursor: pointer;
-        }
-        .dash-bar:hover { opacity: 0.75; }
-        .dash-bar.enroll { background: var(--adm-primary); }
-        .dash-bar.results { background: var(--adm-purple); }
-        .dash-bar-labels {
-            display: flex;
-            gap: 5px;
-            padding: 5px 4px 0;
-        }
-        .dash-bar-month {
-            flex: 1;
-            text-align: center;
-            font-size: 9.5px;
-            color: var(--adm-muted);
-            font-weight: 500;
-        }
-        .dash-chart-legend {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .dash-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11.5px;
-            color: var(--adm-muted);
-            font-weight: 500;
-        }
-        .dash-legend-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        /* Donut */
-        .dash-donut-wrap {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .dash-donut-svg-wrap {
-            position: relative;
-            flex-shrink: 0;
-        }
-        .dash-donut-center {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        .dash-donut-total-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--adm-muted);
-            line-height: 1;
-        }
-        .dash-donut-total-num {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--adm-text);
-            line-height: 1.2;
-        }
-        .dash-major-list {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 0;
-        }
-        .dash-major-item {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 12px;
-        }
-        .dash-major-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .dash-major-name {
-            flex: 1;
-            color: var(--adm-text-2);
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .dash-major-count { font-weight: 700; color: var(--adm-text); }
-        .dash-major-pct   { color: var(--adm-muted); min-width: 30px; text-align: right; }
-
-        /* --- Bottom Tables Row --- */
-        .dash-tables-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        /* Progress bar in table */
-        .dash-progress {
-            height: 4px;
-            background: var(--adm-border-lt);
-            border-radius: 100px;
-            overflow: hidden;
-            width: 72px;
-        }
-        .dash-progress-bar {
-            height: 100%;
-            background: var(--adm-primary);
-            border-radius: 100px;
-        }
-        .dash-progress-bar.complete { background: var(--adm-green); }
-
-        /* Student avatar circle */
-        .dash-avatar {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1.5px solid var(--adm-border);
-            flex-shrink: 0;
-        }
-        .dash-avatar-fallback {
-            width: 28px; height: 28px;
-            border-radius: 50%;
-            background: var(--adm-primary);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        /* Exam row */
-        .dash-exam-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .dash-exam-item {
-            padding: 10px 12px;
-            border-radius: var(--adm-radius-sm);
-            border: 1px solid var(--adm-border-lt);
-            background: var(--adm-bg);
-            transition: border-color 0.15s, background 0.15s;
-        }
-        .dash-exam-item:hover {
-            border-color: var(--adm-border);
-            background: #fff;
-        }
-        .dash-exam-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--adm-text);
-            margin-bottom: 2px;
-        }
-        .dash-exam-course {
-            font-size: 11.5px;
-            color: var(--adm-muted);
-            margin-bottom: 6px;
-        }
-        .dash-exam-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 11.5px;
-            color: var(--adm-text-2);
-            flex-wrap: wrap;
-        }
-        .dash-exam-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .dash-exam-meta-item i { color: var(--adm-muted); font-size: 11px; }
-
-        /* --- Search Results Dropdown --- */
-        .search-results-dropdown {
-            position: absolute; top: calc(100% + 6px); left: 0;
-            width: 360px; background: #fff;
-            border: 1px solid var(--adm-border);
-            border-radius: var(--adm-radius);
-            box-shadow: var(--adm-shadow-lg);
-            z-index: 400; display: none;
-            max-height: 320px; overflow-y: auto;
-        }
-        .search-results-dropdown.active { display: block; }
-        .search-result-item {
-            padding: 9px 14px;
-            display: flex; align-items: center; justify-content: space-between;
-            color: var(--adm-text); border-bottom: 1px solid var(--adm-border-lt);
-            font-size: 13px; cursor: pointer; transition: background 0.12s;
-            text-decoration: none;
-        }
-        .search-result-item:hover { background: var(--adm-bg); }
-        .search-result-item:last-child { border-bottom: none; }
-        .notifications-dropdown {
-            position: absolute; top: calc(100% + 6px); right: 0;
-            width: 320px; background: #fff;
-            border: 1px solid var(--adm-border); border-radius: var(--adm-radius);
-            box-shadow: var(--adm-shadow-lg); z-index: 400; display: none;
-        }
-        .notifications-dropdown.active { display: block; }
-        .notification-item {
-            padding: 10px 14px; display: flex; gap: 10px;
-            border-bottom: 1px solid var(--adm-border-lt); cursor: pointer; transition: background 0.12s;
-        }
-        .notification-item:hover { background: var(--adm-bg); }
-
-        /* ---- RESPONSIVE ---- */
-        @media (max-width: 1280px) {
-            .dash-ops-grid { grid-template-columns: repeat(3, 1fr); }
-            .dash-fin-grid  { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 1024px) {
-            .dash-analytics-grid { grid-template-columns: 1fr; }
-            .dash-tables-grid    { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 768px) {
-            .dash-ops-grid  { grid-template-columns: repeat(2, 1fr); }
-            .dash-fin-grid  { grid-template-columns: 1fr; }
-            .dash-qa-bar    { gap: 6px; }
-            .dash-page-title { font-size: 20px; }
-        }
-        @media (max-width: 480px) {
-            .dash-ops-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .dash-ops-value { font-size: 22px; }
-        }
-    </style>
+    <link href="../../css/pages/dashboard.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
@@ -667,41 +21,41 @@
 
         <!-- Main -->
         <main class="admin-main">
-            <!-- Topbar -->
+            <!-- Topbar (Global Header) -->
             <header class="admin-topbar">
-                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar">
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar" type="button">
                     <i class="bi bi-list"></i>
                 </button>
 
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search search-icon"></i>
                     <input type="text" class="admin-search-input" id="globalSearchInput"
-                           placeholder="Search users, courses, enrollments…" autocomplete="off">
+                           placeholder="Search users, courses, enrollments…" autocomplete="off" aria-label="Search users, courses, enrollments">
                     <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
                     <div class="search-results-dropdown" id="searchResultsContainer"></div>
                 </div>
 
                 <div class="admin-topbar-actions">
                     <div class="position-relative">
-                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button">
                             <i class="bi bi-bell"></i>
-                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none"></span>
+                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none">0</span>
                         </button>
                         <div class="notifications-dropdown" id="notificationsMenu">
                             <div style="padding:12px 16px 8px;border-bottom:1px solid var(--adm-border);display:flex;justify-content:space-between;align-items:center;">
                                 <span style="font-size:13px;font-weight:700">Notifications</span>
-                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" style="font-size:11px;padding:2px 8px">Mark all read</button>
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" type="button" style="font-size:11px;padding:2px 8px">Mark all read</button>
                             </div>
                             <div id="notificationsList" style="padding:4px 0;max-height:280px;overflow-y:auto;"></div>
                         </div>
                     </div>
 
-                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&size=64"
-                             alt="Admin" class="admin-topbar-avatar" id="topbarAvatar">
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" role="button" tabindex="0">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Johnathan+Vance&background=2563EB&color=fff&size=64"
+                             alt="Dr. Johnathan Vance" class="admin-topbar-avatar" id="topbarAvatar">
                         <div class="admin-topbar-profile-info d-none d-md-block">
-                            <div class="profile-name" id="topbarAdminName">Admin</div>
-                            <div class="profile-role">System Administrator</div>
+                            <div class="profile-name" id="topbarAdminName">Dr. Johnathan Vance</div>
+                            <div class="profile-role">Administrator</div>
                         </div>
                     </div>
                 </div>
@@ -712,223 +66,159 @@
                  ================================================ -->
             <div class="admin-content">
 
-                <!-- ── PAGE HEADER ── -->
-                <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
-                    <div>
-                        <!-- Identity chips -->
-                        <div class="dash-identity-bar">
-                            <span class="dash-identity-chip">
-                                <i class="bi bi-mortarboard"></i>
-                                AUB Digital Academy
+                <!-- ── 1. DASHBOARD HEADER ── -->
+                <div class="dash-welcome-header">
+                    <div class="dash-welcome-left">
+                        <div class="dash-welcome-badge">
+                            <span class="dash-live-dot"></span>
+                            <span id="semesterLabel">Fall Semester 2026</span>
+                            <span class="dash-badge-divider">•</span>
+                            <span id="currentDateBadge">August 29, 2026</span>
+                        </div>
+                        <h1 class="dash-welcome-title">Welcome back, Dr. Johnathan!</h1>
+                        <p class="dash-welcome-sub">Here's what's happening at AUB Digital Academy today.</p>
+                    </div>
+
+                    <div class="dash-welcome-right">
+                        <div class="dash-header-controls">
+                            <select class="adm-form-control dash-period-select" id="timeframeSelect" aria-label="Select timeframe">
+                                <option value="all_time" selected>All Time</option>
+                                <option value="this_month">This Month (August 2026)</option>
+                                <option value="last_month">Last Month (July 2026)</option>
+                                <option value="this_year">Academic Year 2026</option>
+                            </select>
+                            <button class="adm-btn adm-btn-outline dash-export-btn" id="exportReportBtn" type="button" title="Export current dashboard metrics">
+                                <i class="bi bi-download"></i>
+                                <span>Export Report</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 2. KPI CARDS (5 Core Institutional Indicators) ── -->
+                <div class="dash-kpi-grid">
+                    <!-- 1. Total Students -->
+                    <div class="dash-kpi-card">
+                        <div class="dash-kpi-header">
+                            <span class="dash-kpi-label">TOTAL STUDENTS</span>
+                            <div class="dash-kpi-icon-wrap icon-blue">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                        </div>
+                        <div class="dash-kpi-value" id="kpiTotalStudents">5</div>
+                        <div class="dash-kpi-footer">
+                            <span class="dash-kpi-badge badge-positive">
+                                <i class="bi bi-arrow-up-short"></i> +12.5%
                             </span>
-                            <span class="dash-identity-chip" id="semesterChip">
-                                <i class="bi bi-calendar-week"></i>
-                                <span id="semesterLabel">Fall Semester 2026</span>
+                            <span class="dash-kpi-subtext">vs last month</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Active Courses -->
+                    <div class="dash-kpi-card">
+                        <div class="dash-kpi-header">
+                            <span class="dash-kpi-label">ACTIVE COURSES</span>
+                            <div class="dash-kpi-icon-wrap icon-cyan">
+                                <i class="bi bi-journal-bookmark-fill"></i>
+                            </div>
+                        </div>
+                        <div class="dash-kpi-value" id="kpiActiveCourses">5</div>
+                        <div class="dash-kpi-footer">
+                            <span class="dash-kpi-badge badge-neutral">
+                                <i class="bi bi-check2-circle"></i> 100%
                             </span>
-                            <span class="dash-identity-chip live">
-                                <span class="dash-live-dot"></span>
-                                Live Sync
+                            <span class="dash-kpi-subtext">published &amp; active</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. Enrollments -->
+                    <div class="dash-kpi-card">
+                        <div class="dash-kpi-header">
+                            <span class="dash-kpi-label">ENROLLMENTS</span>
+                            <div class="dash-kpi-icon-wrap icon-green">
+                                <i class="bi bi-person-check-fill"></i>
+                            </div>
+                        </div>
+                        <div class="dash-kpi-value" id="kpiEnrollments">5</div>
+                        <div class="dash-kpi-footer">
+                            <span class="dash-kpi-badge badge-positive">
+                                <i class="bi bi-arrow-up-short"></i> +8.2%
                             </span>
+                            <span class="dash-kpi-subtext">vs last term</span>
                         </div>
-                        <h1 class="dash-page-title">Executive Command Center</h1>
-                        <p class="dash-page-sub">Real-time student intake, curriculum analytics, and institutional financial health</p>
                     </div>
 
-                    <div class="dash-campus-badge">
-                        <i class="bi bi-geo-alt"></i>
-                        <div>
-                            <div class="dash-campus-label">Campus Date</div>
-                            <div class="dash-campus-date" id="currentDateBadge">—</div>
+                    <!-- 4. Pending Payments -->
+                    <div class="dash-kpi-card">
+                        <div class="dash-kpi-header">
+                            <span class="dash-kpi-label">PENDING PAYMENTS</span>
+                            <div class="dash-kpi-icon-wrap icon-amber">
+                                <i class="bi bi-credit-card-2-front-fill"></i>
+                            </div>
+                        </div>
+                        <div class="dash-kpi-value" id="kpiPendingPayments">1</div>
+                        <div class="dash-kpi-footer">
+                            <span class="dash-kpi-badge badge-warning">
+                                <i class="bi bi-clock-fill"></i> $120.00
+                            </span>
+                            <span class="dash-kpi-subtext">awaiting payment</span>
+                        </div>
+                    </div>
+
+                    <!-- 5. Upcoming Exams -->
+                    <div class="dash-kpi-card">
+                        <div class="dash-kpi-header">
+                            <span class="dash-kpi-label">UPCOMING EXAMS</span>
+                            <div class="dash-kpi-icon-wrap icon-purple">
+                                <i class="bi bi-clipboard-check-fill"></i>
+                            </div>
+                        </div>
+                        <div class="dash-kpi-value" id="kpiUpcomingExams">3</div>
+                        <div class="dash-kpi-footer">
+                            <span class="dash-kpi-badge badge-purple">
+                                <i class="bi bi-calendar-event"></i> Next: Aug 28
+                            </span>
+                            <span class="dash-kpi-subtext">3 scheduled</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── TIMEFRAME FILTER ── -->
-                <div class="dash-timeframe-bar">
-                    <div class="dash-tf-left">
-                        <span class="dash-tf-label">Timeframe:</span>
-                        <div class="dash-tf-btns" id="timeframeBtns">
-                            <button class="dash-tf-btn active" data-tf="all_time">All Time</button>
-                            <button class="dash-tf-btn" data-tf="today">Today</button>
-                            <button class="dash-tf-btn" data-tf="this_week">This Week</button>
-                            <button class="dash-tf-btn" data-tf="this_month">This Month</button>
-                            <button class="dash-tf-btn" data-tf="custom">Custom Range</button>
-                        </div>
+                <!-- ── 3. QUICK ACTIONS BAR ── -->
+                <div class="dash-quick-actions">
+                    <div class="dash-qa-title">
+                        <i class="bi bi-lightning-charge-fill text-primary"></i>
+                        <span>Quick Actions</span>
                     </div>
-                    <div class="dash-tf-right">
-                        <i class="bi bi-info-circle"></i>
-                        Showing: <strong id="tfShowingLabel">All Time Operational Data</strong>
-                    </div>
-                </div>
-
-                <!-- ── OPERATIONAL OVERVIEW ── -->
-                <div class="dash-section-header">
-                    <div class="dash-section-title">Operational Overview</div>
-                    <div class="dash-section-hint">Real-time status across key academic workflows</div>
-                </div>
-
-                <div class="dash-ops-grid">
-                    <!-- Pending Enrollments -->
-                    <div class="dash-ops-card accent-amber">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending Enrollments</div>
-                            <i class="bi bi-person-plus dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsPendingEnrollments">—</div>
-                        <span class="dash-ops-badge amber"><i class="bi bi-circle-fill"></i> Requires review</span>
-                    </div>
-
-                    <!-- Pending Payments -->
-                    <div class="dash-ops-card accent-orange">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending Payments</div>
-                            <i class="bi bi-credit-card dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsPendingPayments">—</div>
-                        <span class="dash-ops-badge orange"><i class="bi bi-circle-fill"></i> Awaiting payment</span>
-                    </div>
-
-                    <!-- Active Courses -->
-                    <div class="dash-ops-card accent-blue">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Active Courses</div>
-                            <i class="bi bi-play-circle dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsActiveCourses">—</div>
-                        <span class="dash-ops-badge blue"><i class="bi bi-circle-fill"></i> Open</span>
-                    </div>
-
-                    <!-- Completed Courses -->
-                    <div class="dash-ops-card accent-green">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Completed Courses</div>
-                            <i class="bi bi-check-circle dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsCompletedCourses">—</div>
-                        <span class="dash-ops-badge green"><i class="bi bi-circle-fill"></i> Completed</span>
-                    </div>
-
-                    <!-- Upcoming Exams -->
-                    <div class="dash-ops-card accent-purple">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Upcoming Exams</div>
-                            <i class="bi bi-clipboard-check dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsUpcomingExams">—</div>
-                        <span class="dash-ops-badge purple"><i class="bi bi-circle-fill"></i> Scheduled</span>
-                    </div>
-
-                    <!-- Pending Results -->
-                    <div class="dash-ops-card accent-red">
-                        <div class="dash-ops-top">
-                            <div class="dash-ops-label">Pending Results</div>
-                            <i class="bi bi-hourglass-split dash-ops-icon"></i>
-                        </div>
-                        <div class="dash-ops-value" id="opsPendingResults">—</div>
-                        <span class="dash-ops-badge red"><i class="bi bi-circle-fill"></i> Needs grading</span>
+                    <div class="dash-qa-buttons">
+                        <a href="academic-management.html?tab=courses&action=create-course" class="dash-qa-action" id="qaAddCourseBtn">
+                            <i class="bi bi-plus-circle-fill"></i>
+                            <span>Add Course</span>
+                        </a>
+                        <a href="user-management.html?action=create-user" class="dash-qa-action" id="qaAddUserBtn">
+                            <i class="bi bi-person-plus-fill"></i>
+                            <span>Add Student</span>
+                        </a>
+                        <a href="exam-quiz-management.html?action=schedule-exam" class="dash-qa-action" id="qaScheduleExamBtn">
+                            <i class="bi bi-calendar-plus-fill"></i>
+                            <span>Schedule Exam</span>
+                        </a>
+                        <a href="enrollment-management.html?action=enroll-student" class="dash-qa-action" id="qaEnrollStudentBtn">
+                            <i class="bi bi-person-check-fill"></i>
+                            <span>Enroll Student</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- ── FINANCIAL INTELLIGENCE ── -->
-                <div class="dash-section-header">
-                    <div class="dash-section-title">Financial Intelligence</div>
-                    <div class="dash-section-hint">Tuition volume, pending receivables, and invoice health</div>
-                </div>
-
-                <div class="dash-fin-grid">
-                    <!-- Primary: Total Paid Revenue -->
-                    <div class="dash-fin-card primary">
-                        <div class="dash-fin-top">
-                            <div class="dash-fin-label">Total Paid Revenue</div>
-                            <span class="dash-fin-badge" id="finRevenueTrend">+14.5%</span>
-                        </div>
-                        <div class="dash-fin-value" id="finTotalPaidRevenue">$0.00</div>
-                        <div class="dash-fin-meta" id="finPaidInvoiceCount">0 Paid Invoices</div>
-                        <a href="invoices.html" class="dash-fin-link">View Invoices <i class="bi bi-arrow-right"></i></a>
-                    </div>
-
-                    <!-- Pending Payments -->
-                    <div class="dash-fin-card">
-                        <div class="dash-fin-label">Pending Payments</div>
-                        <div class="dash-fin-value dash-fin-highlight" id="finPendingAmount">$0.00</div>
-                        <div class="dash-fin-meta" id="finPendingCount">0 pending payments</div>
-                    </div>
-
-                    <!-- Outstanding Invoices -->
-                    <div class="dash-fin-card">
-                        <div class="dash-fin-label">Outstanding Invoices</div>
-                        <div class="dash-fin-value" id="finOutstandingCount">0</div>
-                        <div class="dash-fin-warn" id="finOutstandingStatus">
-                            <i class="bi bi-clock"></i> Awaiting clearance
-                        </div>
-                    </div>
-
-                    <!-- Total Gross Volume -->
-                    <div class="dash-fin-card">
-                        <div class="dash-fin-label">Total Gross Volume</div>
-                        <div class="dash-fin-value" id="finGrossVolume">$0.00</div>
-                        <div class="dash-fin-meta">All recorded transactions</div>
-                    </div>
-                </div>
-
-                <!-- ── QUICK ACTIONS ── -->
-                <div class="dash-qa-bar">
-                    <span class="dash-qa-label">⚡ Quick Actions</span>
-                    <span class="dash-qa-sep"></span>
-                    <a href="course-management.html" class="dash-qa-btn">
-                        <i class="bi bi-plus-circle"></i> Add Course
-                    </a>
-                    <a href="user-management.html" class="dash-qa-btn">
-                        <i class="bi bi-person-plus"></i> Add User
-                    </a>
-                    <a href="exam-quiz-management.html" class="dash-qa-btn">
-                        <i class="bi bi-calendar-plus"></i> Schedule Exam
-                    </a>
-                    <a href="enrollment-management.html" class="dash-qa-btn">
-                        <i class="bi bi-person-check"></i> Enroll Student
-                    </a>
-                </div>
-
-                <!-- ── INSTITUTIONAL ANALYTICS ── -->
-                <div class="dash-section-header">
-                    <div class="dash-section-title">Institutional Analytics</div>
-                    <div class="dash-section-hint">Student enrollment patterns, examination results, and discipline distribution</div>
-                </div>
-
+                <!-- ── 4. ANALYTICS SECTION (2 Columns) ── -->
                 <div class="dash-analytics-grid">
-                    <!-- Left: Bar Chart -->
-                    <div class="admin-card mb-0">
-                        <div class="admin-card-header">
-                            <div>
-                                <div class="admin-card-title">Enrollment &amp; Exam Trends</div>
-                                <div class="admin-card-subtitle">Monthly student registrations vs. exam completions</div>
-                            </div>
-                            <div class="dash-chart-legend">
-                                <div class="dash-legend-item">
-                                    <span class="dash-legend-dot" style="background:var(--adm-primary)"></span>
-                                    Enrollments
-                                </div>
-                                <div class="dash-legend-item">
-                                    <span class="dash-legend-dot" style="background:var(--adm-purple)"></span>
-                                    Exam Results
-                                </div>
-                            </div>
-                        </div>
-                        <div class="admin-card-body" style="padding-bottom:0">
-                            <div class="dash-bar-chart" id="enrollmentBarChart"></div>
-                            <div class="dash-bar-labels" id="enrollmentBarLabels"></div>
-                        </div>
-                    </div>
-
-                    <!-- Right: Donut -->
+                    <!-- Left: Students by Major -->
                     <div class="admin-card mb-0">
                         <div class="admin-card-header">
                             <div>
                                 <div class="admin-card-title">Students by Major</div>
                                 <div class="admin-card-subtitle">Active student enrollment by academic specialization</div>
                             </div>
-                            <select class="adm-form-control" id="majorTimeframeSelect"
-                                    style="width:110px;font-size:12px">
+                            <select class="adm-form-control dash-card-select" id="majorTimeframeSelect" aria-label="Select major timeframe">
                                 <option value="all_time">All Time</option>
                                 <option value="this_month">This Month</option>
                                 <option value="last_month">Last Month</option>
@@ -936,35 +226,67 @@
                             </select>
                         </div>
                         <div class="admin-card-body">
-                            <div class="dash-donut-wrap">
-                                <div class="dash-donut-svg-wrap">
-                                    <svg viewBox="0 0 36 36" width="120" height="120"
-                                         style="transform:rotate(-90deg)" id="enrollmentDonutSvg">
-                                        <circle cx="18" cy="18" r="15.915"
-                                                fill="transparent" stroke="#E2E8F0" stroke-width="3.5"></circle>
+                            <div class="dash-donut-layout">
+                                <div class="dash-donut-chart-container">
+                                    <svg viewBox="0 0 36 36" class="dash-donut-svg" id="enrollmentDonutSvg">
+                                        <circle cx="18" cy="18" r="15.915" fill="transparent" stroke="#E2E8F0" stroke-width="3.5"></circle>
                                     </svg>
-                                    <div class="dash-donut-center">
-                                        <div class="dash-donut-total-label">TOTAL</div>
-                                        <div class="dash-donut-total-num" id="donutTotalNumber">0</div>
+                                    <div class="dash-donut-center-info">
+                                        <span class="dash-donut-center-label">TOTAL</span>
+                                        <span class="dash-donut-center-val" id="donutTotalNumber">5</span>
+                                        <span class="dash-donut-center-sub">Students</span>
                                     </div>
                                 </div>
-                                <div class="dash-major-list" id="enrollmentCategoriesList"></div>
+                                <div class="dash-donut-legend" id="enrollmentCategoriesList">
+                                    <!-- Populated dynamically: CS (2), SE (1), DS (1), Cyber (1) -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Enrollment & Exam Trends -->
+                    <div class="admin-card mb-0">
+                        <div class="admin-card-header">
+                            <div>
+                                <div class="admin-card-title">Enrollment &amp; Exam Trends</div>
+                                <div class="admin-card-subtitle">Monthly student registrations vs. exam completions</div>
+                            </div>
+                            <div class="dash-trend-legend">
+                                <div class="dash-trend-legend-item">
+                                    <span class="dash-trend-dot dot-enroll"></span>
+                                    <span>Enrollments</span>
+                                </div>
+                                <div class="dash-trend-legend-item">
+                                    <span class="dash-trend-dot dot-exam"></span>
+                                    <span>Exam Results</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="admin-card-body pb-2">
+                            <div class="dash-trend-chart-wrap">
+                                <div class="dash-bar-chart" id="enrollmentBarChart">
+                                    <!-- Populated dynamically: March to August trends -->
+                                </div>
+                                <div class="dash-bar-labels" id="enrollmentBarLabels">
+                                    <!-- Months: Mar, Apr, May, Jun, Jul, Aug -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── BOTTOM TABLES ── -->
+                <!-- ── 5. TABLES SECTION (Recent Enrollments & Upcoming Exams) ── -->
                 <div class="dash-tables-grid">
-                    <!-- Recent Enrollments -->
+                    <!-- Left: Recent Enrollments Table -->
                     <div class="admin-card mb-0">
                         <div class="admin-card-header">
                             <div>
                                 <div class="admin-card-title">Recent Enrollments</div>
-                                <div class="admin-card-subtitle">Latest student course registrations</div>
+                                <div class="admin-card-subtitle">Latest student course registrations and progress</div>
                             </div>
                             <a href="enrollment-management.html" class="adm-btn adm-btn-outline adm-btn-sm">
-                                View All <i class="bi bi-arrow-right"></i>
+                                <span>View All</span>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
                         <div class="admin-table-responsive">
@@ -973,33 +295,52 @@
                                     <tr>
                                         <th>Student</th>
                                         <th>Course</th>
-                                        <th>Enrolled</th>
+                                        <th>Enrolled Date</th>
                                         <th>Progress</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody id="recentEnrollmentsTableBody">
-                                    <tr><td colspan="5" class="text-center py-4 text-muted">Loading…</td></tr>
+                                    <tr><td colspan="5" class="text-center py-4 text-muted">Loading enrollments…</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Upcoming Exams -->
+                    <!-- Right: Upcoming Exams Card -->
                     <div class="admin-card mb-0">
                         <div class="admin-card-header">
                             <div>
                                 <div class="admin-card-title">Upcoming Exams</div>
-                                <div class="admin-card-subtitle">Scheduled academic evaluations</div>
+                                <div class="admin-card-subtitle">Scheduled academic evaluations &amp; quizzes</div>
                             </div>
                             <a href="exam-quiz-management.html" class="adm-btn adm-btn-outline adm-btn-sm">
-                                Manage Exams <i class="bi bi-arrow-right"></i>
+                                <span>Manage Exams</span>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
-                        <div class="admin-card-body pt-0">
-                            <div class="dash-exam-row" id="upcomingExamsList">
-                                <div class="text-center text-muted py-4" style="font-size:13px">Loading…</div>
+                        <div class="admin-card-body p-0">
+                            <div class="dash-exam-list" id="upcomingExamsList">
+                                <div class="text-center text-muted py-4">Loading scheduled exams…</div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 6. RECENT ACTIVITY FEED ── -->
+                <div class="admin-card mt-3 mb-0">
+                    <div class="admin-card-header">
+                        <div>
+                            <div class="admin-card-title">Recent Activity</div>
+                            <div class="admin-card-subtitle">Real-time audit log of institutional administrative events</div>
+                        </div>
+                        <span class="dash-activity-live-tag">
+                            <i class="bi bi-activity"></i> Live System Log
+                        </span>
+                    </div>
+                    <div class="admin-card-body p-0">
+                        <div class="dash-activity-list" id="recentActivityList">
+                            <!-- Populated dynamically from audit logs -->
                         </div>
                     </div>
                 </div>
@@ -1008,9 +349,8 @@
         </main>
     </div>
 
-    <div id="admToastContainer" class="adm-toast-container"></div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/admin-layout.js"></script>
     <script src="../../js/pages/admin-dashboard.js"></script>
 </body>

@@ -82,6 +82,15 @@ async function initSchema() {
     try {
         await dbAsync.run(`ALTER TABLE programs ADD COLUMN faculty TEXT DEFAULT 'Information Technology Faculty';`);
     } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN code TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN short_description TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN category_id INTEGER;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN credits INTEGER DEFAULT 120;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN image_url TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN logo_url TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN learning_outcomes TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN instructor_ids TEXT;`); } catch (e) {}
+    try { await dbAsync.run(`ALTER TABLE programs ADD COLUMN status TEXT DEFAULT 'Published';`); } catch (e) {}
 
     // 3. Users
     await dbAsync.run(`

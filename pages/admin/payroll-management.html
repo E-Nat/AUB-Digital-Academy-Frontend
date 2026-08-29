@@ -21,117 +21,47 @@
     <div class="admin-wrapper">
         
         <!-- SIDEBAR -->
-                                <!-- AUB DIGITAL ACADEMY - MINIMAL WHITE SIDEBAR -->
-        <aside class="admin-sidebar" id="adminSidebar" aria-label="Administration Sidebar Navigation">
-            <div class="admin-sidebar-brand">
-                <div class="admin-brand-header">
-                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
-                    <div class="admin-brand-info">
-                        <div class="admin-brand-title">AUB Digital Academy</div>
-                        <div class="admin-brand-subtitle">Administration Portal</div>
-                    </div>
-                </div>
-            </div>
-
-            <nav class="admin-sidebar-menu" aria-label="Main Navigation">
-                <div class="admin-sidebar-label">MAIN</div>
-                <a href="dashboard.html" class="admin-nav-item">
-                    <i class="bi bi-grid" aria-hidden="true"></i>
-                    <span>Dashboard</span>
-                </a>
-
-                <div class="admin-sidebar-label">ACADEMIC</div>
-                <a href="academic-management.html" class="admin-nav-item">
-                    <i class="bi bi-mortarboard" aria-hidden="true"></i>
-                    <span>Academic Management</span>
-                </a>
-                <a href="exam-management.html" class="admin-nav-item">
-                    <i class="bi bi-clipboard-check" aria-hidden="true"></i>
-                    <span>Exam & Quiz Management</span>
-                </a>
-                <a href="enrollment-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-check" aria-hidden="true"></i>
-                    <span>Enrollment Management</span>
-                </a>
-                <a href="schedule-management.html" class="admin-nav-item">
-                    <i class="bi bi-calendar3" aria-hidden="true"></i>
-                    <span>Schedule / Calendar</span>
-                </a>
-
-                <div class="admin-sidebar-label">PEOPLE</div>
-                <a href="user-management.html" class="admin-nav-item">
-                    <i class="bi bi-people" aria-hidden="true"></i>
-                    <span>User Management</span>
-                </a>
-                <a href="teacher-management.html" class="admin-nav-item">
-                    <i class="bi bi-person-badge" aria-hidden="true"></i>
-                    <span>Teacher Management</span>
-                </a>
-
-                <div class="admin-sidebar-label">FINANCE</div>
-                <a href="payment-management.html" class="admin-nav-item">
-                    <i class="bi bi-credit-card" aria-hidden="true"></i>
-                    <span>Payments</span>
-                </a>
-                <a href="payment-management.html#invoices" class="admin-nav-item">
-                    <i class="bi bi-receipt" aria-hidden="true"></i>
-                    <span>Invoices</span>
-                </a>
-                <a href="payroll-management.html" class="admin-nav-item active">
-                    <i class="bi bi-wallet2" aria-hidden="true"></i>
-                    <span>Teacher Payroll</span>
-                </a>
-
-                <div class="admin-sidebar-label">REPORTS</div>
-                <a href="reports.html" class="admin-nav-item">
-                    <i class="bi bi-bar-chart" aria-hidden="true"></i>
-                    <span>Reports & Analytics</span>
-                </a>
-
-                <div class="admin-sidebar-label">SYSTEM</div>
-                <a href="settings.html" class="admin-nav-item">
-                    <i class="bi bi-gear" aria-hidden="true"></i>
-                    <span>Settings</span>
-                </a>
-            </nav>
-
-            <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" id="logoutBtn" type="button" aria-label="Sign Out of Administration Portal">
-                    <i class="bi bi-box-arrow-left" aria-hidden="true"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
+        <aside class="admin-sidebar"></aside>
 
         <!-- MAIN VIEW -->
         <main class="admin-main">
             
             <!-- TOPBAR -->
+            <!-- Topbar (Global Header) -->
             <header class="admin-topbar">
-                <div class="admin-topbar-left">
-                    <button class="admin-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    <button class="btn btn-sm btn-light border d-none d-lg-inline-flex align-items-center justify-content-center me-1" id="sidebarCollapseToggle" title="Toggle Compact Sidebar" style="width: 36px; height: 36px; border-radius: 8px;">
-                        <i class="bi bi-layout-sidebar-inset"></i>
-                    </button>
-                    <div class="admin-search-wrapper">
-                        <i class="bi bi-search"></i>
-                        <input type="text" class="admin-search-input" id="globalSearchInput" placeholder="Search teacher payroll records...">
-                        <div class="search-results-dropdown" id="searchResultsContainer"></div>
-                    </div>
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar" type="button">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div class="admin-search-wrapper">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="admin-search-input" id="globalSearchInput"
+                           placeholder="Search users, courses, enrollments…" autocomplete="off" aria-label="Search users, courses, enrollments">
+                    <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
+                    <div class="search-results-dropdown" id="searchResultsContainer"></div>
                 </div>
 
                 <div class="admin-topbar-actions">
-                    <button class="admin-notification-btn" id="notificationBtn" aria-label="Notifications">
-                        <i class="bi bi-bell-fill"></i>
-                        <span class="admin-notification-badge" id="notificationBadge">3</span>
-                    </button>
-                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150" alt="Admin" id="topbarAvatar">
-                        <div class="d-none d-md-block text-start lh-1">
-                            <div class="name" id="topbarAdminName">Admin</div>
-                            <div class="role">System Administrator</div>
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button">
+                            <i class="bi bi-bell"></i>
+                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none">0</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px 8px;border-bottom:1px solid var(--adm-border);display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:13px;font-weight:700">Notifications</span>
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" type="button" style="font-size:11px;padding:2px 8px">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" style="padding:4px 0;max-height:280px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" role="button" tabindex="0">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Johnathan+Vance&background=2563EB&color=fff&size=64"
+                             alt="Dr. Johnathan Vance" class="admin-topbar-avatar" id="topbarAvatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block">
+                            <div class="profile-name" id="topbarAdminName">Dr. Johnathan Vance</div>
+                            <div class="profile-role">Administrator</div>
                         </div>
                     </div>
                 </div>
@@ -145,11 +75,11 @@
                         <p class="admin-page-subtitle">Manage faculty base salaries, course compensations, exam grading bonuses, and monthly disbursements.</p>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-outline-primary btn-sm" id="exportPayrollBtn">
-                            <i class="bi bi-download me-1"></i> Export Payroll
+                        <button class="adm-btn adm-btn-outline" id="exportPayrollBtn" type="button">
+                            <i class="bi bi-download"></i> Export Payroll
                         </button>
-                        <button class="btn btn-primary btn-sm" id="generatePayrollBtn">
-                            <i class="bi bi-plus-lg me-1"></i> Create Payroll Entry
+                        <button class="adm-btn adm-btn-primary" id="generatePayrollBtn" type="button">
+                            <i class="bi bi-plus-lg"></i> Create Payroll Entry
                         </button>
                     </div>
                 </div>
@@ -232,7 +162,7 @@
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="../../js/data/mock-store.js"></script>
-    <script src="../../js/components/sidebar.js"></script>
+    <script src="../../js/admin-layout.js"></script>
     <script src="../../js/pages/payroll-management.js"></script>
 </body>
 </html>

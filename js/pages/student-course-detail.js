@@ -158,34 +158,54 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         // Render Syllabus Modules
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
-        document.getElementById('cTotalLessons').textContent = `${chapters.reduce((sum, ch) => sum + (ch.lesson_count || 0), 0)} Lessons Total`;
+        const allLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id) : [];
+        const totalLessonCount = allLessons.length > 0 ? allLessons.length : chapters.reduce((sum, ch) => sum + (ch.lesson_count || 0), 0);
+        if (document.getElementById('cTotalLessons')) {
+            document.getElementById('cTotalLessons').textContent = `${totalLessonCount} Lessons Total`;
+        }
         
         const accordion = document.getElementById('syllabusAccordion');
         if (chapters.length === 0) {
             accordion.innerHTML = `<div class="p-3 text-center text-muted bg-light rounded border small">Module syllabus being finalized by faculty.</div>`;
         } else {
-            accordion.innerHTML = chapters.map((ch, idx) => `
-                <div class="accordion-item border rounded-2 mb-2 overflow-hidden">
-                    <h2 class="accordion-header" id="heading${ch.id}">
-                        <button class="accordion-button ${idx > 0 ? 'collapsed' : ''} bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${ch.id}">
-                            <div class="d-flex align-items-center justify-content-between w-100 me-3">
-                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Module ${ch.chapter_num}: ${escapeHtml(ch.title)}</span>
-                                <span class="badge bg-white text-primary border">${ch.lesson_count || 3} Lessons &bull; ${escapeHtml(ch.duration || '2 Hours')}</span>
-                            </div>
-                        </button>
-                    </h2>
-                    <div id="collapse${ch.id}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#syllabusAccordion">
-                        <div class="accordion-body p-3 bg-white" style="font-size: 13px;">
-                            <p class="text-secondary mb-2">${escapeHtml(ch.description || 'Core interactive exercises, theory lecture, and hands-on coding laboratory.')}</p>
-                            <div class="d-flex align-items-center gap-3 text-muted small">
-                                <span><i class="bi bi-play-circle me-1 text-primary"></i>Video Lectures Included</span>
-                                <span><i class="bi bi-file-earmark-code me-1 text-primary"></i>Practical Code Starter</span>
-                                <span><i class="bi bi-patch-question me-1 text-primary"></i>Knowledge Check Quiz</span>
+            accordion.innerHTML = chapters.map((ch, idx) => {
+                const chLessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
+                const lessonCount = chLessons.length > 0 ? chLessons.length : (ch.lesson_count || 0);
+
+                return `
+                    <div class="accordion-item border rounded-2 mb-2 overflow-hidden">
+                        <h2 class="accordion-header" id="heading${ch.id}">
+                            <button class="accordion-button ${idx > 0 ? 'collapsed' : ''} bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${ch.id}">
+                                <div class="d-flex align-items-center justify-content-between w-100 me-3">
+                                    <span class="fw-bold text-dark" style="font-size: 13.5px;">Module ${ch.chapter_num}: ${escapeHtml(ch.title)}</span>
+                                    <span class="badge bg-white text-primary border">${lessonCount} Lessons &bull; ${escapeHtml(ch.duration || '2 Weeks')}</span>
+                                </div>
+                            </button>
+                        </h2>
+                        <div id="collapse${ch.id}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#syllabusAccordion">
+                            <div class="accordion-body p-3 bg-white" style="font-size: 13px;">
+                                <p class="text-secondary mb-2">${escapeHtml(ch.description || 'Core interactive exercises, theory lecture, and hands-on coding laboratory.')}</p>
+                                ${chLessons.length > 0 ? `
+                                    <div class="d-flex flex-column gap-1 mt-2 border-top pt-2">
+                                        ${chLessons.map(l => `
+                                            <div class="d-flex align-items-center justify-content-between text-muted py-1" style="font-size: 12px;">
+                                                <span><i class="bi bi-play-circle text-primary me-2"></i><span class="text-dark fw-medium">${escapeHtml(l.title)}</span></span>
+                                                <span class="badge bg-light text-muted border">${escapeHtml(l.duration || '20 minutes')}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : `
+                                    <div class="d-flex align-items-center gap-3 text-muted small">
+                                        <span><i class="bi bi-play-circle me-1 text-primary"></i>Video Lectures Included</span>
+                                        <span><i class="bi bi-file-earmark-code me-1 text-primary"></i>Practical Code Starter</span>
+                                        <span><i class="bi bi-patch-question me-1 text-primary"></i>Knowledge Check Quiz</span>
+                                    </div>
+                                `}
                             </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         // Render Action Button

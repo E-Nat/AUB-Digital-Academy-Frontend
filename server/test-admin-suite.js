@@ -366,8 +366,8 @@ async function runAll() {
         const mockStorePath = path.join(__dirname, '../js/data/mock-store.js');
         const mockStoreCode = fs.readFileSync(mockStorePath, 'utf-8');
 
-        if (!mockStoreCode.includes('aub_admin_mock_store_v3')) {
-            throw new Error('MockStore STORAGE_KEY is not synchronized to v3.');
+        if (!mockStoreCode.includes('aub_admin_mock_store_v3') && !mockStoreCode.includes('aub_admin_mock_store_v4')) {
+            throw new Error('MockStore STORAGE_KEY is not synchronized to v3 or v4.');
         }
         if (!mockStoreCode.includes('getChaptersByCourseId') || !mockStoreCode.includes('createChapter')) {
             throw new Error('MockStore missing Chapter module methods.');

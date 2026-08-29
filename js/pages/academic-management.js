@@ -4,7 +4,12 @@
 // Integrated with SweetAlert2 & AdminMockStore
 // ==========================================
 
-document.addEventListener('DOMContentLoaded', function () {
+let isAcademicManagementInitialized = false;
+
+function initAcademicManagement() {
+    if (isAcademicManagementInitialized) return;
+    isAcademicManagementInitialized = true;
+
     const isLocal = window.location.hostname === 'localhost' || 
                     window.location.hostname === '127.0.0.1' || 
                     window.location.protocol === 'file:';
@@ -32,54 +37,64 @@ document.addEventListener('DOMContentLoaded', function () {
     let allInstructors = [];
     let activeChapterCourseId = null;
 
+    // Safe Modal Helper
+    const safeGetModal = (el) => {
+        if (!el || typeof bootstrap === 'undefined' || !bootstrap.Modal) return null;
+        try {
+            return bootstrap.Modal.getOrCreateInstance(el);
+        } catch (e) {
+            return null;
+        }
+    };
+
     // Modals
     const programModalEl = document.getElementById('createProgramModal');
-    const programModal = programModalEl ? new bootstrap.Modal(programModalEl) : null;
+    const programModal = safeGetModal(programModalEl);
 
     const courseModalEl = document.getElementById('createCourseModal');
-    const courseModal = courseModalEl ? new bootstrap.Modal(courseModalEl) : null;
+    const courseModal = safeGetModal(courseModalEl);
 
     const chaptersModalEl = document.getElementById('chaptersModal');
-    const chaptersModal = chaptersModalEl ? new bootstrap.Modal(chaptersModalEl) : null;
+    const chaptersModal = safeGetModal(chaptersModalEl);
 
     const categoryModalEl = document.getElementById('createCategoryModal');
-    const categoryModal = categoryModalEl ? new bootstrap.Modal(categoryModalEl) : null;
+    const categoryModal = safeGetModal(categoryModalEl);
 
     const instructorModalEl = document.getElementById('createInstructorModal');
-    const instructorModal = instructorModalEl ? new bootstrap.Modal(instructorModalEl) : null;
+    const instructorModal = safeGetModal(instructorModalEl);
 
     const viewCourseModalEl = document.getElementById('viewCourseModal');
-    const viewCourseModal = viewCourseModalEl ? new bootstrap.Modal(viewCourseModalEl) : null;
+    const viewCourseModal = safeGetModal(viewCourseModalEl);
     let activeCourseInView = null;
 
     // Course Content Builder Modals
     const contentBuilderModalEl = document.getElementById('courseContentBuilderModal');
-    const contentBuilderModal = contentBuilderModalEl ? new bootstrap.Modal(contentBuilderModalEl) : null;
+    const contentBuilderModal = safeGetModal(contentBuilderModalEl);
 
     const moduleEditorModalEl = document.getElementById('moduleEditorModal');
-    const moduleEditorModal = moduleEditorModalEl ? new bootstrap.Modal(moduleEditorModalEl) : null;
+    const moduleEditorModal = safeGetModal(moduleEditorModalEl);
 
     const lessonEditorModalEl = document.getElementById('lessonEditorModal');
-    const lessonEditorModal = lessonEditorModalEl ? new bootstrap.Modal(lessonEditorModalEl) : null;
+    const lessonEditorModal = safeGetModal(lessonEditorModalEl);
 
     const quizEditorModalEl = document.getElementById('quizEditorModal');
-    const quizEditorModal = quizEditorModalEl ? new bootstrap.Modal(quizEditorModalEl) : null;
+    const quizEditorModal = safeGetModal(quizEditorModalEl);
 
     const assignmentEditorModalEl = document.getElementById('assignmentEditorModal');
-    const assignmentEditorModal = assignmentEditorModalEl ? new bootstrap.Modal(assignmentEditorModalEl) : null;
+    const assignmentEditorModal = safeGetModal(assignmentEditorModalEl);
 
     // Course Creation Wizard Sub-Modals
     const wizardModuleModalEl = document.getElementById('wizardModuleModal');
-    const wizardModuleModal = wizardModuleModalEl ? new bootstrap.Modal(wizardModuleModalEl) : null;
+    const wizardModuleModal = safeGetModal(wizardModuleModalEl);
 
     const wizardLessonModalEl = document.getElementById('wizardLessonModal');
-    const wizardLessonModal = wizardLessonModalEl ? new bootstrap.Modal(wizardLessonModalEl) : null;
+    const wizardLessonModal = safeGetModal(wizardLessonModalEl);
 
     const wizardQuizModalEl = document.getElementById('wizardQuizModal');
-    const wizardQuizModal = wizardQuizModalEl ? new bootstrap.Modal(wizardQuizModalEl) : null;
+    const wizardQuizModal = safeGetModal(wizardQuizModalEl);
 
     const wizardAssignmentModalEl = document.getElementById('wizardAssignmentModal');
-    const wizardAssignmentModal = wizardAssignmentModalEl ? new bootstrap.Modal(wizardAssignmentModalEl) : null;
+    const wizardAssignmentModal = safeGetModal(wizardAssignmentModalEl);
 
     let activeBuilderCourseId = null;
     let activeBuilderCourse = null;
@@ -98,39 +113,104 @@ document.addEventListener('DOMContentLoaded', function () {
         'theme-indigo': '#4f46e5'
     };
 
-    async function loadPrograms() {
-        let loaded = false;
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
-            const res = await fetch(`${API_BASE}/admin/programs`, { 
-                headers: getHeaders(), 
-                signal: controller.signal 
-            });
-            clearTimeout(timeoutId);
+    // 1. Instant Synchronous Rendering & Background Data Hydration
+    async function loadPrograms(forceRefresh = false) {
+        const tbody = document.getElementById('programsTableBody');
 
-            if (res.ok) {
-                const data = await res.json();
-                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                    allPrograms = data.data;
-                    loaded = true;
-                }
+        // Step 1: Render immediately from cache/store (0ms - zero artificial delay)
+        if (window.AdminStore && typeof window.AdminStore.getPrograms === 'function') {
+            const storePrograms = window.AdminStore.getPrograms();
+            if (Array.isArray(storePrograms) && storePrograms.length > 0) {
+                allPrograms = storePrograms;
+                renderProgramsTable(allPrograms);
             }
-        } catch (e) {}
-
-        if (!loaded && window.AdminStore) {
-            allPrograms = window.AdminStore.getPrograms();
+        } else if (allPrograms && allPrograms.length > 0) {
+            renderProgramsTable(allPrograms);
         }
 
-        renderProgramsTable(allPrograms);
-    }
+        // If no cached data exists and nothing rendered yet, show immediate inline table skeleton
+        if ((!allPrograms || allPrograms.length === 0) && tbody && tbody.children.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                        <div class="text-muted text-xs">Loading academic programs...</div>
+                    </td>
+                </tr>
+            `;
+        }
 
-    function renderProgramsTable(programs) {
+        // Step 2: Fetch asynchronously in the background without blocking the UI
+        try {
+            let freshData = null;
+            if (window.academicService && typeof window.academicService.getPrograms === 'function') {
+                freshData = await window.academicService.getPrograms(forceRefresh);
+            } else {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch(`${API_BASE}/admin/programs`, { 
+                    headers: getHeaders(), 
+                    signal: controller.signal 
+                });
+                clearTimeout(timeoutId);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        freshData = data.data;
+                    }
+                }
+            }
+
+            if (freshData && Array.isArray(freshData)) {
+                allPrograms = freshData;
+                renderProgramsTable(allPrograms);
+            }
+        } catch (err) {
+            console.warn('[AcademicManagement] Background programs fetch note:', err.message);
+            // If completely empty and API fails, show error state with retry button
+            if (!allPrograms || allPrograms.length === 0) {
+                renderProgramsTable([], true);
+            }
+        }
+    }
+    window.loadPrograms = loadPrograms;
+
+    function renderProgramsTable(programs, isError = false) {
         const tbody = document.getElementById('programsTableBody');
         if (!tbody) return;
 
-        if (programs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-5 text-muted"><i class="bi bi-mortarboard fs-3 d-block mb-2 text-secondary opacity-50"></i>No academic programs found</td></tr>`;
+        // 7. ERROR STATE: Clear error + Retry button
+        if (isError) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="bi bi-exclamation-triangle fs-2 text-danger d-block mb-2 opacity-75"></i>
+                        <div class="fw-semibold text-dark mb-1">Unable to load academic programs.</div>
+                        <p class="text-muted text-xs mb-3">Please check your connection and try again.</p>
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="loadPrograms(true)">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Retry
+                        </button>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // 8. EMPTY STATE: Graduation cap icon + message + Add New Program button
+        if (!programs || programs.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="bi bi-mortarboard fs-1 text-muted opacity-50 d-block mb-2"></i>
+                        <div class="fw-bold text-dark fs-6 mb-1">No academic programs found</div>
+                        <p class="text-muted text-xs mb-3">Create your first academic program to get started.</p>
+                        <button class="btn btn-primary btn-sm rounded-pill px-4 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="window.openCreateProgramModal ? window.openCreateProgramModal() : null">
+                            <i class="bi bi-plus-lg"></i> Add New Program
+                        </button>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
@@ -138,18 +218,22 @@ document.addEventListener('DOMContentLoaded', function () {
             const themeClass = p.theme_class || 'theme-blue';
             const themeColor = THEME_COLOR_MAP[themeClass] || '#2563eb';
             const iconClass = p.icon_class || 'bi-laptop';
+            const logoUrl = p.logo_url || p.custom_logo || '';
 
             return `
             <tr>
                 <td class="text-muted fw-bold" style="font-size: 12px;">#${p.order_num !== undefined ? p.order_num : 1}</td>
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-2 p-1 d-flex align-items-center justify-content-center border" style="width: 36px; height: 36px; flex-shrink: 0; background-color: rgba(37, 99, 235, 0.06);">
-                            <i class="bi ${escapeHtml(iconClass)}" style="font-size: 16px; color: ${themeColor};"></i>
+                        <div class="rounded-2 p-1 d-flex align-items-center justify-content-center border bg-white" style="width: 38px; height: 38px; flex-shrink: 0; background-color: rgba(37, 99, 235, 0.05);">
+                            ${logoUrl 
+                                ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" class="w-100 h-100 object-fit-contain rounded">`
+                                : `<i class="bi ${escapeHtml(iconClass)}" style="font-size: 16px; color: ${themeColor};"></i>`
+                            }
                         </div>
                         <div>
                             <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(p.title)}</div>
-                            <div class="text-muted text-truncate" style="font-size: 11px; max-width: 280px;" title="${escapeHtml(p.description || '')}">${escapeHtml(p.description || '')}</div>
+                            <div class="text-muted text-truncate" style="font-size: 11px; max-width: 280px;" title="${escapeHtml(p.description || p.short_description || '')}">${escapeHtml(p.description || p.short_description || '')}</div>
                         </div>
                     </div>
                 </td>
@@ -169,11 +253,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 </td>
                 <td>
                     <div class="d-flex gap-1">
-                        <button class="action-btn" title="Edit Program" onclick="openEditProgramModal(${p.id})">
-                            <i class="bi bi-pencil"></i>
+                        <button class="action-btn" title="View Program Details" aria-label="View program ${escapeHtml(p.title)}" onclick="viewProgram(${p.id})">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
-                        <button class="action-btn delete" title="Delete Program" onclick="deleteProgram(${p.id})">
-                            <i class="bi bi-trash"></i>
+                        <button class="action-btn" title="Edit Program" aria-label="Edit program ${escapeHtml(p.title)}" onclick="openEditProgramModal(${p.id})">
+                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                        </button>
+                        <button class="action-btn delete" title="Delete Program" aria-label="Delete program ${escapeHtml(p.title)}" onclick="deleteProgram(${p.id})">
+                            <i class="bi bi-trash" aria-hidden="true"></i>
                         </button>
                     </div>
                 </td>
@@ -182,65 +269,71 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
-    // Live UI updaters for Program Modal
-    function updateProgramIconPreview() {
-        const iconInput = document.getElementById('programIcon');
-        const iconPreview = document.getElementById('programIconPreview');
-        if (!iconInput || !iconPreview) return;
-        const val = iconInput.value.trim() || 'bi-laptop';
-        iconPreview.className = `bi ${val}`;
-    }
+    // ==========================================
+    // 1. PROGRAMS MANAGEMENT (Create Program Form & Modal Flow)
+    // ==========================================
+    let selectedProgramInstructors = [];
+    let programLearningOutcomes = [];
+    let isSubmittingProgram = false;
 
-    function updateProgramThemePreview() {
-        const themeSelect = document.getElementById('programTheme');
-        const dot = document.getElementById('programThemePreviewDot');
-        if (!themeSelect || !dot) return;
-        const color = THEME_COLOR_MAP[themeSelect.value] || '#2563eb';
-        dot.style.backgroundColor = color;
-    }
-
-    function updateProgramDescCount() {
-        const descInput = document.getElementById('programDesc');
-        const countEl = document.getElementById('programDescCharCount');
-        if (!descInput || !countEl) return;
-        const len = descInput.value.trim().length;
-        if (len < 10) {
-            countEl.textContent = `${len} / 10 min chars`;
-            countEl.className = 'text-danger text-xs';
+    // Toast Notification Helper
+    function showProgramToast(type, title, message = '') {
+        const toastType = type === 'danger' ? 'error' : type;
+        if (typeof showToast === 'function') {
+            showToast(toastType, title, message || '');
+        } else if (window.AdminStore && typeof window.AdminStore.constructor.toast === 'function') {
+            window.AdminStore.constructor.toast(message || title, toastType);
+        } else if (window.Swal) {
+            const Toast = window.Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+            Toast.fire({
+                icon: toastType,
+                title: title,
+                text: message || undefined
+            });
         } else {
-            countEl.textContent = `${len} chars`;
-            countEl.className = 'text-muted text-xs';
+            console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
         }
     }
 
-    // Program Field Validation
-    function setFieldInvalid(inputId, feedbackId, message) {
-        const input = document.getElementById(inputId);
+    // Form Validation Helper
+    function setFieldInvalid(fieldId, feedbackId, message) {
+        const field = document.getElementById(fieldId);
         const feedback = document.getElementById(feedbackId);
-        if (input) {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
+        if (field) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
         }
-        if (feedback && message) {
+        if (feedback) {
             feedback.textContent = message;
+            feedback.style.display = 'block';
         }
     }
 
-    function setFieldValid(inputId) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
+    function setFieldValid(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+        const feedback = document.getElementById(`${fieldId}Feedback`);
+        if (feedback) {
+            feedback.style.display = 'none';
         }
     }
 
     function clearProgramValidation() {
-        const fields = ['programTitle', 'programDegree', 'programDuration', 'programIcon', 'programTheme', 'programDesc', 'programUrl', 'programOrder'];
+        const fields = ['programTitle', 'programCode', 'programDegree', 'programDuration', 'programCategorySelect', 'programCredits', 'programStatus'];
         fields.forEach(id => {
             const el = document.getElementById(id);
-            if (el) {
-                el.classList.remove('is-invalid', 'is-valid');
-            }
+            if (el) el.classList.remove('is-invalid', 'is-valid');
+            const fb = document.getElementById(`${id}Feedback`);
+            if (fb) fb.style.display = 'none';
         });
     }
 
@@ -248,90 +341,740 @@ document.addEventListener('DOMContentLoaded', function () {
         let isValid = true;
         let firstInvalidEl = null;
 
-        // 1. Program Title *
+        // 1. Program Title * (Required)
         const titleEl = document.getElementById('programTitle');
         const titleVal = titleEl ? titleEl.value.trim() : '';
         if (!titleVal) {
-            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title is required.');
+            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program title is required.');
             isValid = false;
             if (!firstInvalidEl) firstInvalidEl = titleEl;
         } else if (titleVal.length < 3) {
-            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
-            isValid = false;
-            if (!firstInvalidEl) firstInvalidEl = titleEl;
-        } else if (titleVal.length > 150) {
-            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title cannot exceed 150 characters.');
+            setFieldInvalid('programTitle', 'programTitleFeedback', 'Program title must be at least 3 characters.');
             isValid = false;
             if (!firstInvalidEl) firstInvalidEl = titleEl;
         } else {
             setFieldValid('programTitle');
         }
 
-        // 2. Degree Type *
+        // 2. Degree Type * (Required)
         const degreeEl = document.getElementById('programDegree');
         const degreeVal = degreeEl ? degreeEl.value.trim() : '';
         if (!degreeVal) {
-            setFieldInvalid('programDegree', 'programDegreeFeedback', 'Please select a valid Degree Type.');
+            setFieldInvalid('programDegree', 'programDegreeFeedback', 'Degree type is required.');
             isValid = false;
             if (!firstInvalidEl) firstInvalidEl = degreeEl;
         } else {
             setFieldValid('programDegree');
         }
 
-        // 3. Duration *
+        // 3. Category * (Required)
+        const catEl = document.getElementById('programCategorySelect');
+        const catVal = catEl ? catEl.value.trim() : '';
+        if (!catVal) {
+            setFieldInvalid('programCategorySelect', 'programCategoryFeedback', 'Category is required.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = catEl;
+        } else {
+            setFieldValid('programCategorySelect');
+        }
+
+        // 4. Duration * (Required)
         const durationEl = document.getElementById('programDuration');
         const durationVal = durationEl ? durationEl.value.trim() : '';
         if (!durationVal) {
-            setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required (e.g. 4 Years).');
-            isValid = false;
-            if (!firstInvalidEl) firstInvalidEl = durationEl;
-        } else if (durationVal.length < 2) {
-            setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration must be at least 2 characters (e.g. 4 Years).');
+            setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required.');
             isValid = false;
             if (!firstInvalidEl) firstInvalidEl = durationEl;
         } else {
             setFieldValid('programDuration');
         }
 
-        // 4. Description *
-        const descEl = document.getElementById('programDesc');
-        const descVal = descEl ? descEl.value.trim() : '';
-        if (!descVal) {
-            setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description is required.');
-            isValid = false;
-            if (!firstInvalidEl) firstInvalidEl = descEl;
-        } else if (descVal.length < 10) {
-            setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description must be at least 10 characters long.');
-            isValid = false;
-            if (!firstInvalidEl) firstInvalidEl = descEl;
-        } else {
-            setFieldValid('programDesc');
+        // 5. Credits (Numeric validation if entered)
+        const creditsEl = document.getElementById('programCredits');
+        const creditsVal = creditsEl ? creditsEl.value.trim() : '';
+        if (creditsVal !== '') {
+            const num = Number(creditsVal);
+            if (isNaN(num) || num < 1 || num > 500) {
+                setFieldInvalid('programCredits', 'programCreditsFeedback', 'Credits must be a valid number between 1 and 500.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = creditsEl;
+            } else {
+                setFieldValid('programCredits');
+            }
         }
 
-        // 5. Sort Order
-        const orderEl = document.getElementById('programOrder');
-        const orderVal = orderEl ? orderEl.value : '';
-        if (orderVal !== '' && (isNaN(Number(orderVal)) || Number(orderVal) < 0)) {
-            setFieldInvalid('programOrder', 'programOrderFeedback', 'Sort order must be a non-negative number (0 or higher).');
+        // 6. Status * (Required)
+        const statusEl = document.getElementById('programStatus');
+        const statusVal = statusEl ? statusEl.value.trim() : '';
+        if (!statusVal) {
+            setFieldInvalid('programStatus', 'programStatusFeedback', 'Please select a status.');
             isValid = false;
-            if (!firstInvalidEl) firstInvalidEl = orderEl;
+            if (!firstInvalidEl) firstInvalidEl = statusEl;
         } else {
-            setFieldValid('programOrder');
+            setFieldValid('programStatus');
+        }
+
+        if (!isValid && firstInvalidEl) {
+            try {
+                firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidEl.focus();
+            } catch (e) {
+                firstInvalidEl.focus();
+            }
         }
 
         return { isValid, firstInvalidEl };
     }
 
-    // Attach live listeners for Program fields
+    // Dynamic Category Loading for Program Modal (Instant Cache + Non-blocking Background Sync)
+    async function loadCategoriesForProgramModal(selectedId = null) {
+        const select = document.getElementById('programCategorySelect');
+        if (!select) return;
+
+        // 1. Synchronously populate from cache/store if available (0ms)
+        let cats = allCategories;
+        if ((!cats || cats.length === 0) && window.AdminStore) {
+            cats = window.AdminStore.getCategories();
+            if (Array.isArray(cats) && cats.length > 0) {
+                allCategories = cats;
+            }
+        }
+
+        // Fallback default categories if empty to prevent form submission lockout
+        if (!cats || cats.length === 0) {
+            cats = [
+                { id: 1, name: 'Computer Science' },
+                { id: 2, name: 'Software Engineering' },
+                { id: 3, name: 'Cybersecurity' },
+                { id: 4, name: 'Data Science & AI' },
+                { id: 5, name: 'Information Technology' },
+                { id: 6, name: 'General Studies' }
+            ];
+            allCategories = cats;
+        }
+
+        if (cats && cats.length > 0) {
+            let options = '<option value="" disabled' + (!selectedId ? ' selected' : '') + '>Select category...</option>';
+            cats.forEach(c => {
+                const isSel = selectedId && (Number(selectedId) === Number(c.id) || String(selectedId).toLowerCase() === c.name.toLowerCase()) ? ' selected' : '';
+                options += `<option value="${c.id}"${isSel}>${escapeHtml(c.name)}</option>`;
+            });
+            select.innerHTML = options;
+        } else {
+            select.innerHTML = '<option value="" disabled selected>Loading categories...</option>';
+        }
+
+        // 2. Background sync from API if needed
+        try {
+            if (window.academicService && typeof window.academicService.getCategories === 'function') {
+                const freshCats = await window.academicService.getCategories();
+                if (Array.isArray(freshCats) && freshCats.length > 0) {
+                    allCategories = freshCats;
+                    let currentVal = select.value || selectedId;
+                    let options = '<option value="" disabled' + (!currentVal ? ' selected' : '') + '>Select category...</option>';
+                    freshCats.forEach(c => {
+                        const isSel = currentVal && (Number(currentVal) === Number(c.id) || String(currentVal).toLowerCase() === c.name.toLowerCase()) ? ' selected' : '';
+                        options += `<option value="${c.id}"${isSel}>${escapeHtml(c.name)}</option>`;
+                    });
+                    select.innerHTML = options;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // ==========================================
+    // 1. INSTRUCTORS SEARCHABLE MULTI-SELECT
+    // ==========================================
+    let instructorSearchQuery = '';
+
+    // Dynamic Instructor Loading & Sync
+    async function loadInstructorsForProgramModal() {
+        // 1. Synchronously populate from cache/store if available (0ms)
+        let insts = allInstructors;
+        if ((!insts || insts.length === 0) && window.AdminStore) {
+            insts = window.AdminStore.getInstructors();
+            if (Array.isArray(insts) && insts.length > 0) {
+                allInstructors = insts;
+            }
+        }
+
+        renderInstructorDropdownList(instructorSearchQuery);
+
+        // 2. Background sync from API if needed
+        try {
+            if (window.academicService && typeof window.academicService.getInstructors === 'function') {
+                const freshInsts = await window.academicService.getInstructors();
+                if (Array.isArray(freshInsts) && freshInsts.length > 0) {
+                    allInstructors = freshInsts;
+                    renderInstructorDropdownList(instructorSearchQuery);
+                }
+            }
+        } catch (e) {}
+    }
+
+    // Render Searchable Instructor Dropdown List
+    function renderInstructorDropdownList(query = '') {
+        const listContainer = document.getElementById('instructorDropdownList');
+        if (!listContainer) return;
+
+        let insts = allInstructors;
+        if ((!insts || insts.length === 0) && window.AdminStore) {
+            insts = window.AdminStore.getInstructors();
+            if (Array.isArray(insts) && insts.length > 0) {
+                allInstructors = insts;
+            }
+        }
+
+        if (!insts || insts.length === 0) {
+            listContainer.innerHTML = '<div class="text-muted text-center py-3 text-xs"><span class="spinner-border spinner-border-sm me-1 text-primary"></span> Loading instructors...</div>';
+            return;
+        }
+
+        const q = query.trim().toLowerCase();
+        const filtered = insts.filter(inst => {
+            if (!q) return true;
+            const nameMatch = inst.name && inst.name.toLowerCase().includes(q);
+            const emailMatch = inst.email && inst.email.toLowerCase().includes(q);
+            const idMatch = inst.id && String(inst.id).toLowerCase().includes(q);
+            const titleMatch = inst.title && inst.title.toLowerCase().includes(q);
+            const expMatch = inst.expertise && inst.expertise.toLowerCase().includes(q);
+            const deptMatch = inst.department && inst.department.toLowerCase().includes(q);
+            return nameMatch || emailMatch || idMatch || titleMatch || expMatch || deptMatch;
+        });
+
+        if (filtered.length === 0) {
+            listContainer.innerHTML = '<div class="text-muted text-center py-3 text-xs">No instructors found</div>';
+            return;
+        }
+
+        listContainer.innerHTML = filtered.map(inst => {
+            const isSelected = selectedProgramInstructors.some(i => Number(i.id) === Number(inst.id));
+            const sub = inst.title || inst.expertise || 'Academic Faculty';
+            const initials = inst.name ? inst.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : 'IN';
+
+            return `
+            <div class="instructor-dropdown-item ${isSelected ? 'selected' : ''}" onclick="toggleProgramInstructor(${inst.id})">
+                <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                    <div class="instructor-avatar">
+                        ${initials}
+                    </div>
+                    <div class="text-truncate">
+                        <div class="fw-bold text-dark text-xs text-truncate">${escapeHtml(inst.name)}</div>
+                        <div class="text-muted text-truncate" style="font-size: 11px;">${escapeHtml(sub)}</div>
+                    </div>
+                </div>
+                <div class="instructor-checkbox ms-2">
+                    ${isSelected ? '<i class="bi bi-check-lg"></i>' : ''}
+                </div>
+            </div>
+            `;
+        }).join('');
+    }
+
+    // Toggle Instructor Selection
+    window.toggleProgramInstructor = function (id) {
+        const selectedId = Number(id);
+        const idx = selectedProgramInstructors.findIndex(i => Number(i.id) === selectedId);
+
+        if (idx !== -1) {
+            selectedProgramInstructors.splice(idx, 1);
+        } else {
+            const inst = allInstructors.find(i => Number(i.id) === selectedId);
+            if (inst) {
+                selectedProgramInstructors.push({
+                    id: inst.id,
+                    name: inst.name,
+                    title: inst.title || inst.expertise || 'Academic Faculty'
+                });
+            }
+        }
+
+        renderProgramInstructorChips();
+        renderInstructorDropdownList(instructorSearchQuery);
+    };
+
+    // Remove Selected Instructor Chip
+    window.removeProgramInstructor = function (id) {
+        selectedProgramInstructors = selectedProgramInstructors.filter(i => Number(i.id) !== Number(id));
+        renderProgramInstructorChips();
+        renderInstructorDropdownList(instructorSearchQuery);
+    };
+
+    // Instructor Chips Handler & Placeholder Sync
+    function renderProgramInstructorChips() {
+        const container = document.getElementById('selectedInstructorsChips');
+        const placeholder = document.getElementById('instructorDropdownPlaceholder');
+
+        if (placeholder) {
+            if (selectedProgramInstructors.length === 0) {
+                placeholder.textContent = 'Select instructors...';
+                placeholder.className = 'text-muted text-truncate';
+            } else {
+                placeholder.textContent = `${selectedProgramInstructors.length} instructor${selectedProgramInstructors.length > 1 ? 's' : ''} selected`;
+                placeholder.className = 'text-dark fw-semibold text-truncate';
+            }
+        }
+
+        if (!container) return;
+
+        if (selectedProgramInstructors.length === 0) {
+            container.innerHTML = '<span class="text-muted text-xs py-1 px-2" id="noInstructorsPlaceholder">No instructors selected yet.</span>';
+            return;
+        }
+
+        container.innerHTML = selectedProgramInstructors.map(inst => `
+            <span class="instructor-chip" data-id="${inst.id}">
+                <i class="bi bi-person-check text-primary"></i>
+                <span>${escapeHtml(inst.name)}</span>
+                <button type="button" class="chip-remove" onclick="removeProgramInstructor(${inst.id})" title="Remove ${escapeHtml(inst.name)}" aria-label="Remove ${escapeHtml(inst.name)}">
+                    <i class="bi bi-x"></i>
+                </button>
+            </span>
+        `).join('');
+    }
+
+    // Setup Instructor Search & Dropdown Events
+    function setupInstructorDropdownEvents() {
+        const toggleBtn = document.getElementById('instructorDropdownToggleBtn');
+        const menu = document.getElementById('instructorDropdownMenu');
+        const searchInput = document.getElementById('instructorSearchInput');
+        const container = document.getElementById('instructorSelectContainer');
+
+        if (!toggleBtn || !menu) return;
+
+        toggleBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = menu.style.display === 'block';
+            menu.style.display = isOpen ? 'none' : 'block';
+            toggleBtn.setAttribute('aria-expanded', !isOpen);
+
+            if (!isOpen && searchInput) {
+                searchInput.value = '';
+                instructorSearchQuery = '';
+                renderInstructorDropdownList('');
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                instructorSearchQuery = this.value;
+                renderInstructorDropdownList(this.value);
+            });
+            searchInput.addEventListener('click', function (e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Close on click outside
+        document.addEventListener('click', function (e) {
+            if (container && !container.contains(e.target)) {
+                if (menu.style.display === 'block') {
+                    menu.style.display = 'none';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    }
+
+    // Dynamic Learning Outcomes Handler
+    function renderProgramLearningOutcomes() {
+        const container = document.getElementById('learningOutcomesList');
+        if (!container) return;
+
+        if (!Array.isArray(programLearningOutcomes) || programLearningOutcomes.length === 0) {
+            container.innerHTML = '<div class="text-muted text-xs py-2 px-3 text-center border rounded-2 bg-light"><i class="bi bi-info-circle me-1"></i>No learning outcomes added yet. Click "+ Add Learning Outcome" to add one.</div>';
+            return;
+        }
+
+        container.innerHTML = programLearningOutcomes.map((outcome, idx) => `
+            <div class="learning-outcome-row" data-index="${idx}">
+                <input type="text" class="form-control text-sm" value="${escapeHtml(outcome)}" placeholder="Students will learn / be able to..." oninput="updateProgramLearningOutcome(${idx}, this.value)" autocomplete="off">
+                <button type="button" class="learning-outcome-remove-btn" onclick="removeProgramLearningOutcome(${idx})" title="Remove outcome" aria-label="Remove outcome">
+                    <i class="bi bi-dash-lg"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    window.updateProgramLearningOutcome = function (idx, text) {
+        if (programLearningOutcomes[idx] !== undefined) {
+            programLearningOutcomes[idx] = text;
+        }
+    };
+
+    window.removeProgramLearningOutcome = function (idx) {
+        programLearningOutcomes.splice(idx, 1);
+        renderProgramLearningOutcomes();
+    };
+
+    const addLearningOutcomeBtn = document.getElementById('addLearningOutcomeBtn');
+    if (addLearningOutcomeBtn) {
+        addLearningOutcomeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            programLearningOutcomes.push('');
+            renderProgramLearningOutcomes();
+            // Focus on the newly added input
+            setTimeout(() => {
+                const inputs = document.querySelectorAll('#learningOutcomesList input');
+                if (inputs.length > 0) {
+                    inputs[inputs.length - 1].focus();
+                }
+            }, 50);
+        });
+    }
+
+    // ==========================================
+    // 2. PROGRAM COVER IMAGE UPLOADER
+    // ==========================================
+    function setupProgramImageUpload() {
+        const dropzone = document.getElementById('programImageDropzone');
+        const fileInput = document.getElementById('programImageFile');
+        const previewBox = document.getElementById('programImagePreviewBox');
+        const previewImg = document.getElementById('programImagePreviewImg');
+        const fileNameEl = document.getElementById('programImageFileName');
+        const fileSizeEl = document.getElementById('programImageFileSize');
+        const imageUrlInput = document.getElementById('programImageUrl');
+        const replaceBtn = document.getElementById('replaceProgramImageBtn');
+        const removeBtn = document.getElementById('removeProgramImageBtn');
+
+        if (!dropzone || !fileInput) return;
+
+        function handleFile(file) {
+            if (!file) return;
+
+            // Validate file type (JPG, PNG, WebP)
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                showProgramToast('danger', 'Invalid Format', 'Please upload a JPG, PNG, or WebP image.');
+                return;
+            }
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showProgramToast('danger', 'File Too Large', 'Program cover image must be 5MB or smaller.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const dataUrl = e.target.result;
+                if (imageUrlInput) imageUrlInput.value = dataUrl;
+                if (previewImg) previewImg.src = dataUrl;
+                if (fileNameEl) fileNameEl.textContent = file.name;
+                if (fileSizeEl) fileSizeEl.textContent = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+
+                if (dropzone) dropzone.classList.add('d-none');
+                if (previewBox) {
+                    previewBox.classList.remove('d-none');
+                    previewBox.classList.add('d-flex');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                handleFile(this.files[0]);
+            }
+        });
+
+        // Drag and drop support
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            if (dt && dt.files && dt.files[0]) {
+                handleFile(dt.files[0]);
+            }
+        });
+
+        if (replaceBtn) {
+            replaceBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+        }
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                resetProgramImage();
+            });
+        }
+    }
+
+    function resetProgramImage() {
+        const dropzone = document.getElementById('programImageDropzone');
+        const fileInput = document.getElementById('programImageFile');
+        const previewBox = document.getElementById('programImagePreviewBox');
+        const previewImg = document.getElementById('programImagePreviewImg');
+        const imageUrlInput = document.getElementById('programImageUrl');
+
+        if (fileInput) fileInput.value = '';
+        if (imageUrlInput) imageUrlInput.value = '';
+        if (previewImg) previewImg.src = '';
+
+        if (previewBox) {
+            previewBox.classList.add('d-none');
+            previewBox.classList.remove('d-flex');
+        }
+        if (dropzone) {
+            dropzone.classList.remove('d-none');
+        }
+    }
+
+    function setProgramImagePreview(url, name = 'Program Cover Image') {
+        const dropzone = document.getElementById('programImageDropzone');
+        const previewBox = document.getElementById('programImagePreviewBox');
+        const previewImg = document.getElementById('programImagePreviewImg');
+        const fileNameEl = document.getElementById('programImageFileName');
+        const fileSizeEl = document.getElementById('programImageFileSize');
+        const imageUrlInput = document.getElementById('programImageUrl');
+
+        if (!url) {
+            resetProgramImage();
+            return;
+        }
+
+        if (imageUrlInput) imageUrlInput.value = url;
+        if (previewImg) previewImg.src = url;
+        if (fileNameEl) fileNameEl.textContent = name;
+        if (fileSizeEl) fileSizeEl.textContent = 'Existing Image';
+
+        if (dropzone) dropzone.classList.add('d-none');
+        if (previewBox) {
+            previewBox.classList.remove('d-none');
+            previewBox.classList.add('d-flex');
+        }
+    }
+
+    // ==========================================
+    // 3. CUSTOM PROGRAM LOGO UPLOADER
+    // ==========================================
+    function setupProgramLogoUpload() {
+        const dropzone = document.getElementById('programLogoDropzone');
+        const fileInput = document.getElementById('programLogoFile');
+        const previewBox = document.getElementById('programLogoPreviewBox');
+        const previewImg = document.getElementById('programLogoPreviewImg');
+        const fileNameEl = document.getElementById('programLogoFileName');
+        const fileSizeEl = document.getElementById('programLogoFileSize');
+        const logoUrlInput = document.getElementById('programLogoUrl');
+        const replaceBtn = document.getElementById('replaceProgramLogoBtn');
+        const removeBtn = document.getElementById('removeProgramLogoBtn');
+
+        const visualPreviewBadge = document.getElementById('programVisualPreviewBadge');
+        const visualPreviewTitle = document.getElementById('programVisualPreviewTitle');
+        const visualPreviewDesc = document.getElementById('programVisualPreviewDesc');
+        const iconSelect = document.getElementById('programIconSelect');
+
+        function updateVisualPreview() {
+            const hasCustomLogo = logoUrlInput && logoUrlInput.value.trim() !== '';
+            const selectedIcon = iconSelect ? iconSelect.value : 'bi-laptop';
+
+            if (hasCustomLogo) {
+                if (visualPreviewTitle) visualPreviewTitle.textContent = 'Custom Logo Active';
+                if (visualPreviewDesc) visualPreviewDesc.textContent = 'Custom logo will be used in program listings and headers.';
+                if (visualPreviewBadge) {
+                    visualPreviewBadge.innerHTML = `<img src="${logoUrlInput.value}" alt="Logo" class="w-100 h-100 object-fit-contain rounded">`;
+                }
+            } else {
+                if (visualPreviewTitle) visualPreviewTitle.textContent = 'Predefined Icon Active';
+                if (visualPreviewDesc) visualPreviewDesc.textContent = 'If no custom logo is uploaded, the selected icon is used.';
+                if (visualPreviewBadge) {
+                    visualPreviewBadge.innerHTML = `<i class="bi ${escapeHtml(selectedIcon)} text-primary fs-5"></i>`;
+                }
+            }
+        }
+
+        if (iconSelect) {
+            iconSelect.addEventListener('change', updateVisualPreview);
+        }
+
+        if (!dropzone || !fileInput) return;
+
+        function handleFile(file) {
+            if (!file) return;
+
+            // Validate file type
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                showProgramToast('danger', 'Invalid Format', 'Please upload a JPG, PNG, or WebP logo.');
+                return;
+            }
+
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showProgramToast('danger', 'File Too Large', 'Custom logo must be 2MB or smaller.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const dataUrl = e.target.result;
+                if (logoUrlInput) logoUrlInput.value = dataUrl;
+                if (previewImg) previewImg.src = dataUrl;
+                if (fileNameEl) fileNameEl.textContent = file.name;
+                if (fileSizeEl) fileSizeEl.textContent = `${(file.size / 1024).toFixed(0)} KB`;
+
+                if (dropzone) dropzone.classList.add('d-none');
+                if (previewBox) {
+                    previewBox.classList.remove('d-none');
+                    previewBox.classList.add('d-flex');
+                }
+                updateVisualPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        fileInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                handleFile(this.files[0]);
+            }
+        });
+
+        // Drag and drop support
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            if (dt && dt.files && dt.files[0]) {
+                handleFile(dt.files[0]);
+            }
+        });
+
+        if (replaceBtn) {
+            replaceBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+        }
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                resetProgramLogo();
+            });
+        }
+    }
+
+    function resetProgramLogo() {
+        const dropzone = document.getElementById('programLogoDropzone');
+        const fileInput = document.getElementById('programLogoFile');
+        const previewBox = document.getElementById('programLogoPreviewBox');
+        const previewImg = document.getElementById('programLogoPreviewImg');
+        const logoUrlInput = document.getElementById('programLogoUrl');
+        const visualPreviewBadge = document.getElementById('programVisualPreviewBadge');
+        const visualPreviewTitle = document.getElementById('programVisualPreviewTitle');
+        const visualPreviewDesc = document.getElementById('programVisualPreviewDesc');
+        const iconSelect = document.getElementById('programIconSelect');
+
+        if (fileInput) fileInput.value = '';
+        if (logoUrlInput) logoUrlInput.value = '';
+        if (previewImg) previewImg.src = '';
+
+        if (previewBox) {
+            previewBox.classList.add('d-none');
+            previewBox.classList.remove('d-flex');
+        }
+        if (dropzone) {
+            dropzone.classList.remove('d-none');
+        }
+
+        if (visualPreviewTitle) visualPreviewTitle.textContent = 'Predefined Icon Active';
+        if (visualPreviewDesc) visualPreviewDesc.textContent = 'If no custom logo is uploaded, the selected icon is used.';
+        if (visualPreviewBadge && iconSelect) {
+            visualPreviewBadge.innerHTML = `<i class="bi ${escapeHtml(iconSelect.value || 'bi-laptop')} text-primary fs-5"></i>`;
+        }
+    }
+
+    function setProgramLogoPreview(url, name = 'Custom Logo') {
+        const dropzone = document.getElementById('programLogoDropzone');
+        const previewBox = document.getElementById('programLogoPreviewBox');
+        const previewImg = document.getElementById('programLogoPreviewImg');
+        const fileNameEl = document.getElementById('programLogoFileName');
+        const fileSizeEl = document.getElementById('programLogoFileSize');
+        const logoUrlInput = document.getElementById('programLogoUrl');
+        const visualPreviewBadge = document.getElementById('programVisualPreviewBadge');
+        const visualPreviewTitle = document.getElementById('programVisualPreviewTitle');
+        const visualPreviewDesc = document.getElementById('programVisualPreviewDesc');
+
+        if (!url) {
+            resetProgramLogo();
+            return;
+        }
+
+        if (logoUrlInput) logoUrlInput.value = url;
+        if (previewImg) previewImg.src = url;
+        if (fileNameEl) fileNameEl.textContent = name;
+        if (fileSizeEl) fileSizeEl.textContent = 'Existing Logo';
+
+        if (dropzone) dropzone.classList.add('d-none');
+        if (previewBox) {
+            previewBox.classList.remove('d-none');
+            previewBox.classList.add('d-flex');
+        }
+
+        if (visualPreviewTitle) visualPreviewTitle.textContent = 'Custom Logo Active';
+        if (visualPreviewDesc) visualPreviewDesc.textContent = 'Custom logo will be used in program listings and headers.';
+        if (visualPreviewBadge) {
+            visualPreviewBadge.innerHTML = `<img src="${url}" alt="Logo" class="w-100 h-100 object-fit-contain rounded">`;
+        }
+    }
+
+    // Featured Toggle Handler
+    const programFeaturedToggle = document.getElementById('programFeaturedToggle');
+    const featuredToggleLabel = document.getElementById('featuredToggleLabel');
+    if (programFeaturedToggle && featuredToggleLabel) {
+        programFeaturedToggle.addEventListener('change', function () {
+            if (this.checked) {
+                featuredToggleLabel.textContent = 'ON';
+                featuredToggleLabel.className = 'form-check-label text-xs fw-bold text-primary';
+            } else {
+                featuredToggleLabel.textContent = 'OFF';
+                featuredToggleLabel.className = 'form-check-label text-xs fw-bold text-muted';
+            }
+        });
+    }
+
+    // Attach real-time input listeners for validation
     const programTitleInput = document.getElementById('programTitle');
     if (programTitleInput) {
         programTitleInput.addEventListener('input', function () {
             if (this.value.trim().length >= 3) setFieldValid('programTitle');
-            else if (this.classList.contains('is-invalid')) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
         });
         programTitleInput.addEventListener('blur', function () {
-            if (!this.value.trim()) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title is required.');
-            else if (this.value.trim().length < 3) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program Title must be at least 3 characters.');
+            if (!this.value.trim()) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program title is required.');
+            else if (this.value.trim().length < 3) setFieldInvalid('programTitle', 'programTitleFeedback', 'Program title must be at least 3 characters.');
             else setFieldValid('programTitle');
         });
     }
@@ -340,233 +1083,685 @@ document.addEventListener('DOMContentLoaded', function () {
     if (programDegreeSelect) {
         programDegreeSelect.addEventListener('change', function () {
             if (this.value) setFieldValid('programDegree');
-            else setFieldInvalid('programDegree', 'programDegreeFeedback', 'Please select a Degree Type.');
+            else setFieldInvalid('programDegree', 'programDegreeFeedback', 'Please select a degree type.');
         });
     }
 
     const programDurationInput = document.getElementById('programDuration');
     if (programDurationInput) {
         programDurationInput.addEventListener('input', function () {
-            if (this.value.trim().length >= 2) setFieldValid('programDuration');
-        });
-        programDurationInput.addEventListener('blur', function () {
-            if (!this.value.trim()) setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required.');
-            else setFieldValid('programDuration');
+            if (this.value.trim()) setFieldValid('programDuration');
+            else setFieldInvalid('programDuration', 'programDurationFeedback', 'Duration is required.');
         });
     }
 
-    const programDescInput = document.getElementById('programDesc');
-    if (programDescInput) {
-        programDescInput.addEventListener('input', function () {
-            updateProgramDescCount();
-            if (this.value.trim().length >= 10) setFieldValid('programDesc');
-        });
-        programDescInput.addEventListener('blur', function () {
-            if (!this.value.trim()) setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description is required.');
-            else if (this.value.trim().length < 10) setFieldInvalid('programDesc', 'programDescFeedback', 'Program Description must be at least 10 characters.');
-            else setFieldValid('programDesc');
+    const programCategorySelect = document.getElementById('programCategorySelect');
+    if (programCategorySelect) {
+        programCategorySelect.addEventListener('change', function () {
+            if (this.value) setFieldValid('programCategorySelect');
+            else setFieldInvalid('programCategorySelect', 'programCategoryFeedback', 'Please select a category.');
         });
     }
 
-    const programIconInput = document.getElementById('programIcon');
-    if (programIconInput) {
-        programIconInput.addEventListener('input', updateProgramIconPreview);
-    }
-
-    const programThemeSelect = document.getElementById('programTheme');
-    if (programThemeSelect) {
-        programThemeSelect.addEventListener('change', updateProgramThemePreview);
-    }
-
-    const programOrderInput = document.getElementById('programOrder');
-    if (programOrderInput) {
-        programOrderInput.addEventListener('input', function () {
-            if (Number(this.value) >= 0) setFieldValid('programOrder');
-            else setFieldInvalid('programOrder', 'programOrderFeedback', 'Sort order must be 0 or greater.');
+    const programCreditsInput = document.getElementById('programCredits');
+    if (programCreditsInput) {
+        programCreditsInput.addEventListener('input', function () {
+            const num = Number(this.value);
+            if (this.value === '' || (!isNaN(num) && num > 0 && num <= 500)) setFieldValid('programCredits');
+            else setFieldInvalid('programCredits', 'programCreditsFeedback', 'Credits must be a positive number.');
         });
     }
 
+    const programCodeInput = document.getElementById('programCode');
+    if (programCodeInput) {
+        programCodeInput.addEventListener('input', function () {
+            if (this.classList.contains('is-invalid')) {
+                setFieldValid('programCode');
+            }
+        });
+    }
+
+    const programStatusSelect = document.getElementById('programStatus');
+    if (programStatusSelect) {
+        programStatusSelect.addEventListener('change', function () {
+            if (this.value) setFieldValid('programStatus');
+            else setFieldInvalid('programStatus', 'programStatusFeedback', 'Please select a status.');
+        });
+    }
+
+    // Open Create Program Modal
     window.openCreateProgramModal = function () {
-        document.getElementById('programForm').reset();
-        document.getElementById('programId').value = '';
-        document.getElementById('programDuration').value = '4 Years';
-        document.getElementById('programIcon').value = 'bi-laptop';
-        document.getElementById('programTheme').value = 'theme-blue';
-        document.getElementById('programOrder').value = allPrograms.length + 1;
-        document.getElementById('programPublished').checked = true;
-        document.getElementById('programModalTitle').textContent = 'Add New Featured Program';
-        
-        clearProgramValidation();
-        updateProgramIconPreview();
-        updateProgramThemePreview();
-        updateProgramDescCount();
+        const form = document.getElementById('programForm');
+        if (form) form.reset();
 
-        if (programModal) programModal.show();
+        isSubmittingProgram = false;
+        const submitBtn = document.getElementById('submitProgramBtn');
+        if (submitBtn) submitBtn.disabled = false;
+        const submitSpinner = document.getElementById('submitProgramSpinner');
+        if (submitSpinner) submitSpinner.classList.add('d-none');
+        const submitBtnText = document.getElementById('submitProgramBtnText');
+        if (submitBtnText) submitBtnText.textContent = 'Publish';
+        const saveDraftBtn = document.getElementById('saveDraftProgramBtn');
+        if (saveDraftBtn) saveDraftBtn.disabled = false;
+
+        const idEl = document.getElementById('programId');
+        if (idEl) idEl.value = '';
+        const titleEl = document.getElementById('programModalTitle');
+        if (titleEl) titleEl.textContent = 'Add New Program';
+        const subTitleEl = document.getElementById('programModalSubtitle');
+        if (subTitleEl) subTitleEl.textContent = 'Add a new academic program to AUB Digital Academy.';
+
+        clearProgramValidation();
+        resetProgramImage();
+        resetProgramLogo();
+
+        const durEl = document.getElementById('programDuration');
+        if (durEl) durEl.value = '4 Years';
+        const credEl = document.getElementById('programCredits');
+        if (credEl) credEl.value = '120';
+        const orderEl = document.getElementById('programOrderNum');
+        if (orderEl) orderEl.value = (allPrograms.length + 1);
+        const themeEl = document.getElementById('programThemeSelect');
+        if (themeEl) themeEl.value = 'theme-blue';
+        const iconEl = document.getElementById('programIconSelect');
+        if (iconEl) iconEl.value = 'bi-laptop';
+        const statusEl = document.getElementById('programStatus');
+        if (statusEl) statusEl.value = 'Published';
+        
+        if (programFeaturedToggle) {
+            programFeaturedToggle.checked = true;
+            if (featuredToggleLabel) {
+                featuredToggleLabel.textContent = 'ON';
+                featuredToggleLabel.className = 'form-check-label text-xs fw-bold text-primary';
+            }
+        }
+
+        selectedProgramInstructors = [];
+        programLearningOutcomes = [];
+
+        renderProgramInstructorChips();
+        renderInstructorDropdownList('');
+        renderProgramLearningOutcomes();
+        loadCategoriesForProgramModal();
+        loadInstructorsForProgramModal();
+
+        const modalEl = document.getElementById('createProgramModal');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modalInstance) modalInstance.show();
+        }
     };
 
+    // Open Edit Program Modal
     window.openEditProgramModal = function (id) {
-        const p = allPrograms.find(prog => prog.id === id);
+        let p = allPrograms.find(prog => Number(prog.id) === Number(id));
+        if (!p && window.AdminStore && typeof window.AdminStore.getPrograms === 'function') {
+            p = window.AdminStore.getPrograms().find(prog => Number(prog.id) === Number(id));
+        }
         if (!p) return;
 
+        const form = document.getElementById('programForm');
+        if (form) form.reset();
+
         clearProgramValidation();
-        document.getElementById('programId').value = p.id;
-        document.getElementById('programTitle').value = p.title;
-        document.getElementById('programDegree').value = p.degree_type || 'BACHELOR DEGREE';
-        document.getElementById('programDuration').value = p.duration || '4 Years';
-        document.getElementById('programIcon').value = p.icon_class || 'bi-laptop';
-        document.getElementById('programTheme').value = p.theme_class || 'theme-blue';
-        document.getElementById('programDesc').value = p.description || '';
-        document.getElementById('programUrl').value = p.detail_url || '';
-        document.getElementById('programOrder').value = p.order_num !== undefined ? p.order_num : 1;
-        document.getElementById('programPublished').checked = p.is_published === 1 || p.is_published === true;
-        document.getElementById('programModalTitle').textContent = 'Edit Featured Program';
 
-        updateProgramIconPreview();
-        updateProgramThemePreview();
-        updateProgramDescCount();
+        isSubmittingProgram = false;
+        const submitBtn = document.getElementById('submitProgramBtn');
+        if (submitBtn) submitBtn.disabled = false;
+        const submitSpinner = document.getElementById('submitProgramSpinner');
+        if (submitSpinner) submitSpinner.classList.add('d-none');
+        const saveDraftBtn = document.getElementById('saveDraftProgramBtn');
+        if (saveDraftBtn) saveDraftBtn.disabled = false;
 
-        if (programModal) programModal.show();
+        const idEl = document.getElementById('programId');
+        if (idEl) idEl.value = p.id;
+        const titleEl = document.getElementById('programModalTitle');
+        if (titleEl) titleEl.textContent = 'Edit Academic Program';
+        const subTitleEl = document.getElementById('programModalSubtitle');
+        if (subTitleEl) subTitleEl.textContent = `Update program details for ${p.title}.`;
+        const submitBtnText = document.getElementById('submitProgramBtnText');
+        if (submitBtnText) submitBtnText.textContent = 'Save Changes';
+
+        const pTitle = document.getElementById('programTitle');
+        if (pTitle) pTitle.value = p.title || '';
+        const pCode = document.getElementById('programCode');
+        if (pCode) pCode.value = p.code || (p.slug ? p.slug.toUpperCase() : '');
+        const pShortDesc = document.getElementById('programShortDesc');
+        if (pShortDesc) pShortDesc.value = p.short_description || '';
+        const pDegree = document.getElementById('programDegree');
+        if (pDegree) pDegree.value = p.degree_type || "Bachelor Degree";
+        const pDur = document.getElementById('programDuration');
+        if (pDur) pDur.value = p.duration || '4 Years';
+        const pCred = document.getElementById('programCredits');
+        if (pCred) pCred.value = p.credits || '120';
+        const pOrder = document.getElementById('programOrderNum');
+        if (pOrder) pOrder.value = p.order_num !== undefined ? p.order_num : 1;
+        const pTheme = document.getElementById('programThemeSelect');
+        if (pTheme) pTheme.value = p.theme_class || 'theme-blue';
+        const pIcon = document.getElementById('programIconSelect');
+        if (pIcon) pIcon.value = p.icon_class || 'bi-laptop';
+        const pFullDesc = document.getElementById('programFullDesc');
+        if (pFullDesc) pFullDesc.value = p.description || p.full_description || '';
+        const pStatus = document.getElementById('programStatus');
+        if (pStatus) pStatus.value = p.status || (p.is_published === 1 ? 'Published' : 'Draft');
+
+        if (programFeaturedToggle) {
+            const isFeat = p.is_featured === 1 || p.is_featured === true;
+            programFeaturedToggle.checked = isFeat;
+            if (featuredToggleLabel) {
+                featuredToggleLabel.textContent = isFeat ? 'ON' : 'OFF';
+                featuredToggleLabel.className = `form-check-label text-xs fw-bold ${isFeat ? 'text-primary' : 'text-muted'}`;
+            }
+        }
+
+        // Set Cover Image
+        if (p.image_url) {
+            setProgramImagePreview(p.image_url, `${p.title} Cover`);
+        } else {
+            resetProgramImage();
+        }
+
+        // Set Custom Logo
+        if (p.logo_url || p.custom_logo) {
+            setProgramLogoPreview(p.logo_url || p.custom_logo, `${p.title} Logo`);
+        } else {
+            resetProgramLogo();
+        }
+
+        // Parse Learning Outcomes
+        if (p.learning_outcomes) {
+            try {
+                programLearningOutcomes = Array.isArray(p.learning_outcomes)
+                    ? p.learning_outcomes
+                    : JSON.parse(p.learning_outcomes);
+            } catch (e) {
+                programLearningOutcomes = [p.learning_outcomes];
+            }
+        } else {
+            programLearningOutcomes = [];
+        }
+        renderProgramLearningOutcomes();
+
+        // Parse Instructors
+        selectedProgramInstructors = [];
+        if (p.instructor_ids) {
+            let instIds = [];
+            try {
+                instIds = Array.isArray(p.instructor_ids) ? p.instructor_ids : JSON.parse(p.instructor_ids);
+            } catch (e) {
+                instIds = [p.instructor_ids];
+            }
+            instIds.forEach(instId => {
+                const found = allInstructors.find(i => Number(i.id) === Number(instId));
+                if (found) {
+                    selectedProgramInstructors.push({ id: found.id, name: found.name, title: found.title || '' });
+                }
+            });
+        }
+        renderProgramInstructorChips();
+        renderInstructorDropdownList('');
+
+        loadCategoriesForProgramModal(p.category_id);
+        loadInstructorsForProgramModal();
+
+        const modalEl = document.getElementById('createProgramModal');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modalInstance) modalInstance.show();
+        }
     };
 
+    // Attach Add Button Click Event Directly
+    const openAddProgramBtn = document.getElementById('openAddProgramBtn');
+    if (openAddProgramBtn) {
+        openAddProgramBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.openCreateProgramModal();
+        });
+    }
+
+    // Modal Lifecycle Listeners for Accessibility & Focus Trap
+    if (programModalEl) {
+        programModalEl.addEventListener('shown.bs.modal', function () {
+            const titleInput = document.getElementById('programTitle');
+            if (titleInput) titleInput.focus();
+        });
+        programModalEl.addEventListener('hidden.bs.modal', function () {
+            clearProgramValidation();
+            const addBtn = document.getElementById('openAddProgramBtn');
+            if (addBtn) addBtn.focus();
+        });
+    }
+
+    // Initialize Program Image, Logo & Instructor Dropdown Listeners
+    setupProgramImageUpload();
+    setupProgramLogoUpload();
+    setupInstructorDropdownEvents();
+
+    // Hook up Save as Draft Button
+    const saveDraftProgramBtn = document.getElementById('saveDraftProgramBtn');
+    if (saveDraftProgramBtn) {
+        saveDraftProgramBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const statusEl = document.getElementById('programStatus');
+            if (statusEl) statusEl.value = 'Draft';
+            const form = document.getElementById('programForm');
+            if (form) {
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+        });
+    }
+
+    // Hook up Publish / Submit Program Button
+    const submitProgramBtn = document.getElementById('submitProgramBtn');
+    if (submitProgramBtn) {
+        submitProgramBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const form = document.getElementById('programForm');
+            if (form) {
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+        });
+    }
+
+    // Program Form Submission Handler
     const programForm = document.getElementById('programForm');
     if (programForm) {
         programForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // Run full validation
+            if (isSubmittingProgram) return;
+
+            // Run Validation
             const { isValid, firstInvalidEl } = validateProgramForm();
             if (!isValid) {
-                if (firstInvalidEl) {
-                    firstInvalidEl.focus();
-                }
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.toast('Please correct the highlighted errors in the form.', 'error');
-                }
+                if (firstInvalidEl) firstInvalidEl.focus();
+                showProgramToast('danger', 'Validation Error', 'Please correct the required fields in the form.');
                 return;
             }
 
-            const id = document.getElementById('programId').value;
-            const title = document.getElementById('programTitle').value.trim();
-            const degreeType = document.getElementById('programDegree').value.trim();
-            const duration = document.getElementById('programDuration').value.trim();
-            const iconClass = document.getElementById('programIcon').value.trim() || 'bi-laptop';
-            const themeClass = document.getElementById('programTheme').value || 'theme-blue';
-            const description = document.getElementById('programDesc').value.trim();
-            const detailUrl = document.getElementById('programUrl').value.trim() || '#';
-            const orderNum = parseInt(document.getElementById('programOrder').value, 10);
-            const isPublished = document.getElementById('programPublished').checked ? 1 : 0;
+            const id = document.getElementById('programId')?.value;
+            const title = document.getElementById('programTitle')?.value.trim() || '';
+            const code = document.getElementById('programCode')?.value.trim() || '';
+            const shortDesc = document.getElementById('programShortDesc')?.value.trim() || '';
+            const degreeType = document.getElementById('programDegree')?.value.trim() || 'Bachelor Degree';
+            const categoryId = document.getElementById('programCategorySelect')?.value;
+            const duration = document.getElementById('programDuration')?.value.trim() || '4 Years';
+            const creditsVal = document.getElementById('programCredits')?.value.trim();
+            const credits = creditsVal ? Number(creditsVal) : 120;
+            const orderNumVal = document.getElementById('programOrderNum') ? document.getElementById('programOrderNum').value : '';
+            const orderNum = orderNumVal ? Number(orderNumVal) : (allPrograms.length + 1);
+            const themeClass = document.getElementById('programThemeSelect') ? document.getElementById('programThemeSelect').value : 'theme-blue';
+            const iconClass = document.getElementById('programIconSelect') ? document.getElementById('programIconSelect').value : 'bi-laptop';
+            const fullDesc = document.getElementById('programFullDesc')?.value.trim() || '';
+            const imageUrl = document.getElementById('programImageUrl') ? document.getElementById('programImageUrl').value.trim() : '';
+            const logoUrl = document.getElementById('programLogoUrl') ? document.getElementById('programLogoUrl').value.trim() : '';
+            const status = document.getElementById('programStatus')?.value || 'Published';
+            const isFeatured = programFeaturedToggle ? (programFeaturedToggle.checked ? 1 : 0) : 1;
+            const isPublished = status === 'Draft' ? 0 : 1;
+
+            // 8. DUPLICATE PROGRAM PROTECTION (Client-side pre-check)
+            if (Array.isArray(allPrograms)) {
+                const existingDuplicate = allPrograms.find(p => {
+                    if (id && Number(p.id) === Number(id)) return false;
+                    const sameCode = code && p.code && p.code.trim().toLowerCase() === code.toLowerCase();
+                    const sameTitle = p.title && p.title.trim().toLowerCase() === title.toLowerCase();
+                    return sameCode || sameTitle;
+                });
+
+                if (existingDuplicate) {
+                    const isCodeDupe = code && existingDuplicate.code && existingDuplicate.code.trim().toLowerCase() === code.toLowerCase();
+                    const msg = isCodeDupe 
+                        ? 'An academic program with this code already exists.' 
+                        : 'An academic program with this title already exists.';
+                    const fieldId = isCodeDupe ? 'programCode' : 'programTitle';
+                    const feedbackId = isCodeDupe ? 'programCodeFeedback' : 'programTitleFeedback';
+                    
+                    setFieldInvalid(fieldId, feedbackId, msg);
+                    const fieldEl = document.getElementById(fieldId);
+                    if (fieldEl) fieldEl.focus();
+                    showProgramToast('danger', 'Duplicate Program', msg);
+                    return;
+                }
+            }
+
+            // Filter valid outcomes
+            const outcomes = programLearningOutcomes.filter(o => o && o.trim().length > 0);
+            const instructorIds = selectedProgramInstructors.map(i => i.id);
+
+            const effectiveDesc = fullDesc || shortDesc || `${title} academic program at AUB Digital Academy.`;
 
             const payload = {
                 title: title,
+                code: code,
+                slug: code ? code.toLowerCase() : title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+                short_description: shortDesc,
+                description: effectiveDesc,
+                full_description: fullDesc || effectiveDesc,
                 degree_type: degreeType,
+                category_id: categoryId ? Number(categoryId) : null,
                 duration: duration,
+                credits: credits,
+                image_url: imageUrl,
+                logo_url: logoUrl,
+                learning_outcomes: outcomes,
+                instructor_ids: instructorIds,
+                status: status,
+                is_featured: isFeatured,
+                is_published: isPublished,
                 icon_class: iconClass,
                 theme_class: themeClass,
-                description: description,
-                detail_url: detailUrl,
-                order_num: isNaN(orderNum) ? 1 : Math.max(0, orderNum),
-                is_published: isPublished
+                order_num: orderNum
             };
 
-            const saveBtn = document.getElementById('saveProgramBtn');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving...`;
-            }
+            // Loading state on button [ Creating... ] / [ Saving... ]
+            const submitBtn = document.getElementById('submitProgramBtn');
+            const submitSpinner = document.getElementById('submitProgramSpinner');
+            const submitBtnText = document.getElementById('submitProgramBtnText');
+            const saveDraftBtn = document.getElementById('saveDraftProgramBtn');
+
+            isSubmittingProgram = true;
+            if (submitBtn) submitBtn.disabled = true;
+            if (saveDraftBtn) saveDraftBtn.disabled = true;
+            if (submitSpinner) submitSpinner.classList.remove('d-none');
+            if (submitBtnText) submitBtnText.textContent = id ? 'Saving...' : (status === 'Draft' ? 'Saving...' : 'Publishing...');
 
             try {
-                if (id) {
-                    if (window.AdminStore) {
-                        window.AdminStore.updateProgram(id, payload);
-                        allPrograms = window.AdminStore.getPrograms();
+                if (window.academicService && typeof window.academicService.createProgram === 'function') {
+                    if (id) {
+                        await window.academicService.updateProgram(id, payload);
+                    } else {
+                        await window.academicService.createProgram(payload);
                     }
-                    if (programModal) programModal.hide();
-                    renderProgramsTable(allPrograms);
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Updated', `"${title}" has been successfully updated.`);
                 } else {
-                    if (window.AdminStore) {
-                        window.AdminStore.createProgram(payload);
-                        allPrograms = window.AdminStore.getPrograms();
+                    const url = id ? `${API_BASE}/admin/programs/${id}` : `${API_BASE}/admin/programs`;
+                    const method = id ? 'PUT' : 'POST';
+
+                    const res = await fetch(url, {
+                        method: method,
+                        headers: getHeaders(),
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.status === 409) {
+                        const errData = await res.json().catch(() => ({}));
+                        const msg = errData.message || 'An academic program with this code already exists.';
+                        setFieldInvalid('programCode', 'programCodeFeedback', msg);
+                        const codeEl = document.getElementById('programCode');
+                        if (codeEl) {
+                            try { codeEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); codeEl.focus(); } catch (e) { codeEl.focus(); }
+                        }
+                        showProgramToast('danger', 'Duplicate Program', msg);
+                        return;
                     }
-                    if (programModal) programModal.hide();
-                    renderProgramsTable(allPrograms);
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Program Created', `"${title}" has been added to featured academic programs.`);
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.message || 'Unable to create program. Please try again.');
+                    }
                 }
 
-                const url = id ? `${API_BASE}/admin/programs/${id}` : `${API_BASE}/admin/programs`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {
-                console.error('Save program error:', err);
-            } finally {
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Program`;
+                // 1. Close Modal
+                const modalEl = document.getElementById('createProgramModal');
+                if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modalInstance = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (modalInstance) modalInstance.hide();
                 }
+
+                // 2. Success notification
+                showProgramToast('success', id ? 'Program updated successfully.' : 'Program created successfully.');
+
+                // 3. Force refresh table immediately from backend database / store
+                await loadPrograms(true);
+
+                // 4. Reset form state after success
+                if (programForm) programForm.reset();
+                clearProgramValidation();
+                resetProgramImage();
+                resetProgramLogo();
+                selectedProgramInstructors = [];
+                programLearningOutcomes = [];
+                renderProgramInstructorChips();
+                renderProgramLearningOutcomes();
+
+            } catch (err) {
+                console.error('[AcademicManagement] Submit error:', err);
+                if (err.isDuplicate || err.status === 409) {
+                    const fieldId = err.field || 'programCode';
+                    const feedbackId = fieldId === 'programTitle' ? 'programTitleFeedback' : 'programCodeFeedback';
+                    const msg = err.message || 'An academic program with this code already exists.';
+                    setFieldInvalid(fieldId, feedbackId, msg);
+                    const el = document.getElementById(fieldId);
+                    if (el) {
+                        try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); } catch (e) { el.focus(); }
+                    }
+                    showProgramToast('danger', 'Duplicate Program', msg);
+                } else if (err.isNetworkError || err.name === 'TypeError' || (err.message && (err.message.includes('fetch') || err.message.includes('NetworkError') || err.message.includes('Failed to fetch')))) {
+                    showProgramToast('danger', 'Connection Error', 'Backend server unreachable. Please make sure the server is running.');
+                } else {
+                    showProgramToast('danger', 'Error', err.message || 'Unable to create program. Please try again.');
+                }
+            } finally {
+                isSubmittingProgram = false;
+                if (submitBtn) submitBtn.disabled = false;
+                if (saveDraftBtn) saveDraftBtn.disabled = false;
+                if (submitSpinner) submitSpinner.classList.add('d-none');
+                if (submitBtnText) submitBtnText.textContent = id ? 'Save Changes' : 'Publish';
             }
         });
     }
 
-    window.toggleProgramStatus = async function (id) {
-        let prog = null;
-        if (window.AdminStore) {
-            prog = window.AdminStore.toggleProgramPublish(id);
-            allPrograms = window.AdminStore.getPrograms();
+    // View Program Details Modal Handler
+    window.viewProgram = function (id) {
+        let p = allPrograms.find(prog => Number(prog.id) === Number(id));
+        if (!p && window.AdminStore && typeof window.AdminStore.getPrograms === 'function') {
+            p = window.AdminStore.getPrograms().find(prog => Number(prog.id) === Number(id));
         }
-        renderProgramsTable(allPrograms);
-        if (prog && window.AdminStore) {
-            window.AdminStore.constructor.toast(`Program is now ${prog.is_published ? 'Published' : 'Draft'}`, 'info');
+        if (!p) return;
+
+        const titleEl = document.getElementById('viewProgramTitle');
+        const degreeEl = document.getElementById('viewProgramDegree');
+        const statusEl = document.getElementById('viewProgramStatus');
+        const bodyEl = document.getElementById('viewProgramBody');
+        const editBtn = document.getElementById('viewProgramEditBtn');
+
+        if (titleEl) titleEl.textContent = p.title || 'Program Details';
+        if (degreeEl) degreeEl.textContent = p.degree_type || 'Bachelor Degree';
+        if (statusEl) {
+            const isPub = p.is_published === 1 || p.is_published === true || (p.status && p.status.toLowerCase() === 'published');
+            statusEl.textContent = isPub ? 'Published' : 'Draft';
+            statusEl.className = `badge ${isPub ? 'bg-success' : 'bg-secondary'}`;
         }
 
+        if (editBtn) {
+            editBtn.onclick = function () {
+                const viewModalEl = document.getElementById('viewProgramModal');
+                if (viewModalEl && typeof bootstrap !== 'undefined') {
+                    const vm = bootstrap.Modal.getInstance(viewModalEl);
+                    if (vm) vm.hide();
+                }
+                setTimeout(() => window.openEditProgramModal(p.id), 250);
+            };
+        }
+
+        if (bodyEl) {
+            let catName = 'General';
+            if (p.category_id && window.AdminStore && typeof window.AdminStore.getCategories === 'function') {
+                const cat = window.AdminStore.getCategories().find(c => Number(c.id) === Number(p.category_id));
+                if (cat) catName = cat.name;
+            }
+
+            let outcomesList = [];
+            if (p.learning_outcomes) {
+                try {
+                    outcomesList = Array.isArray(p.learning_outcomes) ? p.learning_outcomes : JSON.parse(p.learning_outcomes);
+                } catch (e) {
+                    outcomesList = [p.learning_outcomes];
+                }
+            }
+
+            let instructorNames = [];
+            if (p.instructor_ids && window.AdminStore && typeof window.AdminStore.getInstructors === 'function') {
+                let instIds = [];
+                try {
+                    instIds = Array.isArray(p.instructor_ids) ? p.instructor_ids : JSON.parse(p.instructor_ids);
+                } catch (e) {
+                    instIds = [p.instructor_ids];
+                }
+                const allInsts = window.AdminStore.getInstructors();
+                instructorNames = instIds.map(iId => {
+                    const found = allInsts.find(i => Number(i.id) === Number(iId));
+                    return found ? found.name : null;
+                }).filter(Boolean);
+            }
+
+            const themeClass = p.theme_class || 'theme-blue';
+            const themeColor = THEME_COLOR_MAP[themeClass] || '#2563eb';
+            const logoUrl = p.logo_url || p.custom_logo || '';
+            const imgUrl = p.image_url || '';
+
+            bodyEl.innerHTML = `
+                <div class="row g-4">
+                    ${imgUrl ? `
+                    <div class="col-12">
+                        <div class="rounded-3 overflow-hidden border" style="max-height: 200px;">
+                            <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.title)}" class="w-100 h-100 object-fit-cover">
+                        </div>
+                    </div>
+                    ` : ''}
+                    <div class="col-md-6">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Code</div>
+                        <div class="fw-semibold text-dark text-sm">${escapeHtml(p.code || 'N/A')}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Category</div>
+                        <div class="fw-semibold text-dark text-sm">${escapeHtml(catName)}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Duration</div>
+                        <div class="fw-semibold text-dark text-sm"><i class="bi bi-clock me-1 text-muted"></i>${escapeHtml(p.duration || '4 Years')}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Credits</div>
+                        <div class="fw-semibold text-dark text-sm">${escapeHtml(String(p.credits || 120))} Credits</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Display Order</div>
+                        <div class="fw-semibold text-dark text-sm">#${p.order_num !== undefined ? p.order_num : 1}</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-1">Description</div>
+                        <p class="text-sm text-secondary mb-0" style="line-height: 1.6;">${escapeHtml(p.description || p.full_description || p.short_description || 'No description available.')}</p>
+                    </div>
+                    ${outcomesList.length > 0 ? `
+                    <div class="col-12">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-2">Learning Outcomes</div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-1.5">
+                            ${outcomesList.map(o => `
+                                <li class="text-xs text-dark d-flex align-items-start gap-2">
+                                    <i class="bi bi-check-circle-fill text-success mt-0.5" style="font-size: 13px;"></i>
+                                    <span>${escapeHtml(o)}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    ` : ''}
+                    ${instructorNames.length > 0 ? `
+                    <div class="col-12">
+                        <div class="text-xs text-muted text-uppercase fw-bold mb-2">Assigned Faculty</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${instructorNames.map(name => `
+                                <span class="badge bg-light text-dark border fw-medium px-2.5 py-1.5 text-xs d-inline-flex align-items-center gap-1.5">
+                                    <i class="bi bi-person-badge text-primary"></i> ${escapeHtml(name)}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        const modalEl = document.getElementById('viewProgramModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (modalInstance) modalInstance.show();
+        }
+    };
+
+    window.toggleProgramStatus = async function (id) {
         try {
-            await fetch(`${API_BASE}/admin/programs/${id}/toggle-publish`, { method: 'PATCH', headers: getHeaders() });
-        } catch (e) {}
+            if (window.academicService && typeof window.academicService.toggleProgramPublish === 'function') {
+                const res = await window.academicService.toggleProgramPublish(id);
+                showProgramToast('info', 'Status Updated', `Program is now ${res?.is_published ? 'Published' : 'Draft'}`);
+            } else {
+                await fetch(`${API_BASE}/admin/programs/${id}/toggle-publish`, { method: 'PATCH', headers: getHeaders() });
+            }
+            await loadPrograms(true);
+        } catch (err) {
+            showProgramToast('danger', 'Error', err.message || 'Failed to toggle program status.');
+            await loadPrograms(true);
+        }
     };
 
     window.deleteProgram = async function (id) {
-        const prog = allPrograms.find(p => p.id === id);
+        let prog = allPrograms.find(p => Number(p.id) === Number(id));
+        if (!prog && window.AdminStore && typeof window.AdminStore.getPrograms === 'function') {
+            prog = window.AdminStore.getPrograms().find(p => Number(p.id) === Number(id));
+        }
         const name = prog ? prog.title : 'this program';
 
         let confirmed = false;
-        if (window.AdminStore) {
+        if (window.Swal) {
+            const result = await Swal.fire({
+                title: 'Delete this academic program?',
+                text: `Are you sure you want to delete "${name}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+            confirmed = result.isConfirmed;
+        } else if (window.AdminStore && typeof window.AdminStore.constructor.confirmDialog === 'function') {
             confirmed = await window.AdminStore.constructor.confirmDialog(
-                'Delete Program?',
+                'Delete this academic program?',
                 `Are you sure you want to delete "${name}"?`,
-                'Yes, Delete Program',
+                'Delete',
                 '#DC2626'
             );
         } else {
-            confirmed = confirm(`Are you sure you want to delete "${name}"?`);
+            confirmed = confirm(`Delete this academic program?\n\nAre you sure you want to delete "${name}"?`);
         }
 
         if (!confirmed) return;
 
         try {
-            if (window.AdminStore) {
-                window.AdminStore.deleteProgram(id);
-                allPrograms = window.AdminStore.getPrograms();
-            }
-
-            const res = await fetch(`${API_BASE}/admin/programs/${id}`, { method: 'DELETE', headers: getHeaders() });
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                if (errData.message) {
-                    throw new Error(errData.message);
+            if (window.academicService && typeof window.academicService.deleteProgram === 'function') {
+                await window.academicService.deleteProgram(id);
+            } else {
+                const res = await fetch(`${API_BASE}/admin/programs/${id}`, { method: 'DELETE', headers: getHeaders() });
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.message || 'Cannot delete program.');
                 }
             }
 
-            renderProgramsTable(allPrograms);
-            if (window.AdminStore) {
-                window.AdminStore.constructor.toast(`Program "${name}" deleted`, 'success');
-            }
+            showProgramToast('success', 'Deleted', `Program "${name}" deleted successfully.`);
+            await loadPrograms(true);
         } catch (err) {
-            if (window.AdminStore) {
-                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete program with registered students.');
-            } else {
-                alert(err.message || 'Cannot delete program.');
-            }
-            // Reload to restore state
-            loadPrograms();
+            showProgramToast('danger', 'Action Prohibited', err.message || 'Cannot delete program.');
+            await loadPrograms(true);
         }
     };
 
@@ -574,10 +1769,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // 2. COURSES MANAGEMENT
     // ==========================================
     async function loadCourses() {
-        let loaded = false;
+        // Step 1: Render synchronously from cache immediately (0ms)
+        if ((!allCourses || allCourses.length === 0) && window.AdminStore) {
+            allCourses = window.AdminStore.getCourses();
+            applyCourseFilters();
+        }
+
+        // Step 2: Background fetch from API
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
             const res = await fetch(`${API_BASE}/admin/courses`, { 
                 headers: getHeaders(),
                 signal: controller.signal
@@ -588,16 +1789,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const data = await res.json();
                 if (data.success && Array.isArray(data.data) && data.data.length > 0) {
                     allCourses = data.data;
-                    loaded = true;
+                    applyCourseFilters();
                 }
             }
         } catch (e) {}
-
-        if (!loaded && window.AdminStore) {
-            allCourses = window.AdminStore.getCourses();
-        }
-
-        applyCourseFilters();
     }
 
     function renderCoursesTable(courses) {
@@ -614,11 +1809,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const lessonCount = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id).length : (c.lesson_count || 0);
             const quizCount = window.AdminStore ? window.AdminStore.getAllQuizzesByCourseId(c.id).length : (c.quiz_count || 0);
             const assignmentCount = window.AdminStore ? window.AdminStore.getAllAssignmentsByCourseId(c.id).length : (c.assignment_count || 0);
+            const imgSrc = (c.thumbnail_url && (c.thumbnail_url.startsWith('http') || c.thumbnail_url.startsWith('data:')))
+                ? c.thumbnail_url
+                : ('../../' + (c.thumbnail_url || 'assets/images/course_webdev.jpg'));
             return `
                 <tr>
                     <td>
                         <div class="d-flex align-items-center gap-2 cursor-pointer" onclick="openViewCourseModal(${c.id})" title="Click to view course details">
-                            <img src="../../${escapeHtml(c.thumbnail_url || 'assets/images/courses/fullstack.jpg')}" class="rounded-2 object-fit-cover border" style="width: 44px; height: 32px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=100'">
+                            <img src="${escapeHtml(imgSrc)}" class="rounded-2 object-fit-cover border" style="width: 44px; height: 32px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=100'">
                             <div>
                                 <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(c.title)}</div>
                                 <div class="text-muted" style="font-size: 11px;">
@@ -708,92 +1906,102 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // View Course Details Modal
     window.openViewCourseModal = function (courseId) {
-        const c = allCourses.find(course => course.id === courseId);
+        let c = allCourses.find(course => Number(course.id) === Number(courseId));
+        if (!c && window.AdminStore) {
+            c = window.AdminStore.getCourseById(courseId);
+        }
         if (!c) return;
 
         activeCourseInView = c;
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
         const allLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id) : [];
-        const allQuizzes = window.AdminStore ? window.AdminStore.getAllQuizzesByCourseId(c.id) : [];
-        const allAssignments = window.AdminStore ? window.AdminStore.getAllAssignmentsByCourseId(c.id) : [];
 
-        const body = document.getElementById('viewCourseModalBody');
-        const titleEl = document.getElementById('viewCourseModalTitle');
-        if (titleEl) titleEl.textContent = `Course Syllabus: ${c.title}`;
+        const titleEl = document.getElementById('viewCourseTitle') || document.getElementById('viewCourseModalTitle');
+        const catEl = document.getElementById('viewCourseCategory');
+        const diffEl = document.getElementById('viewCourseDifficulty');
+        const body = document.getElementById('viewCourseBody') || document.getElementById('viewCourseModalBody');
+        const editBtn = document.getElementById('viewCourseEditBtn');
+
+        if (titleEl) titleEl.textContent = c.title;
+        if (catEl) catEl.textContent = c.category_name || 'Academic';
+        if (diffEl) diffEl.textContent = c.difficulty || 'Beginner';
+
+        if (editBtn) {
+            editBtn.onclick = function () {
+                if (viewCourseModal) viewCourseModal.hide();
+                openEditCourseModal(c.id);
+            };
+        }
+
+        const imgSrc = (c.thumbnail_url && (c.thumbnail_url.startsWith('http') || c.thumbnail_url.startsWith('data:'))) 
+            ? c.thumbnail_url 
+            : ('../../' + (c.thumbnail_url || 'assets/images/course_webdev.jpg'));
 
         if (body) {
             body.innerHTML = `
+                <!-- Course Hero Card -->
                 <div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 mb-3 border">
-                    <img src="../../${escapeHtml(c.thumbnail_url || 'assets/images/courses/fullstack.jpg')}" class="rounded-3 object-fit-cover border shadow-sm" style="width: 80px; height: 60px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
+                    <img src="${escapeHtml(imgSrc)}" class="rounded-3 object-fit-cover border shadow-sm" style="width: 100px; height: 75px; flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=200'">
                     <div class="flex-grow-1">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1">${escapeHtml(c.category_name || 'Academic')}</span>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <span class="badge bg-primary px-2 py-1">${escapeHtml(c.category_name || 'Specialized Course')}</span>
                             <span class="badge bg-light text-dark border px-2 py-1">${escapeHtml(c.difficulty || 'Beginner')}</span>
-                            <span class="admin-status-badge ${c.is_published ? 'published' : 'draft'}">${c.is_published ? 'Published' : 'Draft'}</span>
-                            ${c.badge ? `<span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1">${escapeHtml(c.badge)}</span>` : ''}
+                            <span class="badge ${c.is_published ? 'bg-success' : 'bg-secondary'} px-2 py-1">${c.is_published ? 'Published' : 'Draft'}</span>
+                            ${c.code ? `<span class="badge bg-white text-secondary border px-2 py-1"><i class="bi bi-hash me-0.5"></i>${escapeHtml(c.code)}</span>` : ''}
+                            ${c.is_featured ? `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2 py-1"><i class="bi bi-star-fill text-warning me-1"></i>Featured</span>` : ''}
                         </div>
                         <h5 class="fw-bold text-dark mb-1">${escapeHtml(c.title)}</h5>
                         <div class="text-muted" style="font-size: 12px;">
-                            <i class="bi bi-person-badge me-1"></i> Instructor: <span class="text-dark fw-semibold">${escapeHtml(c.instructor_name)}</span> &bull; 
+                            <i class="bi bi-person-badge me-1"></i> Instructor: <span class="text-dark fw-semibold">${escapeHtml(c.instructor_name || 'Faculty Staff')}</span> &bull; 
                             <i class="bi bi-clock ms-2 me-1"></i> ${escapeHtml(c.duration || '8 Weeks')} &bull; 
-                            <i class="bi bi-people ms-2 me-1"></i> ${c.enrolled_students_count || 0} Students &bull; 
+                            <i class="bi bi-people ms-2 me-1"></i> ${c.enrolled_students_count || 0} Enrolled &bull; 
                             <i class="bi bi-star-fill text-warning ms-2 me-1"></i> ${c.rating || '4.8'}
                         </div>
                     </div>
                 </div>
 
+                <!-- Course Description -->
                 <div class="mb-3">
-                    <h6 class="text-xs fw-bold text-uppercase text-muted mb-2">Course Overview & Syllabus</h6>
-                    <p class="text-secondary bg-white p-3 rounded-2 border" style="font-size: 13px; line-height: 1.6;">
-                        ${escapeHtml(c.description || 'Comprehensive curriculum designed for student mastery.')}
+                    <h6 class="text-xs fw-bold text-uppercase text-muted mb-2">Course Overview</h6>
+                    <p class="text-secondary bg-white p-3 rounded-2 border mb-0" style="font-size: 13px; line-height: 1.6;">
+                        ${escapeHtml(c.description || c.short_description || 'Comprehensive curriculum designed for student mastery.')}
                     </p>
                 </div>
 
+                <!-- Curriculum Summary -->
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="text-xs fw-bold text-uppercase text-muted mb-0">Curriculum Units (${chapters.length} Modules &bull; ${allLessons.length} Lessons &bull; ${allQuizzes.length} Quizzes &bull; ${allAssignments.length} Assignments)</h6>
+                        <h6 class="text-xs fw-bold text-uppercase text-muted mb-0">Curriculum Units (${chapters.length} Modules &bull; ${allLessons.length} Lessons)</h6>
+                        <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 rounded-pill text-xs" onclick="if (viewCourseModal) viewCourseModal.hide(); openCourseContentBuilder(${c.id});">
+                            <i class="bi bi-journal-bookmark me-1"></i> Manage Curriculum
+                        </button>
                     </div>
 
                     ${chapters.length === 0 ? `
-                        <div class="text-center py-3 text-muted border rounded-2 bg-light" style="font-size: 12px;">
-                            No curriculum modules registered yet for this course.
+                        <div class="text-center py-4 text-muted border rounded-2 bg-light" style="font-size: 12.5px;">
+                            <i class="bi bi-diagram-3 fs-3 d-block mb-1 text-secondary opacity-50"></i>
+                            No curriculum modules registered yet for this course. (0 Lessons)
                         </div>
                     ` : `
-                        <div class="d-flex flex-column gap-2" style="max-height: 280px; overflow-y: auto;">
+                        <div class="d-flex flex-column gap-2" style="max-height: 240px; overflow-y: auto;">
                             ${chapters.map((ch, idx) => {
                                 const chLessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
-                                const chQuizzes = window.AdminStore ? window.AdminStore.getQuizzesByModuleId(ch.id) : [];
-                                const chAssignments = window.AdminStore ? window.AdminStore.getAssignmentsByModuleId(ch.id) : [];
                                 return `
-                                    <div class="p-3 bg-light rounded-2 border">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="p-2.5 bg-light rounded-2 border">
+                                        <div class="d-flex align-items-center justify-content-between mb-1.5">
                                             <div>
-                                                <span class="badge bg-primary me-2" style="font-size: 10px;">Module ${ch.chapter_num || idx + 1}</span>
-                                                <span class="fw-bold text-dark" style="font-size: 13px;">${escapeHtml(ch.title)}</span>
+                                                <span class="badge bg-primary me-1.5" style="font-size: 10px;">Module ${ch.chapter_num || idx + 1}</span>
+                                                <span class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(ch.title)}</span>
                                             </div>
-                                            <span class="badge bg-white text-secondary border" style="font-size: 11px;">${escapeHtml(ch.duration || '2 Weeks')}</span>
+                                            <span class="badge bg-white text-secondary border" style="font-size: 10.5px;">${escapeHtml(ch.duration || '2 Weeks')}</span>
                                         </div>
-                                        ${ch.description ? `<p class="text-muted small mb-2" style="font-size: 11.5px;">${escapeHtml(ch.description)}</p>` : ''}
                                         <div class="d-flex flex-column gap-1 ms-2 border-start ps-2" style="border-color: #CBD5E1 !important;">
-                                            ${chLessons.map(l => {
-                                                const icon = l.content_type === 'Document' ? 'bi-file-earmark-pdf text-danger' : l.content_type === 'Text' ? 'bi-file-text text-secondary' : 'bi-camera-video text-primary';
-                                                return `
-                                                    <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
-                                                        <span class="text-truncate me-2"><i class="bi ${icon} me-1"></i> <span class="fw-medium text-dark">${escapeHtml(l.title)}</span></span>
-                                                        <span class="badge bg-white text-muted border flex-shrink-0" style="font-size: 10px;">${escapeHtml(l.content_type || 'Video')} &bull; ${escapeHtml(l.duration || '45 Mins')}</span>
-                                                    </div>
-                                                `;
-                                            }).join('')}
-                                            ${chQuizzes.map(q => `
+                                            ${chLessons.length === 0 ? `
+                                                <span class="text-muted text-xs">No lessons added to this module yet.</span>
+                                            ` : chLessons.map(l => `
                                                 <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
-                                                    <span class="text-truncate me-2"><i class="bi bi-question-square me-1" style="color: #7C3AED;"></i> <span class="fw-medium text-dark">${escapeHtml(q.title)}</span></span>
-                                                    <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #7C3AED;">Quiz &bull; ${(q.questions || []).length} Qs &bull; Pass ${q.passing_score || 70}%</span>
-                                                </div>
-                                            `).join('')}
-                                            ${chAssignments.map(a => `
-                                                <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 11.5px;">
-                                                    <span class="text-truncate me-2"><i class="bi bi-journal-check me-1" style="color: #D97706;"></i> <span class="fw-medium text-dark">${escapeHtml(a.title)}</span></span>
-                                                    <span class="badge bg-white border flex-shrink-0" style="font-size: 10px; color: #D97706;">Assignment &bull; ${a.max_score || 100} Pts${a.due_date ? ` &bull; Due ${a.due_date}` : ''}</span>
+                                                    <span class="text-truncate me-2"><i class="bi bi-play-circle text-primary me-1"></i> <span class="text-dark">${escapeHtml(l.title)}</span></span>
+                                                    <span class="badge bg-white text-muted border flex-shrink-0" style="font-size: 10px;">${escapeHtml(l.duration || '45 Mins')}</span>
                                                 </div>
                                             `).join('')}
                                         </div>
@@ -806,28 +2014,12 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
         }
 
-        if (viewCourseModal) viewCourseModal.show();
+        document.querySelectorAll('.modal-backdrop').forEach(el => {
+            if (!document.querySelector('.modal.show')) el.remove();
+        });
+        const vModal = safeGetModal(document.getElementById('viewCourseModal')) || viewCourseModal;
+        if (vModal) vModal.show();
     };
-
-    const manageChaptersFromViewBtn = document.getElementById('manageChaptersFromViewBtn');
-    if (manageChaptersFromViewBtn) {
-        manageChaptersFromViewBtn.addEventListener('click', function () {
-            if (viewCourseModal) viewCourseModal.hide();
-            if (activeCourseInView) {
-                openCourseContentBuilder(activeCourseInView.id);
-            }
-        });
-    }
-
-    const editCourseFromViewBtn = document.getElementById('editCourseFromViewBtn');
-    if (editCourseFromViewBtn) {
-        editCourseFromViewBtn.addEventListener('click', function () {
-            if (viewCourseModal) viewCourseModal.hide();
-            if (activeCourseInView) {
-                openEditCourseModal(activeCourseInView.id);
-            }
-        });
-    }
 
     // ==========================================================================
     // MULTI-STEP COURSE CREATION STEPPER CONTROLLER (6 STEPS)
@@ -2299,541 +3491,303 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Real-Time Form Validation UX
-    function setupCourseFormValidation() {
-        const titleInput = document.getElementById('courseTitle');
-        if (titleInput) {
-            titleInput.addEventListener('input', function () {
-                const val = this.value.trim();
-                if (!val) {
-                    setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
-                } else if (val.length < 3) {
-                    setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title must be at least 3 characters.');
-                } else {
-                    setFieldValid('courseTitle');
-                }
-            });
-            titleInput.addEventListener('blur', function () {
-                const val = this.value.trim();
-                if (!val) setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
-                else if (val.length < 3) setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title must be at least 3 characters.');
-                else setFieldValid('courseTitle');
-            });
+    // Course Form Real-Time Validation UX
+    function setCourseFieldInvalid(fieldId, feedbackId, message) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('is-valid');
+            field.classList.add('is-invalid');
         }
-
-        const descInput = document.getElementById('courseDesc');
-        const countSpan = document.getElementById('courseDescCount');
-        if (descInput) {
-            descInput.addEventListener('input', function () {
-                const val = this.value.trim();
-                if (countSpan) countSpan.textContent = `${val.length} / 500`;
-                if (!val) {
-                    setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required.');
-                } else if (val.length < 10) {
-                    setFieldInvalid('courseDesc', 'courseDescFeedback', `Course Description must be at least 10 characters (${val.length}/10 entered).`);
-                } else {
-                    setFieldValid('courseDesc');
-                }
-            });
-            descInput.addEventListener('blur', function () {
-                const val = this.value.trim();
-                if (!val) setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required.');
-                else if (val.length < 10) setFieldInvalid('courseDesc', 'courseDescFeedback', `Course Description must be at least 10 characters (${val.length}/10 entered).`);
-                else setFieldValid('courseDesc');
-            });
-        }
-
-        const catSelect = document.getElementById('courseCategorySelect');
-        if (catSelect) {
-            catSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    setFieldInvalid('courseCategorySelect', 'courseCategoryFeedback', 'Please select a category.');
-                } else {
-                    setFieldValid('courseCategorySelect');
-                }
-            });
-        }
-
-        const insSelect = document.getElementById('courseInstructorSelect');
-        if (insSelect) {
-            insSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    setFieldInvalid('courseInstructorSelect', 'courseInstructorFeedback', 'Please select an instructor.');
-                } else {
-                    setFieldValid('courseInstructorSelect');
-                }
-            });
-        }
-
-        const priceInput = document.getElementById('coursePrice');
-        if (priceInput) {
-            priceInput.addEventListener('input', function () {
-                const val = parseFloat(this.value);
-                if (isNaN(val) || val < 0) {
-                    setFieldInvalid('coursePrice', 'coursePriceFeedback', 'Price cannot be negative.');
-                } else {
-                    setFieldValid('coursePrice');
-                }
-            });
-        }
-
-        ['courseEnrollmentStart', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('change', () => {
-                    validateCourseDates();
-                    updateCourseStatusPreview();
-                });
-            }
-        });
-
-        // Stepper buttons
-        const continueBtn = document.getElementById('stepperContinueBtn');
-        if (continueBtn) {
-            continueBtn.addEventListener('click', function () {
-                goToCourseStep(currentCourseStep + 1);
-            });
-        }
-
-        const backBtn = document.getElementById('stepperBackBtn');
-        if (backBtn) {
-            backBtn.addEventListener('click', function () {
-                goToCourseStep(currentCourseStep - 1);
-            });
-        }
-
-        const saveDraftBtn = document.getElementById('saveDraftBtn');
-        if (saveDraftBtn) {
-            saveDraftBtn.addEventListener('click', function () {
-                submitCourseWithPublishStatus(0);
-            });
-        }
-
-        const createCourseBtnEl = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
-        if (createCourseBtnEl) {
-            createCourseBtnEl.addEventListener('click', function () {
-                const isPub = parseInt(document.getElementById('coursePublishedVal')?.value || '1');
-                submitCourseWithPublishStatus(isPub);
-            });
+        const fb = document.getElementById(feedbackId);
+        if (fb && message) {
+            fb.textContent = message;
         }
     }
 
-    // Media Upload Handlers: Thumbnail & Introduction Video
-    function setupMediaUploads() {
-        // 1. Thumbnail Upload
-        const thumbInput = document.getElementById('courseThumbnailInput');
-        const thumbDropzone = document.getElementById('thumbnailDropzone');
-        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
-        const thumbPreviewImg = document.getElementById('thumbnailPreviewImg');
-        const thumbFileName = document.getElementById('thumbnailFileName');
-        const thumbFileSize = document.getElementById('thumbnailFileSize');
-        const replaceThumbBtn = document.getElementById('replaceThumbnailBtn');
-        const removeThumbBtn = document.getElementById('removeThumbnailBtn');
-        const thumbUrlInput = document.getElementById('courseThumbnailUrl');
+    function setCourseFieldValid(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('is-invalid');
+            field.classList.add('is-valid');
+        }
+    }
 
-        function handleThumbFile(file) {
+    function clearCourseValidation() {
+        ['courseTitle', 'courseCode', 'courseCategorySelect', 'courseInstructorSelect', 'courseDifficulty', 'courseFullDesc'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('is-invalid');
+                el.classList.remove('is-valid');
+            }
+        });
+    }
+
+    function validateCourseForm() {
+        let isValid = true;
+        let firstInvalidEl = null;
+
+        const titleEl = document.getElementById('courseTitle');
+        const titleVal = (titleEl?.value || '').trim();
+        if (!titleVal || titleVal.length < 3) {
+            setCourseFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course title is required (minimum 3 characters).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = titleEl;
+        } else {
+            setCourseFieldValid('courseTitle');
+        }
+
+        const codeEl = document.getElementById('courseCode');
+        const codeVal = (codeEl?.value || '').trim().toUpperCase();
+        const currentCourseId = document.getElementById('courseId')?.value;
+        if (!codeVal) {
+            setCourseFieldInvalid('courseCode', 'courseCodeFeedback', 'Course code is required (e.g. CS-WD101).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = codeEl;
+        } else {
+            const existingCourses = (window.AdminStore ? window.AdminStore.getCourses() : allCourses) || [];
+            const codeExists = existingCourses.some(c => 
+                c.code && 
+                c.code.trim().toUpperCase() === codeVal && 
+                String(c.id) !== String(currentCourseId)
+            );
+            if (codeExists) {
+                setCourseFieldInvalid('courseCode', 'courseCodeFeedback', 'Course code already exists.');
+                isValid = false;
+                if (!firstInvalidEl) firstInvalidEl = codeEl;
+            } else {
+                setCourseFieldValid('courseCode');
+            }
+        }
+
+        const catEl = document.getElementById('courseCategorySelect');
+        if (!catEl || !catEl.value) {
+            setCourseFieldInvalid('courseCategorySelect', 'courseCategoryFeedback', 'Please select a category.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = catEl;
+        } else {
+            setCourseFieldValid('courseCategorySelect');
+        }
+
+        const insEl = document.getElementById('courseInstructorSelect');
+        if (!insEl || !insEl.value) {
+            setCourseFieldInvalid('courseInstructorSelect', 'courseInstructorFeedback', 'Please select an instructor.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = insEl;
+        } else {
+            setCourseFieldValid('courseInstructorSelect');
+        }
+
+        const diffEl = document.getElementById('courseDifficulty');
+        if (!diffEl || !diffEl.value) {
+            setCourseFieldInvalid('courseDifficulty', 'courseDifficultyFeedback', 'Please select difficulty level.');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = diffEl;
+        } else {
+            setCourseFieldValid('courseDifficulty');
+        }
+
+        const descEl = document.getElementById('courseFullDesc');
+        const descVal = (descEl?.value || '').trim();
+        if (!descVal || descVal.length < 10) {
+            setCourseFieldInvalid('courseFullDesc', 'courseFullDescFeedback', 'Course description is required (at least 10 characters).');
+            isValid = false;
+            if (!firstInvalidEl) firstInvalidEl = descEl;
+        } else {
+            setCourseFieldValid('courseFullDesc');
+        }
+
+        return { isValid, firstInvalidEl };
+    }
+
+    function setupCourseFormHandlers() {
+        // Real-time validation listeners
+        const titleEl = document.getElementById('courseTitle');
+        if (titleEl) {
+            titleEl.addEventListener('input', () => {
+                if (titleEl.value.trim().length >= 3) setCourseFieldValid('courseTitle');
+            });
+            titleEl.addEventListener('blur', () => {
+                if (titleEl.value.trim().length < 3) setCourseFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course title is required (minimum 3 characters).');
+                else setCourseFieldValid('courseTitle');
+            });
+        }
+
+        const codeEl = document.getElementById('courseCode');
+        if (codeEl) {
+            codeEl.addEventListener('input', () => {
+                if (codeEl.value.trim()) setCourseFieldValid('courseCode');
+            });
+            codeEl.addEventListener('blur', () => {
+                const codeVal = codeEl.value.trim().toUpperCase();
+                const currentCourseId = document.getElementById('courseId')?.value;
+                if (!codeVal) {
+                    setCourseFieldInvalid('courseCode', 'courseCodeFeedback', 'Course code is required (e.g. CS-WD101).');
+                } else {
+                    const existingCourses = (window.AdminStore ? window.AdminStore.getCourses() : allCourses) || [];
+                    const codeExists = existingCourses.some(c => 
+                        c.code && 
+                        c.code.trim().toUpperCase() === codeVal && 
+                        String(c.id) !== String(currentCourseId)
+                    );
+                    if (codeExists) {
+                        setCourseFieldInvalid('courseCode', 'courseCodeFeedback', 'Course code already exists.');
+                    } else {
+                        setCourseFieldValid('courseCode');
+                    }
+                }
+            });
+        }
+
+        const descEl = document.getElementById('courseFullDesc');
+        if (descEl) {
+            descEl.addEventListener('input', () => {
+                if (descEl.value.trim().length >= 10) setCourseFieldValid('courseFullDesc');
+            });
+            descEl.addEventListener('blur', () => {
+                if (descEl.value.trim().length < 10) setCourseFieldInvalid('courseFullDesc', 'courseFullDescFeedback', 'Course description is required (at least 10 characters).');
+                else setCourseFieldValid('courseFullDesc');
+            });
+        }
+
+        const catEl = document.getElementById('courseCategorySelect');
+        if (catEl) {
+            catEl.addEventListener('change', () => {
+                if (catEl.value) setCourseFieldValid('courseCategorySelect');
+            });
+        }
+
+        const insEl = document.getElementById('courseInstructorSelect');
+        if (insEl) {
+            insEl.addEventListener('change', () => {
+                if (insEl.value) setCourseFieldValid('courseInstructorSelect');
+            });
+        }
+
+        // Featured Switch toggle label
+        const featToggle = document.getElementById('courseFeaturedToggle');
+        const featLabel = document.getElementById('courseFeaturedToggleLabel');
+        if (featToggle && featLabel) {
+            featToggle.addEventListener('change', () => {
+                featLabel.textContent = featToggle.checked ? 'ON' : 'OFF';
+            });
+        }
+
+        // Image upload handlers
+        const fileInput = document.getElementById('courseImageFile');
+        const dropzone = document.getElementById('courseImageDropzone');
+        const previewBox = document.getElementById('courseImagePreviewBox');
+        const previewImg = document.getElementById('courseImagePreviewImg');
+        const fileNameEl = document.getElementById('courseImageFileName');
+        const fileSizeEl = document.getElementById('courseImageFileSize');
+        const replaceBtn = document.getElementById('replaceCourseImageBtn');
+        const removeBtn = document.getElementById('removeCourseImageBtn');
+        const urlInput = document.getElementById('courseImageUrl');
+
+        function handleImageFile(file) {
             if (!file || !file.type.startsWith('image/')) {
-                if (window.AdminStore) window.AdminStore.constructor.toast('Please select a valid image file (PNG, JPG, WEBP)', 'error');
+                showProgramToast('error', 'Invalid File', 'Please select a valid image file (PNG, JPG, WebP).');
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                if (window.AdminStore) window.AdminStore.constructor.toast('Image exceeds 5 MB limit', 'error');
+                showProgramToast('error', 'File Too Large', 'Cover image cannot exceed 5MB.');
                 return;
             }
 
             const reader = new FileReader();
             reader.onload = function (e) {
-                if (thumbPreviewImg) thumbPreviewImg.src = e.target.result;
-                if (thumbFileName) thumbFileName.textContent = file.name;
-                if (thumbFileSize) thumbFileSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-                if (thumbPreviewBox) thumbPreviewBox.style.display = 'flex';
-                if (thumbUrlInput) thumbUrlInput.value = `assets/images/courses/${file.name}`;
+                if (previewImg) previewImg.src = e.target.result;
+                if (fileNameEl) fileNameEl.textContent = file.name;
+                if (fileSizeEl) fileSizeEl.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                if (previewBox) {
+                    previewBox.classList.remove('d-none');
+                    previewBox.classList.add('d-flex');
+                }
+                if (urlInput) urlInput.value = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
-        if (thumbInput) {
-            thumbInput.addEventListener('change', function () {
-                if (this.files && this.files[0]) handleThumbFile(this.files[0]);
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files[0]) handleImageFile(this.files[0]);
             });
         }
 
-        if (thumbDropzone) {
-            thumbDropzone.addEventListener('dragover', function (e) {
+        if (dropzone) {
+            dropzone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                this.classList.add('dragover');
+                dropzone.classList.add('border-primary');
             });
-            thumbDropzone.addEventListener('dragleave', function (e) {
+            dropzone.addEventListener('dragleave', (e) => {
                 e.preventDefault();
-                this.classList.remove('dragover');
+                dropzone.classList.remove('border-primary');
             });
-            thumbDropzone.addEventListener('drop', function (e) {
+            dropzone.addEventListener('drop', (e) => {
                 e.preventDefault();
-                this.classList.remove('dragover');
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    handleThumbFile(e.dataTransfer.files[0]);
+                dropzone.classList.remove('border-primary');
+                if (e.dataTransfer?.files?.[0]) handleImageFile(e.dataTransfer.files[0]);
+            });
+        }
+
+        if (replaceBtn && fileInput) {
+            replaceBtn.addEventListener('click', () => fileInput.click());
+        }
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', () => {
+                if (fileInput) fileInput.value = '';
+                if (previewBox) {
+                    previewBox.classList.remove('d-flex');
+                    previewBox.classList.add('d-none');
                 }
+                if (previewImg) previewImg.src = '';
+                if (urlInput) urlInput.value = 'assets/images/course_webdev.jpg';
             });
         }
 
-        if (replaceThumbBtn && thumbInput) {
-            replaceThumbBtn.addEventListener('click', () => thumbInput.click());
+        // Action buttons
+        const saveDraftBtn = document.getElementById('saveDraftCourseBtn');
+        if (saveDraftBtn) {
+            saveDraftBtn.addEventListener('click', () => saveCourse(false));
         }
 
-        if (removeThumbBtn) {
-            removeThumbBtn.addEventListener('click', function () {
-                if (thumbInput) thumbInput.value = '';
-                if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
-                if (thumbPreviewImg) thumbPreviewImg.src = '';
-                if (thumbUrlInput) thumbUrlInput.value = '';
-            });
+        const publishBtn = document.getElementById('publishCourseBtn');
+        if (publishBtn) {
+            publishBtn.addEventListener('click', () => saveCourse(true));
         }
 
-        // 2. Video Upload
-        const videoInput = document.getElementById('courseVideoInput');
-        const videoDropzone = document.getElementById('videoDropzone');
-        const videoPreviewBox = document.getElementById('videoPreviewBox');
-        const videoPreviewPlayer = document.getElementById('videoPreviewPlayer');
-        const videoFileName = document.getElementById('videoFileName');
-        const videoFileSize = document.getElementById('videoFileSize');
-        const replaceVideoBtn = document.getElementById('replaceVideoBtn');
-        const removeVideoBtn = document.getElementById('removeVideoBtn');
-        const videoUrlInput = document.getElementById('courseVideoUrl');
-
-        function handleVideoFile(file) {
-            if (!file || !file.type.startsWith('video/')) {
-                if (window.AdminStore) window.AdminStore.constructor.toast('Please select a valid video file (MP4, WebM, MOV)', 'error');
-                return;
-            }
-            if (file.size > 100 * 1024 * 1024) {
-                if (window.AdminStore) window.AdminStore.constructor.toast('Video exceeds 100 MB limit', 'error');
-                return;
-            }
-
-            const videoBlobUrl = URL.createObjectURL(file);
-            if (videoPreviewPlayer) videoPreviewPlayer.src = videoBlobUrl;
-            if (videoFileName) videoFileName.textContent = file.name;
-            if (videoFileSize) videoFileSize.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
-            if (videoPreviewBox) videoPreviewBox.style.display = 'block';
-            if (videoUrlInput) videoUrlInput.value = `assets/videos/${file.name}`;
-        }
-
-        if (videoInput) {
-            videoInput.addEventListener('change', function () {
-                if (this.files && this.files[0]) handleVideoFile(this.files[0]);
-            });
-        }
-
-        if (videoDropzone) {
-            videoDropzone.addEventListener('dragover', function (e) {
+        const courseForm = document.getElementById('courseForm');
+        if (courseForm) {
+            courseForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                this.classList.add('dragover');
+                const isPub = (document.getElementById('courseStatus')?.value || 'Published') === 'Published';
+                saveCourse(isPub);
             });
-            videoDropzone.addEventListener('dragleave', function (e) {
+        }
+
+        const openAddCourseBtn = document.getElementById('openAddCourseBtn');
+        if (openAddCourseBtn) {
+            openAddCourseBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.classList.remove('dragover');
-            });
-            videoDropzone.addEventListener('drop', function (e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    handleVideoFile(e.dataTransfer.files[0]);
+                if (typeof window.openCreateCourseModal === 'function') {
+                    window.openCreateCourseModal();
                 }
-            });
-        }
-
-        if (replaceVideoBtn && videoInput) {
-            replaceVideoBtn.addEventListener('click', () => videoInput.click());
-        }
-
-        if (removeVideoBtn) {
-            removeVideoBtn.addEventListener('click', function () {
-                if (videoInput) videoInput.value = '';
-                if (videoPreviewBox) videoPreviewBox.style.display = 'none';
-                if (videoPreviewPlayer) videoPreviewPlayer.src = '';
-                if (videoUrlInput) videoUrlInput.value = '';
             });
         }
     }
 
-    setupCourseFormValidation();
-    setupMediaUploads();
-
-    window.openCreateCourseModal = function () {
-        document.getElementById('courseForm').reset();
-        document.getElementById('courseId').value = '';
-        
-        // Initialize default curriculum structure (2 Modules, with real Lessons, Quiz, and Assignment)
-        wizardModules = [
-            {
-                chapter_num: 1,
-                title: 'Module 1 — HTML & CSS Basics',
-                duration: '2 Weeks',
-                description: 'Core concepts of semantic HTML, page structure, modern CSS styling, and responsive layout foundations.',
-                lessons: [
-                    { 
-                        title: '1.1 Getting Started with HTML5 Structure', 
-                        duration: '45 Mins', 
-                        description: 'Semantic tags, document hierarchy, and markup best practices.',
-                        content_type: 'Video',
-                        video_url: 'assets/videos/lesson1.mp4',
-                        video_size: '18.4 MB'
-                    },
-                    { 
-                        title: '1.2 Modern CSS Styling & Flexbox', 
-                        duration: '50 Mins', 
-                        description: 'Responsive container layouts with Flexbox and CSS Grid.',
-                        content_type: 'Document',
-                        pdf_url: 'assets/docs/css-cheatsheet.pdf',
-                        pdf_size: '2.1 MB'
-                    }
-                ],
-                quizzes: [
-                    {
-                        title: 'Quiz 1 — HTML & CSS Knowledge Check',
-                        description: 'Test your understanding of semantic markup and responsive layout rules.',
-                        duration_mins: 20,
-                        passing_score: 70,
-                        questions: [
-                            {
-                                question: 'Which semantic element should represent independent, self-contained content in HTML5?',
-                                option_a: '<section>',
-                                option_b: '<article>',
-                                option_c: '<div>',
-                                option_d: '<aside>',
-                                correct_answer: 'B',
-                                points: 10
-                            },
-                            {
-                                question: 'What CSS property allows flex items to wrap across multiple lines?',
-                                option_a: 'flex-wrap: wrap',
-                                option_b: 'flex-direction: column',
-                                option_c: 'display: grid',
-                                option_d: 'align-items: center',
-                                correct_answer: 'A',
-                                points: 10
-                            }
-                        ]
-                    }
-                ],
-                assignments: []
-            },
-            {
-                chapter_num: 2,
-                title: 'Module 2 — JavaScript Core & Interactivity',
-                duration: '3 Weeks',
-                description: 'DOM manipulation, asynchronous JavaScript, event handling, and modern ES6+ features.',
-                lessons: [
-                    { 
-                        title: '2.1 DOM Selection & Event Listeners', 
-                        duration: '45 Mins', 
-                        description: 'Selecting DOM nodes and responding to user actions.',
-                        content_type: 'Video',
-                        video_url: 'assets/videos/lesson2.mp4',
-                        video_size: '24.1 MB'
-                    }
-                ],
-                quizzes: [],
-                assignments: [
-                    {
-                        title: 'Assignment 1 — Interactive Responsive Layout',
-                        instructions: 'Create a responsive 3-section personal portfolio website that adapts cleanly across mobile and desktop viewports.',
-                        due_date: '2026-09-30',
-                        max_score: 100,
-                        attachment_name: 'starter-portfolio.zip',
-                        attachment_size: '1.8 MB'
-                    }
-                ]
-            }
-        ];
-        renderWizardModules();
-
-        // Reset Stepper to Step 1
-        completedCourseSteps.clear();
-        goToCourseStep(1);
-
-        document.getElementById('courseModalTitle').textContent = 'Add New Specialized Course';
-        document.getElementById('coursePrice').value = '0.00';
-        document.getElementById('courseDuration').value = '8 Weeks';
-        document.getElementById('courseBadge').value = '';
-        document.getElementById('coursePrerequisites').value = '';
-        
-        // Reset thumbnail preview
-        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
-        if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
-        const thumbInput = document.getElementById('courseThumbnailInput');
-        if (thumbInput) thumbInput.value = '';
-        const thumbUrl = document.getElementById('courseThumbnailUrl');
-        if (thumbUrl) thumbUrl.value = 'assets/images/courses/fullstack.jpg';
-
-        // Reset video preview
-        const videoPreviewBox = document.getElementById('videoPreviewBox');
-        if (videoPreviewBox) videoPreviewBox.style.display = 'none';
-        const videoInput = document.getElementById('courseVideoInput');
-        if (videoInput) videoInput.value = '';
-        const videoUrl = document.getElementById('courseVideoUrl');
-        if (videoUrl) videoUrl.value = '';
-
-        // Reset character counter
-        const countSpan = document.getElementById('courseDescCount');
-        if (countSpan) countSpan.textContent = '0 / 500';
-
-        // Clear validation errors
-        ['courseTitle', 'courseCategorySelect', 'courseInstructorSelect', 'courseDesc', 'coursePrice', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
-            setFieldValid(id);
-        });
-        
-        // Default lifecycle dates
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('courseEnrollmentStart').value = today;
-        
-        setPublishStatusChoice(1);
-        populateCourseSelects();
-        updateCourseStatusPreview();
-        if (courseModal) courseModal.show();
-    };
-
-    window.openEditCourseModal = function (id) {
-        const c = allCourses.find(course => course.id === id);
-        if (!c) return;
-
-        // Load existing curriculum modules, lessons, quizzes, assignments from store into wizardModules
-        const existingChapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
-        if (existingChapters.length > 0) {
-            wizardModules = existingChapters.map((ch, idx) => {
-                const lessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
-                const quizzes = window.AdminStore ? window.AdminStore.getQuizzesByModuleId(ch.id) : [];
-                const assignments = window.AdminStore ? window.AdminStore.getAssignmentsByModuleId(ch.id) : [];
-                return {
-                    id: ch.id,
-                    chapter_num: idx + 1,
-                    title: ch.title,
-                    duration: ch.duration || '2 Weeks',
-                    description: ch.description || '',
-                    lessons: lessons.map(l => ({
-                        id: l.id,
-                        module_id: ch.id,
-                        course_id: c.id,
-                        title: l.title,
-                        duration: l.duration || '45 Mins',
-                        description: l.description || '',
-                        content_type: l.content_type || (l.video_url ? 'Video' : l.pdf_url ? 'Document' : 'Text'),
-                        video_url: l.video_url || '',
-                        video_size: l.video_size || '',
-                        pdf_url: l.pdf_url || '',
-                        pdf_size: l.pdf_size || '',
-                        text_content: l.text_content || ''
-                    })),
-                    quizzes: quizzes.map(q => ({
-                        id: q.id,
-                        module_id: ch.id,
-                        course_id: c.id,
-                        title: q.title,
-                        description: q.description || '',
-                        duration_mins: q.duration_mins || 20,
-                        passing_score: q.passing_score || 70,
-                        questions: Array.isArray(q.questions) ? q.questions : []
-                    })),
-                    assignments: assignments.map(a => ({
-                        id: a.id,
-                        module_id: ch.id,
-                        course_id: c.id,
-                        title: a.title,
-                        instructions: a.instructions || '',
-                        due_date: a.due_date ? String(a.due_date).split('T')[0] : '',
-                        max_score: a.max_score || 100,
-                        attachment_name: a.attachment_name || '',
-                        attachment_size: a.attachment_size || ''
-                    }))
-                };
-            });
-        } else {
-            wizardModules = [
-                {
-                    chapter_num: 1,
-                    title: 'Module 1 — Foundations & Core Principles',
-                    duration: '2 Weeks',
-                    description: 'Foundational architecture and setup.',
-                    lessons: [
-                        { title: '1.1 Introduction', duration: '30 Mins', description: 'Overview and setup.', content_type: 'Video', video_url: 'assets/videos/lesson1.mp4' },
-                        { title: '1.2 Core Principles', duration: '45 Mins', description: 'Foundational concepts.', content_type: 'Document', pdf_url: 'assets/docs/cheatsheet.pdf' }
-                    ],
-                    quizzes: [],
-                    assignments: []
-                }
-            ];
-        }
-        renderWizardModules();
-
-        // Reset Stepper to Step 1 and prefill
-        completedCourseSteps.clear();
-        completedCourseSteps.add(1);
-        completedCourseSteps.add(2);
-        completedCourseSteps.add(3);
-        completedCourseSteps.add(4);
-        completedCourseSteps.add(5);
-        goToCourseStep(1);
-
-        populateCourseSelects();
-        document.getElementById('courseId').value = c.id;
-        document.getElementById('courseTitle').value = c.title;
-        document.getElementById('courseDifficulty').value = c.difficulty || 'Beginner';
-        document.getElementById('courseCategorySelect').value = c.category_id || (allCategories[0] ? allCategories[0].id : 1);
-        document.getElementById('courseInstructorSelect').value = c.instructor_id || (allInstructors[0] ? allInstructors[0].id : 1);
-        document.getElementById('courseDuration').value = c.duration || c.duration_hours || '8 Weeks';
-        document.getElementById('coursePrice').value = c.price !== undefined ? parseFloat(c.price).toFixed(2) : '0.00';
-        document.getElementById('courseBadge').value = c.badge || c.badge_text || '';
-        document.getElementById('coursePrerequisites').value = c.prerequisites || '';
-        document.getElementById('courseEnrollmentStart').value = c.enrollment_start_date ? String(c.enrollment_start_date).split('T')[0] : '';
-        document.getElementById('courseEnrollmentDeadline').value = c.enrollment_deadline ? String(c.enrollment_deadline).split('T')[0] : '';
-        document.getElementById('courseStartDate').value = c.start_date ? String(c.start_date).split('T')[0] : '';
-        document.getElementById('courseEndDate').value = c.end_date ? String(c.end_date).split('T')[0] : '';
-        document.getElementById('courseDesc').value = c.description || '';
-        
-        // Character counter
-        const countSpan = document.getElementById('courseDescCount');
-        if (countSpan) countSpan.textContent = `${(c.description || '').length} / 500`;
-
-        // Thumbnail preview
-        const thumbPreviewBox = document.getElementById('thumbnailPreviewBox');
-        const thumbPreviewImg = document.getElementById('thumbnailPreviewImg');
-        const thumbUrl = document.getElementById('courseThumbnailUrl');
-        if (c.thumbnail_url) {
-            if (thumbUrl) thumbUrl.value = c.thumbnail_url;
-            if (thumbPreviewImg) thumbPreviewImg.src = `../../${c.thumbnail_url}`;
-            if (thumbPreviewBox) thumbPreviewBox.style.display = 'flex';
-        } else {
-            if (thumbPreviewBox) thumbPreviewBox.style.display = 'none';
-        }
-
-        // Video preview
-        const videoPreviewBox = document.getElementById('videoPreviewBox');
-        const videoUrl = document.getElementById('courseVideoUrl');
-        if (c.video_url) {
-            if (videoUrl) videoUrl.value = c.video_url;
-            if (videoPreviewBox) videoPreviewBox.style.display = 'block';
-        } else {
-            if (videoPreviewBox) videoPreviewBox.style.display = 'none';
-        }
-
-        const isPub = (c.is_published === 1 || c.is_published === true) ? 1 : 0;
-        setPublishStatusChoice(isPub);
-        document.getElementById('courseModalTitle').textContent = 'Edit Specialized Course';
-
-        // Clear validation errors
-        ['courseTitle', 'courseCategorySelect', 'courseInstructorSelect', 'courseDesc', 'coursePrice', 'courseEnrollmentDeadline', 'courseStartDate', 'courseEndDate'].forEach(id => {
-            setFieldValid(id);
-        });
-
-        updateCourseStatusPreview();
-        if (courseModal) courseModal.show();
-    };
-
     function populateCourseSelects() {
+        if ((!allCategories || allCategories.length === 0) && window.AdminStore) {
+            allCategories = window.AdminStore.getCategories();
+        }
+        if ((!allInstructors || allInstructors.length === 0) && window.AdminStore) {
+            allInstructors = window.AdminStore.getInstructors();
+        }
+
         const catSelect = document.getElementById('courseCategorySelect');
         if (catSelect) {
             const currentVal = catSelect.value;
-            catSelect.innerHTML = `<option value="">-- Select Category / Discipline --</option>` + allCategories.map(cat => `
+            catSelect.innerHTML = `<option value="" disabled selected>Select category...</option>` + allCategories.map(cat => `
                 <option value="${cat.id}">${escapeHtml(cat.name)}</option>
             `).join('');
             if (currentVal) catSelect.value = currentVal;
@@ -2842,142 +3796,237 @@ document.addEventListener('DOMContentLoaded', function () {
         const insSelect = document.getElementById('courseInstructorSelect');
         if (insSelect) {
             const currentVal = insSelect.value;
-            insSelect.innerHTML = `<option value="">-- Select Assigned Instructor --</option>` + allInstructors.map(ins => `
+            insSelect.innerHTML = `<option value="" disabled selected>Select instructor...</option>` + allInstructors.map(ins => `
                 <option value="${ins.id}">${escapeHtml(ins.name)} (${escapeHtml(ins.title || 'Faculty Lead')})</option>
             `).join('');
             if (currentVal) insSelect.value = currentVal;
         }
     }
 
-    // Submit Course Payload (Draft or Published) with Modules, Lessons, Quizzes, Assignments
-    async function submitCourseWithPublishStatus(isPublished) {
-        // Validate all 5 prior steps
-        for (let s = 1; s <= 5; s++) {
-            const { isValid, firstInvalidEl } = validateCourseStep(s);
-            if (!isValid) {
-                goToCourseStep(s);
-                if (firstInvalidEl) {
-                    firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalidEl.focus();
-                }
-                if (window.AdminStore) window.AdminStore.constructor.toast(`Please correct the highlighted items in Step ${s}.`, 'error');
-                return;
+    window.openCreateCourseModal = function () {
+        const modalEl = document.getElementById('createCourseModal');
+        if (!modalEl) return;
+
+        const form = document.getElementById('courseForm');
+        if (form) form.reset();
+
+        document.getElementById('courseId').value = '';
+        document.getElementById('courseModalTitle').textContent = 'Add New Course';
+        document.getElementById('courseModalSubtitle').textContent = 'Add a new specialized course to AUB Digital Academy.';
+
+        populateCourseSelects();
+
+        const catSelect = document.getElementById('courseCategorySelect');
+        if (catSelect && catSelect.options.length > 1) catSelect.selectedIndex = 1;
+
+        const insSelect = document.getElementById('courseInstructorSelect');
+        if (insSelect && insSelect.options.length > 1) insSelect.selectedIndex = 1;
+
+        const diffEl = document.getElementById('courseDifficulty');
+        if (diffEl) diffEl.value = 'Beginner';
+
+        const durEl = document.getElementById('courseDuration');
+        if (durEl) durEl.value = '8 Weeks';
+
+        const priceEl = document.getElementById('coursePrice');
+        if (priceEl) priceEl.value = '0.00';
+
+        const ordEl = document.getElementById('courseOrderNum');
+        if (ordEl) {
+            const courses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
+            ordEl.value = courses.length + 1;
+        }
+
+        const statEl = document.getElementById('courseStatus');
+        if (statEl) statEl.value = 'Published';
+
+        const ratingEl = document.getElementById('courseRating');
+        if (ratingEl) ratingEl.value = '4.9';
+
+        const featToggle = document.getElementById('courseFeaturedToggle');
+        if (featToggle) featToggle.checked = false;
+        const featLabel = document.getElementById('courseFeaturedToggleLabel');
+        if (featLabel) featLabel.textContent = 'OFF';
+
+        // Reset image
+        const previewBox = document.getElementById('courseImagePreviewBox');
+        if (previewBox) {
+            previewBox.classList.remove('d-flex');
+            previewBox.classList.add('d-none');
+        }
+        const fileInput = document.getElementById('courseImageFile');
+        if (fileInput) fileInput.value = '';
+        const urlInput = document.getElementById('courseImageUrl');
+        if (urlInput) urlInput.value = 'assets/images/course_webdev.jpg';
+
+        clearCourseValidation();
+
+        // Clean up any stale modal-backdrop
+        document.querySelectorAll('.modal-backdrop').forEach(el => {
+            if (!document.querySelector('.modal.show')) el.remove();
+        });
+
+        const modal = safeGetModal(modalEl);
+        if (modal) modal.show();
+    };
+
+    window.openEditCourseModal = function (id) {
+        let c = allCourses.find(course => Number(course.id) === Number(id));
+        if (!c && window.AdminStore) {
+            c = window.AdminStore.getCourseById(id);
+        }
+        if (!c) return;
+
+        populateCourseSelects();
+
+        document.getElementById('courseId').value = c.id;
+        document.getElementById('courseTitle').value = c.title || '';
+        document.getElementById('courseCode').value = c.code || '';
+        document.getElementById('courseShortDesc').value = c.short_description || '';
+        document.getElementById('courseDifficulty').value = c.difficulty || 'Beginner';
+        document.getElementById('courseCategorySelect').value = c.category_id || (allCategories[0] ? allCategories[0].id : 1);
+        document.getElementById('courseInstructorSelect').value = c.instructor_id || (allInstructors[0] ? allInstructors[0].id : 1);
+        document.getElementById('courseDuration').value = c.duration || c.duration_hours || '8 Weeks';
+        const ratingEl = document.getElementById('courseRating');
+        if (ratingEl) ratingEl.value = (c.rating !== undefined && c.rating !== null) ? c.rating : '4.9';
+        const editPriceEl = document.getElementById('coursePrice');
+        if (editPriceEl) editPriceEl.value = (c.price !== undefined && c.price !== null) ? c.price : '0.00';
+        document.getElementById('courseOrderNum').value = c.order_num !== undefined ? c.order_num : 1;
+        document.getElementById('courseFullDesc').value = c.description || '';
+
+        const isPub = (c.is_published === 1 || c.is_published === true || c.is_published === '1');
+        document.getElementById('courseStatus').value = isPub ? 'Published' : 'Draft';
+
+        const isFeat = Boolean(c.is_featured || c.badge === 'Popular' || c.badge === 'Featured');
+        const featToggle = document.getElementById('courseFeaturedToggle');
+        if (featToggle) featToggle.checked = isFeat;
+        const featLabel = document.getElementById('courseFeaturedToggleLabel');
+        if (featLabel) featLabel.textContent = isFeat ? 'ON' : 'OFF';
+
+        // Image
+        const urlInput = document.getElementById('courseImageUrl');
+        const previewBox = document.getElementById('courseImagePreviewBox');
+        const previewImg = document.getElementById('courseImagePreviewImg');
+        const fileNameEl = document.getElementById('courseImageFileName');
+        const fileInput = document.getElementById('courseImageFile');
+        if (fileInput) fileInput.value = '';
+
+        if (c.thumbnail_url) {
+            if (urlInput) urlInput.value = c.thumbnail_url;
+            const imgSrc = (c.thumbnail_url.startsWith('http') || c.thumbnail_url.startsWith('data:'))
+                ? c.thumbnail_url 
+                : ('../../' + c.thumbnail_url);
+            if (previewImg) previewImg.src = imgSrc;
+            if (fileNameEl) fileNameEl.textContent = c.thumbnail_url.split('/').pop() || 'cover.jpg';
+            if (previewBox) {
+                previewBox.classList.remove('d-none');
+                previewBox.classList.add('d-flex');
             }
+        } else {
+            if (urlInput) urlInput.value = 'assets/images/course_webdev.jpg';
+            if (previewBox) {
+                previewBox.classList.remove('d-flex');
+                previewBox.classList.add('d-none');
+            }
+        }
+
+        document.getElementById('courseModalTitle').textContent = 'Edit Course';
+        document.getElementById('courseModalSubtitle').textContent = 'Update specialized course details.';
+
+        clearCourseValidation();
+
+        const modalEl = document.getElementById('createCourseModal');
+        const modal = safeGetModal(modalEl) || courseModal;
+        if (modal) modal.show();
+    };
+
+    async function saveCourse(isPublished) {
+        const { isValid, firstInvalidEl } = validateCourseForm();
+        if (!isValid) {
+            if (firstInvalidEl) {
+                firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalidEl.focus();
+            }
+            showProgramToast('error', 'Validation Error', 'Please complete all required fields correctly.');
+            return;
         }
 
         const id = document.getElementById('courseId').value;
         const title = document.getElementById('courseTitle').value.trim();
-        const thumbUrlVal = document.getElementById('courseThumbnailUrl')?.value.trim() || 'assets/images/courses/fullstack.jpg';
-        const videoUrlVal = document.getElementById('courseVideoUrl')?.value.trim() || '';
-
-        const totalModules = wizardModules.length;
-        const totalLessons = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.lessons) ? m.lessons.length : 0), 0);
-        const totalQuizzes = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.quizzes) ? m.quizzes.length : 0), 0);
-        const totalAssignments = wizardModules.reduce((acc, m) => acc + (Array.isArray(m.assignments) ? m.assignments.length : 0), 0);
+        const code = (document.getElementById('courseCode')?.value || '').trim().toUpperCase();
+        const shortDesc = (document.getElementById('courseShortDesc')?.value || '').trim();
+        const categoryId = parseInt(document.getElementById('courseCategorySelect').value) || 1;
+        const instructorId = parseInt(document.getElementById('courseInstructorSelect').value) || 1;
+        const difficulty = document.getElementById('courseDifficulty').value || 'Beginner';
+        const duration = (document.getElementById('courseDuration')?.value || '').trim() || '8 Weeks';
+        const rating = parseFloat(document.getElementById('courseRating')?.value) || 4.9;
+        const price = parseFloat(document.getElementById('coursePrice')?.value) || 0;
+        const orderNum = parseInt(document.getElementById('courseOrderNum')?.value) || 1;
+        const fullDesc = document.getElementById('courseFullDesc').value.trim();
+        const isFeatured = document.getElementById('courseFeaturedToggle')?.checked ? 1 : 0;
+        const imageUrl = document.getElementById('courseImageUrl')?.value.trim() || 'assets/images/course_webdev.jpg';
 
         const payload = {
             title: title,
-            category_id: parseInt(document.getElementById('courseCategorySelect').value) || 1,
-            instructor_id: parseInt(document.getElementById('courseInstructorSelect').value) || 1,
-            difficulty: document.getElementById('courseDifficulty').value,
-            duration: document.getElementById('courseDuration').value.trim() || '8 Weeks',
-            duration_hours: document.getElementById('courseDuration').value.trim() || '8 Weeks',
-            module_count: totalModules,
-            lesson_count: totalLessons,
-            quiz_count: totalQuizzes,
-            assignment_count: totalAssignments,
-            price: parseFloat(document.getElementById('coursePrice').value) || 0.00,
-            badge: document.getElementById('courseBadge').value.trim(),
-            badge_text: document.getElementById('courseBadge').value.trim(),
-            prerequisites: document.getElementById('coursePrerequisites').value.trim(),
-            thumbnail_url: thumbUrlVal,
-            video_url: videoUrlVal,
-            enrollment_start_date: document.getElementById('courseEnrollmentStart').value || null,
-            enrollment_deadline: document.getElementById('courseEnrollmentDeadline').value || null,
-            start_date: document.getElementById('courseStartDate').value || null,
-            end_date: document.getElementById('courseEndDate').value || null,
-            description: document.getElementById('courseDesc').value.trim(),
-            is_published: isPublished,
-            modules: wizardModules
+            code: code,
+            short_description: shortDesc,
+            category_id: categoryId,
+            instructor_id: instructorId,
+            difficulty: difficulty,
+            duration: duration,
+            duration_hours: duration,
+            rating: rating,
+            price: price,
+            order_num: orderNum,
+            description: fullDesc,
+            is_published: isPublished ? 1 : 0,
+            is_featured: isFeatured,
+            badge: isFeatured ? 'Popular' : '',
+            badge_text: isFeatured ? 'Popular' : '',
+            thumbnail_url: imageUrl
         };
 
-        const createCourseBtnEl = document.getElementById('createCourseSubmitBtn') || document.getElementById('saveCourseBtn');
-        const saveDraftBtnEl = document.getElementById('saveDraftBtn');
-        const isEditing = Boolean(id);
+        const publishBtn = document.getElementById('publishCourseBtn');
+        const saveDraftBtn = document.getElementById('saveDraftCourseBtn');
+        const spinner = document.getElementById('publishCourseSpinner');
 
-        if (createCourseBtnEl) createCourseBtnEl.disabled = true;
-        if (saveDraftBtnEl) saveDraftBtnEl.disabled = true;
+        if (publishBtn) publishBtn.disabled = true;
+        if (saveDraftBtn) saveDraftBtn.disabled = true;
+        if (isPublished && spinner) spinner.classList.remove('d-none');
 
-        if (isPublished) {
-            if (createCourseBtnEl) {
-                createCourseBtnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> ${isEditing ? 'Saving...' : 'Creating Course...'}`;
-            }
-        } else {
-            if (saveDraftBtnEl) {
-                saveDraftBtnEl.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Saving Draft...`;
-            }
-        }
-
-        let apiSuccess = false;
-        try {
-            const url = id ? `${API_BASE}/admin/courses/${id}` : `${API_BASE}/admin/courses`;
-            const method = id ? 'PUT' : 'POST';
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-            
-            const res = await fetch(url, { 
-                method, 
-                headers: getHeaders(), 
-                body: JSON.stringify(payload),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-            if (res.ok) apiSuccess = true;
-        } catch (netErr) {
-            // Backend offline or timeout: gracefully continue with local storage save
-            apiSuccess = false;
-        }
-
-        // Local Storage / AdminStore Persistence (Offline-First Guarantee)
         try {
             if (id) {
+                // Editing existing course
                 if (window.AdminStore) {
                     window.AdminStore.updateCourse(id, payload);
                     allCourses = window.AdminStore.getCourses();
                 }
-                if (courseModal) courseModal.hide();
+                const modalEl = document.getElementById('createCourseModal');
+                const modal = safeGetModal(modalEl) || courseModal;
+                if (modal) modal.hide();
+
                 applyCourseFilters();
-                if (window.AdminStore) {
-                    const statusText = isPublished ? 'published to student catalog' : 'saved as private draft';
-                    const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
-                    window.AdminStore.constructor.notifySuccess('Course Updated', `"${title}" has been updated with ${totalModules} modules, ${totalLessons} lessons, ${totalQuizzes} quizzes, and ${totalAssignments} assignments, and ${statusText}${noticeSuffix}.`);
-                }
+                showProgramToast('success', 'Course Updated', `"${title}" has been updated successfully.`);
             } else {
+                // Creating new course
                 if (window.AdminStore) {
-                    const newCourse = window.AdminStore.createCourse(payload);
+                    window.AdminStore.createCourse(payload);
                     allCourses = window.AdminStore.getCourses();
                 }
-                if (courseModal) courseModal.hide();
+                const modalEl = document.getElementById('createCourseModal');
+                const modal = safeGetModal(modalEl) || courseModal;
+                if (modal) modal.hide();
+
                 applyCourseFilters();
-                if (window.AdminStore) {
-                    const statusText = isPublished ? 'published to student catalog' : 'saved as draft';
-                    const noticeSuffix = apiSuccess ? '' : ' (saved locally for demo)';
-                    window.AdminStore.constructor.notifySuccess('Course Created Successfully', `"${title}" has been created with ${totalModules} modules, ${totalLessons} lessons, ${totalQuizzes} quizzes, and ${totalAssignments} assignments, and ${statusText}${noticeSuffix}.`);
-                }
+                const actionWord = isPublished ? 'published' : 'saved as draft';
+                showProgramToast('success', isPublished ? 'Course Published' : 'Course Saved', `"${title}" has been ${actionWord} successfully.`);
             }
         } catch (err) {
-            if (window.AdminStore) window.AdminStore.constructor.notifyError('Failed to Save Course', err.message);
+            showProgramToast('error', 'Failed to Save Course', err.message || 'An error occurred while saving the course.');
         } finally {
-            if (createCourseBtnEl) {
-                createCourseBtnEl.disabled = false;
-                createCourseBtnEl.innerHTML = isEditing 
-                    ? `<i class="bi bi-check-circle me-1"></i> Save Changes` 
-                    : `<i class="bi bi-plus-circle me-1"></i> Create Course`;
-            }
-            if (saveDraftBtnEl) {
-                saveDraftBtnEl.disabled = false;
-                saveDraftBtnEl.innerHTML = `<i class="bi bi-save me-1"></i> Save as Draft`;
-            }
+            if (publishBtn) publishBtn.disabled = false;
+            if (saveDraftBtn) saveDraftBtn.disabled = false;
+            if (spinner) spinner.classList.add('d-none');
         }
     }
 
@@ -2988,25 +4037,37 @@ document.addEventListener('DOMContentLoaded', function () {
             allCourses = window.AdminStore.getCourses();
         }
         applyCourseFilters();
-        if (course && window.AdminStore) {
-            window.AdminStore.constructor.toast(`Course is now ${course.is_published ? 'Published' : 'Draft'}`, 'info');
+        if (course) {
+            showProgramToast('info', 'Status Changed', `Course is now ${course.is_published ? 'Published' : 'Draft'}`);
         }
-
-        try {
-            await fetch(`${API_BASE}/admin/courses/${id}/toggle-publish`, { method: 'PATCH', headers: getHeaders() });
-        } catch (e) {}
     };
 
     window.deleteCourse = async function (id) {
-        const course = allCourses.find(c => c.id === id);
-        const name = course ? course.title : 'this course';
+        let c = allCourses.find(course => Number(course.id) === Number(id));
+        if (!c && window.AdminStore) {
+            c = window.AdminStore.getCourseById(id);
+        }
+        const name = c ? c.title : 'this course';
 
         let confirmed = false;
-        if (window.AdminStore) {
+        if (window.Swal) {
+            const res = await Swal.fire({
+                title: 'Delete Course?',
+                text: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+            confirmed = res.isConfirmed;
+        } else if (window.AdminStore && typeof window.AdminStore.constructor.confirmDialog === 'function') {
             confirmed = await window.AdminStore.constructor.confirmDialog(
                 'Delete Course?',
-                `Are you sure you want to delete "${name}" and all its syllabus modules & lessons?`,
-                'Yes, Delete Course',
+                `Are you sure you want to delete "${name}"?`,
+                'Delete',
                 '#DC2626'
             );
         } else {
@@ -3020,28 +4081,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.AdminStore.deleteCourse(id);
                 allCourses = window.AdminStore.getCourses();
             }
-
-            const res = await fetch(`${API_BASE}/admin/courses/${id}`, { method: 'DELETE', headers: getHeaders() });
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                if (errData.message) {
-                    throw new Error(errData.message);
-                }
-            }
-
-            applyCourseFilters();
-            if (window.AdminStore) {
-                window.AdminStore.constructor.toast(`Course "${name}" deleted`, 'success');
-            }
+            renderCoursesTable(allCourses);
+            showProgramToast('success', 'Course Deleted', `Course "${name}" was deleted successfully.`);
         } catch (err) {
-            if (window.AdminStore) {
-                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete course with active enrollments.');
-            } else {
-                alert(err.message || 'Cannot delete course.');
-            }
-            loadCourses();
+            showProgramToast('error', 'Action Prohibited', err.message || 'Cannot delete course.');
+            renderCoursesTable(allCourses);
         }
     };
+
+    setupCourseFormHandlers();
 
     // ==========================================================================
     // 3. COURSE CONTENT BUILDER (Interactive Visual Syllabus Hierarchy)
@@ -3049,17 +4097,61 @@ document.addEventListener('DOMContentLoaded', function () {
     // ==========================================================================
     window.openCourseContentBuilder = function (courseId) {
         activeBuilderCourseId = courseId;
-        const course = allCourses.find(c => c.id === courseId);
+        let course = allCourses.find(c => Number(c.id) === Number(courseId));
+        if (!course && window.AdminStore) {
+            course = window.AdminStore.getCourseById(courseId);
+        }
         if (!course) return;
 
         activeBuilderCourse = course;
         const titleEl = document.getElementById('builderCourseTitle');
         const catEl = document.getElementById('builderCourseCategory');
-        if (titleEl) titleEl.textContent = `Course Content: ${course.title}`;
-        if (catEl) catEl.textContent = course.category_name || 'Academic';
+        if (titleEl) titleEl.textContent = `Course Curriculum: ${course.title}`;
+        if (catEl) catEl.textContent = course.category_name || 'Specialized Course';
 
         renderCourseContentTree(courseId);
-        if (contentBuilderModal) contentBuilderModal.show();
+
+        document.querySelectorAll('.modal-backdrop').forEach(el => {
+            if (!document.querySelector('.modal.show')) el.remove();
+        });
+
+        const modal = safeGetModal(document.getElementById('courseContentBuilderModal')) || contentBuilderModal;
+        if (modal) modal.show();
+    };
+
+    function formatTotalDuration(lessons) {
+        let totalMinutes = 0;
+        lessons.forEach(l => {
+            const d = String(l.duration || '').toLowerCase();
+            const minMatch = d.match(/(\d+)\s*(?:min|minute)/);
+            const hrMatch = d.match(/(\d+)\s*(?:hr|hour)/);
+            if (hrMatch) totalMinutes += parseInt(hrMatch[1], 10) * 60;
+            if (minMatch) totalMinutes += parseInt(minMatch[1], 10);
+            if (!hrMatch && !minMatch) {
+                const numOnly = parseInt(d, 10);
+                if (!isNaN(numOnly)) totalMinutes += numOnly;
+            }
+        });
+        if (totalMinutes === 0) return '0h 0m Total Duration';
+        const hrs = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        if (hrs > 0 && mins > 0) return `${hrs}h ${mins}m Total Duration`;
+        if (hrs > 0) return `${hrs}h Total Duration`;
+        return `${mins}m Total Duration`;
+    }
+
+    window.toggleModuleCollapse = function (modId) {
+        const bodyEl = document.getElementById(`moduleContent_${modId}`);
+        const iconEl = document.getElementById(`moduleChevron_${modId}`);
+        if (!bodyEl) return;
+        const isHidden = bodyEl.classList.contains('d-none');
+        if (isHidden) {
+            bodyEl.classList.remove('d-none');
+            if (iconEl) iconEl.className = 'bi bi-chevron-down';
+        } else {
+            bodyEl.classList.add('d-none');
+            if (iconEl) iconEl.className = 'bi bi-chevron-right';
+        }
     };
 
     function renderCourseContentTree(courseId) {
@@ -3069,9 +4161,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(courseId) : [];
         const allCourseLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(courseId) : [];
+        const totalDurationStr = formatTotalDuration(allCourseLessons);
 
         if (statsBadge) {
-            statsBadge.textContent = `${chapters.length} Modules \u2022 ${allCourseLessons.length} Lessons`;
+            statsBadge.textContent = `${chapters.length} Modules \u2022 ${allCourseLessons.length} Lessons \u2022 ${totalDurationStr}`;
         }
 
         if (chapters.length === 0) {
@@ -3080,7 +4173,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <i class="bi bi-diagram-3 fs-1 text-muted opacity-50 d-block mb-2"></i>
                     <h6 class="fw-bold text-dark">No Curriculum Modules Added</h6>
                     <p class="text-muted small mb-3">Begin structuring this course by adding the first chapter or module.</p>
-                    <button class="btn btn-sm btn-primary" onclick="openAddModuleModal()">
+                    <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="openAddModuleModal()">
                         <i class="bi bi-plus-circle me-1"></i> Add First Module
                     </button>
                 </div>
@@ -3093,70 +4186,111 @@ document.addEventListener('DOMContentLoaded', function () {
         // 1. Modules & Lessons Accordion
         html += chapters.map((ch, idx) => {
             const lessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
+            const isFirstMod = idx === 0;
+            const isLastMod = idx === chapters.length - 1;
+            const isDraftMod = (ch.status === 'Draft');
 
             return `
-                <div class="module-tree-card">
-                    <div class="module-tree-header">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary px-2 py-1" style="font-size: 11px;">Module ${ch.chapter_num || (idx + 1)}</span>
-                            <span class="fw-bold text-dark" style="font-size: 13.5px;">${escapeHtml(ch.title)}</span>
-                            <span class="text-muted small">(${escapeHtml(ch.duration || '2 Weeks')})</span>
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 10.5px;">${lessons.length} ${lessons.length === 1 ? 'Lesson' : 'Lessons'}</span>
+                <div class="module-tree-card mb-3 border rounded-3 bg-white shadow-sm overflow-hidden" id="moduleCard_${ch.id}">
+                    <div class="module-tree-header p-3 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2 cursor-pointer" onclick="toggleModuleCollapse(${ch.id})" title="Click to Expand/Collapse Module">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="text-secondary" style="font-size: 13px;">
+                                <i class="bi bi-chevron-down" id="moduleChevron_${ch.id}"></i>
+                            </span>
+                            <span class="badge bg-primary px-2.5 py-1 fw-bold" style="font-size: 11px;">Module ${ch.chapter_num || (idx + 1)}</span>
+                            <span class="fw-bold text-dark fs-6">${escapeHtml(ch.title)}</span>
+                            <span class="badge bg-white text-secondary border px-2 py-1" style="font-size: 11px;"><i class="bi bi-clock me-1"></i>${escapeHtml(ch.duration || '2 Weeks')}</span>
+                            <span class="badge ${isDraftMod ? 'bg-secondary' : 'bg-success'} bg-opacity-10 text-${isDraftMod ? 'secondary' : 'success'} border px-2 py-0.5" style="font-size: 10.5px;">${ch.status || 'Published'}</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5" style="font-size: 10.5px;">${lessons.length} ${lessons.length === 1 ? 'Lesson' : 'Lessons'}</span>
                         </div>
-                        <div class="d-flex align-items-center gap-1">
-                            <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;" onclick="openAddLessonModal(${ch.id})" title="Add Lesson to this Module">
-                                <i class="bi bi-plus-circle me-1"></i> Add Lesson
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap" onclick="event.stopPropagation()">
+                            <button type="button" class="btn btn-sm btn-primary rounded-pill py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 11.5px;" onclick="openAddLessonModal(${ch.id})" title="Add Lesson to this Module">
+                                <i class="bi bi-plus-circle"></i> Add Lesson
                             </button>
-                            <button class="btn btn-sm btn-light border py-0 px-2" style="font-size: 11px;" onclick="openEditModuleModal(${ch.id})" title="Edit Module">
+                            <button type="button" class="action-btn" ${isFirstMod ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : `onclick="moveModuleUp(${ch.id})"`} title="Move Module Up">
+                                <i class="bi bi-arrow-up"></i>
+                            </button>
+                            <button type="button" class="action-btn" ${isLastMod ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : `onclick="moveModuleDown(${ch.id})"`} title="Move Module Down">
+                                <i class="bi bi-arrow-down"></i>
+                            </button>
+                            <button type="button" class="action-btn" onclick="openEditModuleModal(${ch.id})" title="Edit Module">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                            <button class="btn btn-sm btn-light border text-danger py-0 px-2" style="font-size: 11px;" onclick="deleteModule(${ch.id})" title="Delete Module">
+                            <button type="button" class="action-btn delete text-danger" onclick="deleteModule(${ch.id})" title="Delete Module">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="lesson-tree-body">
-                        ${lessons.length === 0 ? `
-                            <div class="p-3 text-center text-muted small bg-light">
-                                No lessons created in this module yet. <a href="javascript:void(0)" class="fw-semibold text-primary" onclick="openAddLessonModal(${ch.id})">+ Add First Lesson</a>
+                    <div id="moduleContent_${ch.id}">
+                        ${ch.description ? `
+                            <div class="px-3 pt-2 pb-2 bg-light bg-opacity-50 text-muted small border-bottom" style="font-size: 12px;">
+                                <i class="bi bi-info-circle me-1 text-secondary"></i>${escapeHtml(ch.description)}
                             </div>
-                        ` : lessons.map(l => `
-                            <div class="lesson-tree-item">
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-file-earmark-play text-primary"></i>
-                                        <span class="fw-semibold text-dark" style="font-size: 13px;">${escapeHtml(l.title)}</span>
-                                        <span class="text-muted" style="font-size: 11px;">&bull; ${escapeHtml(l.duration || '45 Mins')}</span>
-                                    </div>
-                                    ${l.description ? `<div class="text-muted mt-1" style="font-size: 11.5px;">${escapeHtml(l.description)}</div>` : ''}
-                                    
-                                    <!-- Resource Badges -->
-                                    <div class="mt-2 d-flex flex-wrap">
-                                        ${l.video_url ? `
-                                            <span class="resource-pill video" title="Attached Streaming Video">
-                                                <i class="bi bi-camera-video"></i> ${escapeHtml(l.video_url.split('/').pop() || 'video.mp4')} ${l.video_size ? `(${l.video_size})` : ''}
-                                            </span>
-                                        ` : ''}
-                                        ${l.pdf_url ? `
-                                            <span class="resource-pill pdf" title="Attached Learning Material">
-                                                <i class="bi bi-file-earmark-pdf"></i> ${escapeHtml(l.pdf_url.split('/').pop() || 'document.pdf')} ${l.pdf_size ? `(${l.pdf_size})` : ''}
-                                            </span>
-                                        ` : ''}
-                                        <button class="btn btn-link text-primary p-0 ms-1 align-middle" style="font-size: 11px; text-decoration: none;" onclick="openEditLessonModal(${l.id})" title="Attach Additional Materials">
-                                            <i class="bi bi-paperclip"></i> + Add Material
-                                        </button>
-                                    </div>
+                        ` : ''}
+                        <div class="lesson-tree-body p-3 bg-white">
+                            ${lessons.length === 0 ? `
+                                <div class="p-3 text-center text-muted small bg-light rounded-2 border border-dashed">
+                                    <i class="bi bi-journal-plus fs-4 d-block mb-1 text-secondary opacity-50"></i>
+                                    No lessons created in this module yet. <a href="javascript:void(0)" class="fw-semibold text-primary" onclick="openAddLessonModal(${ch.id})">+ Add First Lesson</a>
                                 </div>
-                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
-                                    <button class="action-btn" title="Edit Lesson" onclick="openEditLessonModal(${l.id})">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="action-btn delete" title="Delete Lesson" onclick="deleteLesson(${l.id})">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
+                            ` : `
+                                <div class="d-flex flex-column gap-2">
+                                    ${lessons.map((l, lIdx) => {
+                                        const isFirstLes = lIdx === 0;
+                                        const isLastLes = lIdx === lessons.length - 1;
+                                        const isDraftLes = (l.status === 'Draft');
+                                        let typeIcon = 'bi-camera-video text-primary';
+                                        if (l.type === 'Lab') typeIcon = 'bi-laptop text-success';
+                                        else if (l.type === 'Reading') typeIcon = 'bi-file-earmark-text text-info';
+                                        else if (l.type === 'Live') typeIcon = 'bi-broadcast text-danger';
+
+                                        return `
+                                            <div class="lesson-tree-item p-2.5 bg-light rounded-2 border d-flex align-items-start justify-content-between gap-2">
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                                        <span class="badge bg-white text-dark border" style="font-size: 10.5px;">#${l.order_num || (lIdx + 1)}</span>
+                                                        <i class="bi ${typeIcon}"></i>
+                                                        <span class="fw-bold text-dark" style="font-size: 13px;">${escapeHtml(l.title)}</span>
+                                                        <span class="text-muted" style="font-size: 11.5px;">&bull; <i class="bi bi-clock me-0.5"></i>${escapeHtml(l.duration || '20 minutes')}</span>
+                                                        <span class="badge bg-white text-secondary border px-1.5 py-0.5" style="font-size: 10px;">${escapeHtml(l.type || 'Video')}</span>
+                                                        <span class="badge ${isDraftLes ? 'bg-secondary' : 'bg-success'} bg-opacity-10 text-${isDraftLes ? 'secondary' : 'success'} border px-1.5 py-0.5" style="font-size: 10px;">${l.status || 'Published'}</span>
+                                                    </div>
+                                                    ${l.description ? `<div class="text-muted mb-1.5" style="font-size: 11.5px; line-height: 1.4;">${escapeHtml(l.description)}</div>` : ''}
+                                                    
+                                                    <!-- Resource Badges -->
+                                                    <div class="d-flex flex-wrap align-items-center gap-1.5">
+                                                        ${l.video_url ? `
+                                                            <span class="resource-pill video badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 10px;" title="Attached Video">
+                                                                <i class="bi bi-camera-video me-1"></i> ${escapeHtml(l.video_url.split('/').pop() || 'video.mp4')} ${l.video_size ? `(${l.video_size})` : ''}
+                                                            </span>
+                                                        ` : ''}
+                                                        ${l.pdf_url ? `
+                                                            <span class="resource-pill pdf badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 10px;" title="Attached Learning Material">
+                                                                <i class="bi bi-file-earmark-pdf me-1"></i> ${escapeHtml(l.pdf_url.split('/').pop() || 'document.pdf')} ${l.pdf_size ? `(${l.pdf_size})` : ''}
+                                                            </span>
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                    <button type="button" class="action-btn" ${isFirstLes ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : `onclick="moveLessonUp(${l.id})"`} title="Move Lesson Up">
+                                                        <i class="bi bi-arrow-up"></i>
+                                                    </button>
+                                                    <button type="button" class="action-btn" ${isLastLes ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : `onclick="moveLessonDown(${l.id})"`} title="Move Lesson Down">
+                                                        <i class="bi bi-arrow-down"></i>
+                                                    </button>
+                                                    <button type="button" class="action-btn" title="Edit Lesson" onclick="openEditLessonModal(${l.id})">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button type="button" class="action-btn delete text-danger" title="Delete Lesson" onclick="deleteLesson(${l.id})">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
-                            </div>
-                        `).join('')}
+                            `}
+                        </div>
                     </div>
                 </div>
             `;
@@ -3228,6 +4362,44 @@ document.addEventListener('DOMContentLoaded', function () {
         container.innerHTML = html;
     }
 
+    // Module Reordering Handlers
+    window.moveModuleUp = function (moduleId) {
+        if (window.AdminStore) {
+            window.AdminStore.moveChapter(moduleId, 'up');
+            renderCourseContentTree(activeBuilderCourseId);
+            allCourses = window.AdminStore.getCourses();
+            applyCourseFilters();
+        }
+    };
+
+    window.moveModuleDown = function (moduleId) {
+        if (window.AdminStore) {
+            window.AdminStore.moveChapter(moduleId, 'down');
+            renderCourseContentTree(activeBuilderCourseId);
+            allCourses = window.AdminStore.getCourses();
+            applyCourseFilters();
+        }
+    };
+
+    // Lesson Reordering Handlers
+    window.moveLessonUp = function (lessonId) {
+        if (window.AdminStore) {
+            window.AdminStore.moveLesson(lessonId, 'up');
+            renderCourseContentTree(activeBuilderCourseId);
+            allCourses = window.AdminStore.getCourses();
+            applyCourseFilters();
+        }
+    };
+
+    window.moveLessonDown = function (lessonId) {
+        if (window.AdminStore) {
+            window.AdminStore.moveLesson(lessonId, 'down');
+            renderCourseContentTree(activeBuilderCourseId);
+            allCourses = window.AdminStore.getCourses();
+            applyCourseFilters();
+        }
+    };
+
     // Module CRUD Handlers in Content Builder
     window.openAddModuleModal = function () {
         const form = document.getElementById('moduleEditorForm');
@@ -3238,8 +4410,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(activeBuilderCourseId) : [];
         document.getElementById('moduleEditorOrder').value = chapters.length + 1;
         document.getElementById('moduleEditorTitle').textContent = 'Add New Module';
+        document.getElementById('moduleEditorDuration').value = '2 Weeks';
+        document.getElementById('moduleEditorStatus').value = 'Published';
+        document.getElementById('moduleEditorDesc').value = '';
         
-        if (moduleEditorModal) moduleEditorModal.show();
+        const mModal = safeGetModal(document.getElementById('moduleEditorModal')) || moduleEditorModal;
+        if (mModal) mModal.show();
     };
 
     window.openEditModuleModal = function (moduleId) {
@@ -3250,12 +4426,14 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('moduleEditorId').value = ch.id;
         document.getElementById('moduleEditorCourseId').value = ch.course_id;
         document.getElementById('moduleEditorTitleInput').value = ch.title;
-        document.getElementById('moduleEditorOrder').value = ch.chapter_num;
+        document.getElementById('moduleEditorOrder').value = ch.chapter_num || 1;
         document.getElementById('moduleEditorDuration').value = ch.duration || '2 Weeks';
+        document.getElementById('moduleEditorStatus').value = ch.status || 'Published';
         document.getElementById('moduleEditorDesc').value = ch.description || '';
         document.getElementById('moduleEditorTitle').textContent = 'Edit Module';
 
-        if (moduleEditorModal) moduleEditorModal.show();
+        const mModal = safeGetModal(document.getElementById('moduleEditorModal')) || moduleEditorModal;
+        if (mModal) mModal.show();
     };
 
     const moduleEditorForm = document.getElementById('moduleEditorForm');
@@ -3266,13 +4444,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const courseId = parseInt(document.getElementById('moduleEditorCourseId').value) || activeBuilderCourseId;
             const title = document.getElementById('moduleEditorTitleInput').value.trim();
 
+            if (!title) {
+                document.getElementById('moduleEditorTitleInput').classList.add('is-invalid');
+                return;
+            } else {
+                document.getElementById('moduleEditorTitleInput').classList.remove('is-invalid');
+            }
+
             const payload = {
                 course_id: courseId,
                 chapter_num: parseInt(document.getElementById('moduleEditorOrder').value) || 1,
                 title: title,
-                duration: document.getElementById('moduleEditorDuration').value.trim(),
-                description: document.getElementById('moduleEditorDesc').value.trim(),
-                lesson_count: 3
+                duration: (document.getElementById('moduleEditorDuration').value || '2 Weeks').trim(),
+                status: document.getElementById('moduleEditorStatus')?.value || 'Published',
+                description: (document.getElementById('moduleEditorDesc')?.value || '').trim()
             };
 
             if (id) {
@@ -3280,10 +4465,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.AdminStore) window.AdminStore.constructor.toast('Module updated successfully', 'success');
             } else {
                 if (window.AdminStore) window.AdminStore.createChapter(payload);
-                if (window.AdminStore) window.AdminStore.constructor.toast('Module added to syllabus', 'success');
+                if (window.AdminStore) window.AdminStore.constructor.toast('Module added to curriculum', 'success');
             }
 
-            if (moduleEditorModal) moduleEditorModal.hide();
+            const mModal = safeGetModal(document.getElementById('moduleEditorModal')) || moduleEditorModal;
+            if (mModal) mModal.hide();
             renderCourseContentTree(courseId);
             allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
             applyCourseFilters();
@@ -3299,7 +4485,7 @@ document.addEventListener('DOMContentLoaded', function () {
     window.deleteModule = async function (moduleId) {
         let confirmed = false;
         if (window.AdminStore) {
-            confirmed = await window.AdminStore.constructor.confirmDialog('Delete Module?', 'Are you sure you want to delete this module and its lessons?', 'Yes, Delete', '#DC2626');
+            confirmed = await window.AdminStore.constructor.confirmDialog('Delete Module?', 'Are you sure you want to delete this module and all its lessons?', 'Yes, Delete', '#DC2626');
         } else {
             confirmed = confirm('Are you sure you want to delete this module?');
         }
@@ -3325,8 +4511,15 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('lessonEditorId').value = '';
         document.getElementById('lessonEditorModuleId').value = moduleId;
         document.getElementById('lessonEditorCourseId').value = activeBuilderCourseId;
-        document.getElementById('lessonEditorTitle').textContent = 'Add Lesson & Learning Materials';
-        document.getElementById('lessonEditorDuration').value = '45 Mins';
+        document.getElementById('lessonEditorTitle').textContent = 'Add Lesson';
+        document.getElementById('lessonEditorDuration').value = '20 minutes';
+        document.getElementById('lessonEditorType').value = 'Video';
+        document.getElementById('lessonEditorStatus').value = 'Published';
+        document.getElementById('lessonEditorDesc').value = '';
+        document.getElementById('lessonVideoUrl').value = '';
+
+        const existingLessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(moduleId) : [];
+        document.getElementById('lessonEditorOrder').value = existingLessons.length + 1;
 
         // Reset previews
         const vidPreview = document.getElementById('videoPreviewContainer');
@@ -3334,7 +4527,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const matPreview = document.getElementById('materialPreviewContainer');
         if (matPreview) matPreview.style.display = 'none';
 
-        if (lessonEditorModal) lessonEditorModal.show();
+        const lModal = safeGetModal(document.getElementById('lessonEditorModal')) || lessonEditorModal;
+        if (lModal) lModal.show();
     };
 
     window.openEditLessonModal = function (lessonId) {
@@ -3345,11 +4539,15 @@ document.addEventListener('DOMContentLoaded', function () {
         
         document.getElementById('lessonEditorId').value = lessonId;
         document.getElementById('lessonEditorModuleId').value = les ? les.module_id : '';
-        document.getElementById('lessonEditorCourseId').value = activeBuilderCourseId;
+        document.getElementById('lessonEditorCourseId').value = les ? (les.course_id || activeBuilderCourseId) : activeBuilderCourseId;
         document.getElementById('lessonEditorTitleInput').value = les ? les.title : `Lesson ${lessonId}`;
-        document.getElementById('lessonEditorDuration').value = les ? (les.duration || '45 Mins') : '45 Mins';
+        document.getElementById('lessonEditorDuration').value = les ? (les.duration || '20 minutes') : '20 minutes';
+        document.getElementById('lessonEditorOrder').value = les ? (les.order_num || 1) : 1;
+        document.getElementById('lessonEditorType').value = les ? (les.type || 'Video') : 'Video';
+        document.getElementById('lessonEditorStatus').value = les ? (les.status || 'Published') : 'Published';
         document.getElementById('lessonEditorDesc').value = les ? (les.description || '') : '';
-        document.getElementById('lessonEditorTitle').textContent = 'Edit Lesson & Materials';
+        document.getElementById('lessonVideoUrl').value = les ? (les.video_url || '') : '';
+        document.getElementById('lessonEditorTitle').textContent = 'Edit Lesson';
 
         const vidPreview = document.getElementById('videoPreviewContainer');
         if (vidPreview) vidPreview.style.display = (les && les.video_url) ? 'block' : 'none';
@@ -3357,7 +4555,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const matPreview = document.getElementById('materialPreviewContainer');
         if (matPreview) matPreview.style.display = (les && les.pdf_url) ? 'flex' : 'none';
 
-        if (lessonEditorModal) lessonEditorModal.show();
+        const lModal = safeGetModal(document.getElementById('lessonEditorModal')) || lessonEditorModal;
+        if (lModal) lModal.show();
     };
 
     // Lesson Video & Material file listeners
@@ -3455,9 +4654,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const id = document.getElementById('lessonEditorId').value;
             const moduleId = parseInt(document.getElementById('lessonEditorModuleId').value);
             const title = document.getElementById('lessonEditorTitleInput').value.trim();
-            const duration = document.getElementById('lessonEditorDuration').value.trim() || '45 Mins';
-            const desc = document.getElementById('lessonEditorDesc').value.trim();
+            const duration = (document.getElementById('lessonEditorDuration').value || '20 minutes').trim();
+            const desc = (document.getElementById('lessonEditorDesc')?.value || '').trim();
             const videoUrl = document.getElementById('lessonVideoUrl')?.value.trim() || '';
+            const orderNum = parseInt(document.getElementById('lessonEditorOrder')?.value) || 1;
+            const lessonType = document.getElementById('lessonEditorType')?.value || 'Video';
+            const lessonStatus = document.getElementById('lessonEditorStatus')?.value || 'Published';
+
+            if (!title) {
+                document.getElementById('lessonEditorTitleInput').classList.add('is-invalid');
+                return;
+            } else {
+                document.getElementById('lessonEditorTitleInput').classList.remove('is-invalid');
+            }
 
             const payload = {
                 module_id: moduleId,
@@ -3465,27 +4674,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: title,
                 duration: duration,
                 description: desc,
+                order_num: orderNum,
+                type: lessonType,
+                status: lessonStatus,
                 video_url: videoUrl
             };
 
             if (id && window.AdminStore) {
                 window.AdminStore.updateLesson(parseInt(id), payload);
+                window.AdminStore.constructor.toast(`Lesson "${title}" updated successfully`, 'success');
             } else if (window.AdminStore) {
                 window.AdminStore.createLesson(payload);
+                window.AdminStore.constructor.toast(`Lesson "${title}" added to module`, 'success');
             }
 
-            if (window.AdminStore) window.AdminStore.constructor.toast(`Lesson "${title}" saved`, 'success');
-            if (lessonEditorModal) lessonEditorModal.hide();
+            const lModal = safeGetModal(document.getElementById('lessonEditorModal')) || lessonEditorModal;
+            if (lModal) lModal.hide();
             renderCourseContentTree(activeBuilderCourseId);
             allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
             applyCourseFilters();
         });
     }
 
-    window.deleteLesson = function (lessonId) {
+    window.deleteLesson = async function (lessonId) {
+        let confirmed = false;
+        if (window.AdminStore) {
+            confirmed = await window.AdminStore.constructor.confirmDialog('Delete Lesson?', 'Are you sure you want to delete this lesson?', 'Yes, Delete', '#DC2626');
+        } else {
+            confirmed = confirm('Are you sure you want to delete this lesson?');
+        }
+        if (!confirmed) return;
+
         if (window.AdminStore) {
             window.AdminStore.deleteLesson(lessonId);
-            window.AdminStore.constructor.toast('Lesson removed from module', 'info');
+            window.AdminStore.constructor.toast('Lesson deleted', 'success');
         }
         renderCourseContentTree(activeBuilderCourseId);
         allCourses = window.AdminStore ? window.AdminStore.getCourses() : allCourses;
@@ -3554,45 +4776,71 @@ document.addEventListener('DOMContentLoaded', function () {
             renderCourseContentTree(activeBuilderCourseId);
         });
     };
-
     // ==========================================
-    // 4. CATEGORIES MANAGEMENT
+    // 3. CATEGORIES MANAGEMENT
     // ==========================================
-    async function loadCategories() {
-        let loaded = false;
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
-            const res = await fetch(`${API_BASE}/admin/categories`, { 
-                headers: getHeaders(),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            if (res.ok) {
-                const data = await res.json();
-                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                    allCategories = data.data;
-                    loaded = true;
-                }
-            }
-        } catch (e) {}
-
-        if (!loaded && window.AdminStore) {
-            allCategories = window.AdminStore.getCategories();
+    async function loadCategories(forceRefresh = false) {
+        const tbody = document.getElementById('categoriesTableBody');
+        if (tbody && (!allCategories || allCategories.length === 0)) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                        <div class="text-muted text-xs">Loading categories...</div>
+                    </td>
+                </tr>
+            `;
         }
 
-        renderCategoriesTable(allCategories);
-        populateCategoryFilterOptions();
-        populateCourseSelects();
+        try {
+            if (window.academicService && typeof window.academicService.getCategories === 'function') {
+                const cats = await window.academicService.getCategories();
+                allCategories = Array.isArray(cats) ? cats : [];
+            } else {
+                const res = await fetch(`${API_BASE}/admin/categories`, { headers: getHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        allCategories = data.data;
+                    }
+                }
+            }
+            renderCategoriesTable(allCategories);
+            populateCategoryFilterOptions();
+            populateCourseSelects();
+        } catch (err) {
+            console.error('Failed to load categories:', err);
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-danger">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Unable to load categories.
+                            <button class="btn btn-sm btn-outline-primary ms-2 rounded-pill px-3" onclick="loadCategories(true)">Retry</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
     }
+    window.loadCategories = loadCategories;
 
     function renderCategoriesTable(categories) {
         const tbody = document.getElementById('categoriesTableBody');
         if (!tbody) return;
 
-        if (categories.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No categories found</td></tr>`;
+        if (!categories || categories.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-tags fs-2 text-secondary opacity-50 d-block mb-2"></i>
+                        <div class="fw-semibold">No categories found</div>
+                        <p class="text-xs text-muted mb-2">Create your first category discipline.</p>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="window.openCreateCategoryModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Add Category
+                        </button>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
@@ -3600,11 +4848,15 @@ document.addEventListener('DOMContentLoaded', function () {
             <tr>
                 <td class="text-muted fw-bold" style="font-size: 12px;">#${c.id}</td>
                 <td class="fw-bold" style="font-size: 12.5px;">${escapeHtml(c.name)}</td>
-                <td class="text-muted" style="font-size: 12px;">${escapeHtml(c.slug)}</td>
+                <td class="text-muted" style="font-size: 12px;"><code>${escapeHtml(c.slug)}</code></td>
                 <td><i class="bi ${escapeHtml(c.icon || 'bi-tag')} text-primary fs-6"></i></td>
-                <td class="text-muted" style="font-size: 12px;">${c.order_num || 1}</td>
+                <td><span class="badge bg-light text-dark border">${(c.course_count || 0) + (c.program_count || 0)} Linked</span></td>
+                <td><span class="badge ${c.status === 'Active' || c.is_active ? 'bg-success' : 'bg-secondary'}">${c.status || (c.is_active ? 'Active' : 'Inactive')}</span></td>
                 <td>
-                    <button class="action-btn delete" title="Delete Category" onclick="deleteCategory(${c.id})"><i class="bi bi-trash"></i></button>
+                    <div class="d-flex gap-1">
+                        <button class="action-btn" title="Edit Category" onclick="window.openEditCategoryModal(${c.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="action-btn delete" title="Delete Category" onclick="window.deleteCategory(${c.id})"><i class="bi bi-trash"></i></button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -3614,26 +4866,66 @@ document.addEventListener('DOMContentLoaded', function () {
         const filterSelect = document.getElementById('courseCategoryFilter');
         if (filterSelect && allCategories.length > 0) {
             filterSelect.innerHTML = `<option value="all">All Categories</option>` + allCategories.map(c => `
-                <option value="${c.name}">${escapeHtml(c.name)}</option>
+                <option value="${c.id}">${escapeHtml(c.name)}</option>
             `).join('');
         }
     }
 
     window.openCreateCategoryModal = function () {
-        document.getElementById('categoryForm').reset();
-        document.getElementById('categoryId').value = '';
-        document.getElementById('categoryModalTitle').textContent = 'Add New Category';
+        const form = document.getElementById('categoryForm');
+        if (form) form.reset();
+        const idEl = document.getElementById('categoryId');
+        if (idEl) idEl.value = '';
+        const titleEl = document.getElementById('categoryModalTitle');
+        if (titleEl) titleEl.textContent = 'Add New Category';
         
-        // Dynamic slug auto-population
         const nameInput = document.getElementById('categoryName');
         const slugInput = document.getElementById('categorySlug');
         if (nameInput && slugInput) {
             nameInput.oninput = function() {
-                slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                if (!document.getElementById('categoryId')?.value) {
+                    slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                }
             };
         }
 
-        if (categoryModal) categoryModal.show();
+        const modalEl = document.getElementById('createCategoryModal');
+        if (modalEl) {
+            const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (m) m.show();
+        }
+    };
+
+    window.openEditCategoryModal = function (id) {
+        const cat = allCategories.find(c => Number(c.id) === Number(id));
+        if (!cat) return;
+
+        const form = document.getElementById('categoryForm');
+        if (form) form.reset();
+
+        const idEl = document.getElementById('categoryId');
+        if (idEl) idEl.value = cat.id;
+        const titleEl = document.getElementById('categoryModalTitle');
+        if (titleEl) titleEl.textContent = 'Edit Category';
+
+        const nameEl = document.getElementById('categoryName');
+        if (nameEl) nameEl.value = cat.name || '';
+        const slugEl = document.getElementById('categorySlug');
+        if (slugEl) slugEl.value = cat.slug || '';
+        const iconEl = document.getElementById('categoryIcon');
+        if (iconEl) iconEl.value = cat.icon || 'bi-tag';
+        const colorEl = document.getElementById('categoryColor');
+        if (colorEl) colorEl.value = cat.color || '#2563EB';
+        const orderEl = document.getElementById('categoryOrder');
+        if (orderEl) orderEl.value = cat.order_num !== undefined ? cat.order_num : 1;
+        const statusEl = document.getElementById('categoryStatus');
+        if (statusEl) statusEl.value = cat.status || (cat.is_active ? 'Active' : 'Inactive');
+
+        const modalEl = document.getElementById('createCategoryModal');
+        if (modalEl) {
+            const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (m) m.show();
+        }
     };
 
     const categoryForm = document.getElementById('categoryForm');
@@ -3641,32 +4933,21 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('categoryName').value.trim();
-            const slug = document.getElementById('categorySlug').value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            const name = document.getElementById('categoryName')?.value.trim();
+            const slug = document.getElementById('categorySlug')?.value.trim() || (name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
             const id = document.getElementById('categoryId')?.value;
 
             if (!name) {
-                setFieldInvalid('categoryName', 'catNameFeedback', 'Category Name is required.');
-                return;
-            }
-
-            // Duplicate name or slug check
-            const duplicate = allCategories.find(c => (!id || c.id !== Number(id)) && (c.name.toLowerCase() === name.toLowerCase() || c.slug.toLowerCase() === slug.toLowerCase()));
-            if (duplicate) {
-                if (duplicate.name.toLowerCase() === name.toLowerCase()) {
-                    setFieldInvalid('categoryName', 'catNameFeedback', `Category "${name}" already exists.`);
-                } else {
-                    setFieldInvalid('categorySlug', 'catSlugFeedback', `Category slug "${slug}" already exists.`);
-                }
-                if (window.AdminStore) window.AdminStore.constructor.toast('Duplicate category detected.', 'error');
+                setFieldInvalid('categoryName', 'categoryNameFeedback', 'Category Name is required.');
                 return;
             }
 
             const payload = {
                 name: name,
                 slug: slug,
-                icon: document.getElementById('categoryIcon').value.trim() || 'bi-laptop',
-                order_num: parseInt(document.getElementById('categoryOrder').value) || 1,
+                icon: document.getElementById('categoryIcon')?.value.trim() || 'bi-tag',
+                color: document.getElementById('categoryColor')?.value || '#2563EB',
+                order_num: parseInt(document.getElementById('categoryOrder')?.value) || 0,
                 status: document.getElementById('categoryStatus')?.value || 'Active'
             };
 
@@ -3678,49 +4959,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 if (id) {
-                    if (window.AdminStore) {
-                        window.AdminStore.updateCategory(id, payload);
-                        allCategories = window.AdminStore.getCategories();
-                    }
-                    if (categoryModal) categoryModal.hide();
-                    renderCategoriesTable(allCategories);
-                    populateCategoryFilterOptions();
-                    populateCourseSelects();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Updated', `"${name}" has been updated.`);
+                    await window.academicService.updateCategory(id, payload);
+                    showProgramToast('success', 'Category Updated', `"${name}" updated successfully.`);
                 } else {
-                    if (window.AdminStore) {
-                        window.AdminStore.createCategory(payload);
-                        allCategories = window.AdminStore.getCategories();
-                    }
-                    if (categoryModal) categoryModal.hide();
-                    renderCategoriesTable(allCategories);
-                    populateCategoryFilterOptions();
-                    populateCourseSelects();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Category Created', `"${name}" added to academic disciplines.`);
+                    await window.academicService.createCategory(payload);
+                    showProgramToast('success', 'Category Created', `"${name}" added to academic categories.`);
                 }
 
-                const url = id ? `${API_BASE}/admin/categories/${id}` : `${API_BASE}/admin/categories`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.notifyError('Failed to Save Category', err.message);
+                const modalEl = document.getElementById('createCategoryModal');
+                if (modalEl) {
+                    const m = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (m) m.hide();
                 }
+
+                await loadCategories(true);
+            } catch (err) {
+                showProgramToast('danger', 'Failed to Save Category', err.message || 'Error occurred.');
             } finally {
                 if (saveBtn) {
                     saveBtn.disabled = false;
-                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Category`;
+                    saveBtn.innerHTML = `Save Category`;
                 }
             }
         });
     }
 
     window.deleteCategory = async function (id) {
-        const cat = allCategories.find(c => c.id === id);
+        const cat = allCategories.find(c => Number(c.id) === Number(id));
         const name = cat ? cat.name : 'this category';
 
         let confirmed = false;
-        if (window.AdminStore) {
+        if (window.AdminStore && typeof window.AdminStore.constructor.confirmDialog === 'function') {
             confirmed = await window.AdminStore.constructor.confirmDialog(
                 'Delete Category?',
                 `Are you sure you want to delete "${name}"?`,
@@ -3734,72 +5003,79 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!confirmed) return;
 
         try {
-            if (window.AdminStore) {
-                window.AdminStore.deleteCategory(id);
-                allCategories = window.AdminStore.getCategories();
-            }
-
-            const res = await fetch(`${API_BASE}/admin/categories/${id}`, { method: 'DELETE', headers: getHeaders() });
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                if (errData.message) {
-                    throw new Error(errData.message);
-                }
-            }
-
-            renderCategoriesTable(allCategories);
-            populateCategoryFilterOptions();
-
-            if (window.AdminStore) {
-                window.AdminStore.constructor.toast(`Category "${name}" deleted`, 'success');
-            }
+            await window.academicService.deleteCategory(id);
+            await loadCategories(true);
+            showProgramToast('success', 'Category Deleted', `"${name}" has been removed.`);
         } catch (err) {
-            if (window.AdminStore) {
-                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'Cannot delete category: assigned to courses.');
-            } else {
-                alert(err.message || 'Cannot delete category.');
-            }
-            loadCategories();
+            showProgramToast('danger', 'Action Prohibited', err.message || 'Cannot delete category assigned to courses or programs.');
+            loadCategories(true);
         }
     };
 
     // ==========================================
-    // 5. INSTRUCTORS MANAGEMENT
+    // 4. INSTRUCTORS MANAGEMENT
     // ==========================================
-    async function loadInstructors() {
-        let loaded = false;
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
-            const res = await fetch(`${API_BASE}/admin/instructors`, { 
-                headers: getHeaders(),
-                signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            if (res.ok) {
-                const data = await res.json();
-                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                    allInstructors = data.data;
-                    loaded = true;
-                }
-            }
-        } catch (e) {}
-
-        if (!loaded && window.AdminStore) {
-            allInstructors = window.AdminStore.getInstructors();
+    async function loadInstructors(forceRefresh = false) {
+        const tbody = document.getElementById('instructorsTableBody');
+        if (tbody && (!allInstructors || allInstructors.length === 0)) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                        <div class="text-muted text-xs">Loading instructors...</div>
+                    </td>
+                </tr>
+            `;
         }
 
-        renderInstructorsTable(allInstructors);
-        populateCourseSelects();
+        try {
+            if (window.academicService && typeof window.academicService.getInstructors === 'function') {
+                const insts = await window.academicService.getInstructors();
+                allInstructors = Array.isArray(insts) ? insts : [];
+            } else {
+                const res = await fetch(`${API_BASE}/admin/instructors`, { headers: getHeaders() });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.success && Array.isArray(data.data)) {
+                        allInstructors = data.data;
+                    }
+                }
+            }
+            renderInstructorsTable(allInstructors);
+            populateCourseSelects();
+        } catch (err) {
+            console.error('Failed to load instructors:', err);
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-danger">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Unable to load instructors.
+                            <button class="btn btn-sm btn-outline-primary ms-2 rounded-pill px-3" onclick="loadInstructors(true)">Retry</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
     }
+    window.loadInstructors = loadInstructors;
 
     function renderInstructorsTable(instructors) {
         const tbody = document.getElementById('instructorsTableBody');
         if (!tbody) return;
 
-        if (instructors.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No instructors registered</td></tr>`;
+        if (!instructors || instructors.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-people fs-2 text-secondary opacity-50 d-block mb-2"></i>
+                        <div class="fw-semibold">No instructors registered</div>
+                        <p class="text-xs text-muted mb-2">Add faculty members to assign to courses and programs.</p>
+                        <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="window.openCreateInstructorModal()">
+                            <i class="bi bi-plus-lg me-1"></i> Add Instructor
+                        </button>
+                    </td>
+                </tr>
+            `;
             return;
         }
 
@@ -3807,15 +5083,24 @@ document.addEventListener('DOMContentLoaded', function () {
             <tr>
                 <td>
                     <div class="d-flex align-items-center gap-2">
-                        <img src="${escapeHtml(i.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150')}" class="rounded-circle object-fit-cover border shadow-sm" style="width: 34px; height: 34px;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
-                        <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(i.name)}</div>
+                        <img src="${escapeHtml(i.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150')}" class="rounded-circle border" style="width: 36px; height: 36px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
+                        <div>
+                            <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(i.name)}</div>
+                            <div class="text-muted" style="font-size: 11px;">${escapeHtml(i.faculty || i.department || 'IT Faculty')}</div>
+                        </div>
                     </div>
                 </td>
-                <td class="text-muted" style="font-size: 12px;">${escapeHtml(i.title || 'Faculty Member')}</td>
-                <td class="text-muted" style="font-size: 12px;">${escapeHtml(i.email || '')}</td>
-                <td><span class="badge bg-light text-secondary border px-2 py-1" style="font-size: 11px;">${escapeHtml(i.expertise || 'General Tech')}</span></td>
+                <td class="text-muted fw-semibold" style="font-size: 12px;">${escapeHtml(i.title || 'Faculty Member')}</td>
+                <td class="text-muted" style="font-size: 12px;">${escapeHtml(i.email || 'N/A')}</td>
+                <td><span class="badge bg-light text-primary border" style="font-size: 11px;">${escapeHtml(i.expertise || 'Computer Science')}</span></td>
+                <td><span class="badge bg-light text-dark border">${i.course_count || 0} Courses</span></td>
+                <td><span class="badge ${i.status === 'Active' ? 'bg-success' : 'bg-secondary'}">${i.status || 'Active'}</span></td>
                 <td>
-                    <button class="action-btn delete" title="Delete Instructor" onclick="deleteInstructor(${i.id})"><i class="bi bi-trash"></i></button>
+                    <div class="d-flex gap-1">
+                        <button class="action-btn" title="View Profile" onclick="window.viewInstructor(${i.id})"><i class="bi bi-eye"></i></button>
+                        <button class="action-btn" title="Edit Instructor" onclick="window.openEditInstructorModal(${i.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="action-btn delete" title="Delete Instructor" onclick="window.deleteInstructor(${i.id})"><i class="bi bi-trash"></i></button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -3824,34 +5109,85 @@ document.addEventListener('DOMContentLoaded', function () {
     window.openCreateInstructorModal = function () {
         const form = document.getElementById('instructorForm');
         if (form) form.reset();
-        document.getElementById('instructorId').value = '';
-        document.getElementById('instructorUserId').value = '';
-        document.getElementById('instructorModalTitle').textContent = 'Add New Instructor';
+        const idEl = document.getElementById('instructorId');
+        if (idEl) idEl.value = '';
+        const titleEl = document.getElementById('instructorModalTitle');
+        if (titleEl) titleEl.textContent = 'Add New Instructor';
 
-        // Populate faculty user accounts dropdown
-        const userSelect = document.getElementById('instructorUserSelect');
-        if (userSelect && window.AdminStore) {
-            const teachers = window.AdminStore.getUsers().filter(u => u.role === 'TEACHER');
-            userSelect.innerHTML = `<option value="">-- Create or Enter Details Manually --</option>` + teachers.map(t => `
-                <option value="${t.id}" data-name="${escapeHtml(t.full_name)}" data-email="${escapeHtml(t.email)}" data-avatar="${escapeHtml(t.avatar_url || '')}">
-                    ${escapeHtml(t.full_name)} (${escapeHtml(t.university_id || t.email)})
-                </option>
-            `).join('');
+        const facultyEl = document.getElementById('instructorFaculty');
+        if (facultyEl) facultyEl.value = 'Information Technology Faculty';
 
-            userSelect.onchange = function () {
-                const selectedOpt = userSelect.options[userSelect.selectedIndex];
-                if (selectedOpt && selectedOpt.value) {
-                    document.getElementById('instructorUserId').value = selectedOpt.value;
-                    document.getElementById('instructorName').value = selectedOpt.getAttribute('data-name') || '';
-                    document.getElementById('instructorEmail').value = selectedOpt.getAttribute('data-email') || '';
-                    document.getElementById('instructorTitle').value = 'Faculty Instructor';
-                } else {
-                    document.getElementById('instructorUserId').value = '';
-                }
-            };
+        const modalEl = document.getElementById('createInstructorModal');
+        if (modalEl) {
+            const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (m) m.show();
         }
+    };
 
-        if (instructorModal) instructorModal.show();
+    window.openEditInstructorModal = function (id) {
+        const inst = allInstructors.find(i => Number(i.id) === Number(id));
+        if (!inst) return;
+
+        const form = document.getElementById('instructorForm');
+        if (form) form.reset();
+
+        const idEl = document.getElementById('instructorId');
+        if (idEl) idEl.value = inst.id;
+        const titleEl = document.getElementById('instructorModalTitle');
+        if (titleEl) titleEl.textContent = 'Edit Instructor Profile';
+
+        const nameEl = document.getElementById('instructorName');
+        if (nameEl) nameEl.value = inst.name || '';
+        const titleInput = document.getElementById('instructorTitleInput');
+        if (titleInput) titleInput.value = inst.title || '';
+        const emailEl = document.getElementById('instructorEmail');
+        if (emailEl) emailEl.value = inst.email || '';
+        const phoneEl = document.getElementById('instructorPhone');
+        if (phoneEl) phoneEl.value = inst.phone || '';
+        const facultyEl = document.getElementById('instructorFaculty');
+        if (facultyEl) facultyEl.value = inst.faculty || inst.department || 'Information Technology Faculty';
+        const expEl = document.getElementById('instructorExpertise');
+        if (expEl) expEl.value = inst.expertise || '';
+        const avatarEl = document.getElementById('instructorAvatarUrl');
+        if (avatarEl) avatarEl.value = inst.avatar_url || '';
+        const bioEl = document.getElementById('instructorBio');
+        if (bioEl) bioEl.value = inst.bio || '';
+        const statusEl = document.getElementById('instructorStatus');
+        if (statusEl) statusEl.value = inst.status || 'Active';
+
+        const modalEl = document.getElementById('createInstructorModal');
+        if (modalEl) {
+            const m = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (m) m.show();
+        }
+    };
+
+    window.viewInstructor = function (id) {
+        const inst = allInstructors.find(i => Number(i.id) === Number(id));
+        if (!inst) return;
+
+        if (window.Swal) {
+            window.Swal.fire({
+                title: inst.name,
+                html: `
+                    <div class="text-start">
+                        <div class="text-center mb-3">
+                            <img src="${inst.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle border" style="width: 80px; height: 80px; object-fit: cover;">
+                            <div class="text-primary fw-semibold mt-1">${escapeHtml(inst.title || 'Faculty Member')}</div>
+                        </div>
+                        <div class="mb-2"><strong>Email:</strong> ${escapeHtml(inst.email || 'N/A')}</div>
+                        <div class="mb-2"><strong>Department:</strong> ${escapeHtml(inst.faculty || inst.department || 'Information Technology')}</div>
+                        <div class="mb-2"><strong>Expertise:</strong> ${escapeHtml(inst.expertise || 'N/A')}</div>
+                        <div><strong>Bio:</strong> <p class="text-muted small mb-0">${escapeHtml(inst.bio || 'Experienced academic educator at AUB Digital Academy.')}</p></div>
+                    </div>
+                `,
+                showCloseButton: true,
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#2563EB'
+            });
+        } else {
+            alert(`${inst.name}\n${inst.title || ''}\nEmail: ${inst.email || ''}\nExpertise: ${inst.expertise || ''}\nBio: ${inst.bio || ''}`);
+        }
     };
 
     const instructorForm = document.getElementById('instructorForm');
@@ -3859,20 +5195,19 @@ document.addEventListener('DOMContentLoaded', function () {
         instructorForm.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('instructorName').value.trim();
-            const email = document.getElementById('instructorEmail').value.trim();
+            const name = document.getElementById('instructorName')?.value.trim();
+            const email = document.getElementById('instructorEmail')?.value.trim();
             const id = document.getElementById('instructorId')?.value;
-            const userId = parseInt(document.getElementById('instructorUserId')?.value) || null;
 
             if (!name || name.length < 2) {
-                setFieldInvalid('instructorName', 'instNameFeedback', 'Instructor Name is required (min 2 chars).');
+                setFieldInvalid('instructorName', 'instructorNameFeedback', 'Instructor Name is required (min 2 chars).');
                 return;
             }
 
             if (email) {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    setFieldInvalid('instructorEmail', 'instEmailFeedback', 'Please enter a valid email address (e.g. name@aub.edu.kh).');
+                    setFieldInvalid('instructorEmail', 'instructorEmailFeedback', 'Please enter a valid email address.');
                     return;
                 } else {
                     setFieldValid('instructorEmail');
@@ -3880,17 +5215,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const payload = {
-                user_id: userId,
                 name: name,
-                title: document.getElementById('instructorTitle').value.trim() || 'Lecturer',
+                title: document.getElementById('instructorTitleInput')?.value.trim() || 'Lecturer',
                 email: email,
                 phone: document.getElementById('instructorPhone')?.value.trim() || '',
-                department: document.getElementById('instructorDepartment')?.value.trim() || 'Information Technology',
-                faculty: document.getElementById('instructorDepartment')?.value.trim() || 'Information Technology',
+                department: document.getElementById('instructorFaculty')?.value.trim() || 'Information Technology Faculty',
+                faculty: document.getElementById('instructorFaculty')?.value.trim() || 'Information Technology Faculty',
                 status: document.getElementById('instructorStatus')?.value || 'Active',
-                expertise: document.getElementById('instructorExpertise').value.trim() || 'Computer Science & Technology',
+                expertise: document.getElementById('instructorExpertise')?.value.trim() || 'Computer Science & Technology',
                 bio: document.getElementById('instructorBio')?.value.trim() || '',
-                avatar_url: document.getElementById('instructorPhoto')?.value.trim() || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
+                avatar_url: document.getElementById('instructorAvatarUrl')?.value.trim() || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150`
             };
 
             const saveBtn = document.getElementById('saveInstructorBtn');
@@ -3901,47 +5235,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 if (id) {
-                    if (window.AdminStore) {
-                        window.AdminStore.updateInstructor(id, payload);
-                        allInstructors = window.AdminStore.getInstructors();
-                    }
-                    if (instructorModal) instructorModal.hide();
-                    renderInstructorsTable(allInstructors);
-                    populateCourseSelects();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Updated', `${name} profile updated.`);
+                    await window.academicService.updateInstructor(id, payload);
+                    showProgramToast('success', 'Instructor Updated', `${name} profile updated.`);
                 } else {
-                    if (window.AdminStore) {
-                        window.AdminStore.createInstructor(payload);
-                        allInstructors = window.AdminStore.getInstructors();
-                    }
-                    if (instructorModal) instructorModal.hide();
-                    renderInstructorsTable(allInstructors);
-                    populateCourseSelects();
-                    if (window.AdminStore) window.AdminStore.constructor.notifySuccess('Instructor Added', `${name} is connected to academic faculty.`);
+                    await window.academicService.createInstructor(payload);
+                    showProgramToast('success', 'Instructor Added', `${name} is connected to academic faculty.`);
                 }
 
-                const url = id ? `${API_BASE}/admin/instructors/${id}` : `${API_BASE}/admin/instructors`;
-                const method = id ? 'PUT' : 'POST';
-                await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(payload) });
-            } catch (err) {
-                if (window.AdminStore) {
-                    window.AdminStore.constructor.notifyError('Failed to Save Instructor', err.message);
+                const modalEl = document.getElementById('createInstructorModal');
+                if (modalEl) {
+                    const m = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (m) m.hide();
                 }
+
+                await loadInstructors(true);
+            } catch (err) {
+                showProgramToast('danger', 'Failed to Save Instructor', err.message || 'Error occurred.');
             } finally {
                 if (saveBtn) {
                     saveBtn.disabled = false;
-                    saveBtn.innerHTML = `<i class="bi bi-check2 me-1"></i> Save Instructor`;
+                    saveBtn.innerHTML = `Save Instructor`;
                 }
             }
         });
     }
 
     window.deleteInstructor = async function (id) {
-        const ins = allInstructors.find(i => i.id === id);
+        const ins = allInstructors.find(i => Number(i.id) === Number(id));
         const name = ins ? ins.name : 'this instructor';
 
         let confirmed = false;
-        if (window.AdminStore) {
+        if (window.AdminStore && typeof window.AdminStore.constructor.confirmDialog === 'function') {
             confirmed = await window.AdminStore.constructor.confirmDialog(
                 'Delete Instructor?',
                 `Are you sure you want to delete ${name}?`,
@@ -3955,39 +5279,228 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!confirmed) return;
 
         try {
-            if (window.AdminStore) {
-                window.AdminStore.deleteInstructor(id);
-                allInstructors = window.AdminStore.getInstructors();
-            }
-
-            const res = await fetch(`${API_BASE}/admin/instructors/${id}`, { method: 'DELETE', headers: getHeaders() });
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                if (errData.message) {
-                    throw new Error(errData.message);
-                }
-            }
-
-            renderInstructorsTable(allInstructors);
-
-            if (window.AdminStore) {
-                window.AdminStore.constructor.toast(`Instructor "${name}" deleted`, 'success');
-            }
+            await window.academicService.deleteInstructor(id);
+            await loadInstructors(true);
+            showProgramToast('success', 'Instructor Deleted', `Instructor "${name}" deleted.`);
         } catch (err) {
-            if (window.AdminStore) {
-                window.AdminStore.constructor.notifyError('Action Prohibited', err.message || 'This instructor is assigned to courses. Please reassign these courses before deleting.');
-            } else {
-                alert(err.message || 'Cannot delete instructor.');
-            }
-            loadInstructors();
+            showProgramToast('danger', 'Action Prohibited', err.message || 'Cannot delete instructor assigned to active courses.');
+            loadInstructors(true);
         }
     };
+
+    // ==========================================
+    // 5. VIEW PROGRAM & COURSE MODAL LOGIC
+    // ==========================================
+    window.viewProgram = function (id) {
+        const p = allPrograms.find(prog => Number(prog.id) === Number(id));
+        if (!p) return;
+
+        const modalEl = document.getElementById('viewProgramModal');
+        if (!modalEl) return;
+
+        const titleEl = document.getElementById('viewProgramTitle');
+        const degreeEl = document.getElementById('viewProgramDegree');
+        const statusEl = document.getElementById('viewProgramStatus');
+        const bodyEl = document.getElementById('viewProgramBody');
+        const editBtn = document.getElementById('viewProgramEditBtn');
+
+        if (titleEl) titleEl.textContent = p.title;
+        if (degreeEl) degreeEl.textContent = p.degree_type || 'BACHELOR DEGREE';
+        if (statusEl) {
+            statusEl.textContent = p.status || (p.is_published ? 'Published' : 'Draft');
+            statusEl.className = `badge ${p.is_published ? 'bg-success' : 'bg-secondary'}`;
+        }
+        if (editBtn) {
+            editBtn.onclick = () => {
+                const viewModal = bootstrap.Modal.getInstance(modalEl);
+                if (viewModal) viewModal.hide();
+                openEditProgramModal(p.id);
+            };
+        }
+
+        let outcomes = [];
+        if (p.learning_outcomes) {
+            try {
+                outcomes = Array.isArray(p.learning_outcomes) ? p.learning_outcomes : JSON.parse(p.learning_outcomes);
+            } catch (e) {
+                outcomes = [p.learning_outcomes];
+            }
+        }
+
+        let instList = [];
+        if (p.instructor_ids) {
+            try {
+                const instIds = Array.isArray(p.instructor_ids) ? p.instructor_ids : JSON.parse(p.instructor_ids);
+                instList = allInstructors.filter(i => instIds.includes(i.id) || instIds.includes(String(i.id)) || instIds.includes(Number(i.id)));
+            } catch (e) {}
+        }
+
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <div class="row g-3">
+                    ${p.image_url ? `
+                    <div class="col-12 text-center mb-2">
+                        <img src="${escapeHtml(p.image_url)}" class="img-fluid rounded-3 border" style="max-height: 200px; width: 100%; object-fit: cover;">
+                    </div>` : ''}
+                    <div class="col-md-6">
+                        <div class="text-xs text-muted fw-semibold text-uppercase">Program Code</div>
+                        <div class="fw-bold">${escapeHtml(p.code || p.slug || 'N/A')}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="text-xs text-muted fw-semibold text-uppercase">Duration & Credits</div>
+                        <div class="fw-bold">${escapeHtml(p.duration || '4 Years')} &bull; ${p.credits || 120} Credits</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-xs text-muted fw-semibold text-uppercase">Short Description</div>
+                        <p class="text-secondary small mb-2">${escapeHtml(p.short_description || 'No short description provided.')}</p>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-xs text-muted fw-semibold text-uppercase">Full Curriculum Description</div>
+                        <div class="p-3 bg-white rounded border small" style="line-height: 1.6;">${escapeHtml(p.description || p.full_description || 'No detailed description available.')}</div>
+                    </div>
+                    ${outcomes && outcomes.length > 0 ? `
+                    <div class="col-12">
+                        <div class="text-xs text-muted fw-semibold text-uppercase mb-1">Key Learning Outcomes</div>
+                        <ul class="list-group list-group-flush border rounded-3 p-2 small">
+                            ${outcomes.map(o => `<li class="list-group-item px-2 py-1 border-0 d-flex gap-2"><i class="bi bi-check-circle-fill text-success"></i> <span>${escapeHtml(o)}</span></li>`).join('')}
+                        </ul>
+                    </div>` : ''}
+                    ${instList && instList.length > 0 ? `
+                    <div class="col-12">
+                        <div class="text-xs text-muted fw-semibold text-uppercase mb-1">Assigned Faculty / Instructors</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${instList.map(i => `<span class="badge bg-light text-dark border p-2 d-inline-flex align-items-center gap-1.5"><i class="bi bi-person-badge text-primary"></i> ${escapeHtml(i.name)} (${escapeHtml(i.title || 'Faculty')})</span>`).join('')}
+                        </div>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        if (modal) modal.show();
+    };
+
+    // Course Creation / Edit Standard Form Submit
+    const courseFormModal = document.getElementById('courseForm');
+    if (courseFormModal) {
+        courseFormModal.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('courseId')?.value;
+            const title = document.getElementById('courseTitle')?.value.trim();
+            const diff = document.getElementById('courseDifficulty')?.value;
+            const catId = document.getElementById('courseCategorySelect')?.value;
+            const instId = document.getElementById('courseInstructorSelect')?.value;
+            const duration = document.getElementById('courseDuration')?.value.trim() || '8 Hours';
+            const lessons = parseInt(document.getElementById('courseLessons')?.value) || 12;
+            const status = document.getElementById('courseStatus')?.value || 'Published';
+            const badge = document.getElementById('courseBadge')?.value.trim();
+            const price = parseFloat(document.getElementById('coursePrice')?.value) || 0.0;
+            const desc = document.getElementById('courseDesc')?.value.trim();
+
+            if (!title) {
+                setFieldInvalid('courseTitle', 'courseTitleFeedback', 'Course Title is required.');
+                return;
+            }
+            if (!catId) {
+                setFieldInvalid('courseCategorySelect', 'courseCategoryFeedback', 'Please select a category.');
+                return;
+            }
+            if (!instId) {
+                setFieldInvalid('courseInstructorSelect', 'courseInstructorFeedback', 'Please select an instructor.');
+                return;
+            }
+            if (!desc || desc.length < 10) {
+                setFieldInvalid('courseDesc', 'courseDescFeedback', 'Course Description is required (minimum 10 characters).');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveCourseSubmitBtn');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+            }
+
+            const payload = {
+                title,
+                category_id: Number(catId),
+                instructor_id: Number(instId),
+                difficulty: diff,
+                duration_hours: duration,
+                lesson_count: lessons,
+                status,
+                badge_text: badge || null,
+                price,
+                description: desc,
+                is_published: status === 'Draft' ? 0 : 1
+            };
+
+            try {
+                if (id) {
+                    await window.academicService.updateCourse(id, payload);
+                    showProgramToast('success', 'Course Updated', `"${title}" updated successfully.`);
+                } else {
+                    await window.academicService.createCourse(payload);
+                    showProgramToast('success', 'Course Created', `"${title}" created successfully.`);
+                }
+
+                const modalEl = document.getElementById('createCourseModal');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+                await loadCourses(true);
+            } catch (err) {
+                showProgramToast('danger', 'Error Saving Course', err.message || 'Failed to save course.');
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Save Course';
+                }
+            }
+        });
+    }
 
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // Top Search Bar Filter (Global & Tab-Aware)
+    const adminSearchInput = document.getElementById('adminSearchInput') || document.getElementById('academicSearchInput');
+    if (adminSearchInput) {
+        adminSearchInput.addEventListener('input', function () {
+            const q = this.value.toLowerCase().trim();
+            if (allPrograms.length > 0) {
+                const filteredProgs = allPrograms.filter(p => !q || (p.title && p.title.toLowerCase().includes(q)) || (p.description && p.description.toLowerCase().includes(q)) || (p.code && p.code.toLowerCase().includes(q)));
+                renderProgramsTable(filteredProgs);
+            }
+            if (allCourses.length > 0) {
+                const filteredCourses = allCourses.filter(c => !q || (c.title && c.title.toLowerCase().includes(q)) || (c.description && c.description.toLowerCase().includes(q)) || (c.instructor_name && c.instructor_name.toLowerCase().includes(q)));
+                renderCoursesTable(filteredCourses);
+            }
+            if (allCategories.length > 0) {
+                const filteredCats = allCategories.filter(c => !q || (c.name && c.name.toLowerCase().includes(q)) || (c.slug && c.slug.toLowerCase().includes(q)));
+                renderCategoriesTable(filteredCats);
+            }
+            if (allInstructors.length > 0) {
+                const filteredInsts = allInstructors.filter(i => !q || (i.name && i.name.toLowerCase().includes(q)) || (i.email && i.email.toLowerCase().includes(q)) || (i.expertise && i.expertise.toLowerCase().includes(q)));
+                renderInstructorsTable(filteredInsts);
+            }
+        });
+    }
+
+    // Tab Switching Hydration
+    const academicTabs = document.getElementById('academicTabs');
+    if (academicTabs) {
+        academicTabs.addEventListener('shown.bs.tab', (e) => {
+            const targetId = e.target.id;
+            if (targetId === 'programs-tab') loadPrograms(true);
+            else if (targetId === 'courses-tab') loadCourses(true);
+            else if (targetId === 'categories-tab') loadCategories(true);
+            else if (targetId === 'instructors-tab') loadInstructors(true);
+        });
     }
 
     // Handle Hash Navigation & Tab Deep Linking (Courses, Programs, Categories, Instructors)
@@ -4024,7 +5537,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Auto-trigger course creation modal if specified in query param or hash
             if (action === 'create-course' || action === 'create' || hash === '#create-course') {
                 setTimeout(() => {
                     if (typeof window.openCreateCourseModal === 'function') {
@@ -4044,4 +5556,11 @@ document.addEventListener('DOMContentLoaded', function () {
     loadCourses();
     handleInitialRouteAndTab();
     window.addEventListener('hashchange', handleInitialRouteAndTab);
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAcademicManagement);
+} else {
+    initAcademicManagement();
+}
+

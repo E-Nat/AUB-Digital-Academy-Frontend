@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    // Progress Range Sliders Labels Binding
+    const addRange = document.getElementById('enrollProgressRange');
+    const addRangeLabel = document.getElementById('addProgressLabel');
+    if (addRange && addRangeLabel) {
+        addRange.addEventListener('input', () => {
+            addRangeLabel.textContent = `${addRange.value}%`;
+        });
+    }
+
     const editRange = document.getElementById('editEnrollProgressRange');
     const editRangeLabel = document.getElementById('editProgressLabel');
     if (editRange && editRangeLabel) {
@@ -55,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // 1. Load Enrollments
+    // 1. Load Enrollments & KPIs
     async function loadEnrollments() {
         let loaded = false;
         try {
@@ -80,7 +89,43 @@ document.addEventListener('DOMContentLoaded', async function () {
             allEnrollments = window.AdminStore.getEnrollments();
         }
 
+        populateFilterDropdowns();
+        updateEnrollmentKPIs();
         applyFilters();
+    }
+
+    function updateEnrollmentKPIs() {
+        const total = allEnrollments.length;
+        const active = allEnrollments.filter(e => (e.status || 'Active').toLowerCase() === 'active').length;
+        const completed = allEnrollments.filter(e => (e.status || '').toLowerCase() === 'completed' || Number(e.progress_percentage) === 100).length;
+        const pending = allEnrollments.filter(e => ['pending', 'dropped', 'suspended', 'cancelled'].includes((e.status || '').toLowerCase())).length;
+
+        const totalEl = document.getElementById('kpiTotalEnrollments');
+        if (totalEl) totalEl.textContent = total;
+
+        const activeEl = document.getElementById('kpiActiveEnrollments');
+        if (activeEl) activeEl.textContent = active;
+
+        const compEl = document.getElementById('kpiCompletedEnrollments');
+        if (compEl) compEl.textContent = completed;
+
+        const pendEl = document.getElementById('kpiPendingEnrollments');
+        if (pendEl) pendEl.textContent = pending;
+
+        const countBadge = document.getElementById('enrollmentRecordCount');
+        if (countBadge) countBadge.textContent = `${total} Record${total === 1 ? '' : 's'}`;
+    }
+
+    function populateFilterDropdowns() {
+        const courseFilter = document.getElementById('enrollmentCourseFilter');
+        if (courseFilter && window.AdminStore) {
+            const courses = window.AdminStore.getCourses();
+            const currVal = courseFilter.value;
+            courseFilter.innerHTML = '<option value="all">All Courses</option>' + courses.map(c => `
+                <option value="${c.id}">${escapeHtml(c.title)}</option>
+            `).join('');
+            if (currVal) courseFilter.value = currVal;
+        }
     }
 
     function getPaymentBadgeHtml(paymentStatus) {
@@ -92,25 +137,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         } else if (pStatus === 'refunded') {
             return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1"><i class="bi bi-arrow-counterclockwise me-1"></i>Refunded</span>`;
         }
-        return `<span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1">${escapeHtml(paymentStatus || 'Unpaid')}</span>`;
+        return `<span class="badge bg-secondary bg-opacity-10 text-secondary border px-2 py-1">${escapeHtml(paymentStatus || 'Paid')}</span>`;
     }
 
     function renderEnrollments(items) {
         const tbody = document.getElementById('enrollmentsTableBody');
-        const countEl = document.getElementById('enrollmentRecordCount');
         if (!tbody) return;
-
-        if (countEl) {
-            countEl.textContent = `Showing ${items.length} of ${allEnrollments.length} enrollments`;
-        }
 
         if (items.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="8" class="text-center py-5 text-muted">
-                        <i class="bi bi-person-x fs-3 d-block mb-2 text-secondary opacity-50"></i>
-                        <span class="fw-semibold">No enrollment records match your search</span>
-                        <div style="font-size: 11.5px;" class="mt-1">Try resetting the status filter or search keyword.</div>
+                        <i class="bi bi-person-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
+                        <h6 class="fw-bold text-dark mb-1">No Enrollment Records Found</h6>
+                        <span class="small text-muted">Try resetting the status/course filter or search keyword.</span>
                     </td>
                 </tr>
             `;
@@ -119,18 +159,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         tbody.innerHTML = items.map(e => {
             const statusClass = (e.status || 'Active').toLowerCase();
-            const isDone = statusClass === 'completed' || e.progress_percentage === 100;
+            const isDone = statusClass === 'completed' || Number(e.progress_percentage) === 100;
             const course = window.AdminStore ? window.AdminStore.getCourseById(e.course_id) : null;
             const courseTimeline = (course && course.start_date && course.end_date)
                 ? `<div class="text-dark fw-semibold" style="font-size: 11.5px;"><i class="bi bi-calendar-event text-primary me-1"></i>${String(course.start_date).split('T')[0]} &rarr; ${String(course.end_date).split('T')[0]}</div>`
                 : `<div class="text-muted small" style="font-size: 11px;">Enrolled: ${formatDate(e.enrollment_date)}</div>`;
+
+            const avatarUrl = e.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150';
 
             return `
                 <tr>
                     <td class="text-muted fw-bold" style="font-size: 12px;">#ENR-${e.id}</td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <img src="${e.student_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'}" class="rounded-circle object-fit-cover border shadow-sm" style="width: 32px; height: 32px;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
+                            <img src="${escapeHtml(avatarUrl)}" class="rounded-circle object-fit-cover border shadow-sm" style="width: 34px; height: 34px;" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150'">
                             <div>
                                 <div class="fw-bold text-dark" style="font-size: 12.5px;">${escapeHtml(e.student_name || 'Student')}</div>
                                 <div class="text-muted" style="font-size: 11px;">${escapeHtml(e.student_uni_id || e.student_email || '')}</div>
@@ -147,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                     <td>
                         ${courseTimeline}
                     </td>
-                    <td style="width: 130px;">
+                    <td style="width: 140px;">
                         <div class="d-flex align-items-center gap-2">
                             <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 6px;">
                                 <div class="progress-bar ${isDone ? 'bg-success' : 'bg-primary'}" style="width: ${e.progress_percentage || 0}%; border-radius: 6px;"></div>
@@ -174,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 </li>
                                 <li>
                                     <a class="dropdown-item py-1.5" href="javascript:void(0)" onclick="openEditEnrollmentModal(${e.id})">
-                                        <i class="bi bi-pencil text-secondary me-2"></i> Update Progress
+                                        <i class="bi bi-pencil text-secondary me-2"></i> Update Record
                                     </a>
                                 </li>
                                 <li>
@@ -195,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                                 <li><hr class="dropdown-divider my-1"></li>
                                 <li>
                                     <a class="dropdown-item py-1.5 text-danger" href="javascript:void(0)" onclick="deleteEnrollment(${e.id})">
-                                        <i class="bi bi-x-circle text-danger me-2"></i> Cancel Enrollment
+                                        <i class="bi bi-x-circle text-danger me-2"></i> Remove Enrollment
                                     </a>
                                 </li>
                             </ul>
@@ -207,12 +249,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function applyFilters() {
-        const searchInput = document.getElementById('enrollmentSearchInput');
+        const topSearch = document.getElementById('enrollmentSearchInput');
+        const tbSearch = document.getElementById('enrollmentToolbarSearch');
         const statusFilter = document.getElementById('enrollmentStatusFilter');
+        const courseFilter = document.getElementById('enrollmentCourseFilter');
         const paymentFilter = document.getElementById('enrollmentPaymentFilter');
 
-        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const q = ((tbSearch && tbSearch.value) || (topSearch && topSearch.value) || '').toLowerCase().trim();
         const statusVal = statusFilter ? statusFilter.value.toLowerCase() : 'all';
+        const courseVal = courseFilter ? courseFilter.value : 'all';
         const payVal = paymentFilter ? paymentFilter.value.toLowerCase() : 'all';
 
         const filtered = allEnrollments.filter(item => {
@@ -225,27 +270,38 @@ document.addEventListener('DOMContentLoaded', async function () {
             const itemStatus = (item.status || 'Active').toLowerCase();
             const matchStatus = statusVal === 'all' || itemStatus === statusVal;
 
+            const matchCourse = courseVal === 'all' || Number(item.course_id) === Number(courseVal);
+
             const itemPay = (item.payment_status || 'Paid').toLowerCase();
             const matchPay = payVal === 'all' || itemPay === payVal;
 
-            return matchQuery && matchStatus && matchPay;
+            return matchQuery && matchStatus && matchCourse && matchPay;
         });
 
         renderEnrollments(filtered);
     }
 
-    const searchInput = document.getElementById('enrollmentSearchInput');
-    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    ['enrollmentSearchInput', 'enrollmentToolbarSearch'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', applyFilters);
+    });
 
-    const statusFilter = document.getElementById('enrollmentStatusFilter');
-    if (statusFilter) statusFilter.addEventListener('change', applyFilters);
-
-    const paymentFilter = document.getElementById('enrollmentPaymentFilter');
-    if (paymentFilter) paymentFilter.addEventListener('change', applyFilters);
+    ['enrollmentStatusFilter', 'enrollmentCourseFilter', 'enrollmentPaymentFilter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', applyFilters);
+    });
 
     window.resetEnrollmentFilters = function () {
-        if (searchInput) searchInput.value = '';
+        const topSearch = document.getElementById('enrollmentSearchInput');
+        const tbSearch = document.getElementById('enrollmentToolbarSearch');
+        const statusFilter = document.getElementById('enrollmentStatusFilter');
+        const courseFilter = document.getElementById('enrollmentCourseFilter');
+        const paymentFilter = document.getElementById('enrollmentPaymentFilter');
+
+        if (topSearch) topSearch.value = '';
+        if (tbSearch) tbSearch.value = '';
         if (statusFilter) statusFilter.value = 'all';
+        if (courseFilter) courseFilter.value = 'all';
         if (paymentFilter) paymentFilter.value = 'all';
         applyFilters();
         if (window.AdminStore) window.AdminStore.constructor.toast('Enrollment filters reset', 'info');
@@ -260,6 +316,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             window.AdminStore.updateEnrollment(id, { status: 'Active', payment_status: 'Paid' });
             window.AdminStore.constructor.notifySuccess('Admission Approved', `Student ${enr.student_name} is confirmed as Active in ${enr.course_title}.`);
         }
+        updateEnrollmentKPIs();
         applyFilters();
     };
 
@@ -324,6 +381,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 }
 
                 if (addModal) addModal.hide();
+                updateEnrollmentKPIs();
+                populateFilterDropdowns();
                 applyFilters();
 
                 if (window.AdminStore && newEnr) {
@@ -362,11 +421,21 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!enr) return;
 
         document.getElementById('editEnrollmentId').value = enr.id;
-        document.getElementById('editStudentName').textContent = enr.student_name || 'Student';
-        document.getElementById('editCourseTitle').textContent = enr.course_title || 'Academic Course';
-        document.getElementById('editEnrollStatus').value = enr.status || 'Active';
+        const studentNameEl = document.getElementById('editStudentName');
+        if (studentNameEl) studentNameEl.textContent = `${enr.student_name} (${enr.student_uni_id || 'ID'})`;
+
+        const courseSelect = document.getElementById('editCourseSelect');
+        if (courseSelect && window.AdminStore) {
+            const courses = window.AdminStore.getCourses();
+            courseSelect.innerHTML = courses.map(c => `
+                <option value="${c.id}" ${Number(c.id) === Number(enr.course_id) ? 'selected' : ''}>${escapeHtml(c.title)} (${escapeHtml(c.difficulty || 'Course')})</option>
+            `).join('');
+        }
+
+        const statusSelect = document.getElementById('editEnrollStatus');
+        if (statusSelect) statusSelect.value = enr.status || 'Active';
         
-        const prog = enr.progress_percentage || 0;
+        const prog = Number(enr.progress_percentage) || 0;
         if (editRange) editRange.value = prog;
         if (editRangeLabel) editRangeLabel.textContent = `${prog}%`;
 
@@ -379,20 +448,26 @@ document.addEventListener('DOMContentLoaded', async function () {
             e.preventDefault();
 
             const id = parseInt(document.getElementById('editEnrollmentId').value);
+            const courseId = parseInt(document.getElementById('editCourseSelect')?.value);
             const status = document.getElementById('editEnrollStatus').value;
             const progress = parseInt(document.getElementById('editEnrollProgressRange').value) || 0;
 
             const payload = {
                 status: status,
-                progress_percentage: progress
+                progress_percentage: Math.min(Math.max(progress, 0), 100)
             };
+
+            if (courseId) {
+                payload.course_id = courseId;
+            }
 
             if (window.AdminStore) {
                 window.AdminStore.updateEnrollment(id, payload);
                 allEnrollments = window.AdminStore.getEnrollments();
                 if (editModal) editModal.hide();
+                updateEnrollmentKPIs();
                 applyFilters();
-                window.AdminStore.constructor.notifySuccess('Enrollment Updated', 'Student progress and status updated successfully.');
+                window.AdminStore.constructor.notifySuccess('Enrollment Updated', 'Student course enrollment and progress updated successfully.');
             }
         });
     }
@@ -481,9 +556,12 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (window.AdminStore) {
             window.AdminStore.deleteEnrollment(id);
             allEnrollments = window.AdminStore.getEnrollments();
+            updateEnrollmentKPIs();
+            populateFilterDropdowns();
             window.AdminStore.constructor.toast('Enrollment record removed', 'success');
         } else {
             allEnrollments = allEnrollments.filter(e => e.id !== id);
+            updateEnrollmentKPIs();
         }
 
         applyFilters();
@@ -521,6 +599,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     };
 
+    function handleInitialParams() {
+        const params = new URLSearchParams(window.location.search || '');
+        const action = (params.get('action') || '').toLowerCase();
+        if (action === 'enroll-student' || action === 'create' || action === 'add') {
+            setTimeout(() => {
+                openAddEnrollmentModal();
+            }, 300);
+        }
+    }
+
     function formatDate(dateStr) {
         if (!dateStr) return 'N/A';
         try {
@@ -539,4 +627,5 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     loadEnrollments();
+    handleInitialParams();
 });

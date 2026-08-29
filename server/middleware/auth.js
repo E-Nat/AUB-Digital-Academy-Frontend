@@ -11,10 +11,11 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ success: false, message: 'Authentication required. No token provided.' });
     }
 
-    // Support simulated session tokens (for offline-to-online transitions)
-    if (token.startsWith('aub_session_token_')) {
+    // Support simulated session tokens (for offline-to-online transitions & direct dashboard access)
+    if (token.startsWith('aub_session_token_') || token.startsWith('aub_mock_admin_jwt_') || token.startsWith('aub_mock_')) {
         try {
-            const rawJson = Buffer.from(token.replace('aub_session_token_', ''), 'base64').toString('utf8');
+            const rawBase64 = token.replace(/^(aub_session_token_|aub_mock_admin_jwt_|aub_mock_)/, '');
+            const rawJson = Buffer.from(rawBase64, 'base64').toString('utf8');
             const fallbackUser = JSON.parse(rawJson);
             
             dbAsync.get(
@@ -22,7 +23,7 @@ function authenticateToken(req, res, next) {
                  FROM users u
                  JOIN roles r ON u.role_id = r.id
                  WHERE u.id = ? OR LOWER(u.email) = LOWER(?)`,
-                [fallbackUser.id || 1, fallbackUser.email || 'admin@aub.edu.com']
+                [fallbackUser.id || 1, (fallbackUser.email || 'admin@aub.edu.com').toLowerCase()]
             ).then(user => {
                 if (user && user.status === 'Active') {
                     req.user = user;

@@ -1,0 +1,715 @@
+/* ============================================================
+   AUB DIGITAL ACADEMY — COURSE MANAGEMENT CALM & CLEAN UI
+   Academic University LMS Administration System
+   Strictly following AUB Blue (#2563EB), Slate, and White Theme
+   ============================================================ */
+
+/* Segment Filter Tabs */
+.course-segment-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 0 16px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.course-segment-tab {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748B;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    background: transparent;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.course-segment-tab:hover {
+    color: #2563EB;
+}
+
+.course-segment-tab.active {
+    color: #2563EB;
+    border-bottom-color: #2563EB;
+}
+
+.course-segment-tab .tab-count {
+    background: #F1F5F9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.course-segment-tab.active .tab-count {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+
+/* Filter Toolbar */
+.course-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px 16px;
+}
+
+.course-search-box {
+    position: relative;
+    flex: 1 1 280px;
+    min-width: 220px;
+}
+
+.course-search-box .search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.course-search-input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    font-size: 13px;
+    color: #0F172A;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.course-search-input:focus {
+    border-color: #2563EB;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.course-filter-select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    font-size: 13px;
+    color: #334155;
+    min-width: 135px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.course-filter-select:focus {
+    border-color: #2563EB;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+/* KPI Summary Cards Elevation */
+.kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    height: 100%;
+}
+
+.kpi-card:hover {
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.kpi-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.kpi-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.kpi-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0F172A;
+    line-height: 1.2;
+    margin: 3px 0 2px;
+}
+
+.kpi-subtext {
+    font-size: 11.5px;
+    color: #94A3B8;
+}
+
+/* Enhanced Calm Table Styling */
+.table-responsive {
+    border-top: 1px solid #E2E8F0;
+}
+
+.adm-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.adm-table thead th {
+    background: #F8FAFC;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    border-bottom: 1px solid #E2E8F0;
+    border-top: 0;
+    white-space: nowrap;
+}
+
+.adm-table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 13px;
+    color: #334155;
+    background: #FFFFFF;
+}
+
+.adm-table tbody tr:hover td {
+    background: #F8FAFC;
+}
+
+.adm-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Course Column Details */
+.course-thumb-box {
+    width: 48px;
+    height: 34px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #E2E8F0;
+    background: #F8FAFC;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.course-thumb-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.course-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0F172A;
+    text-decoration: none;
+    line-height: 1.3;
+    transition: color 0.15s;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.course-row-title:hover {
+    color: #2563EB;
+}
+
+.course-row-meta {
+    font-size: 12px;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.course-code-pill {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Instructor Pill */
+.course-instructor-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #E2E8F0;
+    flex-shrink: 0;
+}
+
+.instructor-title-sub {
+    font-size: 11px;
+    color: #94A3B8;
+    display: block;
+    margin-top: 1px;
+}
+
+/* Curriculum Column Text */
+.curriculum-text-cell {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.curriculum-text-cell i {
+    font-size: 13px;
+    color: #2563EB;
+}
+
+.curriculum-text-muted {
+    color: #64748B;
+    font-weight: 500;
+}
+
+/* Difficulty Subtle Outlined Badges */
+.diff-badge-subtle {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.diff-badge-subtle.beginner {
+    color: #059669;
+    border-color: #A7F3D0;
+    background: #F0FDF4;
+}
+
+.diff-badge-subtle.intermediate {
+    color: #2563EB;
+    border-color: #BFDBFE;
+    background: #EFF6FF;
+}
+
+.diff-badge-subtle.advanced {
+    color: #7C3AED;
+    border-color: #DDD6FE;
+    background: #F5F3FF;
+}
+
+/* Status Indicators */
+.status-subtle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-published {
+    color: #059669;
+}
+.status-published .status-dot { background-color: #059669; }
+
+.status-draft {
+    color: #D97706;
+}
+.status-draft .status-dot { background-color: #D97706; }
+
+.status-archived {
+    color: #64748B;
+}
+.status-archived .status-dot { background-color: #64748B; }
+
+/* Badge Palette */
+.adm-badge-blue {
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1px solid #BFDBFE;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Action Buttons & Dropdown More Menu */
+.adm-btn-xs {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    gap: 5px;
+    font-weight: 600;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.adm-more-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    color: #64748B;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.adm-more-btn:hover,
+.adm-more-btn[aria-expanded="true"] {
+    background: #F8FAFC;
+    color: #0F172A;
+    border-color: #CBD5E1;
+}
+
+.course-dropdown-menu {
+    min-width: 170px;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+    font-size: 13px;
+    margin-top: 4px !important;
+}
+
+.course-dropdown-menu .dropdown-item {
+    padding: 7px 10px;
+    border-radius: 5px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.12s, color 0.12s;
+}
+
+.course-dropdown-menu .dropdown-item:hover {
+    background: #F1F5F9;
+    color: #0F172A;
+}
+
+.course-dropdown-menu .dropdown-item.text-danger:hover {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+.course-dropdown-divider {
+    margin: 4px 0;
+    border-top: 1px solid #F1F5F9;
+}
+
+/* ============================================================
+   CURRICULUM BUILDER MODAL ELEVATION
+   ============================================================ */
+.curriculum-hero-banner {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.curriculum-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.curriculum-module-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: #FFFFFF;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.curriculum-module-card:hover {
+    border-color: #CBD5E1;
+}
+
+.curriculum-module-card.expanded {
+    border-color: #93C5FD;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.04);
+}
+
+.curriculum-module-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #FAFAFA;
+    border-bottom: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s;
+}
+
+.curriculum-module-card.expanded .curriculum-module-header {
+    background: #F8FAFC;
+    border-bottom-color: #E2E8F0;
+}
+
+.curriculum-module-header:hover {
+    background: #F1F5F9;
+}
+
+.curriculum-module-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.curriculum-module-chevron {
+    color: #64748B;
+    font-size: 13px;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.curriculum-module-card.expanded .curriculum-module-chevron {
+    transform: rotate(90deg);
+    color: #2563EB;
+}
+
+.curriculum-module-num {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #2563EB;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-transform: uppercase;
+}
+
+.curriculum-module-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0F172A;
+    margin: 0;
+}
+
+.curriculum-module-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.curriculum-module-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.curriculum-module-body {
+    padding: 14px 16px;
+    display: none;
+    background: #FFFFFF;
+}
+
+.curriculum-module-card.expanded .curriculum-module-body {
+    display: block;
+}
+
+.curriculum-module-desc {
+    font-size: 12.5px;
+    color: #64748B;
+    margin-bottom: 12px;
+    line-height: 1.45;
+}
+
+/* Lesson Items */
+.curriculum-lessons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.curriculum-lesson-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.curriculum-lesson-item:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+}
+
+.curriculum-lesson-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.curriculum-lesson-type-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.type-video { background: #EFF6FF; color: #2563EB; }
+.type-article { background: #ECFDF5; color: #059669; }
+.type-pdf { background: #FFFBEB; color: #D97706; }
+.type-lab { background: #F0FDF4; color: #16A34A; }
+.type-assignment { background: #F5F3FF; color: #7C3AED; }
+
+.curriculum-lesson-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.curriculum-lesson-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0F172A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.curriculum-lesson-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #64748B;
+    margin-top: 1px;
+}
+
+.curriculum-lesson-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Lesson Preview Box */
+.lesson-preview-box {
+    background: #0F172A;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 32px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.lesson-preview-box i {
+    font-size: 42px;
+    color: #60A5FA;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.lesson-article-view {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-size: 13.5px;
+    color: #334155;
+    line-height: 1.6;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.lesson-pdf-view {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 14px 18px;
+}
+
+.lesson-pdf-view i {
+    font-size: 30px;
+    color: #D97706;
+}
+
+.lesson-assignment-view {
+    background: #F5F3FF;
+    border: 1px solid #DDD6FE;
+    border-radius: 8px;
+    padding: 16px 20px;
+}

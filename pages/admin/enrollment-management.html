@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enrollment Management — AUB Digital Academy Admin</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Admin Layout CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
 </head>
 <body class="admin-body">
@@ -20,169 +26,322 @@
 
         <!-- Main -->
         <main class="admin-main">
+            <!-- Topbar -->
+            <!-- Topbar (Global Header) -->
             <header class="admin-topbar">
-                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar">
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar" type="button">
                     <i class="bi bi-list"></i>
                 </button>
+
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="admin-search-input" id="enrollmentSearchInput" placeholder="Search enrollments…" autocomplete="off">
+                    <input type="text" class="admin-search-input" id="globalSearchInput"
+                           placeholder="Search users, courses, enrollments…" autocomplete="off" aria-label="Search users, courses, enrollments">
                     <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
+                    <div class="search-results-dropdown" id="searchResultsContainer"></div>
+                </div>
+
                 <div class="admin-topbar-actions">
-                    <button class="admin-icon-btn" aria-label="Notifications"><i class="bi bi-bell"></i></button>
-                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&size=64" alt="Admin" class="admin-topbar-avatar">
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button">
+                            <i class="bi bi-bell"></i>
+                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none">0</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px 8px;border-bottom:1px solid var(--adm-border);display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:13px;font-weight:700">Notifications</span>
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" type="button" style="font-size:11px;padding:2px 8px">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" style="padding:4px 0;max-height:280px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" role="button" tabindex="0">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Johnathan+Vance&background=2563EB&color=fff&size=64"
+                             alt="Dr. Johnathan Vance" class="admin-topbar-avatar" id="topbarAvatar">
                         <div class="admin-topbar-profile-info d-none d-md-block">
-                            <div class="profile-name">Admin</div>
-                            <div class="profile-role">System Administrator</div>
+                            <div class="profile-name" id="topbarAdminName">Dr. Johnathan Vance</div>
+                            <div class="profile-role">Administrator</div>
                         </div>
                     </div>
                 </div>
             </header>
 
+            <!-- Page Content -->
             <div class="admin-content">
-                <div class="admin-page-header">
+                
+                <!-- Page Header -->
+                <div class="admin-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     <div>
-                        <h1 class="admin-page-title">Enrollment Management</h1>
-                        <p class="admin-page-subtitle">Track course enrollments, student progress, and completion records.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="fw-bold text-dark mb-0">Student Enrollment Management</h4>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" id="enrollmentRecordCount">5 Records</span>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Track course enrollments, student academic progress, completion statuses, and tuition confirmations.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="adm-btn adm-btn-outline" onclick="exportEnrollmentsCSV()" type="button">
+                            <i class="bi bi-download"></i> Export CSV
+                        </button>
+                        <button class="adm-btn adm-btn-primary" onclick="openAddEnrollmentModal()" type="button">
+                            <i class="bi bi-plus-lg"></i> Enroll Student
+                        </button>
                     </div>
                 </div>
 
-                <div class="admin-card">
+                <!-- 4 KPI Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-lg-3">
+                        <div class="admin-card p-3 border-0 shadow-sm bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted text-xs fw-bold text-uppercase">Total Enrollments</span>
+                                <div class="p-2 rounded-2 bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-people-fill fs-6"></i>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-dark" id="kpiTotalEnrollments">5</h3>
+                            <span class="text-xs text-muted">Active database entries</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="admin-card p-3 border-0 shadow-sm bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted text-xs fw-bold text-uppercase">Active Studying</span>
+                                <div class="p-2 rounded-2 bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-play-circle-fill fs-6"></i>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-success" id="kpiActiveEnrollments">4</h3>
+                            <span class="text-xs text-muted">Currently attending classes</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="admin-card p-3 border-0 shadow-sm bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted text-xs fw-bold text-uppercase">Completed Courses</span>
+                                <div class="p-2 rounded-2 bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-check2-all fs-6"></i>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-info" id="kpiCompletedEnrollments">1</h3>
+                            <span class="text-xs text-muted">100% syllabus finished</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-3">
+                        <div class="admin-card p-3 border-0 shadow-sm bg-white">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-muted text-xs fw-bold text-uppercase">Pending / Dropped</span>
+                                <div class="p-2 rounded-2 bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-hourglass-split fs-6"></i>
+                                </div>
+                            </div>
+                            <h3 class="fw-bold mb-0 text-warning" id="kpiPendingEnrollments">0</h3>
+                            <span class="text-xs text-muted">Awaiting confirmation or on hold</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Toolbar -->
+                <div class="admin-card p-3 mb-4 border-0 shadow-sm bg-white">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" class="form-control bg-light border-start-0" id="enrollmentToolbarSearch" placeholder="Search by student name, ID, email, or course...">
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <select class="form-select form-select-sm bg-light" id="enrollmentStatusFilter">
+                                <option value="all">All Statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Dropped">Dropped</option>
+                                <option value="Suspended">Suspended</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <select class="form-select form-select-sm bg-light" id="enrollmentCourseFilter">
+                                <option value="all">All Courses</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-light btn-sm border w-100" onclick="resetEnrollmentFilters()">
+                                <i class="bi bi-x-circle me-1"></i> Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enrollments Table Card -->
+                <div class="admin-card border-0 shadow-sm bg-white overflow-hidden">
                     <div class="admin-table-responsive">
                         <table class="admin-table">
                             <thead>
                                 <tr>
                                     <th>ENROLLMENT ID</th>
                                     <th>STUDENT</th>
-                                    <th>COURSE / PROGRAM</th>
-                                    <th>DATE</th>
+                                    <th>COURSE / DEGREE PATH</th>
+                                    <th>TUITION</th>
+                                    <th>ENROLLED DATE</th>
                                     <th>PROGRESS</th>
                                     <th>STATUS</th>
-                                    <th>ACTIONS</th>
+                                    <th class="text-end pe-4">ACTIONS</th>
                                 </tr>
                             </thead>
                             <tbody id="enrollmentsTableBody">
-                                <!-- Dynamically Rendered -->
+                                <tr>
+                                    <td colspan="8" class="text-center py-5 text-muted">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading enrollments...
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
-    <div id="admToastContainer" class="adm-toast-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../js/admin-layout.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async function () {
-            const API_BASE = window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')
-                ? 'http://localhost:5000/api'
-                : '/api';
 
-            function getAuthToken() {
-                return localStorage.getItem('aub_auth_token') || 
-                       localStorage.getItem('token') || 
-                       sessionStorage.getItem('aub_auth_token') || 
-                       sessionStorage.getItem('token') || '';
-            }
-
-            function getHeaders() {
-                const token = getAuthToken();
-                const headers = { 'Content-Type': 'application/json' };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                return headers;
-            }
-
-            let allEnrollments = [];
-
-            async function loadEnrollments() {
-                try {
-                    const res = await fetch(`${API_BASE}/admin/enrollments`, { headers: getHeaders() });
-                    const data = await res.json();
-                    if (data.success && data.data) {
-                        allEnrollments = data.data;
-                        renderEnrollments(allEnrollments);
-                    }
-                } catch (e) {
-                    console.error('Error loading enrollments:', e);
-                }
-            }
-
-            function renderEnrollments(items) {
-                const tbody = document.getElementById('enrollmentsTableBody');
-                if (!tbody) return;
-
-                tbody.innerHTML = items.map(e => `
-                    <tr>
-                        <td class="text-muted fw-bold">#ENR-${e.id}</td>
-                        <td>
-                            <div class="fw-bold text-dark">${escapeHtml(e.student_name || 'Student')}</div>
-                            <div class="text-xs text-muted">${escapeHtml(e.student_id || e.student_email || '')}</div>
-                        </td>
-                        <td><span class="fw-semibold text-primary">${escapeHtml(e.course_title || e.program_title || 'Academic Course')}</span></td>
-                        <td class="text-muted text-xs">${formatDate(e.enrollment_date)}</td>
-                        <td style="width: 140px;">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 6px; background: #F1F5F9; border-radius: 6px;">
-                                    <div class="progress-bar bg-success" style="width: ${e.progress_percentage || 0}%; border-radius: 6px;"></div>
-                                </div>
-                                <span class="text-xs fw-bold text-muted">${e.progress_percentage || 0}%</span>
+    <!-- MODAL 1: Add New Enrollment -->
+    <div class="modal fade" id="addEnrollmentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-plus-fill text-primary me-2"></i>Enroll Student in Course</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addEnrollmentForm" novalidate>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="enrollStudentSelect">Select Student <span class="text-danger">*</span></label>
+                            <select class="form-select" id="enrollStudentSelect" required>
+                                <option value="" disabled selected>Choose a student...</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a student.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="enrollCourseSelect">Select Course <span class="text-danger">*</span></label>
+                            <select class="form-select" id="enrollCourseSelect" required>
+                                <option value="" disabled selected>Choose a course...</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a course.</div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold" for="enrollStatus">Enrollment Status</label>
+                                <select class="form-select" id="enrollStatus">
+                                    <option value="Active" selected>Active</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Dropped">Dropped</option>
+                                    <option value="Suspended">Suspended</option>
+                                </select>
                             </div>
-                        </td>
-                        <td><span class="admin-status-badge ${(e.status || 'active').toLowerCase()}">${escapeHtml(e.status || 'Active')}</span></td>
-                        <td>
-                            <button class="action-btn delete" title="Delete Enrollment" onclick="deleteEnrollment(${e.id})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+                            <div class="col-6">
+                                <label class="form-label fw-semibold" for="enrollDate">Enrollment Date</label>
+                                <input type="date" class="form-control" id="enrollDate" required>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">Initial Progress</label>
+                                <span class="badge bg-primary px-2 py-1" id="addProgressLabel">0%</span>
+                            </div>
+                            <input type="range" class="form-range" id="enrollProgressRange" min="0" max="100" step="5" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveEnrollBtn">
+                            <i class="bi bi-check2"></i> Enroll Student
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-            const searchInput = document.getElementById('enrollmentSearchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', function (e) {
-                    const q = e.target.value.toLowerCase();
-                    const filtered = allEnrollments.filter(item => 
-                        (item.student_name && item.student_name.toLowerCase().includes(q)) ||
-                        (item.course_title && item.course_title.toLowerCase().includes(q)) ||
-                        (item.student_id && item.student_id.toLowerCase().includes(q))
-                    );
-                    renderEnrollments(filtered);
-                });
-            }
+    <!-- MODAL 2: Edit Enrollment Modal -->
+    <div class="modal fade" id="editEnrollmentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-primary me-2"></i>Update Enrollment Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editEnrollmentForm" novalidate>
+                    <input type="hidden" id="editEnrollmentId">
+                    <div class="modal-body p-4">
+                        <div class="p-3 bg-light rounded-3 mb-3 border">
+                            <div class="text-muted text-xs text-uppercase fw-bold">Student Name</div>
+                            <div class="fw-bold text-dark fs-6 mt-0.5" id="editStudentName">Dara Sok</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="editCourseSelect">Enrolled Course <span class="text-danger">*</span></label>
+                            <select class="form-select" id="editCourseSelect" required>
+                                <!-- Dynamic -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="editEnrollStatus">Enrollment Status</label>
+                            <select class="form-select" id="editEnrollStatus">
+                                <option value="Active">Active</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Dropped">Dropped</option>
+                                <option value="Suspended">Suspended</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0">Course Progress (%)</label>
+                                <span class="badge bg-primary px-2 py-1" id="editProgressLabel">0%</span>
+                            </div>
+                            <input type="range" class="form-range" id="editEnrollProgressRange" min="0" max="100" step="1" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="updateEnrollBtn">
+                            <i class="bi bi-check2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-            window.deleteEnrollment = async function (id) {
-                const token = getAuthToken();
-                if (!token) return;
-                if (!confirm('Are you sure you want to remove this enrollment record?')) return;
-                try {
-                    const res = await fetch(`${API_BASE}/admin/enrollments/${id}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    const data = await res.json();
-                    if (data.success) loadEnrollments();
-                } catch (err) {
-                    console.error(err);
-                }
-            };
+    <!-- MODAL 3: View Enrollment Details -->
+    <div class="modal fade" id="viewEnrollmentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-badge text-primary me-2"></i>Enrollment Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" id="viewEnrollmentBody">
+                    <!-- Dynamic -->
+                </div>
+                <div class="modal-footer bg-light d-flex justify-content-between">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="adm-btn adm-btn-primary" id="editFromEnrollViewBtn">
+                        <i class="bi bi-pencil"></i> Edit Enrollment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            function formatDate(dateStr) {
-                if (!dateStr) return '2026-05-24';
-                return dateStr.split(' ')[0] || dateStr.split('T')[0];
-            }
+    <div id="admToastContainer" class="adm-toast-container"></div>
 
-            function escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            loadEnrollments();
-        });
-    </script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../js/data/mock-store.js"></script>
+    <script src="../../js/admin-layout.js"></script>
+    <script src="../../js/pages/enrollment-management.js"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@
     
     <!-- Custom Admin CSS -->
     <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <link href="../../css/pages/academic-management.css" rel="stylesheet">
     <style>
         .nav-tabs .nav-link {
             font-weight: 600;
@@ -61,23 +62,41 @@
 
         <!-- Main -->
         <main class="admin-main">
-            <!-- TOPBAR -->
+            <!-- Topbar (Global Header) -->
             <header class="admin-topbar">
-                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar">
+                <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar" type="button">
                     <i class="bi bi-list"></i>
                 </button>
+
                 <div class="admin-search-wrapper">
                     <i class="bi bi-search search-icon"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search academic records…" autocomplete="off">
+                    <input type="text" class="admin-search-input" id="globalSearchInput"
+                           placeholder="Search users, courses, enrollments…" autocomplete="off" aria-label="Search users, courses, enrollments">
                     <span class="admin-search-kbd d-none d-md-flex">Ctrl K</span>
+                    <div class="search-results-dropdown" id="searchResultsContainer"></div>
                 </div>
+
                 <div class="admin-topbar-actions">
-                    <button class="admin-icon-btn" aria-label="Notifications"><i class="bi bi-bell"></i></button>
-                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=2563EB&color=fff&size=64" alt="Admin" class="admin-topbar-avatar">
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button">
+                            <i class="bi bi-bell"></i>
+                            <span class="admin-notification-badge has-count" id="notificationBadge" style="display:none">0</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px 8px;border-bottom:1px solid var(--adm-border);display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:13px;font-weight:700">Notifications</span>
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm" id="markAllReadBtn" type="button" style="font-size:11px;padding:2px 8px">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" style="padding:4px 0;max-height:280px;overflow-y:auto;"></div>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-profile" onclick="window.location.href='settings.html'" role="button" tabindex="0">
+                        <img src="https://ui-avatars.com/api/?name=Dr+Johnathan+Vance&background=2563EB&color=fff&size=64"
+                             alt="Dr. Johnathan Vance" class="admin-topbar-avatar" id="topbarAvatar">
                         <div class="admin-topbar-profile-info d-none d-md-block">
-                            <div class="profile-name">Admin</div>
-                            <div class="profile-role">System Administrator</div>
+                            <div class="profile-name" id="topbarAdminName">Dr. Johnathan Vance</div>
+                            <div class="profile-role">Administrator</div>
                         </div>
                     </div>
                 </div>
@@ -121,8 +140,8 @@
                                     <h3 class="admin-card-title">Featured Academic Programs</h3>
                                     <p class="text-xs text-muted mb-0">These items populate the Featured Programs carousel on the public website.</p>
                                 </div>
-                                <button class="btn btn-primary rounded-pill px-4 fw-semibold btn-sm" data-bs-toggle="modal" data-bs-target="#createProgramModal">
-                                    <i class="bi bi-plus-lg me-1"></i> Add New Program
+                                <button class="adm-btn adm-btn-primary" id="openAddProgramBtn" onclick="window.openCreateProgramModal ? window.openCreateProgramModal() : null" type="button" aria-label="Add New Academic Program">
+                                    <i class="bi bi-plus-lg"></i> Add New Program
                                 </button>
                             </div>
 
@@ -155,8 +174,8 @@
                                     <h3 class="admin-card-title">Specialized Courses</h3>
                                     <p class="text-xs text-muted mb-0">Populate the Popular Courses section on the public website.</p>
                                 </div>
-                                <button class="btn btn-primary rounded-pill px-4 fw-semibold btn-sm" data-bs-toggle="modal" data-bs-target="#createCourseModal">
-                                    <i class="bi bi-plus-lg me-1"></i> Add New Course
+                                <button class="adm-btn adm-btn-primary" id="openAddCourseBtn" onclick="window.openCreateCourseModal ? window.openCreateCourseModal() : null" type="button">
+                                    <i class="bi bi-plus-lg"></i> Add New Course
                                 </button>
                             </div>
 
@@ -185,11 +204,15 @@
                     <div class="tab-pane fade" id="categories-pane" role="tabpanel">
                         <div class="admin-card">
                             <div class="admin-card-header">
-                                <h3 class="admin-card-title">Categories & Tags</h3>
-                                <button class="btn btn-primary rounded-pill px-4 fw-semibold btn-sm" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-                                    <i class="bi bi-plus-lg me-1"></i> Add Category
+                                <div>
+                                    <h3 class="admin-card-title">Categories & Tags</h3>
+                                    <p class="text-xs text-muted mb-0">Academic disciplines and program classifications.</p>
+                                </div>
+                                <button class="adm-btn adm-btn-primary" id="openAddCategoryBtn" onclick="window.openCreateCategoryModal ? window.openCreateCategoryModal() : null" type="button">
+                                    <i class="bi bi-plus-lg"></i> Add Category
                                 </button>
                             </div>
+
                             <div class="admin-table-responsive">
                                 <table class="admin-table">
                                     <thead>
@@ -198,7 +221,8 @@
                                             <th>NAME</th>
                                             <th>SLUG</th>
                                             <th>ICON</th>
-                                            <th>ORDER</th>
+                                            <th>COURSES/PROGRAMS</th>
+                                            <th>STATUS</th>
                                             <th>ACTIONS</th>
                                         </tr>
                                     </thead>
@@ -214,9 +238,12 @@
                     <div class="tab-pane fade" id="instructors-pane" role="tabpanel">
                         <div class="admin-card">
                             <div class="admin-card-header">
-                                <h3 class="admin-card-title">Academic Instructors & Faculty</h3>
-                                <button class="btn btn-primary rounded-pill px-4 fw-semibold btn-sm" data-bs-toggle="modal" data-bs-target="#createInstructorModal">
-                                    <i class="bi bi-plus-lg me-1"></i> Add Instructor
+                                <div>
+                                    <h3 class="admin-card-title">Academic Instructors & Faculty</h3>
+                                    <p class="text-xs text-muted mb-0">Faculty members, professors, and course instructors.</p>
+                                </div>
+                                <button class="adm-btn adm-btn-primary" id="openAddInstructorBtn" onclick="window.openCreateInstructorModal ? window.openCreateInstructorModal() : null" type="button">
+                                    <i class="bi bi-plus-lg"></i> Add Instructor
                                 </button>
                             </div>
                             <div class="admin-table-responsive">
@@ -227,6 +254,8 @@
                                             <th>TITLE</th>
                                             <th>EMAIL</th>
                                             <th>EXPERTISE</th>
+                                            <th>COURSES</th>
+                                            <th>STATUS</th>
                                             <th>ACTIONS</th>
                                         </tr>
                                     </thead>
@@ -239,145 +268,916 @@
                     </div>
 
                 </div>
+            <!-- Modals start here, inside admin-content -->
 
-            </div>
-        </main>
-    </div>
-
-    <!-- MODAL: Create/Edit Program -->
-    <div class="modal fade" id="createProgramModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-0 px-4 pt-4">
-                    <h5 class="modal-title fw-bold" id="programModalTitle">Add New Featured Program</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- MODAL: Create/Edit Academic Program -->
+    <div class="modal fade" id="createProgramModal" tabindex="-1" aria-labelledby="programModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered program-modal-dialog">
+            <div class="modal-content program-modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header px-4 py-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-shrink-0">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="programModalTitle">Add New Program</h5>
+                        <p class="text-muted text-xs mb-0 mt-0.5" id="programModalSubtitle">Add a new academic program to AUB Digital Academy.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close program dialog"></button>
                 </div>
-                <form id="programForm">
+
+                <!-- Modal Form -->
+                <form id="programForm" novalidate>
                     <input type="hidden" id="programId">
-                    <div class="modal-body px-4">
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label text-sm fw-semibold">Program Title</label>
-                                <input type="text" class="form-control" id="programTitle" required placeholder="e.g. Computer Science & Engineering">
+
+                    <!-- Modal Body (Scrollable inside modal) -->
+                    <div class="modal-body program-modal-body">
+                        <!-- 1. BASIC INFORMATION -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-info-circle text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Basic Information</h6>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Degree Type</label>
-                                <input type="text" class="form-control" id="programDegree" value="BACHELOR DEGREE" required>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programTitle">
+                                        Program Title <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="programTitle" placeholder="Enter program title" required autocomplete="off">
+                                    <div class="invalid-feedback text-xs" id="programTitleFeedback">Program title is required.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programCode">
+                                        Program Code
+                                    </label>
+                                    <input type="text" class="form-control text-uppercase" id="programCode" placeholder="e.g. CSSE" maxlength="20" autocomplete="off">
+                                    <div class="invalid-feedback text-xs" id="programCodeFeedback">An academic program with this code already exists.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programShortDesc">
+                                        Short Description
+                                    </label>
+                                    <textarea class="form-control" id="programShortDesc" rows="2" placeholder="Brief description of this program..."></textarea>
+                                    <div class="form-text text-xs text-muted">A concise summary used in program cards and listings.</div>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Duration</label>
-                                <input type="text" class="form-control" id="programDuration" value="4 Years" required>
+                        </div>
+
+                        <!-- 2. PROGRAM DETAILS -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-mortarboard text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Program Details</h6>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Icon Class (Bootstrap Icons)</label>
-                                <input type="text" class="form-control" id="programIcon" value="bi-laptop" required placeholder="bi-laptop">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programDegree">
+                                        Degree Type <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="programDegree" required>
+                                        <option value="" disabled selected>Select degree type...</option>
+                                        <option value="Bachelor Degree">Bachelor Degree</option>
+                                        <option value="Master Degree">Master Degree</option>
+                                        <option value="Doctorate">Doctorate</option>
+                                        <option value="Certificate">Certificate</option>
+                                        <option value="Diploma">Diploma</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="programDegreeFeedback">Please select a degree type.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programCategorySelect">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="programCategorySelect" required>
+                                        <option value="" disabled selected>Loading categories...</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="programCategoryFeedback">Please select a category.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programDuration">
+                                        Duration
+                                    </label>
+                                    <input type="text" class="form-control" id="programDuration" placeholder="e.g. 4 Years" value="4 Years">
+                                    <div class="invalid-feedback text-xs" id="programDurationFeedback">Please enter a valid duration.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programCredits">
+                                        Credits
+                                    </label>
+                                    <input type="number" class="form-control" id="programCredits" placeholder="e.g. 120" value="120" min="1" max="500">
+                                    <div class="invalid-feedback text-xs" id="programCreditsFeedback">Credits must be a positive number.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programOrderNum">
+                                        Display Order
+                                    </label>
+                                    <input type="number" class="form-control" id="programOrderNum" placeholder="e.g. 1" value="1" min="0" max="999">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programThemeSelect">
+                                        Theme / Color
+                                    </label>
+                                    <select class="form-select" id="programThemeSelect">
+                                        <option value="theme-blue" selected>Blue (Primary)</option>
+                                        <option value="theme-cyan">Cyan (Teal / Modern)</option>
+                                        <option value="theme-purple">Purple (Deep / AI)</option>
+                                        <option value="theme-green">Green (Health / Nature)</option>
+                                        <option value="theme-gold">Gold / Amber (Leadership)</option>
+                                        <option value="theme-orange">Orange (Creative / Energetic)</option>
+                                        <option value="theme-rose">Rose (Arts / Humanities)</option>
+                                        <option value="theme-indigo">Indigo (Research / Tech)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programIconSelect">
+                                        Program Icon
+                                    </label>
+                                    <select class="form-select" id="programIconSelect">
+                                        <option value="bi-laptop" selected>Laptop (Tech & Software)</option>
+                                        <option value="bi-cpu">CPU / Chip (AI & Hardware)</option>
+                                        <option value="bi-shield-check">Shield (Cybersecurity)</option>
+                                        <option value="bi-graph-up">Graph / Growth (Data & Finance)</option>
+                                        <option value="bi-briefcase">Briefcase (Business & Management)</option>
+                                        <option value="bi-code-slash">Code (Programming & Dev)</option>
+                                        <option value="bi-mortarboard">Mortarboard (Academic Degree)</option>
+                                        <option value="bi-book">Book (Curriculum & Arts)</option>
+                                    </select>
+                                </div>
+                                <!-- 3. Custom Program Logo (Optional) -->
+                                <div class="col-12 mt-2">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-0">
+                                                Custom Program Logo (Optional)
+                                            </label>
+                                            <span class="text-muted text-xs">Upload custom logo or use predefined icon</span>
+                                        </div>
+                                        <div class="row g-3 align-items-center">
+                                            <div class="col-md-6">
+                                                <div class="file-upload-dropzone p-3 text-center border border-2 border-dashed rounded-3 bg-white position-relative" id="programLogoDropzone">
+                                                    <input type="file" id="programLogoFile" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/webp" aria-label="Upload custom program logo">
+                                                    <div id="programLogoUploadPrompt">
+                                                        <i class="bi bi-image text-primary fs-4 mb-1 d-block"></i>
+                                                        <div class="fw-semibold text-dark text-xs mb-0.5">Upload Custom Logo</div>
+                                                        <div class="text-secondary text-xs opacity-75" style="font-size: 11px;">Square JPG, PNG, WebP up to 2MB</div>
+                                                    </div>
+                                                </div>
+                                                <div class="upload-preview-container p-2 bg-white border rounded-3 d-none align-items-center justify-content-between" id="programLogoPreviewBox">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="" alt="Logo Preview" id="programLogoPreviewImg" class="rounded border p-1 object-fit-contain bg-light" style="width: 42px; height: 42px;">
+                                                        <div>
+                                                            <div class="fw-bold text-dark text-xs text-truncate" style="max-width: 140px;" id="programLogoFileName">custom-logo.png</div>
+                                                            <div class="text-muted" style="font-size: 10px;" id="programLogoFileSize">Logo loaded</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-2 rounded-pill text-xs" id="replaceProgramLogoBtn" aria-label="Replace custom logo">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm py-0.5 px-2 rounded-pill text-xs" id="removeProgramLogoBtn" aria-label="Remove custom logo">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="programLogoUrl">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="p-2.5 bg-white rounded border d-flex align-items-center gap-2.5">
+                                                    <div class="rounded-circle p-2 bg-light border d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; flex-shrink: 0;" id="programVisualPreviewBadge">
+                                                        <i class="bi bi-laptop text-primary fs-5" id="programVisualPreviewIcon"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-semibold text-dark text-xs" id="programVisualPreviewTitle">Predefined Icon Active</div>
+                                                        <div class="text-muted" style="font-size: 11px;" id="programVisualPreviewDesc">If no custom logo is uploaded, the selected icon is used.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Theme Color</label>
-                                <select class="form-select" id="programTheme">
-                                    <option value="theme-blue">Blue (#2563eb)</option>
-                                    <option value="theme-cyan">Cyan (#0891b2)</option>
-                                    <option value="theme-green">Green (#16a34a)</option>
-                                    <option value="theme-purple">Purple (#9333ea)</option>
-                                    <option value="theme-gold">Gold (#d97706)</option>
-                                    <option value="theme-orange">Orange (#ea580c)</option>
-                                </select>
+                        </div>
+
+                        <!-- 3. PROGRAM DESCRIPTION -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-file-text text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Program Description</h6>
                             </div>
                             <div class="col-12">
-                                <label class="form-label text-sm fw-semibold">Description</label>
-                                <textarea class="form-control" id="programDesc" rows="3" required placeholder="Description of the academic program..."></textarea>
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programFullDesc">
+                                    Full Description
+                                </label>
+                                <textarea class="form-control" id="programFullDesc" rows="4" placeholder="Comprehensive description of curriculum, objectives, career paths, and academic overview..."></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label text-sm fw-semibold">Detail URL</label>
-                                <input type="text" class="form-control" id="programUrl" placeholder="pages/programs/cs.html">
+                        </div>
+
+                        <!-- 4. PROGRAM IMAGE -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-image text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Program Image</h6>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label text-sm fw-semibold">Sort Order</label>
-                                <input type="number" class="form-control" id="programOrder" value="1">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-0">
+                                        Program Cover Image
+                                    </label>
+                                    <span class="text-muted text-xs">Recommended: 1200 × 630 px. JPG, PNG or WebP.</span>
+                                </div>
+                                <!-- Upload Area -->
+                                <div class="file-upload-dropzone p-4 text-center border border-2 border-dashed rounded-3 bg-light position-relative" id="programImageDropzone">
+                                    <input type="file" id="programImageFile" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/webp" aria-label="Upload program cover image">
+                                    <div id="programImageUploadPrompt">
+                                        <i class="bi bi-cloud-arrow-up text-primary fs-1 mb-2 d-block"></i>
+                                        <div class="fw-bold text-dark fs-6 mb-1">Upload Program Cover Image</div>
+                                        <div class="text-muted text-xs mb-1">Drag & drop or browse from computer</div>
+                                        <div class="text-secondary text-xs opacity-75">JPG, PNG, WebP up to 5MB</div>
+                                    </div>
+                                </div>
+                                <!-- Preview Area -->
+                                <div class="upload-preview-container p-3 bg-white border rounded-3 mt-2 d-none align-items-center justify-content-between" id="programImagePreviewBox">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img src="" alt="Program Preview" id="programImagePreviewImg" class="rounded border object-fit-cover" style="width: 85px; height: 60px;">
+                                        <div>
+                                            <div class="fw-bold text-dark text-sm" id="programImageFileName">program-cover.jpg</div>
+                                            <div class="text-muted text-xs" id="programImageFileSize">Image loaded</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm px-3 rounded-pill" id="replaceProgramImageBtn" aria-label="Replace program cover image">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Replace
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill" id="removeProgramImageBtn" aria-label="Remove program cover image">
+                                            <i class="bi bi-trash me-1"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="programImageUrl">
                             </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <div class="form-check form-switch mb-2">
-                                    <input class="form-check-input" type="checkbox" id="programPublished" checked>
-                                    <label class="form-check-label text-sm fw-semibold">Published</label>
+                        </div>
+
+                        <!-- 5. LEARNING OUTCOMES -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check2-circle text-primary fs-6"></i>
+                                    <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Learning Outcomes</h6>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" id="addLearningOutcomeBtn" aria-label="Add new learning outcome">
+                                    <i class="bi bi-plus-lg me-1"></i> Add Learning Outcome
+                                </button>
+                            </div>
+                            <div class="d-flex flex-column gap-2" id="learningOutcomesList">
+                                <!-- Dynamic Outcome inputs rendered here -->
+                            </div>
+                        </div>
+
+                        <!-- 6. INSTRUCTORS (Searchable Multi-Select) -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-people text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Instructors</h6>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1">
+                                    Assign Faculty & Instructors
+                                </label>
+                                <!-- Custom Searchable Dropdown -->
+                                <div class="position-relative" id="instructorSelectContainer">
+                                    <button type="button" class="form-select text-start d-flex align-items-center justify-content-between text-secondary bg-white cursor-pointer" id="instructorDropdownToggleBtn" aria-expanded="false">
+                                        <span id="instructorDropdownPlaceholder" class="text-truncate">Select instructors...</span>
+                                        <i class="bi bi-chevron-down text-muted fs-xs ms-2"></i>
+                                    </button>
+                                    <div class="dropdown-menu shadow-sm border p-2 w-100 mt-1" id="instructorDropdownMenu" style="max-height: 280px; z-index: 1060; border-radius: 8px; display: none;">
+                                        <div class="px-1 pb-2 border-bottom mb-2">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                                                <input type="text" class="form-control bg-light border-start-0 ps-1 text-xs" id="instructorSearchInput" placeholder="Search by name, email, or ID..." autocomplete="off">
+                                            </div>
+                                        </div>
+                                        <div id="instructorDropdownList" class="d-flex flex-column gap-1" style="max-height: 190px; overflow-y: auto;">
+                                            <!-- Dynamically Rendered Instructor Options with Checkboxes -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Selected Chips -->
+                                <div class="d-flex flex-wrap align-items-center gap-2 p-2 min-h-40 bg-light rounded-3 border mt-2" id="selectedInstructorsChips">
+                                    <span class="text-muted text-xs py-1 px-2" id="noInstructorsPlaceholder">No instructors selected yet.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 7. VISIBILITY -->
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-eye text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Visibility</h6>
+                            </div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="programStatus">
+                                        Status <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="programStatus" required aria-label="Program publish status">
+                                        <option value="Published" selected>Published</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Archived">Archived</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="programStatusFeedback">Please select a status.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1 d-block">
+                                        Featured Program
+                                    </label>
+                                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3 border">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" id="programFeaturedToggle" checked role="switch" aria-label="Toggle featured program status">
+                                            <label class="form-check-label text-xs fw-bold text-primary" for="programFeaturedToggle" id="featuredToggleLabel">ON</label>
+                                        </div>
+                                        <span class="text-muted text-xs">Featured programs may appear in the public website's featured programs section.</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Save Program</button>
+
+                    <!-- Modal Footer (Fixed at bottom) -->
+                    <div class="modal-footer px-4 py-3 border-top bg-white d-flex justify-content-end gap-2 flex-shrink-0">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal" id="cancelProgramBtn" aria-label="Cancel program creation">Cancel</button>
+                        <button type="button" class="adm-btn adm-btn-outline" id="saveDraftProgramBtn" aria-label="Save program as draft">Save as Draft</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="submitProgramBtn" aria-label="Publish academic program">
+                            <span class="spinner-border spinner-border-sm d-none" id="submitProgramSpinner" role="status" aria-hidden="true"></span>
+                            <span id="submitProgramBtnText">Publish Program</span>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: Create Course -->
-    <div class="modal fade" id="createCourseModal" tabindex="-1">
+    <!-- MODAL: Create / Edit Course -->
+    <div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="courseModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered program-modal-dialog">
+            <div class="modal-content program-modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header px-4 py-3 border-bottom bg-white d-flex align-items-center justify-content-between flex-shrink-0">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="courseModalTitle">Add New Course</h5>
+                        <p class="text-muted text-xs mb-0 mt-0.5" id="courseModalSubtitle">Add a new specialized course to AUB Digital Academy.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close course dialog"></button>
+                </div>
+
+                <!-- Modal Form -->
+                <form id="courseForm" novalidate>
+                    <input type="hidden" id="courseId" value="">
+
+                    <!-- Modal Body (Scrollable) -->
+                    <div class="modal-body program-modal-body">
+                        <!-- 1. BASIC INFORMATION -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-info-circle text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Basic Information</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseTitle">
+                                        Course Title <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="courseTitle" placeholder="e.g. Full-Stack Web Development" required autocomplete="off">
+                                    <div class="invalid-feedback text-xs" id="courseTitleFeedback">Course title is required (minimum 3 characters).</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseCode">
+                                        Course Code <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control text-uppercase" id="courseCode" placeholder="e.g. CS-WD101" maxlength="20" autocomplete="off" required>
+                                    <div class="invalid-feedback text-xs" id="courseCodeFeedback">Course code is required and must be unique.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseShortDesc">
+                                        Short Description
+                                    </label>
+                                    <textarea class="form-control" id="courseShortDesc" rows="2" placeholder="Brief summary of this course..."></textarea>
+                                    <div class="form-text text-xs text-muted">A concise summary used in course cards and listings.</div>
+                                </div>
+                                <!-- Course Image Upload -->
+                                <div class="col-12">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-0">
+                                                Course Cover Image
+                                            </label>
+                                            <span class="text-muted text-xs">JPG, PNG, WebP up to 5MB</span>
+                                        </div>
+                                        <div class="row g-3 align-items-center">
+                                            <div class="col-md-6">
+                                                <div class="file-upload-dropzone p-3 text-center border border-2 border-dashed rounded-3 bg-white position-relative" id="courseImageDropzone">
+                                                    <input type="file" id="courseImageFile" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/webp" aria-label="Upload course cover image">
+                                                    <div id="courseImageUploadPrompt">
+                                                        <i class="bi bi-cloud-arrow-up text-primary fs-4 mb-1 d-block"></i>
+                                                        <div class="fw-semibold text-dark text-xs mb-0.5">Upload Cover Image</div>
+                                                        <div class="text-secondary text-xs opacity-75" style="font-size: 11px;">Browse or drag &amp; drop</div>
+                                                    </div>
+                                                </div>
+                                                <div class="upload-preview-container p-2 bg-white border rounded-3 d-none align-items-center justify-content-between mt-2" id="courseImagePreviewBox">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <img src="" alt="Course Cover Preview" id="courseImagePreviewImg" class="rounded border object-fit-cover bg-light" style="width: 50px; height: 38px;">
+                                                        <div>
+                                                            <div class="fw-bold text-dark text-xs text-truncate" style="max-width: 140px;" id="courseImageFileName">cover.jpg</div>
+                                                            <div class="text-muted" style="font-size: 10px;" id="courseImageFileSize">Image loaded</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex gap-1">
+                                                        <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-2 rounded-pill text-xs" id="replaceCourseImageBtn" aria-label="Replace course image">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm py-0.5 px-2 rounded-pill text-xs" id="removeCourseImageBtn" aria-label="Remove course image">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="courseImageUrl" value="assets/images/course_webdev.jpg">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="p-2.5 bg-white rounded border d-flex align-items-center gap-2.5">
+                                                    <img src="../../assets/images/course_webdev.jpg" id="courseDefaultPreviewThumb" class="rounded border object-fit-cover" style="width: 54px; height: 40px;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
+                                                    <div>
+                                                        <div class="fw-semibold text-dark text-xs" id="courseDefaultThumbLabel">Default Course Cover</div>
+                                                        <div class="text-muted" style="font-size: 11px;">Standard high-resolution academy banner if no custom image is selected.</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. COURSE DETAILS -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-journal-text text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Course Details</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseCategorySelect">
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="courseCategorySelect" required>
+                                        <option value="" disabled selected>Select category...</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="courseCategoryFeedback">Please select a category.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseInstructorSelect">
+                                        Instructor <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="courseInstructorSelect" required>
+                                        <option value="" disabled selected>Select instructor...</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="courseInstructorFeedback">Please select an instructor.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseDifficulty">
+                                        Difficulty <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="courseDifficulty" required>
+                                        <option value="Beginner" selected>Beginner</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Advanced">Advanced</option>
+                                    </select>
+                                    <div class="invalid-feedback text-xs" id="courseDifficultyFeedback">Please select difficulty level.</div>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseDuration">
+                                        Duration
+                                    </label>
+                                    <input type="text" class="form-control" id="courseDuration" placeholder="e.g. 8 Weeks" value="8 Weeks">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseRating">
+                                        Rating (1.0-5.0)
+                                    </label>
+                                    <input type="number" class="form-control" id="courseRating" placeholder="4.9" value="4.9" min="1.0" max="5.0" step="0.1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="coursePrice">
+                                        Price ($ USD)
+                                    </label>
+                                    <input type="number" class="form-control" id="coursePrice" placeholder="0.00" value="0.00" min="0" step="0.01">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseOrderNum">
+                                        Display Order
+                                    </label>
+                                    <input type="number" class="form-control" id="courseOrderNum" placeholder="e.g. 1" value="1" min="1" max="999">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. COURSE DESCRIPTION -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-file-text text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Course Description</h6>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseFullDesc">
+                                    Full Description <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="courseFullDesc" rows="4" placeholder="Comprehensive description of curriculum, objectives, and topics..." required></textarea>
+                                <div class="invalid-feedback text-xs" id="courseFullDescFeedback">Course description is required (at least 10 characters).</div>
+                            </div>
+                        </div>
+
+                        <!-- 4. COURSE SETTINGS -->
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                                <i class="bi bi-sliders text-primary fs-6"></i>
+                                <h6 class="fw-bold text-uppercase text-xs text-secondary mb-0 letter-spacing-1">Course Settings</h6>
+                            </div>
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="courseStatus">
+                                        Status <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="courseStatus" required>
+                                        <option value="Published" selected>Published</option>
+                                        <option value="Draft">Draft</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1 d-block">
+                                        Popular / Featured Course
+                                    </label>
+                                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3 border">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" id="courseFeaturedToggle" role="switch">
+                                            <label class="form-check-label text-xs fw-bold text-primary" for="courseFeaturedToggle" id="courseFeaturedToggleLabel">OFF</label>
+                                        </div>
+                                        <span class="text-muted text-xs">Mark as popular/featured in public website listings.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer (Fixed at bottom) -->
+                    <div class="modal-footer px-4 py-3 border-top bg-white d-flex justify-content-end gap-2 flex-shrink-0">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal" id="cancelCourseBtn">Cancel</button>
+                        <button type="button" class="adm-btn adm-btn-outline" id="saveDraftCourseBtn">Save as Draft</button>
+                        <button type="button" class="adm-btn adm-btn-primary" id="publishCourseBtn">
+                            <span class="spinner-border spinner-border-sm d-none" id="publishCourseSpinner" role="status" aria-hidden="true"></span>
+                            <span id="publishCourseBtnText">Publish Course</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Create / Edit Category -->
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="categoryModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold" id="categoryModalTitle">Add New Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="categoryForm">
+                    <input type="hidden" id="categoryId" value="">
+                    <div class="modal-body px-4">
+                        <div class="mb-3">
+                            <label class="form-label text-sm fw-semibold" for="categoryName">Category Name *</label>
+                            <input type="text" class="form-control" id="categoryName" required placeholder="e.g. Cloud Computing & DevOps">
+                            <div class="invalid-feedback" id="categoryNameFeedback">Category name is required.</div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-sm fw-semibold" for="categorySlug">Slug (Optional)</label>
+                                <input type="text" class="form-control" id="categorySlug" placeholder="e.g. cloud-computing">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-sm fw-semibold" for="categoryIcon">Icon Class</label>
+                                <input type="text" class="form-control" id="categoryIcon" value="bi-tag" placeholder="e.g. bi-cloud">
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-sm fw-semibold" for="categoryColor">Theme Color</label>
+                                <input type="color" class="form-control form-control-color w-100" id="categoryColor" value="#2563EB">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-sm fw-semibold" for="categoryOrder">Display Order</label>
+                                <input type="number" class="form-control" id="categoryOrder" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label text-sm fw-semibold" for="categoryStatus">Status</label>
+                            <select class="form-select" id="categoryStatus">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 px-4 pb-4">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveCategoryBtn">Save Category</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Create / Edit Instructor -->
+    <div class="modal fade" id="createInstructorModal" tabindex="-1" aria-labelledby="instructorModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header border-0 px-4 pt-4">
-                    <h5 class="modal-title fw-bold">Add New Course</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold" id="instructorModalTitle">Add New Instructor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="courseForm">
+                <form id="instructorForm">
+                    <input type="hidden" id="instructorId" value="">
                     <div class="modal-body px-4">
                         <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label text-sm fw-semibold">Course Title</label>
-                                <input type="text" class="form-control" id="courseTitle" required placeholder="e.g. Full-Stack Web Development">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Difficulty</label>
-                                <select class="form-select" id="courseDifficulty">
-                                    <option value="Beginner">Beginner</option>
-                                    <option value="Intermediate">Intermediate</option>
-                                    <option value="Advanced">Advanced</option>
-                                </select>
+                            <div class="col-md-6">
+                                <label class="form-label text-sm fw-semibold" for="instructorName">Full Name *</label>
+                                <input type="text" class="form-control" id="instructorName" required placeholder="e.g. Dr. Sarah Johnson">
+                                <div class="invalid-feedback" id="instructorNameFeedback">Full name is required.</div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-sm fw-semibold">Category</label>
-                                <select class="form-select" id="courseCategorySelect">
-                                    <!-- Dynamic -->
-                                </select>
+                                <label class="form-label text-sm fw-semibold" for="instructorTitleInput">Academic Title / Rank</label>
+                                <input type="text" class="form-control" id="instructorTitleInput" placeholder="e.g. Associate Professor of AI">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label text-sm fw-semibold">Instructor</label>
-                                <select class="form-select" id="courseInstructorSelect">
-                                    <!-- Dynamic -->
-                                </select>
+                                <label class="form-label text-sm fw-semibold" for="instructorEmail">Email Address *</label>
+                                <input type="email" class="form-control" id="instructorEmail" required placeholder="e.g. sarah.johnson@aub.edu.kh">
+                                <div class="invalid-feedback" id="instructorEmailFeedback">Valid email address is required.</div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Duration (Hours)</label>
-                                <input type="text" class="form-control" id="courseDuration" value="8 Hours">
+                            <div class="col-md-6">
+                                <label class="form-label text-sm fw-semibold" for="instructorPhone">Phone</label>
+                                <input type="text" class="form-control" id="instructorPhone" placeholder="e.g. +855 23 999 101">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Total Lessons</label>
-                                <input type="number" class="form-control" id="courseLessons" value="12">
+                            <div class="col-md-6">
+                                <label class="form-label text-sm fw-semibold" for="instructorFaculty">Faculty / Department</label>
+                                <input type="text" class="form-control" id="instructorFaculty" value="Information Technology Faculty" placeholder="Faculty Name">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-sm fw-semibold">Badge (Optional)</label>
-                                <input type="text" class="form-control" id="courseBadge" placeholder="Popular, Recommended">
+                            <div class="col-md-6">
+                                <label class="form-label text-sm fw-semibold" for="instructorExpertise">Primary Expertise</label>
+                                <input type="text" class="form-control" id="instructorExpertise" placeholder="e.g. Machine Learning, Cloud Architecture">
                             </div>
                             <div class="col-12">
-                                <label class="form-label text-sm fw-semibold">Course Description</label>
-                                <textarea class="form-control" id="courseDesc" rows="3" required></textarea>
+                                <label class="form-label text-sm fw-semibold" for="instructorAvatarUrl">Avatar / Photo URL</label>
+                                <input type="url" class="form-control" id="instructorAvatarUrl" placeholder="https://images.unsplash.com/...">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label text-sm fw-semibold" for="instructorBio">Biography</label>
+                                <textarea class="form-control" id="instructorBio" rows="3" placeholder="Academic background, publications, research areas, and teaching experience..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-sm fw-semibold" for="instructorStatus">Status</label>
+                                <select class="form-select" id="instructorStatus">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer border-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">Save Course</button>
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveInstructorBtn">Save Instructor</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
+    <!-- MODAL: View Program Details -->
+    <div class="modal fade" id="viewProgramModal" tabindex="-1" aria-labelledby="viewProgramModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 px-4 pt-4 bg-light">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1" id="viewProgramTitle">Program Details</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary" id="viewProgramDegree">Bachelor Degree</span>
+                            <span class="badge bg-success" id="viewProgramStatus">Published</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-3" id="viewProgramBody">
+                    <!-- Dynamic Details Content -->
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="adm-btn adm-btn-primary" id="viewProgramEditBtn"><i class="bi bi-pencil-square me-1"></i> Edit Program</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: View Course Details -->
+    <div class="modal fade" id="viewCourseModal" tabindex="-1" aria-labelledby="viewCourseModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 px-4 pt-4 bg-light">
+                    <div>
+                        <h5 class="modal-title fw-bold mb-1" id="viewCourseTitle">Course Details</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary" id="viewCourseCategory">Computer Science</span>
+                            <span class="badge bg-info text-dark" id="viewCourseDifficulty">Beginner</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-3" id="viewCourseBody">
+                    <!-- Dynamic Details Content -->
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="adm-btn adm-btn-primary" id="viewCourseEditBtn"><i class="bi bi-pencil-square me-1"></i> Edit Course</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Manage Curriculum / Lessons -->
+    <div class="modal fade" id="courseContentBuilderModal" tabindex="-1" aria-labelledby="builderCourseTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary px-2 py-0.5" id="builderCourseCategory">Specialized Course</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border" id="builderStatsBadge">0 Modules &bull; 0 Lessons</span>
+                        </div>
+                        <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="builderCourseTitle">Manage Curriculum</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="adm-btn adm-btn-primary adm-btn-sm" onclick="openAddModuleModal()">
+                            <i class="bi bi-plus-lg"></i> Add Module
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-4" id="courseContentTreeContainer" style="max-height: 65vh; overflow-y: auto;">
+                    <!-- Dynamic Modules & Lessons Hierarchy -->
+                </div>
+                <div class="modal-footer border-top px-4 py-3 bg-white d-flex justify-content-end">
+                    <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Module -->
+    <div class="modal fade" id="moduleEditorModal" tabindex="-1" aria-labelledby="moduleEditorTitle" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="moduleEditorTitle">Add New Module</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="moduleEditorForm" novalidate>
+                    <input type="hidden" id="moduleEditorId" value="">
+                    <input type="hidden" id="moduleEditorCourseId" value="">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="moduleEditorTitleInput">
+                                Module Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="moduleEditorTitleInput" placeholder="e.g. HTML &amp; CSS Fundamentals" required autocomplete="off">
+                            <div class="invalid-feedback text-xs" id="moduleEditorTitleFeedback">Module title is required.</div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="moduleEditorDuration">
+                                    Duration
+                                </label>
+                                <input type="text" class="form-control" id="moduleEditorDuration" placeholder="e.g. 2 Weeks" value="2 Weeks">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="moduleEditorOrder">
+                                    Display Order
+                                </label>
+                                <input type="number" class="form-control" id="moduleEditorOrder" value="1" min="1" max="99">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="moduleEditorStatus">
+                                Status
+                            </label>
+                            <select class="form-select" id="moduleEditorStatus">
+                                <option value="Published" selected>Published</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="moduleEditorDesc">
+                                Short Description
+                            </label>
+                            <textarea class="form-control" id="moduleEditorDesc" rows="3" placeholder="Brief summary of module objectives and key topics..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-end gap-2">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveModuleBtn">Save Module</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add / Edit Lesson -->
+    <div class="modal fade" id="lessonEditorModal" tabindex="-1" aria-labelledby="lessonEditorTitle" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom px-4 py-3 bg-light d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title fw-bold text-dark mb-0 fs-5" id="lessonEditorTitle">Add Lesson &amp; Materials</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="lessonEditorForm" novalidate>
+                    <input type="hidden" id="lessonEditorId" value="">
+                    <input type="hidden" id="lessonEditorModuleId" value="">
+                    <input type="hidden" id="lessonEditorCourseId" value="">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorTitleInput">
+                                Lesson Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="lessonEditorTitleInput" placeholder="e.g. Introduction to HTML Elements" required autocomplete="off">
+                            <div class="invalid-feedback text-xs" id="lessonEditorTitleFeedback">Lesson title is required.</div>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorType">
+                                    Lesson Type
+                                </label>
+                                <select class="form-select" id="lessonEditorType">
+                                    <option value="Video" selected>Video Lecture</option>
+                                    <option value="Lab">Interactive Lab</option>
+                                    <option value="Reading">Reading / Document</option>
+                                    <option value="Live">Live Session</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorDuration">
+                                    Duration
+                                </label>
+                                <input type="text" class="form-control" id="lessonEditorDuration" placeholder="e.g. 45 Mins" value="45 Mins">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorOrder">
+                                    Order
+                                </label>
+                                <input type="number" class="form-control" id="lessonEditorOrder" value="1" min="1" max="99">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorStatus">
+                                    Status
+                                </label>
+                                <select class="form-select" id="lessonEditorStatus">
+                                    <option value="Published" selected>Published</option>
+                                    <option value="Draft">Draft</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonEditorDesc">
+                                Lesson Description
+                            </label>
+                            <textarea class="form-control" id="lessonEditorDesc" rows="3" placeholder="Overview of lesson objectives, prerequisites, and instructions..."></textarea>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-1" for="lessonVideoUrl">
+                                Video URL or Resource File
+                            </label>
+                            <input type="text" class="form-control" id="lessonVideoUrl" placeholder="e.g. intro-lecture.mp4 or https://youtube.com/watch?v=...">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top px-4 py-3 bg-light d-flex justify-content-end gap-2">
+                        <button type="button" class="adm-btn adm-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="adm-btn adm-btn-primary" id="saveLessonBtn">Save Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+            </div><!-- /.admin-content -->
+        </main><!-- /.admin-main -->
+    </div><!-- /.admin-wrapper -->
+
     <div id="admToastContainer" class="adm-toast-container"></div>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/admin-layout.js"></script>
+    <!-- Application Services & Modules -->
+    <script src="../../js/services/api-client.js"></script>
+    <script src="../../js/services/academic-service.js"></script>
     <script src="../../js/pages/academic-management.js"></script>
 </body>
 </html>

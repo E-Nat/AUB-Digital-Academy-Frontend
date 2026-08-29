@@ -44,6 +44,7 @@ router.patch('/admin/notifications/:id/read', authenticateToken, requireAdmin, a
 
 // Programs CRUD
 router.get('/admin/programs', authenticateToken, requireAdmin, adminController.getAllPrograms);
+router.get('/admin/programs/:id', authenticateToken, requireAdmin, adminController.getProgramById);
 router.post('/admin/programs', authenticateToken, requireAdmin, adminController.createProgram);
 router.put('/admin/programs/:id', authenticateToken, requireAdmin, adminController.updateProgram);
 router.delete('/admin/programs/:id', authenticateToken, requireAdmin, adminController.deleteProgram);
@@ -52,6 +53,7 @@ router.patch('/admin/programs/:id/toggle-publish', authenticateToken, requireAdm
 // Courses CRUD & Advanced Operations
 router.get('/admin/courses', authenticateToken, requireAdmin, adminController.getAllCourses);
 router.get('/admin/courses/:id/details', authenticateToken, requireAdmin, adminController.getCourseDetails);
+router.get('/admin/courses/:id', authenticateToken, requireAdmin, adminController.getCourseDetails);
 router.post('/admin/courses', authenticateToken, requireAdmin, adminController.createCourse);
 router.put('/admin/courses/:id', authenticateToken, requireAdmin, adminController.updateCourse);
 router.delete('/admin/courses/:id', authenticateToken, requireAdmin, adminController.deleteCourse);
@@ -97,12 +99,14 @@ router.post('/student/progress', authenticateToken, adminController.updateStuden
 
 // Categories CRUD
 router.get('/admin/categories', authenticateToken, requireAdmin, adminController.getAllCategories);
+router.get('/admin/categories/:id', authenticateToken, requireAdmin, adminController.getCategoryById);
 router.post('/admin/categories', authenticateToken, requireAdmin, adminController.createCategory);
 router.put('/admin/categories/:id', authenticateToken, requireAdmin, adminController.updateCategory);
 router.delete('/admin/categories/:id', authenticateToken, requireAdmin, adminController.deleteCategory);
 
 // Instructors CRUD
 router.get('/admin/instructors', authenticateToken, requireAdmin, adminController.getAllInstructors);
+router.get('/admin/instructors/:id', authenticateToken, requireAdmin, adminController.getInstructorById);
 router.post('/admin/instructors', authenticateToken, requireAdmin, adminController.createInstructor);
 router.put('/admin/instructors/:id', authenticateToken, requireAdmin, adminController.updateInstructor);
 router.delete('/admin/instructors/:id', authenticateToken, requireAdmin, adminController.deleteInstructor);
