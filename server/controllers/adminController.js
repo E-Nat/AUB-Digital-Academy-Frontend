@@ -314,8 +314,8 @@ exports.createCourse = async (req, res) => {
     try {
         const { title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published } = req.body;
 
-        if (!title || !description) {
-            return res.status(400).json({ success: false, message: 'Title and description are required.' });
+        if (!title || !title.trim()) {
+            return res.status(400).json({ success: false, message: 'Title is required.' });
         }
 
         const finalSlug = slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -324,9 +324,9 @@ exports.createCourse = async (req, res) => {
             `INSERT INTO courses (title, slug, description, category_id, instructor_id, thumbnail_url, rating, difficulty, duration_hours, lesson_count, badge_text, order_num, is_popular, is_published)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                title,
+                title.trim(),
                 finalSlug,
-                description,
+                description || '',
                 category_id || null,
                 instructor_id || null,
                 thumbnail_url || 'assets/images/course_webdev.jpg',

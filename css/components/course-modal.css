@@ -1,0 +1,127 @@
+/* ============================================================
+   AUB DIGITAL ACADEMY — SHARED COURSE MODAL COMPONENT
+   Standardized Academic Course Creation & Edit Studio
+   Theme: AUB Blue (#2563EB), Slate, and Crisp White (No gradients)
+   ============================================================ */
+
+.course-modal-dialog {
+    max-width: 820px;
+    margin: 1.75rem auto;
+}
+
+.course-modal-content {
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    background: #FFFFFF;
+}
+
+.course-modal-header {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 16px 24px;
+}
+
+.course-modal-form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+    margin-bottom: 0;
+}
+
+.course-modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: calc(88vh - 170px);
+    min-height: 280px;
+    padding: 20px 24px;
+}
+
+.course-modal-footer {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    padding: 14px 24px;
+}
+
+/* File Upload Dropzone in Course Modal */
+.course-image-dropzone {
+    border: 2px dashed #CBD5E1;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    transition: all 150ms ease;
+    cursor: pointer;
+}
+
+.course-image-dropzone:hover,
+.course-image-dropzone.dragover {
+    border-color: #2563EB !important;
+    background-color: #EFF6FF !important;
+}
+
+.course-upload-preview {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+}
+
+/* Learning Objectives Rows */
+.learning-objective-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.learning-objective-row input {
+    flex: 1;
+}
+
+.learning-objective-remove-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #E2E8F0;
+    background: #FFFFFF;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 120ms ease;
+    flex-shrink: 0;
+}
+
+.learning-objective-remove-btn:hover {
+    background-color: #FEE2E2;
+    border-color: #FECACA;
+    color: #DC2626;
+}
+
+/* Responsive adjustments */
+@media (max-height: 820px) {
+    .course-modal-dialog {
+        margin: 0.75rem auto;
+    }
+    .course-modal-content {
+        max-height: 95vh;
+    }
+    .course-modal-body {
+        max-height: calc(92vh - 160px);
+        padding: 16px 20px;
+    }
+    .course-modal-footer {
+        padding: 10px 20px;
+    }
+}

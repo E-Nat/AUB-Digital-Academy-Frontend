@@ -1,1 +1,587 @@
-<!-- profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile — Student Portal — AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <!-- Unified Student Layout CSS -->
+    <link href="../../css/layouts/student.css" rel="stylesheet">
+    <style>
+        .profile-hero-card {
+            background: #FFFFFF;
+            border: 1px solid var(--student-border);
+            border-radius: var(--student-radius);
+            padding: 24px;
+            box-shadow: var(--student-shadow-sm);
+            margin-bottom: 24px;
+        }
+        .profile-avatar-box {
+            width: 80px;
+            height: 80px;
+            min-width: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #EFF6FF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .profile-nav-tab {
+            border: none;
+            background: transparent;
+            color: var(--student-text-muted);
+            font-weight: 600;
+            font-size: 13.5px;
+            padding: 10px 18px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .profile-nav-tab.active {
+            color: var(--student-primary);
+            border-bottom-color: var(--student-primary);
+            background: transparent;
+        }
+        .info-field-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--student-text-muted);
+            margin-bottom: 3px;
+        }
+        .info-field-val {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--student-navy);
+        }
+        .cert-row-item {
+            padding: 14px 16px;
+            border: 1px solid var(--student-border);
+            border-radius: 10px;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 10px;
+            transition: all 0.15s ease;
+        }
+        .cert-row-item:hover {
+            border-color: #BFDBFE;
+            background: #F8FAFC;
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="admin-wrapper">
+        
+        <!-- ============================================================
+             STUDENT SIDEBAR
+             ============================================================ -->
+        <aside class="admin-sidebar" id="studentSidebar">
+            <!-- Brand / Sidebar Header -->
+            <div class="admin-sidebar-brand">
+                <a href="dashboard.html" class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Student Portal</div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
+                <a href="dashboard.html" class="admin-nav-item">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>My Learning</span>
+                </a>
+
+                <div class="admin-sidebar-label">LEARNING</div>
+                <a href="my-courses.html" class="admin-nav-item">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Enrolled Courses</span>
+                </a>
+                <a href="assignment.html" class="admin-nav-item">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Assignments</span>
+                </a>
+                <a href="quiz.html" class="admin-nav-item">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    <span>Quizzes &amp; Tests</span>
+                </a>
+                <a href="grades.html" class="admin-nav-item">
+                    <i class="bi bi-award-fill"></i>
+                    <span>Grades &amp; Certificates</span>
+                </a>
+
+                <div class="admin-sidebar-label">SUPPORT</div>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-person-video3"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+
+                <div class="admin-sidebar-label">ACCOUNT</div>
+                <a href="profile.html" class="admin-nav-item active">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="../../welcomepage.html" class="admin-nav-item">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Back to Website</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer / Logout -->
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="logoutStudent()" type="button">
+                    <i class="bi bi-box-arrow-left"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============================================================
+             MAIN CONTENT AREA
+             ============================================================ -->
+        <main class="admin-main">
+            
+            <!-- GLOBAL TOPBAR -->
+            <header class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle Sidebar" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="admin-search-input" id="globalSearchInput" placeholder="Search my profile, courses, certificates..." autocomplete="off">
+                        <kbd class="admin-search-kbd d-none d-md-block">Ctrl K</kbd>
+                    </div>
+                </div>
+
+                <div class="admin-topbar-actions">
+                    <!-- Notifications Dropdown -->
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button" title="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="admin-notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px; border-bottom:1px solid var(--student-border); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px; font-weight:700; color:var(--student-navy);">Notifications</span>
+                                <button class="btn btn-link p-0 text-decoration-none" id="markAllReadBtn" type="button" style="font-size:11.5px; font-weight:600; color:var(--student-primary);">Mark all read</button>
+                            </div>
+                            <div style="max-height:280px; overflow-y:auto;">
+                                <a href="profile.html" class="notif-item unread">
+                                    <div class="notif-icon-box blue"><i class="bi bi-person-check-fill"></i></div>
+                                    <div>
+                                        <div class="notif-title">Profile Data Verified: Semester 2 Active</div>
+                                        <div class="notif-time">Aug 2026 • Registrar</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Profile Button -->
+                    <div class="admin-topbar-profile" onclick="window.location.href='profile.html'" role="button" tabindex="0" title="View Profile">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150" alt="Student" class="admin-topbar-avatar student-avatar-display" id="topbarAvatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block text-start lh-1">
+                            <div class="profile-name student-name-display" id="topbarStudentName">Sreyneang Kim</div>
+                            <div class="profile-role student-role-display">Student</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- PAGE CONTENT -->
+            <div class="admin-content">
+                
+                <!-- ── 1. PROFILE HERO CARD ── -->
+                <div class="profile-hero-card">
+                    <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150" alt="Student Avatar" class="profile-avatar-box student-avatar-display" id="profileMainAvatar">
+                        
+                        <div class="flex-grow-1 text-center text-md-start">
+                            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                                <h1 class="dash-welcome-title fs-3 mb-0" id="profileFullName">Sreyneang Kim</h1>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1">
+                                    <i class="bi bi-circle-fill" style="font-size:6px;"></i> Active Student
+                                </span>
+                            </div>
+                            <p class="text-muted text-sm mb-3" id="profileSubtitle">Undergraduate • B.S. in Software Engineering • Faculty of Information Technology</p>
+                            
+                            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-3 text-xs text-muted">
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-card-heading text-primary"></i> <span id="profileUniId">ID: STU-2026-002</span>
+                                </span>
+                                <span>•</span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-envelope text-primary"></i> <span id="profileEmail">sreyneang.kim@example.com</span>
+                                </span>
+                                <span>•</span>
+                                <span class="d-flex align-items-center gap-1">
+                                    <i class="bi bi-calendar3 text-primary"></i> Year 2 • Semester 2
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm px-3 rounded-3" onclick="switchToSettingsTab()">
+                                <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 2. PROFILE NAVIGATION TABS ── -->
+                <div class="d-flex gap-2 border-bottom mb-4" id="profileNavTabs">
+                    <button class="profile-nav-tab active" data-tab="tabAcademic">
+                        <i class="bi bi-person-lines-fill me-1"></i> Academic &amp; Personal Info
+                    </button>
+                    <button class="profile-nav-tab" data-tab="tabCourses">
+                        <i class="bi bi-journal-bookmark-fill me-1"></i> Enrolled Courses (3)
+                    </button>
+                    <button class="profile-nav-tab" data-tab="tabCertificates">
+                        <i class="bi bi-award-fill me-1"></i> Certificates &amp; Achievements
+                    </button>
+                    <button class="profile-nav-tab" data-tab="tabSettings">
+                        <i class="bi bi-gear-fill me-1"></i> Account Settings
+                    </button>
+                </div>
+
+                <!-- ── 3. TAB 1: ACADEMIC & PERSONAL INFO ── -->
+                <div class="profile-tab-content" id="tabAcademic">
+                    <div class="row g-4">
+                        <!-- Academic Standing Card -->
+                        <div class="col-lg-6">
+                            <div class="student-content-card h-100 mb-0">
+                                <h2 class="section-title fs-5 mb-3">
+                                    <i class="bi bi-mortarboard-fill text-primary"></i> Academic Program Details
+                                </h2>
+
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Degree Program</div>
+                                        <div class="info-field-val">B.S. in Software Engineering</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Faculty Directorate</div>
+                                        <div class="info-field-val">Information Technology</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Current Academic Standing</div>
+                                        <div class="info-field-val text-success">Good Standing (GPA 3.85)</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Enrollment Status</div>
+                                        <div class="info-field-val">Full-time Enrolled</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Initial Enrollment Date</div>
+                                        <div class="info-field-val">August 1, 2026</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Expected Graduation</div>
+                                        <div class="info-field-val">July 15, 2030</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="info-field-label">Assigned Faculty Advisor</div>
+                                        <div class="info-field-val d-flex align-items-center gap-2">
+                                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Advisor" class="rounded-circle" style="width:22px;height:22px;object-fit:cover;">
+                                            <span>Dr. Sarah Johnson (Associate Professor)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personal & Contact Information -->
+                        <div class="col-lg-6">
+                            <div class="student-content-card h-100 mb-0">
+                                <h2 class="section-title fs-5 mb-3">
+                                    <i class="bi bi-person-badge-fill text-primary"></i> Personal &amp; Contact Details
+                                </h2>
+
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Full Legal Name</div>
+                                        <div class="info-field-val" id="dispFullName">Sreyneang Kim</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">University ID</div>
+                                        <div class="info-field-val" id="dispUniId">STU-2026-002</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">University Email</div>
+                                        <div class="info-field-val" id="dispEmail">sreyneang.kim@example.com</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Phone Number</div>
+                                        <div class="info-field-val" id="dispPhone">+855 12 888 102</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Date of Birth</div>
+                                        <div class="info-field-val">November 20, 2004</div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="info-field-label">Gender</div>
+                                        <div class="info-field-val">Female</div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="info-field-label">Residential Address</div>
+                                        <div class="info-field-val">Khan Daun Penh, Phnom Penh, Cambodia</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 4. TAB 2: ENROLLED COURSES ── -->
+                <div class="profile-tab-content d-none" id="tabCourses">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <div class="course-card-thumb-wrap">
+                                    <img src="../../assets/images/course_webdev.jpg" alt="Full-Stack Web Development" class="course-card-thumb">
+                                    <div class="course-card-badges">
+                                        <span class="course-category-badge">Technology</span>
+                                        <span class="course-status-badge in-progress"><i class="bi bi-circle-fill" style="font-size:6px;"></i> In Progress</span>
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <div class="course-code-line">CS-WD101 • 12 Weeks</div>
+                                    <h3 class="course-title-text">Full-Stack Web Development</h3>
+                                    <div class="course-card-footer">
+                                        <div class="course-progress-info">
+                                            <span class="fw-bold text-primary">65% complete</span>
+                                            <span>15 / 24 lessons</span>
+                                        </div>
+                                        <div class="course-progress-bar">
+                                            <div class="course-progress-fill" style="width: 65%;"></div>
+                                        </div>
+                                        <a href="course-detail.html?slug=full-stack-web-development" class="course-action-btn">Continue Learning</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <div class="course-card-thumb-wrap">
+                                    <img src="../../assets/images/course_uiux.jpg" alt="Advanced UI/UX Design" class="course-card-thumb">
+                                    <div class="course-card-badges">
+                                        <span class="course-category-badge">Design</span>
+                                        <span class="course-status-badge in-progress"><i class="bi bi-circle-fill" style="font-size:6px;"></i> In Progress</span>
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <div class="course-code-line">UX-201 • 10 Weeks</div>
+                                    <h3 class="course-title-text">Advanced UI/UX Design</h3>
+                                    <div class="course-card-footer">
+                                        <div class="course-progress-info">
+                                            <span class="fw-bold text-primary">40% complete</span>
+                                            <span>8 / 20 lessons</span>
+                                        </div>
+                                        <div class="course-progress-bar">
+                                            <div class="course-progress-fill" style="width: 40%;"></div>
+                                        </div>
+                                        <a href="course-detail.html?slug=advanced-ui-ux-design" class="course-action-btn">Continue Learning</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 5. TAB 3: CERTIFICATES & ACHIEVEMENTS ── -->
+                <div class="profile-tab-content d-none" id="tabCertificates">
+                    <div class="student-content-card">
+                        <h2 class="section-title fs-5 mb-3">
+                            <i class="bi bi-patch-check-fill text-primary"></i> Earned Credentials
+                        </h2>
+
+                        <div class="cert-row-item">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="student-stat-icon green">
+                                    <i class="bi bi-award-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark fs-6">Certificate of Mastery in Computer Networks &amp; Protocols</div>
+                                    <div class="text-xs text-muted">Issued: August 22, 2026 • Credential ID: AUB-CERT-2026-8804</div>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="grades.html#certificates" class="btn btn-outline-primary btn-sm px-3 rounded-3">
+                                    <i class="bi bi-eye me-1"></i> View Credential
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 6. TAB 4: ACCOUNT SETTINGS ── -->
+                <div class="profile-tab-content d-none" id="tabSettings">
+                    <div class="row g-4">
+                        <div class="col-lg-6">
+                            <div class="student-content-card h-100 mb-0">
+                                <h2 class="section-title fs-5 mb-3">
+                                    <i class="bi bi-sliders text-primary"></i> Update Profile Information
+                                </h2>
+                                <form id="updateProfileForm">
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Full Name</label>
+                                        <input type="text" class="form-control" id="editFullName" value="Sreyneang Kim" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Email Address</label>
+                                        <input type="email" class="form-control" id="editEmail" value="sreyneang.kim@example.com" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Phone Number</label>
+                                        <input type="text" class="form-control" id="editPhone" value="+855 12 888 102">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary px-4 btn-sm">Save Profile Changes</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="student-content-card h-100 mb-0">
+                                <h2 class="section-title fs-5 mb-3">
+                                    <i class="bi bi-shield-lock-fill text-primary"></i> Password &amp; Security
+                                </h2>
+                                <form id="updatePasswordForm">
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Current Password</label>
+                                        <input type="password" class="form-control" placeholder="••••••••" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">New Password</label>
+                                        <input type="password" class="form-control" placeholder="••••••••" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-xs fw-bold text-muted text-uppercase">Confirm New Password</label>
+                                        <input type="password" class="form-control" placeholder="••••••••" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-primary px-4 btn-sm">Update Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Shared Student Layout & Nav Controller -->
+    <script src="../../js/components/student-layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Load user data
+            const userStr = localStorage.getItem('aub_user');
+            let user = null;
+            if (userStr) {
+                try { user = JSON.parse(userStr); } catch(e) {}
+            }
+            if (user) {
+                if (user.full_name) {
+                    document.getElementById('profileFullName').textContent = user.full_name;
+                    document.getElementById('dispFullName').textContent = user.full_name;
+                    document.getElementById('editFullName').value = user.full_name;
+                }
+                if (user.university_id) {
+                    document.getElementById('profileUniId').textContent = `ID: ${user.university_id}`;
+                    document.getElementById('dispUniId').textContent = user.university_id;
+                }
+                if (user.email) {
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('dispEmail').textContent = user.email;
+                    document.getElementById('editEmail').value = user.email;
+                }
+                if (user.phone) {
+                    document.getElementById('dispPhone').textContent = user.phone;
+                    document.getElementById('editPhone').value = user.phone;
+                }
+            }
+
+            // Tab switching
+            const tabs = document.querySelectorAll('#profileNavTabs .profile-nav-tab');
+            const contents = document.querySelectorAll('.profile-tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.add('d-none'));
+
+                    this.classList.add('active');
+                    const targetId = this.dataset.tab;
+                    const targetContent = document.getElementById(targetId);
+                    if (targetContent) targetContent.classList.remove('d-none');
+                });
+            });
+
+            window.switchToSettingsTab = function() {
+                const settingsTab = document.querySelector('#profileNavTabs .profile-nav-tab[data-tab="tabSettings"]');
+                if (settingsTab) settingsTab.click();
+            };
+
+            // Form Submissions
+            document.getElementById('updateProfileForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const newName = document.getElementById('editFullName').value;
+                const newEmail = document.getElementById('editEmail').value;
+                const newPhone = document.getElementById('editPhone').value;
+
+                let u = {};
+                try { u = JSON.parse(localStorage.getItem('aub_user') || '{}'); } catch(e) {}
+                u.full_name = newName;
+                u.email = newEmail;
+                u.phone = newPhone;
+                localStorage.setItem('aub_user', JSON.stringify(u));
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Profile Updated',
+                    text: 'Your profile information has been saved successfully.',
+                    confirmButtonColor: '#2563EB'
+                }).then(() => {
+                    location.reload();
+                });
+            });
+
+            document.getElementById('updatePasswordForm')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Password Changed',
+                    text: 'Your account password has been updated.',
+                    confirmButtonColor: '#2563EB'
+                });
+                this.reset();
+            });
+        });
+    </script>
+</body>
+</html>

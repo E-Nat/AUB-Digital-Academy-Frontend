@@ -1222,25 +1222,19 @@
                 throw new Error('Invalid program data.');
             }
             const title = (programData.title || '').trim();
-            const degree = (programData.degree_type || '').trim();
-            const duration = (programData.duration || '').trim();
+            const degree = (programData.degree_type || 'Bachelor Degree').trim();
+            const duration = (programData.duration || '4 Years').trim();
             const rawDesc = (programData.description || programData.full_description || programData.short_description || '').trim();
             const desc = rawDesc.length >= 10 ? rawDesc : `${title} academic program curriculum and overview at AUB Digital Academy.`;
 
             if (!title || title.length < 3) {
                 throw new Error('Program Title is required (minimum 3 characters).');
             }
-            if (!degree) {
-                throw new Error('Degree Type is required.');
-            }
-            if (!duration || duration.length < 2) {
-                throw new Error('Duration is required (e.g. 4 Years).');
-            }
 
             // Duplicate code protection
             if (programData.code && String(programData.code).trim()) {
                 const checkCode = String(programData.code).trim().toLowerCase();
-                const existingCode = this.state.programs.find(p => p.code && p.code.trim().toLowerCase() === checkCode);
+                const existingCode = this.state.programs.find(p => (!programData.id || p.id !== Number(programData.id)) && p.code && p.code.trim().toLowerCase() === checkCode);
                 if (existingCode) {
                     const err = new Error('An academic program with this code already exists.');
                     err.isDuplicate = true;
@@ -1251,7 +1245,7 @@
             }
 
             // Duplicate title protection
-            const existingTitle = this.state.programs.find(p => p.title && p.title.trim().toLowerCase() === title.toLowerCase());
+            const existingTitle = this.state.programs.find(p => (!programData.id || p.id !== Number(programData.id)) && p.title && p.title.trim().toLowerCase() === title.toLowerCase());
             if (existingTitle) {
                 const err = new Error('An academic program with this title already exists.');
                 err.isDuplicate = true;
@@ -1260,9 +1254,9 @@
                 throw err;
             }
 
-            const nextId = this.state.programs.length > 0 
+            const nextId = programData.id ? Number(programData.id) : (this.state.programs.length > 0 
                 ? Math.max(...this.state.programs.map(p => Number(p.id) || 0)) + 1 
-                : 1;
+                : 1);
 
             const isPub = programData.is_published !== undefined 
                 ? (Number(programData.is_published) ? 1 : 0) 
@@ -1306,8 +1300,8 @@
 
             const existing = this.state.programs[idx];
             const title = programData.title !== undefined ? String(programData.title).trim() : existing.title;
-            const degree = programData.degree_type !== undefined ? String(programData.degree_type).trim() : existing.degree_type;
-            const duration = programData.duration !== undefined ? String(programData.duration).trim() : existing.duration;
+            const degree = programData.degree_type !== undefined ? String(programData.degree_type).trim() : (existing.degree_type || 'Bachelor Degree');
+            const duration = programData.duration !== undefined ? String(programData.duration).trim() : (existing.duration || '4 Years');
             const rawDesc = programData.description !== undefined 
                 ? String(programData.description).trim() 
                 : (programData.full_description !== undefined ? String(programData.full_description).trim() : (existing.description || ''));
@@ -1315,12 +1309,6 @@
 
             if (!title || title.length < 3) {
                 throw new Error('Program Title is required (minimum 3 characters).');
-            }
-            if (!degree) {
-                throw new Error('Degree Type is required.');
-            }
-            if (!duration || duration.length < 2) {
-                throw new Error('Duration is required (e.g. 4 Years).');
             }
 
             // Duplicate code protection
@@ -1472,6 +1460,7 @@
 
                 return {
                     ...c,
+                    status: c.status || (c.is_published === 0 ? 'Draft' : 'Published'),
                     code: c.code || (`CS-${String(c.id).padStart(3, '0')}`),
                     short_description: c.short_description || '',
                     is_featured: c.is_featured !== undefined ? Number(c.is_featured) : 0,
@@ -1507,6 +1496,7 @@
 
             return {
                 ...c,
+                status: c.status || (c.is_published === 0 ? 'Draft' : 'Published'),
                 code: c.code || (`CS-${String(c.id).padStart(3, '0')}`),
                 short_description: c.short_description || '',
                 is_featured: c.is_featured !== undefined ? Number(c.is_featured) : 0,
@@ -1603,21 +1593,17 @@
             const title = typeof courseData.title === 'string' ? courseData.title.trim() : '';
             const desc = typeof courseData.description === 'string' ? courseData.description.trim() : '';
 
-            // Validation 1: Required Fields
+            // Validation 1: Required Fields (Title, Category, Instructor)
             if (!title || title.length < 3) {
                 throw new Error('Course Title is required (minimum 3 characters).');
             }
-            if (!courseData.category_id) {
+            const catId = Number(courseData.category_id || courseData.categoryId);
+            if (!catId) {
                 throw new Error('Category is required.');
             }
-            if (!courseData.instructor_id) {
+            const insId = Number(courseData.instructor_id || courseData.instructorId);
+            if (!insId) {
                 throw new Error('Instructor is required.');
-            }
-            if (!courseData.difficulty) {
-                throw new Error('Difficulty level is required.');
-            }
-            if (!desc || desc.length < 10) {
-                throw new Error('Course Description is required (minimum 10 characters).');
             }
 
             // Validation 2: Clear Date Validations
@@ -1637,12 +1623,15 @@
                 }
             }
 
-            const nextId = this.state.courses.length > 0 
-                ? Math.max(...this.state.courses.map(c => Number(c.id) || 0)) + 1 
-                : 1;
+            const nextId = courseData.id 
+                ? Number(courseData.id) 
+                : (this.state.courses.length > 0 ? Math.max(...this.state.courses.map(c => Number(c.id) || 0)) + 1 : 1);
 
-            const category = this.state.categories.find(cat => cat.id === Number(courseData.category_id));
-            const instructor = this.state.instructors.find(ins => ins.id === Number(courseData.instructor_id));
+            const category = this.state.categories.find(cat => cat.id === catId);
+            const instructor = this.state.instructors.find(ins => ins.id === insId);
+
+            const isPub = courseData.is_published !== undefined ? Number(courseData.is_published) : (courseData.status === 'Draft' ? 0 : 1);
+            const statusVal = courseData.status || (isPub === 1 ? 'Published' : 'Draft');
 
             const newCourse = {
                 id: nextId,
@@ -1650,14 +1639,14 @@
                 code: courseData.code || (`CS-${String(nextId).padStart(3, '0')}`),
                 short_description: courseData.short_description || '',
                 slug: courseData.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-                category_id: Number(courseData.category_id) || 1,
+                category_id: catId,
                 category_name: category ? category.name : 'Computer Science',
-                instructor_id: Number(courseData.instructor_id) || 1,
+                instructor_id: insId,
                 instructor_name: instructor ? instructor.name : 'Faculty Lead',
                 instructor_avatar: instructor ? (instructor.avatar_url || '') : '',
-                difficulty: courseData.difficulty || 'Beginner',
-                duration: courseData.duration || courseData.duration_hours || '8 Weeks',
-                duration_hours: courseData.duration_hours || courseData.duration || '8 Weeks',
+                difficulty: courseData.difficulty || 'Intermediate',
+                duration: courseData.duration || courseData.duration_hours || '12 Weeks',
+                duration_hours: courseData.duration_hours || courseData.duration || '12 Weeks',
                 module_count: 0,
                 lesson_count: 0,
                 rating: 4.8,
@@ -1674,12 +1663,13 @@
                 order_num: Number(courseData.order_num) || 1,
                 description: desc,
                 thumbnail_url: courseData.thumbnail_url || 'assets/images/course_webdev.jpg',
-                is_published: courseData.is_published !== undefined ? Number(courseData.is_published) : 1
+                is_published: isPub,
+                status: statusVal
             };
 
             this.state.courses.unshift(newCourse);
 
-            // If modules array was passed from the 6-step creation wizard
+            // If modules array was passed
             if (Array.isArray(courseData.modules) && courseData.modules.length > 0) {
                 this.setCourseModulesAndLessons(nextId, courseData.modules);
             }
@@ -1705,9 +1695,6 @@
             }
             if (courseData.instructor_id !== undefined && !courseData.instructor_id) {
                 throw new Error('Instructor is required.');
-            }
-            if (!desc || desc.length < 10) {
-                throw new Error('Course Description is required (minimum 10 characters).');
             }
 
             const effEnrStart = courseData.enrollment_start_date !== undefined ? courseData.enrollment_start_date : existing.enrollment_start_date;

@@ -280,7 +280,7 @@
 
 /* 4. Course Content Builder Tree Hierarchy */
 .content-builder-header {
-    background: linear-gradient(135deg, #0B1628 0%, #1E3A8A 100%);
+    background-color: #0F172A;
     color: #FFFFFF;
     padding: 18px 24px;
     border-radius: 8px 8px 0 0;
@@ -787,37 +787,51 @@
 }
 
 /* Searchable Multi-Select Instructor Dropdown */
+#instructorDropdownMenu {
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    background: #FFFFFF;
+}
+
 .instructor-dropdown-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 10px;
+    padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 120ms ease;
     background: transparent;
     user-select: none;
+    border: 1px solid transparent;
+}
+
+.instructor-dropdown-item * {
+    pointer-events: none;
 }
 
 .instructor-dropdown-item:hover {
     background-color: #F8FAFC;
+    border-color: #F1F5F9;
 }
 
 .instructor-dropdown-item.selected {
     background-color: #EFF6FF;
+    border-color: #BFDBFE;
 }
 
 .instructor-dropdown-item .instructor-avatar {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
-    background-color: #E2E8F0;
-    color: #1E293B;
+    background-color: #F1F5F9;
+    color: #334155;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11.5px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
     flex-shrink: 0;
     border: 1px solid #CBD5E1;
 }
@@ -829,14 +843,14 @@
 }
 
 .instructor-checkbox {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
     border: 1.5px solid #CBD5E1;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 10px;
     color: white;
     background: white;
     transition: all 120ms ease;
@@ -848,13 +862,78 @@
     border-color: #2563EB;
 }
 
+/* Selected Instructor Chips */
+.instructor-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px 3px 10px;
+    border-radius: 20px;
+    background-color: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #1E293B;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 120ms ease;
+}
+
+.instructor-chip .chip-name {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.instructor-chip .chip-remove {
+    background: none;
+    border: none;
+    padding: 0 2px;
+    margin: 0;
+    color: #64748B;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 120ms ease;
+}
+
+.instructor-chip .chip-remove:hover {
+    color: #DC2626;
+    background-color: #FEE2E2;
+}
+
+.instructor-chip-more {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background-color: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 120ms ease;
+}
+
+.instructor-chip-more:hover {
+    background-color: #E2E8F0;
+    color: #1E293B;
+}
+
+#instructorDropdownToggleBtn[aria-expanded="true"] #instructorDropdownChevron {
+    transform: rotate(180deg);
+}
+
+.transition-transform {
+    transition: transform 150ms ease;
+}
+
 .file-upload-dropzone.dragover {
     border-color: #2563EB !important;
     background-color: #EFF6FF !important;
-}
-
-#instructorDropdownMenu {
-    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.06);
-    border: 1px solid #E2E8F0;
 }
 

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Coursework & Assignments - Student Portal - AUB Digital Academy</title>
+    <title>Course Assignments — Student Portal — AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,162 +15,224 @@
     <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
-    <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <!-- Unified Student Layout CSS -->
+    <link href="../../css/layouts/student.css" rel="stylesheet">
     <style>
         .assignment-card {
             background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid var(--admin-border);
+            border-radius: var(--student-radius);
+            border: 1px solid var(--student-border);
             padding: 20px;
+            box-shadow: var(--student-shadow-sm);
             transition: all 0.2s ease;
         }
         .assignment-card:hover {
-            border-color: #93C5FD;
-            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+            border-color: #BFDBFE;
+            box-shadow: var(--student-shadow);
             transform: translateY(-2px);
         }
         .filter-tab-btn {
             border: none;
             background: transparent;
-            color: var(--admin-text-muted);
+            color: var(--student-text-muted);
             font-weight: 600;
             font-size: 13px;
             padding: 8px 16px;
             border-radius: 8px;
             transition: all 0.15s ease;
+            cursor: pointer;
         }
         .filter-tab-btn.active {
             background: #ffffff;
-            color: var(--admin-primary);
+            color: var(--student-primary);
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
         }
     </style>
 </head>
 <body class="admin-body">
 
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
+        
+        <!-- ============================================================
+             STUDENT SIDEBAR
+             ============================================================ -->
+        <aside class="admin-sidebar" id="studentSidebar">
+            <!-- Brand / Sidebar Header -->
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                <a href="dashboard.html" class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Student Portal</div>
                     </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">STUDENT PORTAL</div>
-                    </div>
-                </div>
+                </a>
             </div>
 
+            <!-- Navigation Links -->
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid-fill"></i>
                     <span>My Learning</span>
                 </a>
-                <a href="one-on-one.html" class="admin-nav-item">
-                    <i class="bi bi-people-fill"></i>
-                    <span>1-on-1 Mentorship</span>
-                </a>
+
+                <div class="admin-sidebar-label">LEARNING</div>
                 <a href="my-courses.html" class="admin-nav-item">
-                    <i class="bi bi-journal-check"></i>
+                    <i class="bi bi-journal-bookmark-fill"></i>
                     <span>Enrolled Courses</span>
                 </a>
                 <a href="assignment.html" class="admin-nav-item active">
                     <i class="bi bi-card-checklist"></i>
                     <span>Assignments</span>
                 </a>
+                <a href="quiz.html" class="admin-nav-item">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    <span>Quizzes &amp; Tests</span>
+                </a>
                 <a href="grades.html" class="admin-nav-item">
-                    <i class="bi bi-award"></i>
-                    <span>Grades & Certificates</span>
+                    <i class="bi bi-award-fill"></i>
+                    <span>Grades &amp; Certificates</span>
+                </a>
+
+                <div class="admin-sidebar-label">SUPPORT</div>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-person-video3"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+
+                <div class="admin-sidebar-label">ACCOUNT</div>
+                <a href="profile.html" class="admin-nav-item">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
                 </a>
                 <a href="../../welcomepage.html" class="admin-nav-item">
-                    <i class="bi bi-house"></i>
+                    <i class="bi bi-box-arrow-up-right"></i>
                     <span>Back to Website</span>
                 </a>
             </nav>
 
+            <!-- Sidebar Footer / Logout -->
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" onclick="logoutStudent()" type="button">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="studentAvatar">
-                    <div class="admin-user-info">
-                        <div class="name" id="studentName">Sok Virak</div>
-                        <div class="role" id="studentRoleDisplay">ID: 0001001</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
-        <!-- Main View -->
+        <!-- ============================================================
+             MAIN CONTENT AREA
+             ============================================================ -->
         <main class="admin-main">
+            
+            <!-- GLOBAL TOPBAR -->
             <header class="admin-topbar">
-                <div class="admin-search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" id="searchAssignments" placeholder="Search assignments by title or course...">
+                <div class="admin-topbar-left">
+                    <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle Sidebar" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="admin-search-input" id="searchAssignments" placeholder="Search assignments by title or course..." autocomplete="off">
+                        <kbd class="admin-search-kbd d-none d-md-block">Ctrl K</kbd>
+                    </div>
                 </div>
+
                 <div class="admin-topbar-actions">
-                    <div class="admin-topbar-profile">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="topbarAvatar">
-                        <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm" id="topbarStudentName">Sok Virak</div>
-                            <div class="text-xs text-muted">Active Student</div>
+                    <!-- Notifications Dropdown -->
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button" title="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="admin-notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px; border-bottom:1px solid var(--student-border); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px; font-weight:700; color:var(--student-navy);">Notifications</span>
+                                <button class="btn btn-link p-0 text-decoration-none" id="markAllReadBtn" type="button" style="font-size:11.5px; font-weight:600; color:var(--student-primary);">Mark all read</button>
+                            </div>
+                            <div style="max-height:280px; overflow-y:auto;">
+                                <a href="assignment.html" class="notif-item unread">
+                                    <div class="notif-icon-box green"><i class="bi bi-check2-circle"></i></div>
+                                    <div>
+                                        <div class="notif-title">Assignment Graded: HTML5 & CSS Grid (Score: 96/100)</div>
+                                        <div class="notif-time">2 hours ago • Dr. Sarah Johnson</div>
+                                    </div>
+                                </a>
+                                <a href="course-detail.html?slug=full-stack-web-development" class="notif-item unread">
+                                    <div class="notif-icon-box blue"><i class="bi bi-play-circle"></i></div>
+                                    <div>
+                                        <div class="notif-title">New Lesson Available: Express Middleware Deep Dive</div>
+                                        <div class="notif-time">5 hours ago • Module 4</div>
+                                    </div>
+                                </a>
+                                <a href="quiz.html" class="notif-item unread">
+                                    <div class="notif-icon-box amber"><i class="bi bi-clock-history"></i></div>
+                                    <div>
+                                        <div class="notif-title">Quiz Reminder: JavaScript Fundamentals due Friday</div>
+                                        <div class="notif-time">1 day ago • Academic Notice</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Profile Button -->
+                    <div class="admin-topbar-profile" onclick="window.location.href='profile.html'" role="button" tabindex="0" title="View Profile">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150" alt="Student" class="admin-topbar-avatar student-avatar-display" id="topbarAvatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block text-start lh-1">
+                            <div class="profile-name student-name-display" id="topbarStudentName">Sreyneang Kim</div>
+                            <div class="profile-role student-role-display">Student</div>
                         </div>
                     </div>
                 </div>
             </header>
 
+            <!-- PAGE CONTENT -->
             <div class="admin-content">
+                
                 <!-- Page Title -->
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
                     <div>
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded">
-                                <i class="bi bi-journal-check me-1"></i> Coursework & Deadlines
-                            </span>
-                            <span class="text-muted text-xs">Student Portal</span>
-                        </div>
-                        <h1 class="admin-page-title fs-3 fw-bold mb-1">Course Assignments</h1>
-                        <p class="admin-page-subtitle">View upcoming assignments, download project briefs, and submit your homework for grading.</p>
+                        <h1 class="dash-welcome-title fs-3">Course Assignments</h1>
+                        <p class="dash-welcome-sub">View upcoming assignments, download starter briefs, and submit your homework for evaluation.</p>
                     </div>
                 </div>
 
                 <!-- KPI Metric Cards -->
-                <div class="row g-3 mb-4">
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon bg-primary bg-opacity-10 text-primary">
-                                <i class="bi bi-card-checklist fs-4"></i>
-                            </div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Pending / Active</div>
-                                <div class="admin-kpi-value" id="statPendingAssignments">0</div>
-                            </div>
+                <div class="dash-kpi-grid mb-4" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Pending / To Do</div>
+                            <div class="student-stat-value" id="statPendingAssignments">1</div>
+                            <div class="student-stat-sub">Action Required</div>
+                        </div>
+                        <div class="student-stat-icon amber">
+                            <i class="bi bi-card-checklist"></i>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon bg-success bg-opacity-10 text-success">
-                                <i class="bi bi-check-circle fs-4"></i>
-                            </div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Submitted Coursework</div>
-                                <div class="admin-kpi-value" id="statSubmittedAssignments">0</div>
-                            </div>
+
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Submitted Coursework</div>
+                            <div class="student-stat-value" id="statSubmittedAssignments">1</div>
+                            <div class="student-stat-sub">Awaiting Review</div>
+                        </div>
+                        <div class="student-stat-icon blue">
+                            <i class="bi bi-cloud-check-fill"></i>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon bg-info bg-opacity-10 text-info">
-                                <i class="bi bi-award fs-4"></i>
-                            </div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Graded with Feedback</div>
-                                <div class="admin-kpi-value" id="statGradedAssignments">0</div>
-                            </div>
+
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Graded with Feedback</div>
+                            <div class="student-stat-value" id="statGradedAssignments">1</div>
+                            <div class="student-stat-sub">Average: 96%</div>
+                        </div>
+                        <div class="student-stat-icon green">
+                            <i class="bi bi-award-fill"></i>
                         </div>
                     </div>
                 </div>
@@ -177,10 +240,10 @@
                 <!-- Filter Tabs -->
                 <div class="d-flex justify-content-between align-items-center gap-3 mb-4 bg-light p-2 rounded-3 border">
                     <div class="d-flex gap-1" id="statusFilterTabs">
-                        <button class="filter-tab-btn active" data-status="ALL">All Assignments (<span id="countAll">0</span>)</button>
-                        <button class="filter-tab-btn" data-status="Pending">To Do (<span id="countPending">0</span>)</button>
-                        <button class="filter-tab-btn" data-status="Submitted">Submitted (<span id="countSubmitted">0</span>)</button>
-                        <button class="filter-tab-btn" data-status="Graded">Graded (<span id="countGraded">0</span>)</button>
+                        <button class="filter-tab-btn active" data-status="ALL" type="button">All Assignments (<span id="countAll">0</span>)</button>
+                        <button class="filter-tab-btn" data-status="Pending" type="button">To Do (<span id="countPending">0</span>)</button>
+                        <button class="filter-tab-btn" data-status="Submitted" type="button">Submitted (<span id="countSubmitted">0</span>)</button>
+                        <button class="filter-tab-btn" data-status="Graded" type="button">Graded (<span id="countGraded">0</span>)</button>
                     </div>
                 </div>
 
@@ -212,12 +275,12 @@
                         <div class="mb-3">
                             <label class="form-label text-xs fw-bold text-uppercase text-muted">Submission Link / File URL *</label>
                             <input type="url" class="form-control" id="submissionUrl" placeholder="https://github.com/your-username/project or Drive link" required>
-                            <div class="form-text text-xs text-muted">Provide the public GitHub repository link or Google Drive / OneDrive share link.</div>
+                            <div class="form-text text-xs text-muted">Provide your public GitHub repository link or Google Drive / cloud link.</div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Student Comments / Notes</label>
-                            <textarea class="form-control" id="submissionComments" rows="3" placeholder="Notes for the instructor (e.g. key features implemented, extra libraries used)..."></textarea>
+                            <label class="form-label text-xs fw-bold text-uppercase text-muted">Student Comments / Implementation Notes</label>
+                            <textarea class="form-control" id="submissionComments" rows="3" placeholder="Notes for instructor (e.g. key architectural decisions, test coverage, etc.)..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer bg-light">
@@ -233,6 +296,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Shared Student Layout & Nav Controller -->
+    <script src="../../js/components/student-layout.js"></script>
+    <!-- Page Controller -->
     <script src="../../js/pages/student-assignments.js"></script>
 </body>
 </html>

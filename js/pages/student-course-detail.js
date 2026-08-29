@@ -1,6 +1,6 @@
 // ==========================================
-// AUB Digital Academy - Student Course Detail & Checkout Controller
-// Course discovery, ABA KHQR Payment Gateway, Deadline Barrier Check & Enrollment
+// AUB Digital Academy - Student Course Detail & Learning Controller
+// Resolves course via ID or Slug, Renders Syllabus & Modules from Mock Store / API
 // ==========================================
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -25,35 +25,29 @@ document.addEventListener('DOMContentLoaded', async function () {
         return headers;
     }
 
-    // Parse Course ID from URL
+    // Parse Course ID or Slug from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const courseId = parseInt(urlParams.get('id')) || 1;
+    let courseId = parseInt(urlParams.get('id'), 10);
+    const courseSlug = urlParams.get('slug');
+
+    if (!courseId && courseSlug && window.AdminStore) {
+        const courses = window.AdminStore.getCourses();
+        const found = courses.find(c => c.slug === courseSlug || (c.slug && courseSlug.includes(c.slug)) || c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').includes(courseSlug));
+        if (found) courseId = found.id;
+    }
+
+    if (!courseId) courseId = 1;
 
     let activeCourse = null;
-    let selectedMethod = 'ABA PAY';
-    let isEnrolled = false;
 
-    // Modals
-    const checkoutModalEl = document.getElementById('paymentCheckoutModal');
-    const checkoutModal = checkoutModalEl ? new bootstrap.Modal(checkoutModalEl) : null;
-
-    // Load Student Profile Info
-    const student = (window.AdminStore ? window.AdminStore.getUsers().find(u => u.role === 'STUDENT') : null) || {
-        id: 3,
-        full_name: 'Sok Virak',
-        university_id: '0001001',
-        email: 'virak@aub.edu.kh'
-    };
-
-    if (document.getElementById('topbarStudentName')) document.getElementById('topbarStudentName').textContent = student.full_name;
-    if (document.getElementById('studentName')) document.getElementById('studentName').textContent = student.full_name;
+    await loadCourse();
 
     // 1. Load Course Details
     async function loadCourse() {
         let loaded = false;
         try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 1800);
+            const timeoutId = setTimeout(() => controller.abort(), 1500);
             const res = await fetch(`${API_BASE}/public/courses/${courseId}`, { headers: getHeaders(), signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
@@ -66,107 +60,121 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (e) {}
 
         if (!loaded && window.AdminStore) {
-            activeCourse = window.AdminStore.getCourseById(courseId);
+            activeCourse = window.AdminStore.getCourseById(courseId) || window.AdminStore.getCourses()[0];
         }
 
         if (!activeCourse) {
-            alert('Course not found.');
-            return;
-        }
-
-        // Check if student already enrolled
-        if (window.AdminStore) {
-            const enrollments = window.AdminStore.getEnrollments();
-            isEnrolled = enrollments.some(e => e.student_id === student.id && e.course_id === activeCourse.id);
+            activeCourse = {
+                id: 1,
+                title: 'Full-Stack Web Development',
+                code: 'CS-WD101',
+                category_name: 'Technology',
+                difficulty: 'Intermediate',
+                instructor_name: 'Prof. Alex Chen',
+                instructor_avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150',
+                instructor_title: 'Head of Software Engineering',
+                rating: 4.9,
+                enrolled_students_count: 124,
+                description: 'Master frontend engineering with modern HTML5, CSS3, JavaScript ES6+, Express routes, REST APIs, and relational database modeling.',
+                thumbnail_url: '../../assets/images/course_webdev.jpg'
+            };
         }
 
         renderCourseDetails(activeCourse);
     }
 
-    function getStatusBadge(status) {
-        switch (status) {
-            case 'Enrollment Open':
-                return `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1"><i class="bi bi-door-open-fill me-1"></i>Enrollment Open</span>`;
-            case 'Deadline Approaching':
-                return `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2.5 py-1"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>Deadline Approaching</span>`;
-            case 'Enrollment Closed':
-                return `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1"><i class="bi bi-lock-fill me-1"></i>Enrollment Closed</span>`;
-            case 'In Progress':
-                return `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1"><i class="bi bi-play-circle-fill me-1"></i>Cohort In Progress</span>`;
-            case 'Upcoming':
-                return `<span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1"><i class="bi bi-hourglass-split me-1"></i>Upcoming</span>`;
-            default:
-                return `<span class="badge bg-secondary bg-opacity-10 text-secondary border px-2.5 py-1">${escapeHtml(status || 'Active')}</span>`;
-        }
-    }
-
     function renderCourseDetails(c) {
-        document.getElementById('cTitle').textContent = c.title;
-        document.getElementById('cCategory').textContent = c.category_name || 'Academic';
-        document.getElementById('cDifficulty').textContent = c.difficulty || 'Beginner';
-        document.getElementById('cStatusBadge').innerHTML = getStatusBadge(c.computed_status || 'Enrollment Open');
+        const titleEl = document.getElementById('cTitle');
+        const catEl = document.getElementById('cCategory');
+        const diffEl = document.getElementById('cDifficulty');
+        const instNameEl = document.getElementById('cInstructorName');
+        const instAvatarEl = document.getElementById('cInstructorAvatar');
+        const instTitleEl = document.getElementById('cInstructorTitle');
+        const ratingEl = document.getElementById('cRating');
+        const studentsEl = document.getElementById('cStudentsCount');
+        const descEl = document.getElementById('cDescription');
+        const thumbEl = document.getElementById('cThumbnail');
 
-        document.getElementById('cInstructorName').textContent = c.instructor_name || 'Faculty Staff';
-        if (c.instructor_avatar) document.getElementById('cInstructorAvatar').src = c.instructor_avatar;
-        document.getElementById('cRating').textContent = c.rating || '4.8';
-        document.getElementById('cStudentsCount').textContent = c.enrolled_students_count || 0;
-        document.getElementById('cDescription').textContent = c.description || 'Comprehensive curriculum designed for student mastery.';
-
-        const price = Number(c.price) || 0;
-        document.getElementById('cPriceDisplay').textContent = price > 0 ? `$${price.toFixed(2)}` : 'FREE';
-
-        // Dates
-        document.getElementById('cDeadlineDate').textContent = c.enrollment_deadline ? String(c.enrollment_deadline).split('T')[0] : 'Open Admission';
-        document.getElementById('cStartDate').textContent = c.start_date ? String(c.start_date).split('T')[0] : 'Rolling Admissions';
-        document.getElementById('cEndDate').textContent = c.end_date ? String(c.end_date).split('T')[0] : 'TBA';
-
-        // Deadline Warning Banner
-        const bannerContainer = document.getElementById('cDeadlinesBanner');
-        const today = new Date().toISOString().split('T')[0];
-        const isClosed = c.is_enrollment_closed || (c.enrollment_deadline && today > c.enrollment_deadline);
-
-        if (isClosed) {
-            bannerContainer.innerHTML = `
-                <div class="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 small mb-0 rounded-3">
-                    <i class="bi bi-exclamation-octagon-fill fs-5"></i>
-                    <div>
-                        <strong>Enrollment Closed!</strong> The admission deadline for this cohort was ${c.enrollment_deadline}.
-                    </div>
-                </div>
-            `;
-        } else if (c.enrollment_deadline) {
-            const diffMs = new Date(c.enrollment_deadline) - new Date(today);
-            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            if (diffDays >= 0 && diffDays <= 3) {
-                bannerContainer.innerHTML = `
-                    <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 small mb-0 rounded-3 border-warning">
-                        <i class="bi bi-alarm-fill text-warning fs-5"></i>
-                        <div>
-                            <strong>Act Fast!</strong> Enrollment closes in <strong>${diffDays} day${diffDays === 1 ? '' : 's'}</strong> (${c.enrollment_deadline}).
-                        </div>
-                    </div>
-                `;
-            } else {
-                bannerContainer.innerHTML = `
-                    <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 small mb-0 rounded-3">
-                        <i class="bi bi-calendar-check text-success fs-5"></i>
-                        <div>Enrollment is Open until <strong>${c.enrollment_deadline}</strong>.</div>
-                    </div>
-                `;
-            }
+        if (titleEl) titleEl.textContent = c.title;
+        if (catEl) catEl.textContent = c.category_name || 'Technology';
+        if (diffEl) diffEl.textContent = c.difficulty || 'Intermediate';
+        if (instNameEl) instNameEl.textContent = c.instructor_name || 'Prof. Alex Chen';
+        if (instAvatarEl && c.instructor_avatar) instAvatarEl.src = c.instructor_avatar;
+        if (instTitleEl) instTitleEl.textContent = c.instructor_title || 'Senior Faculty Member';
+        if (ratingEl) ratingEl.textContent = c.rating || '4.9';
+        if (studentsEl) studentsEl.textContent = c.enrolled_students_count || '124';
+        if (descEl) descEl.textContent = c.description || 'Comprehensive curriculum designed for practical student mastery.';
+        if (thumbEl && c.thumbnail_url) {
+            thumbEl.src = c.thumbnail_url.startsWith('http') || c.thumbnail_url.startsWith('/') || c.thumbnail_url.startsWith('..')
+                ? c.thumbnail_url 
+                : `../../${c.thumbnail_url}`;
         }
 
         // Render Syllabus Modules
         const chapters = window.AdminStore ? window.AdminStore.getChaptersByCourseId(c.id) : [];
         const allLessons = window.AdminStore ? window.AdminStore.getAllLessonsByCourseId(c.id) : [];
-        const totalLessonCount = allLessons.length > 0 ? allLessons.length : chapters.reduce((sum, ch) => sum + (ch.lesson_count || 0), 0);
+        const totalLessonCount = allLessons.length > 0 ? allLessons.length : (chapters.length > 0 ? chapters.reduce((sum, ch) => sum + (ch.lesson_count || 0), 0) : 24);
+        
         if (document.getElementById('cTotalLessons')) {
             document.getElementById('cTotalLessons').textContent = `${totalLessonCount} Lessons Total`;
         }
         
         const accordion = document.getElementById('syllabusAccordion');
+        if (!accordion) return;
+
         if (chapters.length === 0) {
-            accordion.innerHTML = `<div class="p-3 text-center text-muted bg-light rounded border small">Module syllabus being finalized by faculty.</div>`;
+            // Default syllabus preview for demo
+            accordion.innerHTML = `
+                <div class="accordion-item border rounded-2 mb-2 overflow-hidden">
+                    <h2 class="accordion-header" id="heading1">
+                        <button class="accordion-button bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                            <div class="d-flex align-items-center justify-content-between w-100 me-3">
+                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Module 1: HTML5 &amp; CSS3 Architecture</span>
+                                <span class="badge bg-white text-primary border">3 Lessons • Completed</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#syllabusAccordion">
+                        <div class="accordion-body p-3 bg-white" style="font-size: 13px;">
+                            <div class="lesson-list-item">
+                                <span><i class="bi bi-check-circle-fill text-success me-2"></i>Lesson 1: Semantic Markup &amp; Accessibility Landmarks</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
+                            </div>
+                            <div class="lesson-list-item">
+                                <span><i class="bi bi-check-circle-fill text-success me-2"></i>Lesson 2: Modern CSS Grid &amp; Responsive Layouts</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border rounded-2 mb-2 overflow-hidden">
+                    <h2 class="accordion-header" id="heading4">
+                        <button class="accordion-button bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                            <div class="d-flex align-items-center justify-content-between w-100 me-3">
+                                <span class="fw-bold text-dark" style="font-size: 13.5px;">Module 4: REST API Development &amp; Express</span>
+                                <span class="badge bg-primary text-white">In Progress • Current</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse4" class="accordion-collapse collapse show" data-bs-parent="#syllabusAccordion">
+                        <div class="accordion-body p-3 bg-white" style="font-size: 13px;">
+                            <div class="lesson-list-item">
+                                <span><i class="bi bi-check-circle-fill text-success me-2"></i>Lesson 1: Express Server Scaffolding &amp; Controllers</span>
+                                <span class="badge bg-success bg-opacity-10 text-success">Completed</span>
+                            </div>
+                            <div class="lesson-list-item bg-primary bg-opacity-10 rounded">
+                                <span><i class="bi bi-play-circle-fill text-primary me-2"></i><strong>Lesson 2: Express Routing &amp; Middleware</strong></span>
+                                <span class="badge bg-primary text-white">Current Lesson</span>
+                            </div>
+                            <div class="lesson-list-item">
+                                <span><i class="bi bi-lock text-muted me-2"></i>Lesson 3: Error Handling &amp; Validation</span>
+                                <span class="badge bg-light text-muted border">Upcoming</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         } else {
             accordion.innerHTML = chapters.map((ch, idx) => {
                 const chLessons = window.AdminStore ? window.AdminStore.getLessonsByModuleId(ch.id) : [];
@@ -175,171 +183,33 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return `
                     <div class="accordion-item border rounded-2 mb-2 overflow-hidden">
                         <h2 class="accordion-header" id="heading${ch.id}">
-                            <button class="accordion-button ${idx > 0 ? 'collapsed' : ''} bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${ch.id}">
+                            <button class="accordion-button ${idx > 1 ? 'collapsed' : ''} bg-light py-2.5" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${ch.id}">
                                 <div class="d-flex align-items-center justify-content-between w-100 me-3">
                                     <span class="fw-bold text-dark" style="font-size: 13.5px;">Module ${ch.chapter_num}: ${escapeHtml(ch.title)}</span>
                                     <span class="badge bg-white text-primary border">${lessonCount} Lessons &bull; ${escapeHtml(ch.duration || '2 Weeks')}</span>
                                 </div>
                             </button>
                         </h2>
-                        <div id="collapse${ch.id}" class="accordion-collapse collapse ${idx === 0 ? 'show' : ''}" data-bs-parent="#syllabusAccordion">
+                        <div id="collapse${ch.id}" class="accordion-collapse collapse ${idx <= 1 ? 'show' : ''}" data-bs-parent="#syllabusAccordion">
                             <div class="accordion-body p-3 bg-white" style="font-size: 13px;">
-                                <p class="text-secondary mb-2">${escapeHtml(ch.description || 'Core interactive exercises, theory lecture, and hands-on coding laboratory.')}</p>
+                                <p class="text-secondary mb-2">${escapeHtml(ch.description || 'Core interactive exercises, theory lecture, and hands-on laboratory.')}</p>
                                 ${chLessons.length > 0 ? `
                                     <div class="d-flex flex-column gap-1 mt-2 border-top pt-2">
                                         ${chLessons.map(l => `
-                                            <div class="d-flex align-items-center justify-content-between text-muted py-1" style="font-size: 12px;">
+                                            <div class="lesson-list-item">
                                                 <span><i class="bi bi-play-circle text-primary me-2"></i><span class="text-dark fw-medium">${escapeHtml(l.title)}</span></span>
                                                 <span class="badge bg-light text-muted border">${escapeHtml(l.duration || '20 minutes')}</span>
                                             </div>
                                         `).join('')}
                                     </div>
-                                ` : `
-                                    <div class="d-flex align-items-center gap-3 text-muted small">
-                                        <span><i class="bi bi-play-circle me-1 text-primary"></i>Video Lectures Included</span>
-                                        <span><i class="bi bi-file-earmark-code me-1 text-primary"></i>Practical Code Starter</span>
-                                        <span><i class="bi bi-patch-question me-1 text-primary"></i>Knowledge Check Quiz</span>
-                                    </div>
-                                `}
+                                ` : ''}
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
-        // Render Action Button
-        const actionContainer = document.getElementById('cEnrollActionContainer');
-        if (isEnrolled) {
-            actionContainer.innerHTML = `
-                <a href="dashboard.html" class="btn btn-success btn-lg w-100 py-3 fw-bold shadow-sm">
-                    <i class="bi bi-play-circle-fill me-1"></i> Already Enrolled &bull; Go to Classroom
-                </a>
-            `;
-        } else if (isClosed) {
-            actionContainer.innerHTML = `
-                <button class="btn btn-secondary btn-lg w-100 py-3 fw-bold disabled" disabled>
-                    <i class="bi bi-lock-fill me-1"></i> Enrollment Closed
-                </button>
-            `;
-        } else {
-            actionContainer.innerHTML = `
-                <button class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm" onclick="openPaymentModal()">
-                    <i class="bi bi-credit-card me-1"></i> ${price > 0 ? `Enroll Now &bull; Proceed to Payment ($${price.toFixed(2)})` : 'Enroll Now for Free'}
-                </button>
-            `;
-        }
     }
-
-    // 2. Checkout Modal Handling
-    window.openPaymentModal = function () {
-        if (!activeCourse) return;
-
-        const price = Number(activeCourse.price) || 0;
-        document.getElementById('checkoutCourseTitle').textContent = activeCourse.title;
-        document.getElementById('checkoutCourseMeta').textContent = `${activeCourse.category_name} &bull; Led by ${activeCourse.instructor_name}`;
-        document.getElementById('checkoutPrice').textContent = price > 0 ? `$${price.toFixed(2)}` : 'FREE';
-
-        // Reset views
-        document.getElementById('paymentFeedbackContainer').classList.add('d-none');
-        document.getElementById('checkoutFooter').classList.remove('d-none');
-        selectPaymentMethod('ABA PAY');
-
-        if (checkoutModal) checkoutModal.show();
-    };
-
-    window.selectPaymentMethod = function (method) {
-        selectedMethod = method;
-        document.querySelectorAll('.payment-method-card').forEach(c => c.classList.remove('selected'));
-
-        if (method === 'ABA PAY') {
-            document.getElementById('method-aba')?.classList.add('selected');
-            document.getElementById('khqrView')?.classList.remove('d-none');
-        } else if (method === 'Credit Card') {
-            document.getElementById('method-card')?.classList.add('selected');
-            document.getElementById('khqrView')?.classList.add('d-none');
-        } else {
-            document.getElementById('method-bank')?.classList.add('selected');
-            document.getElementById('khqrView')?.classList.add('d-none');
-        }
-    };
-
-    window.processCheckout = async function () {
-        const confirmBtn = document.getElementById('confirmPaymentBtn');
-        if (confirmBtn) {
-            confirmBtn.disabled = true;
-            confirmBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Verifying...`;
-        }
-
-        // Show feedback processing animation
-        document.getElementById('paymentFeedbackContainer')?.classList.remove('d-none');
-
-        try {
-            // Check deadline barrier
-            const today = new Date().toISOString().split('T')[0];
-            if (activeCourse.enrollment_deadline && today > activeCourse.enrollment_deadline) {
-                throw new Error('Enrollment deadline has expired. Admission is now closed.');
-            }
-
-            let result = null;
-            if (window.AdminStore) {
-                result = window.AdminStore.enrollInCourse(activeCourse.id, student.id, selectedMethod);
-            }
-
-            const res = await fetch(`${API_BASE}/public/courses/${activeCourse.id}/enroll`, {
-                method: 'POST',
-                headers: getHeaders(),
-                body: JSON.stringify({
-                    student_id: student.id,
-                    student_name: student.full_name,
-                    payment_method: selectedMethod
-                })
-            });
-
-            setTimeout(() => {
-                if (checkoutModal) checkoutModal.hide();
-
-                if (window.Swal) {
-                    window.Swal.fire({
-                        icon: 'success',
-                        title: 'Enrollment Confirmed! 🎉',
-                        html: `
-                            <p class="text-secondary mb-2">Your payment of <strong>$${Number(activeCourse.price || 0).toFixed(2)}</strong> via <strong>${selectedMethod}</strong> has been verified.</p>
-                            <div class="p-3 bg-light rounded border text-start small mb-3">
-                                <div><strong>Course:</strong> ${escapeHtml(activeCourse.title)}</div>
-                                <div><strong>Student:</strong> ${escapeHtml(student.full_name)} (${student.university_id})</div>
-                                <div><strong>Status:</strong> <span class="badge bg-success">Active Admission</span></div>
-                            </div>
-                        `,
-                        confirmButtonColor: '#2563EB',
-                        confirmButtonText: '<i class="bi bi-play-circle me-1"></i> Start Course Now',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = 'dashboard.html';
-                    });
-                } else {
-                    alert('Payment Successful! Enrollment Confirmed.');
-                    window.location.href = 'dashboard.html';
-                }
-            }, 900);
-
-        } catch (err) {
-            document.getElementById('paymentFeedbackContainer')?.classList.add('d-none');
-            if (confirmBtn) {
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = `<i class="bi bi-check2-circle me-1"></i> Confirm & Complete Enrollment`;
-            }
-            if (window.Swal) {
-                window.Swal.fire({
-                    icon: 'error',
-                    title: 'Enrollment Failed',
-                    text: err.message || 'Cannot complete enrollment.'
-                });
-            } else {
-                alert(err.message || 'Cannot complete enrollment.');
-            }
-        }
-    };
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -347,7 +217,4 @@ document.addEventListener('DOMContentLoaded', async function () {
         div.textContent = text;
         return div.innerHTML;
     }
-
-    // Initialize Page
-    loadCourse();
 });

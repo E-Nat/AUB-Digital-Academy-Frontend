@@ -109,22 +109,34 @@
         const emptyClearBtn = document.getElementById('emptyClearBtn');
         if (emptyClearBtn) emptyClearBtn.addEventListener('click', resetSearchFilters);
 
-        // Header Buttons
+        // Header & Empty State Add Buttons
         const addCourseBtn = document.getElementById('openAddCourseModalBtn');
         if (addCourseBtn) {
             addCourseBtn.addEventListener('click', function () {
-                openCreateCourseModal();
+                if (typeof window.openCreateCourseModal === 'function') {
+                    window.openCreateCourseModal();
+                }
             });
         }
+
+        const emptyAddBtn = document.getElementById('emptyAddCourseBtn');
+        if (emptyAddBtn) {
+            emptyAddBtn.addEventListener('click', function () {
+                if (typeof window.openCreateCourseModal === 'function') {
+                    window.openCreateCourseModal();
+                }
+            });
+        }
+
+        // Listen to shared course saved event across admin pages
+        window.addEventListener('course:saved', function () {
+            loadStoreData();
+        });
 
         const resetDemoBtn = document.getElementById('resetDemoDataBtn');
         if (resetDemoBtn) {
             resetDemoBtn.addEventListener('click', handleResetDemoData);
         }
-
-        // Form Submissions
-        const courseForm = document.getElementById('courseForm');
-        if (courseForm) courseForm.addEventListener('submit', handleSaveCourse);
 
         const moduleForm = document.getElementById('moduleForm');
         if (moduleForm) moduleForm.addEventListener('submit', handleSaveModule);
@@ -227,23 +239,11 @@
 
     function populateFilterDropdowns() {
         const catFilter = document.getElementById('courseCategoryFilter');
-        const courseCatSelect = document.getElementById('courseCategorySelect');
         if (catFilter) {
             const currentVal = catFilter.value;
             catFilter.innerHTML = '<option value="all">All Categories</option>' +
                 allCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
             if (currentVal) catFilter.value = currentVal;
-        }
-
-        if (courseCatSelect) {
-            courseCatSelect.innerHTML = '<option value="">Select Academic Category...</option>' +
-                allCategories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-        }
-
-        const courseInstSelect = document.getElementById('courseInstructorSelect');
-        if (courseInstSelect) {
-            courseInstSelect.innerHTML = '<option value="">Select Course Instructor...</option>' +
-                allInstructors.map(i => `<option value="${i.id}">${escapeHtml(i.name)} (${escapeHtml(i.title || 'Faculty')})</option>`).join('');
         }
     }
 
@@ -406,6 +406,9 @@
             else if (diffRaw === 'intermediate') diffClass = 'intermediate';
 
             const coverUrl = c.thumbnail_url || 'assets/images/course_webdev.jpg';
+            const coverSrc = (coverUrl.startsWith('data:') || coverUrl.startsWith('http://') || coverUrl.startsWith('https://')) 
+                ? coverUrl 
+                : (coverUrl.startsWith('/') ? coverUrl : `../../${coverUrl}`);
             const courseCode = c.code || `CS-${String(c.id).padStart(3, '0')}`;
             const durationText = c.duration || '12 Weeks';
             const ratingText = c.rating || 4.9;
@@ -415,7 +418,7 @@
                     <td>
                         <div class="d-flex align-items-center gap-3">
                             <div class="course-thumb-box">
-                                <img src="../../${escapeHtml(coverUrl)}" alt="${escapeHtml(c.title)}"
+                                <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.title)}"
                                      onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=120'">
                             </div>
                             <div>
@@ -524,124 +527,19 @@
     }
 
     // ============================================================
-    // 3. CREATE & EDIT COURSE
+    // 3. CREATE & EDIT COURSE (DELEGATED TO SHARED COMPONENT)
     // ============================================================
     function openCreateCourseModal() {
-        const form = document.getElementById('courseForm');
-        if (form) form.reset();
-        form.classList.remove('was-validated');
-
-        document.getElementById('courseId').value = '';
-        document.getElementById('courseModalTitle').textContent = 'Add New Course';
-        document.getElementById('courseCodeInput').value = `CS-${Math.floor(100 + Math.random() * 900)}`;
-        document.getElementById('courseDifficultySelect').value = 'Intermediate';
-        document.getElementById('courseStatusSelect').value = 'Published';
-        document.getElementById('courseDurationInput').value = '12 Weeks';
-        document.getElementById('coursePriceInput').value = '50.00';
-        document.getElementById('courseThumbnailSelect').value = 'assets/images/course_webdev.jpg';
-
-        if (courseModal) courseModal.show();
+        if (typeof window.openCreateCourseModal === 'function') {
+            window.openCreateCourseModal();
+        }
     }
 
     window.editCourse = function (id) {
-        const store = getStore();
-        const course = store.getCourseById(id);
-        if (!course) {
-            showToast('Course not found', 'error');
-            return;
+        if (typeof window.openEditCourseModal === 'function') {
+            window.openEditCourseModal(id);
         }
-
-        const form = document.getElementById('courseForm');
-        if (form) form.reset();
-        form.classList.remove('was-validated');
-
-        document.getElementById('courseId').value = course.id;
-        document.getElementById('courseModalTitle').textContent = `Edit Course — ${course.title}`;
-        document.getElementById('courseTitleInput').value = course.title || '';
-        document.getElementById('courseCodeInput').value = course.code || '';
-        document.getElementById('courseCategorySelect').value = course.category_id || '';
-        document.getElementById('courseInstructorSelect').value = course.instructor_id || '';
-        document.getElementById('courseDifficultySelect').value = course.difficulty || 'Intermediate';
-        document.getElementById('courseDurationInput').value = course.duration || '12 Weeks';
-        document.getElementById('courseStatusSelect').value = course.is_archived === 1 ? 'Archived' : (course.is_published === 1 ? 'Published' : 'Draft');
-        document.getElementById('courseDescriptionInput').value = course.description || '';
-        document.getElementById('coursePriceInput').value = course.price !== undefined ? course.price : '50.00';
-        if (course.thumbnail_url) {
-            document.getElementById('courseThumbnailSelect').value = course.thumbnail_url;
-        }
-
-        if (courseModal) courseModal.show();
     };
-
-    function handleSaveCourse(e) {
-        e.preventDefault();
-        const form = e.target;
-        if (!form.checkValidity()) {
-            form.classList.add('was-validated');
-            return;
-        }
-
-        const idVal = document.getElementById('courseId').value;
-        const isEdit = Boolean(idVal);
-
-        const title = document.getElementById('courseTitleInput').value.trim();
-        const code = document.getElementById('courseCodeInput').value.trim();
-        const categoryId = Number(document.getElementById('courseCategorySelect').value);
-        const instructorId = Number(document.getElementById('courseInstructorSelect').value);
-        const difficulty = document.getElementById('courseDifficultySelect').value;
-        const duration = document.getElementById('courseDurationInput').value.trim();
-        const statusVal = document.getElementById('courseStatusSelect').value;
-        const description = document.getElementById('courseDescriptionInput').value.trim();
-        const price = parseFloat(document.getElementById('coursePriceInput').value) || 0.0;
-        const thumbnail = document.getElementById('courseThumbnailSelect').value;
-
-        if (title.length < 3) {
-            showToast('Course Title must be at least 3 characters.', 'warning');
-            return;
-        }
-        if (description.length < 10) {
-            showToast('Course Description must be at least 10 characters.', 'warning');
-            return;
-        }
-
-        const courseData = {
-            title: title,
-            code: code || `CS-${Math.floor(100 + Math.random() * 900)}`,
-            category_id: categoryId,
-            instructor_id: instructorId,
-            difficulty: difficulty,
-            duration: duration || '12 Weeks',
-            description: description,
-            price: price,
-            thumbnail_url: thumbnail,
-            is_published: statusVal === 'Draft' ? 0 : 1,
-            is_archived: statusVal === 'Archived' ? 1 : 0
-        };
-
-        const store = getStore();
-        try {
-            if (isEdit) {
-                store.updateCourse(Number(idVal), courseData);
-                showToast(`Course "${title}" updated successfully!`, 'success');
-            } else {
-                const newCourse = store.createCourse(courseData);
-                // Create a default starter module for new courses
-                store.createModule({
-                    course_id: newCourse.id,
-                    title: 'Module 1 — Course Introduction',
-                    description: 'Welcome and foundational orientation for this course.',
-                    duration: '2 Weeks'
-                });
-                showToast(`Course "${title}" created successfully!`, 'success');
-            }
-
-            if (courseModal) courseModal.hide();
-            loadStoreData();
-        } catch (err) {
-            console.error('Error saving course:', err);
-            showToast(err.message || 'Failed to save course', 'error');
-        }
-    }
 
     window.duplicateCourseAction = function (id) {
         const store = getStore();

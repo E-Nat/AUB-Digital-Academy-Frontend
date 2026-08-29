@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Details - AUB Digital Academy</title>
+    <title>Course Details — Student Portal — AUB Digital Academy</title>
     <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
@@ -12,8 +12,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     
-    <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <!-- Unified Student Layout CSS -->
+    <link href="../../css/layouts/student.css" rel="stylesheet">
     <style>
         .khqr-box {
             background: linear-gradient(135deg, #005696 0%, #002d50 100%);
@@ -31,182 +34,247 @@
         }
         .payment-method-card {
             cursor: pointer;
-            border: 2px solid #E2E8F0;
+            border: 1.5px solid var(--student-border);
             border-radius: 10px;
             padding: 12px;
             transition: all 0.2s ease;
         }
         .payment-method-card.selected {
-            border-color: #2563EB;
-            background-color: rgba(37, 99, 235, 0.04);
+            border-color: var(--student-primary);
+            background-color: var(--student-primary-lt);
+        }
+        .module-accordion-btn {
+            background: #FFFFFF;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--student-navy);
+        }
+        .lesson-list-item {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--student-border-lt);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .lesson-list-item:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
-<body class="admin-body bg-light">
+<body class="admin-body">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
+        
+        <!-- ============================================================
+             STUDENT SIDEBAR
+             ============================================================ -->
+        <aside class="admin-sidebar" id="studentSidebar">
+            <!-- Brand / Sidebar Header -->
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                <a href="dashboard.html" class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Student Portal</div>
                     </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">STUDENT PORTAL</div>
-                    </div>
-                </div>
+                </a>
             </div>
 
+            <!-- Navigation Links -->
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item">
                     <i class="bi bi-grid-fill"></i>
                     <span>My Learning</span>
                 </a>
+
+                <div class="admin-sidebar-label">LEARNING</div>
                 <a href="my-courses.html" class="admin-nav-item active">
-                    <i class="bi bi-journal-check"></i>
-                    <span>Course Catalog</span>
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    <span>Enrolled Courses</span>
                 </a>
                 <a href="assignment.html" class="admin-nav-item">
                     <i class="bi bi-card-checklist"></i>
                     <span>Assignments</span>
                 </a>
+                <a href="quiz.html" class="admin-nav-item">
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    <span>Quizzes &amp; Tests</span>
+                </a>
                 <a href="grades.html" class="admin-nav-item">
-                    <i class="bi bi-award"></i>
-                    <span>Grades & Certificates</span>
+                    <i class="bi bi-award-fill"></i>
+                    <span>Grades &amp; Certificates</span>
+                </a>
+
+                <div class="admin-sidebar-label">SUPPORT</div>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-person-video3"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+
+                <div class="admin-sidebar-label">ACCOUNT</div>
+                <a href="profile.html" class="admin-nav-item">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
                 </a>
                 <a href="../../welcomepage.html" class="admin-nav-item">
-                    <i class="bi bi-house"></i>
+                    <i class="bi bi-box-arrow-up-right"></i>
                     <span>Back to Website</span>
                 </a>
             </nav>
 
+            <!-- Sidebar Footer / Logout -->
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" onclick="logoutStudent()" type="button">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="studentAvatar">
-                    <div class="admin-user-info">
-                        <div class="name" id="studentName">Sok Virak</div>
-                        <div class="role">Student</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
-        <!-- Main View -->
+        <!-- ============================================================
+             MAIN CONTENT AREA
+             ============================================================ -->
         <main class="admin-main">
+            
+            <!-- GLOBAL TOPBAR -->
             <header class="admin-topbar">
-                <div class="d-flex align-items-center gap-2">
-                    <a href="my-courses.html" class="btn btn-light btn-sm border"><i class="bi bi-arrow-left me-1"></i> Back to Courses</a>
+                <div class="admin-topbar-left">
+                    <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle Sidebar" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <a href="my-courses.html" class="btn btn-outline-secondary btn-sm rounded-3">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Courses
+                    </a>
                 </div>
+
                 <div class="admin-topbar-actions">
-                    <div class="admin-topbar-profile">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student">
-                        <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm" id="topbarStudentName">Sok Virak</div>
-                            <div class="text-xs text-muted">AUB Student</div>
+                    <!-- Notifications Dropdown -->
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button" title="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="admin-notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px; border-bottom:1px solid var(--student-border); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px; font-weight:700; color:var(--student-navy);">Notifications</span>
+                                <button class="btn btn-link p-0 text-decoration-none" id="markAllReadBtn" type="button" style="font-size:11.5px; font-weight:600; color:var(--student-primary);">Mark all read</button>
+                            </div>
+                            <div style="max-height:280px; overflow-y:auto;">
+                                <a href="course-detail.html?slug=full-stack-web-development" class="notif-item unread">
+                                    <div class="notif-icon-box blue"><i class="bi bi-play-circle"></i></div>
+                                    <div>
+                                        <div class="notif-title">New Lesson Available: Express Middleware</div>
+                                        <div class="notif-time">5 hours ago • Module 4</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Profile Button -->
+                    <div class="admin-topbar-profile" onclick="window.location.href='profile.html'" role="button" tabindex="0" title="View Profile">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150" alt="Student" class="admin-topbar-avatar student-avatar-display" id="topbarAvatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block text-start lh-1">
+                            <div class="profile-name student-name-display" id="topbarStudentName">Sreyneang Kim</div>
+                            <div class="profile-role student-role-display">Student</div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <div class="admin-content p-4">
+            <!-- PAGE CONTENT -->
+            <div class="admin-content">
                 
                 <!-- Main Course Container -->
                 <div class="row g-4" id="courseDetailContainer">
                     
                     <!-- Left 8-col: Content, Syllabus, Description -->
                     <div class="col-lg-8">
-                        <div class="bg-white rounded-3 p-4 border shadow-sm mb-4">
+                        <div class="student-content-card mb-4">
                             <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                                 <span class="badge bg-primary bg-opacity-10 text-primary px-2.5 py-1" id="cCategory">Technology</span>
-                                <span class="badge bg-light text-dark border px-2.5 py-1" id="cDifficulty">Beginner</span>
-                                <span id="cStatusBadge"></span>
+                                <span class="badge bg-light text-dark border px-2.5 py-1" id="cDifficulty">Intermediate</span>
+                                <span id="cStatusBadge"><span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-circle-fill me-1" style="font-size:6px;"></i> In Progress</span></span>
                             </div>
 
-                            <h2 class="fw-bold text-dark mb-3" id="cTitle">Course Title</h2>
+                            <h1 class="dash-welcome-title fs-3 mb-3" id="cTitle">Full-Stack Web Development</h1>
                             
                             <!-- Instructor Bar -->
                             <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border mb-4">
-                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100" class="rounded-circle border" style="width: 44px; height: 44px;" id="cInstructorAvatar">
+                                <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150" class="rounded-circle border" style="width: 44px; height: 44px; object-fit: cover;" id="cInstructorAvatar">
                                 <div>
-                                    <div class="fw-bold text-dark" id="cInstructorName">Instructor Name</div>
-                                    <div class="text-muted small" id="cInstructorTitle">Senior Faculty Member</div>
+                                    <div class="fw-bold text-dark" id="cInstructorName">Prof. Alex Chen</div>
+                                    <div class="text-muted text-xs" id="cInstructorTitle">Head of Software Engineering</div>
                                 </div>
                                 <div class="ms-auto text-end">
-                                    <div class="text-warning fw-bold"><i class="bi bi-star-fill me-1"></i><span id="cRating">4.8</span></div>
-                                    <div class="text-muted small"><span id="cStudentsCount">0</span> Students Enrolled</div>
+                                    <div class="text-warning fw-bold text-sm"><i class="bi bi-star-fill me-1"></i><span id="cRating">4.9</span></div>
+                                    <div class="text-muted text-xs"><span id="cStudentsCount">124</span> Students</div>
                                 </div>
                             </div>
 
                             <!-- Course Overview -->
                             <div class="mb-4">
-                                <h5 class="fw-bold text-dark mb-2">Course Overview</h5>
-                                <p class="text-secondary" style="line-height: 1.7; font-size: 14.5px;" id="cDescription">
-                                    Course description...
+                                <h3 class="fw-bold text-dark fs-5 mb-2">Course Overview</h3>
+                                <p class="text-secondary text-sm" style="line-height: 1.7;" id="cDescription">
+                                    Master modern frontend engineering and backend architecture with HTML5, CSS3, ES6+ JavaScript, Node.js, Express REST APIs, and database modeling.
                                 </p>
                             </div>
 
                             <!-- Syllabus Modules -->
                             <div>
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold text-dark mb-0">Course Syllabus & Curriculum</h5>
-                                    <span class="text-muted small" id="cTotalLessons">0 Lessons Total</span>
+                                    <h3 class="fw-bold text-dark fs-5 mb-0">Course Syllabus &amp; Modules</h3>
+                                    <span class="text-muted text-xs fw-semibold" id="cTotalLessons">24 Lessons Total</span>
                                 </div>
                                 <div class="accordion" id="syllabusAccordion">
-                                    <!-- Dynamic Modules -->
+                                    <!-- Dynamic Modules rendered by JS -->
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right 4-col: Admission & Checkout Card -->
+                    <!-- Right 4-col: Summary & Actions Card -->
                     <div class="col-lg-4">
-                        <div class="bg-white rounded-3 p-4 border shadow-sm sticky-top" style="top: 80px;">
-                            <img src="assets/images/course_webdev.jpg" class="img-fluid rounded-3 border shadow-sm mb-3" id="cThumbnail" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400'">
+                        <div class="student-content-card sticky-top" style="top: 80px;">
+                            <img src="../../assets/images/course_webdev.jpg" class="img-fluid rounded-3 border mb-3" id="cThumbnail" style="height: 180px; width:100%; object-fit: cover;">
                             
-                            <div class="d-flex align-items-baseline gap-2 mb-3">
-                                <h2 class="fw-extrabold text-primary mb-0" id="cPriceDisplay">$0.00</h2>
-                                <span class="text-muted small">Tuition & Exam Fee</span>
-                            </div>
-
-                            <!-- Deadline Warning Banner -->
-                            <div id="cDeadlinesBanner" class="mb-3">
-                                <!-- Dynamic Deadline Alerts -->
-                            </div>
-
-                            <!-- Lifecycle Dates -->
-                            <div class="p-3 bg-light rounded-3 border mb-3">
-                                <h6 class="fw-bold text-dark text-xs text-uppercase mb-2"><i class="bi bi-calendar-event me-1 text-primary"></i>Key Cohort Dates</h6>
-                                <div class="d-flex justify-content-between mb-1.5" style="font-size: 12.5px;">
-                                    <span class="text-muted">Enrollment Deadline:</span>
-                                    <span class="fw-bold text-danger" id="cDeadlineDate">2026-09-05</span>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-xs fw-bold mb-1">
+                                    <span>Course Progress</span>
+                                    <span class="text-primary" id="cProgressPct">65% Complete</span>
                                 </div>
-                                <div class="d-flex justify-content-between mb-1.5" style="font-size: 12.5px;">
-                                    <span class="text-muted">Course Starts:</span>
-                                    <span class="fw-semibold text-primary" id="cStartDate">2026-09-10</span>
-                                </div>
-                                <div class="d-flex justify-content-between" style="font-size: 12.5px;">
-                                    <span class="text-muted">Course Ends:</span>
-                                    <span class="fw-semibold text-dark" id="cEndDate">2026-11-10</span>
+                                <div class="course-progress-bar">
+                                    <div class="course-progress-fill" id="cProgressFill" style="width: 65%;"></div>
                                 </div>
                             </div>
 
-                            <!-- Enrollment CTA Button -->
-                            <div id="cEnrollActionContainer">
-                                <button class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm" id="enrollNowBtn" onclick="openPaymentModal()">
-                                    <i class="bi bi-credit-card me-1"></i> Proceed to Payment
-                                </button>
+                            <div class="d-flex flex-column gap-2 mb-3">
+                                <div class="d-flex justify-content-between text-xs text-muted py-1 border-bottom">
+                                    <span><i class="bi bi-clock me-1"></i> Duration:</span>
+                                    <strong class="text-dark">12 Weeks</strong>
+                                </div>
+                                <div class="d-flex justify-content-between text-xs text-muted py-1 border-bottom">
+                                    <span><i class="bi bi-calendar-event me-1"></i> Semester:</span>
+                                    <strong class="text-dark">Fall 2026</strong>
+                                </div>
+                                <div class="d-flex justify-content-between text-xs text-muted py-1">
+                                    <span><i class="bi bi-award me-1"></i> Certificate:</span>
+                                    <strong class="text-success">Included upon passing</strong>
+                                </div>
                             </div>
 
-                            <div class="text-center mt-3">
-                                <span class="text-muted small" style="font-size: 11.5px;">
-                                    <i class="bi bi-shield-check text-success me-1"></i> Official Certificate of Completion Issued by AUB
-                                </span>
+                            <div class="d-grid gap-2">
+                                <a href="quiz.html?id=1" class="btn btn-primary fw-semibold py-2">
+                                    <i class="bi bi-play-circle me-1"></i> Continue Current Lesson
+                                </a>
+                                <a href="one-on-one.html" class="btn btn-outline-primary fw-semibold py-2">
+                                    <i class="bi bi-person-video3 me-1"></i> Book 1:1 Instructor Office Hours
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -217,90 +285,23 @@
         </main>
     </div>
 
-    <!-- MODAL: Payment Checkout (ABA KHQR / Card / Bank) -->
-    <div class="modal fade" id="paymentCheckoutModal" tabindex="-1">
+    <!-- MODAL: Payment / Checkout -->
+    <div class="modal fade" id="paymentCheckoutModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-lock-fill text-success me-1"></i> Secure Course Enrollment</h5>
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 bg-light">
+                    <h5 class="modal-title fw-bold fs-6">Enrollment Checkout</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    
-                    <!-- Step 1: Summary -->
-                    <div class="p-3 bg-light rounded-3 border mb-3 d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold text-dark" id="checkoutCourseTitle">Course Title</div>
-                            <div class="text-muted small" id="checkoutCourseMeta">Specialized Course &bull; AUB Certificate</div>
+                <div class="modal-body p-4 text-center">
+                    <div class="khqr-box mb-3">
+                        <div class="khqr-code-img mb-2">
+                            <i class="bi bi-qr-code text-dark" style="font-size: 100px;"></i>
                         </div>
-                        <h4 class="fw-bold text-primary mb-0" id="checkoutPrice">$0.00</h4>
+                        <div class="fw-bold">Scan with ABA Mobile KHQR</div>
+                        <div class="text-xs text-light">Official AUB Digital Academy Merchant</div>
                     </div>
-
-                    <!-- Payment Methods Selection -->
-                    <h6 class="fw-bold text-xs text-uppercase text-muted mb-2">Select Payment Method</h6>
-                    <div class="d-flex flex-column gap-2 mb-3">
-                        <div class="payment-method-card selected" id="method-aba" onclick="selectPaymentMethod('ABA PAY')">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-qr-code-scan text-primary fs-5"></i>
-                                    <div>
-                                        <div class="fw-bold text-dark text-sm">ABA PAY (KHQR)</div>
-                                        <div class="text-muted text-xs">Scan instantly via any Cambodian Banking App</div>
-                                    </div>
-                                </div>
-                                <span class="badge bg-primary">Recommended</span>
-                            </div>
-                        </div>
-
-                        <div class="payment-method-card" id="method-card" onclick="selectPaymentMethod('Credit Card')">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-credit-card-2-front text-secondary fs-5"></i>
-                                <div>
-                                    <div class="fw-bold text-dark text-sm">Credit / Debit Card</div>
-                                    <div class="text-muted text-xs">Visa, MasterCard, UnionPay</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="payment-method-card" id="method-bank" onclick="selectPaymentMethod('Bank Transfer')">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-bank text-secondary fs-5"></i>
-                                <div>
-                                    <div class="fw-bold text-dark text-sm">Bank Transfer</div>
-                                    <div class="text-muted text-xs">Canadia, ACLEDA, Wing Bank</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- KHQR Display View -->
-                    <div id="khqrView" class="mb-3 text-center">
-                        <div class="khqr-box">
-                            <div class="d-flex justify-content-between align-items-center mb-2 px-2">
-                                <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">KHQR PAY</span>
-                                <span class="badge bg-danger">LIVE</span>
-                            </div>
-                            <div class="khqr-code-img mb-2">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=AUB_DIGITAL_ACADEMY_PAYMENT" alt="ABA KHQR Code" style="width: 170px; height: 170px;">
-                            </div>
-                            <div class="small fw-semibold">Scan with Bakong or ABA Mobile</div>
-                            <div class="text-xs text-white opacity-75 mt-1">Merchant: American University of Phnom Penh</div>
-                        </div>
-                    </div>
-
-                    <!-- Processing / Success Feedback Container -->
-                    <div id="paymentFeedbackContainer" class="d-none text-center py-4">
-                        <div class="spinner-border text-primary mb-3" role="status"></div>
-                        <h5 class="fw-bold text-dark">Processing Payment...</h5>
-                        <p class="text-muted small">Verifying transaction gateway and confirming enrollment...</p>
-                    </div>
-
-                </div>
-                <div class="modal-footer bg-light" id="checkoutFooter">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary btn-sm px-4 fw-bold" id="confirmPaymentBtn" onclick="processCheckout()">
-                        <i class="bi bi-check2-circle me-1"></i> Confirm & Complete Enrollment
-                    </button>
+                    <button class="btn btn-success w-100" id="confirmPaymentBtn">Confirm &amp; Activate Enrollment</button>
                 </div>
             </div>
         </div>
@@ -310,6 +311,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SweetAlert2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Shared Student Layout & Nav Controller -->
+    <script src="../../js/components/student-layout.js"></script>
     <script src="../../js/data/mock-store.js"></script>
     <script src="../../js/pages/student-course-detail.js"></script>
 </body>

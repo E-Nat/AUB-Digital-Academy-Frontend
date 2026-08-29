@@ -21,7 +21,7 @@
         async getPrograms(forceRefresh = false) {
             if (this.client) {
                 try {
-                    const res = await this.client.get('/admin/programs', { timeout: 600 });
+                    const res = await this.client.get('/admin/programs');
                     if (res && res.success && Array.isArray(res.data)) {
                         // Synchronize real database data into local store
                         if (global.AdminStore && typeof global.AdminStore.savePrograms === 'function') {
@@ -46,7 +46,7 @@
         async getProgram(id) {
             if (this.client) {
                 try {
-                    const res = await this.client.get(`/admin/programs/${id}`, { timeout: 600 });
+                    const res = await this.client.get(`/admin/programs/${id}`);
                     if (res && res.success && res.data) {
                         return res.data;
                     }
@@ -70,16 +70,16 @@
 
             if (this.client) {
                 try {
-                    const result = await this.client.post('/admin/programs', programData, { timeout: 600 });
+                    const result = await this.client.post('/admin/programs', programData);
                     if (result && result.success) {
                         // Update local store with real persisted database entity
                         if (global.AdminStore) {
                             try {
                                 const newProg = result.data || { ...programData, id: result.id };
                                 if (typeof global.AdminStore.createProgram === 'function') {
-                                    const existing = global.AdminStore.getPrograms().find(p => Number(p.id) === Number(newProg.id));
+                                    const existing = global.AdminStore.getPrograms().find(p => Number(p.id) === Number(newProg.id) || (newProg.code && p.code && p.code.toLowerCase() === newProg.code.toLowerCase()));
                                     if (existing) {
-                                        global.AdminStore.updateProgram(newProg.id, newProg);
+                                        global.AdminStore.updateProgram(existing.id, newProg);
                                     } else {
                                         global.AdminStore.createProgram(newProg);
                                     }
@@ -113,7 +113,7 @@
 
             if (this.client) {
                 try {
-                    const result = await this.client.put(`/admin/programs/${id}`, programData, { timeout: 600 });
+                    const result = await this.client.put(`/admin/programs/${id}`, programData);
                     if (result && result.success) {
                         if (global.AdminStore && typeof global.AdminStore.updateProgram === 'function') {
                             try { global.AdminStore.updateProgram(id, programData); } catch (e) {}
@@ -143,7 +143,7 @@
 
             if (this.client) {
                 try {
-                    const result = await this.client.delete(`/admin/programs/${id}`, { timeout: 600 });
+                    const result = await this.client.delete(`/admin/programs/${id}`);
                     if (result && result.success) {
                         if (global.AdminStore && typeof global.AdminStore.deleteProgram === 'function') {
                             try { global.AdminStore.deleteProgram(id); } catch (e) {}
@@ -172,7 +172,7 @@
 
             if (this.client) {
                 try {
-                    const result = await this.client.patch(`/admin/programs/${id}/toggle-publish`, {}, { timeout: 600 });
+                    const result = await this.client.patch(`/admin/programs/${id}/toggle-publish`, {});
                     if (result && result.success) {
                         if (global.AdminStore && typeof global.AdminStore.toggleProgramPublish === 'function') {
                             try { global.AdminStore.toggleProgramPublish(id); } catch (e) {}
@@ -249,16 +249,19 @@
             if (this.client) {
                 try {
                     const result = await this.client.post('/admin/courses', courseData);
-                    if (global.AdminStore) {
+                    if (global.AdminStore && typeof global.AdminStore.createCourse === 'function') {
                         try {
                             const newCourse = (result && result.data) ? result.data : { ...courseData, id: (result && result.id) ? result.id : Date.now() };
-                            global.AdminStore.createCourse(newCourse);
-                        } catch (e) {}
+                            const stored = global.AdminStore.createCourse(newCourse);
+                            if (result) result.data = stored || newCourse;
+                        } catch (e) {
+                            console.warn('[AcademicService] Store sync note:', e);
+                        }
                     }
                     return result;
                 } catch (err) {
                     apiError = err;
-                    if (err.status === 409 || err.status === 400 || err.isDuplicate) throw err;
+                    if (err.status === 409 || err.isDuplicate) throw err;
                     console.warn('[AcademicService] API createCourse offline, falling back to local store:', err.message);
                 }
             }

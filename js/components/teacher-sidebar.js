@@ -43,19 +43,47 @@
         const teacherAvatarEls = document.querySelectorAll('.teacher-avatar-display, #teacherAvatar, #topbarAvatar');
 
         teacherNameEls.forEach(el => { if (el) el.textContent = currentUser.full_name || 'Dr. Sarah Johnson'; });
-        teacherRoleEls.forEach(el => { if (el) el.textContent = currentUser.position || 'Lead Instructor'; });
+        teacherRoleEls.forEach(el => { if (el) el.textContent = currentUser.position || 'Teacher'; });
         teacherAvatarEls.forEach(el => { 
             if (el && currentUser.avatar_url) {
                 el.src = currentUser.avatar_url;
             }
         });
 
-        // Mobile Sidebar Toggle
-        const mobileToggle = document.getElementById('mobileSidebarToggle');
         const sidebar = document.getElementById('teacherSidebar') || document.querySelector('.admin-sidebar');
+
+        // Auto active navigation item detection
+        const currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+        if (sidebar) {
+            sidebar.querySelectorAll('.admin-nav-item').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && (href === currentPage || (currentPage === '' && href === 'dashboard.html'))) {
+                    link.classList.add('active');
+                } else if (href && !href.startsWith('#') && href !== currentPage && !href.includes(currentPage)) {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        // Mobile Sidebar Toggle & Backdrop
+        let backdrop = document.querySelector('.admin-sidebar-backdrop');
+        if (!backdrop && sidebar) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'admin-sidebar-backdrop';
+            document.body.appendChild(backdrop);
+        }
+
+        const mobileToggle = document.getElementById('mobileSidebarToggle');
         if (mobileToggle && sidebar) {
             mobileToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('show');
+                if (backdrop) backdrop.classList.toggle('show');
+            });
+        }
+        if (backdrop && sidebar) {
+            backdrop.addEventListener('click', () => {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('show');
             });
         }
 
@@ -100,6 +128,7 @@
         const notificationBtn = document.getElementById('teacherNotificationBtn');
         if (notificationBtn) {
             notificationBtn.addEventListener('click', function () {
+                if (!window.Swal) return;
                 Swal.fire({
                     title: 'Teaching Notifications',
                     html: `
@@ -110,7 +139,7 @@
                                     <small class="text-muted" style="font-size: 11px;">10m ago</small>
                                 </div>
                                 <p class="mb-1 text-muted text-xs">Students submitted "Full-Stack REST API Project" in CS301.</p>
-                                <a href="submissions.html" class="btn btn-sm btn-outline-primary py-0 px-2 text-xs mt-1">Review Now</a>
+                                <a href="submissions.html" class="adm-btn adm-btn-primary adm-btn-xs mt-1">Review Now</a>
                             </div>
                             <div class="list-group-item py-3 px-0 border-bottom">
                                 <div class="d-flex w-100 justify-content-between align-items-center mb-1">
@@ -118,7 +147,7 @@
                                     <small class="text-muted" style="font-size: 11px;">1h ago</small>
                                 </div>
                                 <p class="mb-1 text-muted text-xs">Sreyneang Sok requested a 1-on-1 consultation for tomorrow at 2:00 PM.</p>
-                                <a href="one-on-one.html" class="btn btn-sm btn-outline-primary py-0 px-2 text-xs mt-1">View Request</a>
+                                <a href="one-on-one.html" class="adm-btn adm-btn-outline adm-btn-xs mt-1">View Request</a>
                             </div>
                             <div class="list-group-item py-3 px-0 border-bottom">
                                 <div class="d-flex w-100 justify-content-between align-items-center mb-1">
@@ -145,6 +174,13 @@
     });
 
     window.logoutTeacher = function () {
+        if (!window.Swal) {
+            localStorage.removeItem('aub_auth_token');
+            localStorage.removeItem('token');
+            sessionStorage.clear();
+            window.location.href = '../authentication/login.html';
+            return;
+        }
         Swal.fire({
             title: 'Sign Out?',
             text: 'Are you sure you want to end your faculty session?',

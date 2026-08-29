@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - AUB Digital Academy</title>
+    <title>My Learning — Student Portal — AUB Digital Academy</title>
+    <link rel="icon" type="image/x-icon" href="../../assets/logos/rel_icon.png">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,36 +13,42 @@
     <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link href="../../css/layouts/admin.css" rel="stylesheet">
+    <!-- Unified Student Layout CSS -->
+    <link href="../../css/layouts/student.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="admin-sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="admin-wrapper">
-        <!-- Sidebar -->
-        <aside class="admin-sidebar">
+        
+        <!-- ============================================================
+             STUDENT SIDEBAR
+             ============================================================ -->
+        <aside class="admin-sidebar" id="studentSidebar">
+            <!-- Brand / Sidebar Header -->
             <div class="admin-sidebar-brand">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="bg-primary rounded-3 p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background-color: #2563eb !important;">
-                        <i class="bi bi-mortarboard-fill text-white fs-5"></i>
+                <a href="dashboard.html" class="admin-brand-header">
+                    <img src="../../assets/logos/rel_icon.png" alt="AUB Logo" class="admin-brand-logo-img">
+                    <div class="admin-brand-info">
+                        <div class="admin-brand-title">AUB Digital Academy</div>
+                        <div class="admin-brand-subtitle">Student Portal</div>
                     </div>
-                    <div class="admin-brand-text">
-                        <div class="title">AUB DIGITAL</div>
-                        <div class="subtitle">STUDENT PORTAL</div>
-                    </div>
-                </div>
+                </a>
             </div>
 
+            <!-- Navigation Links -->
             <nav class="admin-sidebar-menu">
+                <div class="admin-sidebar-label">MAIN</div>
                 <a href="dashboard.html" class="admin-nav-item active">
                     <i class="bi bi-grid-fill"></i>
                     <span>My Learning</span>
                 </a>
-                <a href="one-on-one.html" class="admin-nav-item">
-                    <i class="bi bi-people-fill"></i>
-                    <span>1-on-1 Mentorship</span>
-                </a>
+
+                <div class="admin-sidebar-label">LEARNING</div>
                 <a href="my-courses.html" class="admin-nav-item">
-                    <i class="bi bi-journal-check"></i>
+                    <i class="bi bi-journal-bookmark-fill"></i>
                     <span>Enrolled Courses</span>
                 </a>
                 <a href="assignment.html" class="admin-nav-item">
@@ -49,160 +56,489 @@
                     <span>Assignments</span>
                 </a>
                 <a href="quiz.html" class="admin-nav-item">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>Quizzes & Tests</span>
+                    <i class="bi bi-clipboard-check-fill"></i>
+                    <span>Quizzes &amp; Tests</span>
                 </a>
                 <a href="grades.html" class="admin-nav-item">
-                    <i class="bi bi-award"></i>
-                    <span>Grades & Certificates</span>
+                    <i class="bi bi-award-fill"></i>
+                    <span>Grades &amp; Certificates</span>
+                </a>
+
+                <div class="admin-sidebar-label">SUPPORT</div>
+                <a href="one-on-one.html" class="admin-nav-item">
+                    <i class="bi bi-person-video3"></i>
+                    <span>1-on-1 Mentorship</span>
+                </a>
+
+                <div class="admin-sidebar-label">ACCOUNT</div>
+                <a href="profile.html" class="admin-nav-item">
+                    <i class="bi bi-person-circle"></i>
+                    <span>My Profile</span>
                 </a>
                 <a href="../../welcomepage.html" class="admin-nav-item">
-                    <i class="bi bi-house"></i>
+                    <i class="bi bi-box-arrow-up-right"></i>
                     <span>Back to Website</span>
                 </a>
             </nav>
 
+            <!-- Sidebar Footer / Logout -->
             <div class="admin-sidebar-footer">
-                <button class="admin-logout-btn" onclick="localStorage.clear(); window.location.href='../authentication/login.html';">
+                <button class="admin-logout-btn" onclick="logoutStudent()" type="button">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </button>
-                <div class="admin-user-card">
-                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student" id="studentAvatar">
-                    <div class="admin-user-info">
-                        <div class="name" id="studentName">Sok Virak</div>
-                        <div class="role">ID: 0001001</div>
-                    </div>
-                </div>
             </div>
         </aside>
 
-        <!-- Main View -->
+        <!-- ============================================================
+             MAIN CONTENT AREA
+             ============================================================ -->
         <main class="admin-main">
+            
+            <!-- GLOBAL TOPBAR -->
             <header class="admin-topbar">
-                <div class="admin-search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" class="admin-search-input" placeholder="Search my courses, lessons...">
+                <div class="admin-topbar-left">
+                    <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle Sidebar" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div class="admin-search-wrapper">
+                        <i class="bi bi-search search-icon"></i>
+                        <input type="text" class="admin-search-input" id="globalSearchInput" placeholder="Search my courses, lessons, assignments..." autocomplete="off">
+                        <kbd class="admin-search-kbd d-none d-md-block">Ctrl K</kbd>
+                    </div>
                 </div>
+
                 <div class="admin-topbar-actions">
-                    <div class="admin-topbar-profile">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=150" alt="Student">
-                        <div class="d-none d-md-block text-start lh-1">
-                            <div class="fw-bold text-sm" id="topbarStudentName">Sok Virak</div>
-                            <div class="text-xs text-muted">Student</div>
+                    <!-- Notifications Dropdown -->
+                    <div class="position-relative">
+                        <button class="admin-icon-btn" id="notificationBtn" aria-label="Notifications" type="button" title="Notifications">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="admin-notification-badge" id="notificationBadge">3</span>
+                        </button>
+                        <div class="notifications-dropdown" id="notificationsMenu">
+                            <div style="padding:12px 16px; border-bottom:1px solid var(--student-border); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:13px; font-weight:700; color:var(--student-navy);">Notifications</span>
+                                <button class="btn btn-link p-0 text-decoration-none" id="markAllReadBtn" type="button" style="font-size:11.5px; font-weight:600; color:var(--student-primary);">Mark all read</button>
+                            </div>
+                            <div style="max-height:280px; overflow-y:auto;">
+                                <a href="assignment.html" class="notif-item unread">
+                                    <div class="notif-icon-box green"><i class="bi bi-check2-circle"></i></div>
+                                    <div>
+                                        <div class="notif-title">Assignment Graded: HTML5 & CSS Grid (Score: 96/100)</div>
+                                        <div class="notif-time">2 hours ago • Dr. Sarah Johnson</div>
+                                    </div>
+                                </a>
+                                <a href="course-detail.html?slug=full-stack-web-development" class="notif-item unread">
+                                    <div class="notif-icon-box blue"><i class="bi bi-play-circle"></i></div>
+                                    <div>
+                                        <div class="notif-title">New Lesson Available: Express Middleware Deep Dive</div>
+                                        <div class="notif-time">5 hours ago • Module 4</div>
+                                    </div>
+                                </a>
+                                <a href="quiz.html" class="notif-item unread">
+                                    <div class="notif-icon-box amber"><i class="bi bi-clock-history"></i></div>
+                                    <div>
+                                        <div class="notif-title">Quiz Reminder: JavaScript Fundamentals due Friday</div>
+                                        <div class="notif-time">1 day ago • Academic Notice</div>
+                                    </div>
+                                </a>
+                                <a href="one-on-one.html" class="notif-item">
+                                    <div class="notif-icon-box purple"><i class="bi bi-camera-video"></i></div>
+                                    <div>
+                                        <div class="notif-title">Mentorship Session Confirmed with Prof. Alex Chen</div>
+                                        <div class="notif-time">Aug 28 • 03:00 PM</div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Profile Button -->
+                    <div class="admin-topbar-profile" onclick="window.location.href='profile.html'" role="button" tabindex="0" title="View Profile">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150" alt="Student" class="admin-topbar-avatar student-avatar-display" id="topbarAvatar">
+                        <div class="admin-topbar-profile-info d-none d-md-block text-start lh-1">
+                            <div class="profile-name student-name-display" id="topbarStudentName">Sreyneang Kim</div>
+                            <div class="profile-role student-role-display">Student</div>
                         </div>
                     </div>
                 </div>
             </header>
 
+            <!-- PAGE CONTENT -->
             <div class="admin-content">
-                <div class="admin-header-row">
-                    <div>
-                        <h1 class="admin-page-title">Welcome Back, <span id="welcomeStudentName">Virak</span>! 👋</h1>
-                        <p class="admin-page-subtitle">Continue your digital learning journey. Here are your active courses.</p>
+                
+                <!-- ── 1. DASHBOARD WELCOME HEADER ── -->
+                <div class="dash-welcome-header">
+                    <div class="dash-welcome-badge">
+                        <span class="dash-live-dot"></span>
+                        <span>Fall Semester 2026</span>
+                        <span>•</span>
+                        <span>Year 2 • Software Engineering</span>
                     </div>
+                    <h1 class="dash-welcome-title">Welcome back, <span id="welcomeStudentName">Sreyneang</span>! 👋</h1>
+                    <p class="dash-welcome-sub">Continue your digital learning journey. You're making great progress this semester.</p>
                 </div>
 
-                <div class="row g-4 mb-4">
-                    <div class="col-md-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon blue"><i class="bi bi-book-half"></i></div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Active Courses</div>
-                                <div class="admin-kpi-value">2</div>
-                            </div>
+                <!-- ── 2. LEARNING PRIORITY: FEATURED "CONTINUE LEARNING" CARD (TOP MAJOR CTA) ── -->
+                <div class="continue-learning-card">
+                    <div class="continue-badge-header">
+                        <div class="continue-pill">
+                            <i class="bi bi-play-circle-fill"></i> Continue Learning
+                        </div>
+                        <div class="continue-last-studied">
+                            <i class="bi bi-clock-history"></i> Last studied: Today • 25 minutes ago
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon green"><i class="bi bi-check-circle-fill"></i></div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Completed Lessons</div>
-                                <div class="admin-kpi-value">18</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="admin-kpi-card">
-                            <div class="admin-kpi-icon purple"><i class="bi bi-clock-history"></i></div>
-                            <div class="admin-kpi-info">
-                                <div class="admin-kpi-label">Hours Learned</div>
-                                <div class="admin-kpi-value">14.5 hrs</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="admin-card">
-                    <div class="admin-card-header">
-                        <h3 class="admin-card-title">My Enrolled Courses</h3>
-                        <a href="../../welcomepage.html#courses" class="btn btn-outline-primary btn-sm rounded-pill px-3">Browse More Courses</a>
-                    </div>
-                    <div class="row g-4" id="enrolledCoursesList">
-                        <div class="col-md-6">
-                            <div class="p-4 rounded-4 border bg-white shadow-sm h-100 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill">Technology</span>
-                                    <span class="text-success fw-bold text-xs"><i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> In Progress</span>
+                    <div class="continue-grid">
+                        <div class="continue-thumb-box">
+                            <img src="../../assets/images/course_webdev.jpg" alt="Full-Stack Web Development" class="continue-thumb-img">
+                        </div>
+
+                        <div>
+                            <div class="continue-course-category">Technology • Software Engineering (CS-WD101)</div>
+                            <h2 class="continue-course-title">Full-Stack Web Development</h2>
+                            <div class="continue-module-info">
+                                <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-folder-fill text-primary me-1"></i> Module 4</span>
+                                <span class="fw-semibold text-dark">REST API Development</span>
+                                <span class="text-muted">• Lesson 2: Express Routing &amp; Middleware</span>
+                            </div>
+                            
+                            <div class="continue-progress-wrap">
+                                <div class="continue-progress-bar-box">
+                                    <div class="continue-progress-fill" style="width: 65%;"></div>
                                 </div>
-                                <h5 class="fw-bold mb-2">Full-Stack Web Development</h5>
-                                <p class="text-muted text-sm mb-4">Build modern, responsive websites and scalable web applications from scratch.</p>
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between text-xs fw-semibold mb-1">
-                                        <span>Progress</span>
-                                        <span>65%</span>
-                                    </div>
-                                    <div class="progress mb-3" style="height: 6px;">
-                                        <div class="progress-bar bg-primary" style="width: 65%;"></div>
-                                    </div>
-                                    <a href="course-detail.html?slug=full-stack-web-development" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold">
-                                        Continue Learning <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
+                                <div class="continue-progress-labels">
+                                    <span class="text-primary fw-bold">65% Complete</span>
+                                    <span>15 / 24 Lessons</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="p-4 rounded-4 border bg-white shadow-sm h-100 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill">Design</span>
-                                    <span class="text-success fw-bold text-xs"><i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> In Progress</span>
-                                </div>
-                                <h5 class="fw-bold mb-2">Advanced UI/UX Design</h5>
-                                <p class="text-muted text-sm mb-4">Master Figma and design user-centered digital experiences for mobile and web.</p>
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between text-xs fw-semibold mb-1">
-                                        <span>Progress</span>
-                                        <span>40%</span>
-                                    </div>
-                                    <div class="progress mb-3" style="height: 6px;">
-                                        <div class="progress-bar bg-success" style="width: 40%;"></div>
-                                    </div>
-                                    <a href="course-detail.html?slug=advanced-ui-ux-design" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold">
-                                        Continue Learning <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <!-- 1-on-1 Faculty Mentorship Quick Widget -->
-                <div class="admin-card mt-4" style="background: linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 100%); border: 1px solid #BFDBFE;">
-                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary text-white p-3 rounded-4 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
-                                <i class="bi bi-person-video3 fs-4"></i>
-                            </div>
-                            <div>
-                                <div class="badge bg-primary bg-opacity-10 text-primary mb-1">Direct Faculty Access</div>
-                                <h5 class="fw-bold mb-1 text-dark">Need help with your code, capstone, or courses?</h5>
-                                <p class="text-muted text-xs mb-0">Book a private 1-on-1 video or office consultation with university faculty instructors.</p>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <a href="one-on-one.html" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
-                                <i class="bi bi-calendar-check-fill me-1"></i> My 1-on-1 Sessions
+                        <div>
+                            <a href="course-detail.html?slug=full-stack-web-development" class="continue-cta-btn">
+                                <span>Continue Learning</span>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
+                    </div>
+                </div>
+
+                <!-- ── 3. COMPACT STATISTICS (EQUAL HEIGHT KPI CARDS) ── -->
+                <div class="dash-kpi-grid">
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Active Courses</div>
+                            <div class="student-stat-value">2</div>
+                            <div class="student-stat-sub">In 2 Specializations</div>
+                        </div>
+                        <div class="student-stat-icon blue">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Completed Lessons</div>
+                            <div class="student-stat-value">18</div>
+                            <div class="student-stat-sub">Out of 44 Total</div>
+                        </div>
+                        <div class="student-stat-icon green">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Hours Learned</div>
+                            <div class="student-stat-value">14.5 hrs</div>
+                            <div class="student-stat-sub">+2.5 hrs this week</div>
+                        </div>
+                        <div class="student-stat-icon purple">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+
+                    <div class="student-stat-card">
+                        <div>
+                            <div class="student-stat-label">Assignments Due</div>
+                            <div class="student-stat-value">2</div>
+                            <div class="student-stat-sub">1 Due Tomorrow</div>
+                        </div>
+                        <div class="student-stat-icon amber">
+                            <i class="bi bi-calendar-check-fill"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 4. MY ENROLLED COURSES ── -->
+                <div class="mb-4">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <i class="bi bi-mortarboard-fill text-primary"></i>
+                            <span>My Enrolled Courses</span>
+                        </h2>
+                        <a href="my-courses.html" class="section-link">
+                            <span>View All</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Course 1 -->
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <div class="course-card-thumb-wrap">
+                                    <img src="../../assets/images/course_webdev.jpg" alt="Full-Stack Web Development" class="course-card-thumb">
+                                    <div class="course-card-badges">
+                                        <span class="course-category-badge">Technology</span>
+                                        <span class="course-status-badge in-progress">
+                                            <i class="bi bi-circle-fill" style="font-size:6px;"></i> In Progress
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <div class="course-code-line">CS-WD101 • 12 Weeks</div>
+                                    <h3 class="course-title-text">Full-Stack Web Development</h3>
+                                    
+                                    <div class="course-instructor-line">
+                                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150" alt="Prof. Alex Chen" class="course-instructor-avatar">
+                                        <span class="course-instructor-name">Prof. Alex Chen</span>
+                                    </div>
+
+                                    <div class="course-card-footer">
+                                        <div class="course-progress-info">
+                                            <span class="fw-bold text-primary">65% complete</span>
+                                            <span>15 / 24 lessons</span>
+                                        </div>
+                                        <div class="course-progress-bar">
+                                            <div class="course-progress-fill" style="width: 65%;"></div>
+                                        </div>
+                                        <a href="course-detail.html?slug=full-stack-web-development" class="course-action-btn">
+                                            <span>Continue Learning</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Course 2 -->
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <div class="course-card-thumb-wrap">
+                                    <img src="../../assets/images/course_uiux.jpg" alt="Advanced UI/UX Design" class="course-card-thumb">
+                                    <div class="course-card-badges">
+                                        <span class="course-category-badge">Design</span>
+                                        <span class="course-status-badge in-progress">
+                                            <i class="bi bi-circle-fill" style="font-size:6px;"></i> In Progress
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="course-card-body">
+                                    <div class="course-code-line">UX-201 • 10 Weeks</div>
+                                    <h3 class="course-title-text">Advanced UI/UX Design</h3>
+                                    
+                                    <div class="course-instructor-line">
+                                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150" alt="Dr. Sarah Johnson" class="course-instructor-avatar">
+                                        <span class="course-instructor-name">Dr. Sarah Johnson</span>
+                                    </div>
+
+                                    <div class="course-card-footer">
+                                        <div class="course-progress-info">
+                                            <span class="fw-bold text-primary">40% complete</span>
+                                            <span>8 / 20 lessons</span>
+                                        </div>
+                                        <div class="course-progress-bar">
+                                            <div class="course-progress-fill" style="width: 40%;"></div>
+                                        </div>
+                                        <a href="course-detail.html?slug=advanced-ui-ux-design" class="course-action-btn">
+                                            <span>Continue Learning</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── 5. TWO-COLUMN LEARNING WORKFLOW: ASSIGNMENTS / QUIZZES & PROGRESS / SUPPORT ── -->
+                <div class="row g-4 mb-4">
+                    
+                    <!-- Left Column: Upcoming Assignments & Quizzes -->
+                    <div class="col-lg-7">
+                        
+                        <!-- Upcoming Assignments -->
+                        <div class="student-content-card">
+                            <div class="section-header mb-3">
+                                <h3 class="section-title fs-6">
+                                    <i class="bi bi-card-checklist text-primary"></i>
+                                    <span>Upcoming Assignments</span>
+                                </h3>
+                                <a href="assignment.html" class="section-link">View All</a>
+                            </div>
+
+                            <!-- Assignment 1 -->
+                            <div class="assignment-item-row">
+                                <div>
+                                    <div class="assignment-title">Milestone 1: REST API &amp; Database Architecture</div>
+                                    <div class="assignment-course">Full-Stack Web Development (CS-WD101)</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="assignment-due-badge due-soon">
+                                        <i class="bi bi-exclamation-circle-fill"></i> Due Tomorrow
+                                    </span>
+                                    <a href="assignment.html" class="btn-open-assignment">
+                                        <span>Open</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Assignment 2 -->
+                            <div class="assignment-item-row">
+                                <div>
+                                    <div class="assignment-title">Design System &amp; Interactive Prototype in Figma</div>
+                                    <div class="assignment-course">Advanced UI/UX Design (UX-201)</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="assignment-due-badge pending">
+                                        <i class="bi bi-calendar3"></i> Due Sep 3
+                                    </span>
+                                    <a href="assignment.html" class="btn-open-assignment">
+                                        <span>Open</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Assignment 3 (Graded) -->
+                            <div class="assignment-item-row">
+                                <div>
+                                    <div class="assignment-title">HTML5 Semantic Layout &amp; CSS Grid Lab</div>
+                                    <div class="assignment-course">Full-Stack Web Development (CS-WD101)</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="assignment-due-badge graded">
+                                        <i class="bi bi-check-circle-fill"></i> Graded 96/100
+                                    </span>
+                                    <a href="assignment.html" class="btn-open-assignment">
+                                        <span>Feedback</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Quizzes & Tests -->
+                        <div class="student-content-card">
+                            <div class="section-header mb-3">
+                                <h3 class="section-title fs-6">
+                                    <i class="bi bi-clipboard-check-fill text-primary"></i>
+                                    <span>Upcoming Quizzes &amp; Tests</span>
+                                </h3>
+                                <a href="quiz.html" class="section-link">View All</a>
+                            </div>
+
+                            <div class="assignment-item-row">
+                                <div>
+                                    <div class="assignment-title">JavaScript Fundamentals &amp; DOM Manipulation</div>
+                                    <div class="assignment-course">10 Questions • 30 mins • Due Friday</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <a href="quiz.html?id=1" class="continue-cta-btn py-2 px-3 text-xs" style="font-size:12px;">
+                                        <i class="bi bi-play-circle-fill"></i> Take Quiz
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="assignment-item-row">
+                                <div>
+                                    <div class="assignment-title">UI/UX Heuristics &amp; Accessibility Test</div>
+                                    <div class="assignment-course">15 Questions • 25 mins • Open for completion</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <a href="quiz.html?id=2" class="continue-cta-btn py-2 px-3 text-xs" style="font-size:12px;">
+                                        <i class="bi bi-play-circle-fill"></i> Take Quiz
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Progress Analytics & Mentorship Support -->
+                    <div class="col-lg-5">
+                        
+                        <!-- Learning Progress Summary -->
+                        <div class="progress-summary-card">
+                            <div class="section-header mb-3">
+                                <h3 class="section-title fs-6">
+                                    <i class="bi bi-graph-up-arrow text-primary"></i>
+                                    <span>Learning Progress</span>
+                                </h3>
+                                <a href="grades.html" class="section-link">Grades</a>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-sm fw-semibold mb-1">
+                                    <span class="text-dark">Overall Semester Completion</span>
+                                    <span class="text-primary fw-bold">52%</span>
+                                </div>
+                                <div class="course-progress-bar" style="height: 8px;">
+                                    <div class="course-progress-fill" style="width: 52%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="progress-metric-row">
+                                <div class="progress-metric-label">
+                                    <i class="bi bi-check2-all text-success"></i> Lessons Completed
+                                </div>
+                                <div class="progress-metric-val">18 / 44</div>
+                            </div>
+
+                            <div class="progress-metric-row">
+                                <div class="progress-metric-label">
+                                    <i class="bi bi-trophy text-amber"></i> Courses Completed
+                                </div>
+                                <div class="progress-metric-val">1 (Computer Networks)</div>
+                            </div>
+
+                            <div class="progress-metric-row">
+                                <div class="progress-metric-label">
+                                    <i class="bi bi-clock text-primary"></i> Total Study Time
+                                </div>
+                                <div class="progress-metric-val">14.5 Hours</div>
+                            </div>
+
+                            <div class="progress-metric-row">
+                                <div class="progress-metric-label">
+                                    <i class="bi bi-award text-purple"></i> Current GPA
+                                </div>
+                                <div class="progress-metric-val text-success">3.85 / 4.0 (A)</div>
+                            </div>
+                        </div>
+
+                        <!-- 1-on-1 Faculty Mentorship Compact Card -->
+                        <div class="mentorship-card-compact">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="mentorship-icon-box">
+                                    <i class="bi bi-person-video3"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mentorship-title">Need help with your course?</h4>
+                                    <p class="mentorship-sub">Book a private 1-on-1 session with an instructor.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="one-on-one.html" class="btn-book-session">
+                                    <i class="bi bi-calendar-plus-fill"></i>
+                                    <span>Book a Session</span>
+                                </a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -212,23 +548,7 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const userStr = localStorage.getItem('aub_user');
-            if (userStr) {
-                try {
-                    const u = JSON.parse(userStr);
-                    if (u.full_name) {
-                        document.getElementById('studentName').textContent = u.full_name;
-                        document.getElementById('topbarStudentName').textContent = u.full_name;
-                        document.getElementById('welcomeStudentName').textContent = u.full_name.split(' ')[0];
-                    }
-                    if (u.avatar_url) {
-                        document.getElementById('studentAvatar').src = u.avatar_url;
-                    }
-                } catch (e) {}
-            }
-        });
-    </script>
+    <!-- Shared Student Layout & Nav Controller -->
+    <script src="../../js/components/student-layout.js"></script>
 </body>
 </html>
