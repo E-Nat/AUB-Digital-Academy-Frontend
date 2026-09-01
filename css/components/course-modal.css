@@ -59,7 +59,7 @@
 .course-image-dropzone {
     border: 2px dashed #CBD5E1;
     border-radius: 8px;
-    background-color: #FFFFFF;
+    background-color: #F8FAFC;
     transition: all 150ms ease;
     cursor: pointer;
 }
@@ -74,6 +74,16 @@
     border: 1px solid #E2E8F0;
     border-radius: 8px;
     background-color: #FFFFFF;
+    transition: all 150ms ease;
+}
+
+.course-upload-preview:hover {
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.pointer-events-none {
+    pointer-events: none !important;
 }
 
 /* Learning Objectives Rows */

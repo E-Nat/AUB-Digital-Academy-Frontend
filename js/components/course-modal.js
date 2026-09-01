@@ -11,6 +11,10 @@
     let isSubmittingCourse = false;
     let modalInstance = null;
 
+    let currentCustomImage = null;
+    let currentCustomImageFileName = '';
+    let currentCustomImageFileSize = '';
+
     const DEFAULT_COURSE_THUMBNAIL = 'assets/images/course_webdev.jpg';
 
     // HTML Template for Shared Course Modal
@@ -130,7 +134,7 @@
                                 <!-- Course Cover Image -->
                                 <div class="col-12">
                                     <div class="p-3 bg-light rounded-3 border">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center justify-content-between mb-2 pb-1">
                                             <div class="d-flex align-items-center gap-1.5">
                                                 <label class="form-label text-xs fw-bold text-uppercase text-secondary mb-0">
                                                     Course Cover Image
@@ -139,42 +143,81 @@
                                             </div>
                                             <span class="text-muted text-xs">JPG, PNG, WebP up to 5MB</span>
                                         </div>
-                                        <div class="row g-3 align-items-center">
-                                            <div class="col-md-6">
-                                                <div class="course-image-dropzone p-3 text-center border border-2 border-dashed rounded-3 bg-white position-relative" id="courseImageDropzone">
-                                                    <input type="file" id="courseImageFile" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/webp" aria-label="Upload course cover image">
-                                                    <div id="courseImageUploadPrompt">
-                                                        <i class="bi bi-cloud-arrow-up text-primary fs-4 mb-1 d-block"></i>
-                                                        <div class="fw-semibold text-dark text-xs mb-0.5">Upload Cover Image</div>
-                                                        <div class="text-secondary text-xs opacity-75" style="font-size: 11px;">Browse or drag &amp; drop</div>
-                                                    </div>
-                                                </div>
-                                                <div class="course-upload-preview p-2 bg-white border rounded-3 d-none align-items-center justify-content-between mt-2" id="courseImagePreviewBox">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <img src="" alt="Course Cover Preview" id="courseImagePreviewImg" class="rounded border object-fit-cover bg-light" style="width: 50px; height: 38px;">
-                                                        <div>
-                                                            <div class="fw-bold text-dark text-xs text-truncate" style="max-width: 140px;" id="courseImageFileName">cover.jpg</div>
-                                                            <div class="text-muted" style="font-size: 10px;" id="courseImageFileSize">Image loaded</div>
+                                        <div class="row g-3">
+                                            <!-- 1. Custom Upload Card -->
+                                            <div class="col-md-7">
+                                                <div class="card h-100 border shadow-none bg-white">
+                                                    <div class="card-body p-3 d-flex flex-column justify-content-center">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <span class="text-xs fw-bold text-uppercase text-secondary" style="letter-spacing: 0.5px;">Custom Cover</span>
+                                                            <span class="badge bg-light text-muted border text-xs" id="customCoverStatusBadge">None uploaded</span>
                                                         </div>
-                                                    </div>
-                                                    <div class="d-flex gap-1">
-                                                        <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-2 rounded-pill text-xs" id="replaceCourseImageBtn" aria-label="Change course image">
-                                                            <i class="bi bi-arrow-repeat me-1"></i> Change
-                                                        </button>
-                                                        <button type="button" class="btn btn-outline-danger btn-sm py-0.5 px-2 rounded-pill text-xs" id="removeCourseImageBtn" aria-label="Remove course image">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
+
+                                                        <!-- Dropzone (Empty State) -->
+                                                        <div class="course-image-dropzone p-3 text-center border border-2 border-dashed rounded-3 bg-light-subtle position-relative" id="courseImageDropzone" style="cursor: pointer;">
+                                                            <input type="file" id="courseImageFile" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" accept="image/png, image/jpeg, image/jpg, image/webp" aria-label="Upload course cover image">
+                                                            <div id="courseImageUploadPrompt" class="py-1">
+                                                                <i class="bi bi-cloud-arrow-up text-primary fs-3 mb-1 d-block"></i>
+                                                                <div class="fw-semibold text-dark text-xs mb-0.5">Upload Course Cover</div>
+                                                                <div class="text-secondary text-xs opacity-75 mb-2" style="font-size: 11px;">JPG, PNG, WebP up to 5MB</div>
+                                                                <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 rounded-pill text-xs pointer-events-none">
+                                                                    <i class="bi bi-folder2-open me-1"></i> Upload Image
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Uploaded Preview Box (Active Custom Image) -->
+                                                        <div class="course-upload-preview p-2.5 bg-white border rounded-3 d-none align-items-center justify-content-between" id="courseImagePreviewBox">
+                                                            <div class="d-flex align-items-center gap-2.5 min-w-0">
+                                                                <img src="" alt="Course Cover Preview" id="courseImagePreviewImg" class="rounded border object-fit-cover bg-light flex-shrink-0" style="width: 58px; height: 42px;">
+                                                                <div class="min-w-0 pe-2">
+                                                                    <div class="fw-bold text-dark text-xs text-truncate" id="courseImageFileName" style="max-width: 140px;">cover.jpg</div>
+                                                                    <div class="text-muted" style="font-size: 11px;" id="courseImageFileSize">Image loaded</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                                                                <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2.5 rounded-pill text-xs" id="replaceCourseImageBtn" aria-label="Change course image">
+                                                                    <i class="bi bi-arrow-repeat me-1"></i> Change
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2.5 rounded-pill text-xs" id="removeCourseImageBtn" aria-label="Remove custom image" title="Remove custom image">
+                                                                    <i class="bi bi-trash me-1"></i> Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="invalid-feedback d-block text-xs mt-1 d-none" id="courseImageFeedback"></div>
+                                                        <input type="hidden" id="courseImageUrl" value="">
                                                     </div>
                                                 </div>
-                                                <div class="invalid-feedback d-block text-xs mt-1 d-none" id="courseImageFeedback"></div>
-                                                <input type="hidden" id="courseImageUrl" value="assets/images/course_webdev.jpg">
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="p-2.5 bg-white rounded border d-flex align-items-center gap-2.5">
-                                                    <img src="../../assets/images/course_webdev.jpg" id="courseDefaultPreviewThumb" class="rounded border object-fit-cover" style="width: 54px; height: 40px;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
-                                                    <div>
-                                                        <div class="fw-semibold text-dark text-xs" id="courseDefaultThumbLabel">Default Academy Banner</div>
-                                                        <div class="text-muted" style="font-size: 11px;">Standard high-resolution course cover if no custom file is uploaded.</div>
+
+                                            <!-- 2. System Fallback Banner Card -->
+                                            <div class="col-md-5">
+                                                <div class="card h-100 border shadow-none bg-white" id="defaultBannerCard">
+                                                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                                        <div>
+                                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                                <span class="text-xs fw-bold text-uppercase text-secondary" style="letter-spacing: 0.5px;">Fallback Option</span>
+                                                                <span class="badge bg-light text-secondary border text-xs" id="fallbackCoverStatusBadge">Default</span>
+                                                            </div>
+
+                                                            <div class="d-flex align-items-start gap-2.5 mb-2.5">
+                                                                <img src="../../assets/images/course_webdev.jpg" id="courseDefaultPreviewThumb" alt="Default Academy Cover" class="rounded border object-fit-cover flex-shrink-0 bg-light" style="width: 52px; height: 38px;" onerror="this.src='https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=150'">
+                                                                <div class="min-w-0">
+                                                                    <div class="fw-semibold text-dark text-xs mb-0.5">Default Academy Cover</div>
+                                                                    <div class="text-muted" id="useDefaultCoverHelper" style="font-size: 11px; line-height: 1.35;">Used when no custom course cover is uploaded.</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="pt-2 border-top">
+                                                            <div class="form-check d-flex align-items-center gap-2 mb-0">
+                                                                <input class="form-check-input mt-0 cursor-pointer" type="checkbox" id="useDefaultCoverCheck" checked>
+                                                                <label class="form-check-label text-xs fw-semibold text-dark cursor-pointer user-select-none" for="useDefaultCoverCheck">
+                                                                    Use default Academy cover
+                                                                </label>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -392,14 +435,28 @@
         }
     }
 
-    // Image Upload & Preview Controls
-    function setCourseImagePreview(url, fileName = 'cover.jpg', fileSize = 'Custom image loaded') {
+    // Helper: Format file size into readable string
+    function formatFileSize(bytes) {
+        if (!bytes || isNaN(bytes)) return 'Custom image loaded';
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    // Set Custom Uploaded Image in Preview Mode
+    function setCustomImageState(url, fileName = 'cover.jpg', fileSize = 'Custom image loaded') {
+        currentCustomImage = url;
+        currentCustomImageFileName = fileName;
+        currentCustomImageFileSize = fileSize;
+
         const urlInput = document.getElementById('courseImageUrl');
         const previewBox = document.getElementById('courseImagePreviewBox');
         const previewImg = document.getElementById('courseImagePreviewImg');
         const nameEl = document.getElementById('courseImageFileName');
         const sizeEl = document.getElementById('courseImageFileSize');
         const dropzone = document.getElementById('courseImageDropzone');
+        const customBadge = document.getElementById('customCoverStatusBadge');
+        const feedback = document.getElementById('courseImageFeedback');
 
         if (urlInput) urlInput.value = url;
         if (previewImg) {
@@ -416,15 +473,30 @@
         if (dropzone) {
             dropzone.classList.add('d-none');
         }
+        if (customBadge) {
+            customBadge.textContent = 'Active';
+            customBadge.className = 'badge bg-primary-subtle text-primary border border-primary-subtle text-xs';
+        }
+        if (feedback) {
+            feedback.classList.add('d-none');
+            feedback.textContent = '';
+        }
     }
 
-    function resetCourseImage() {
+    // Clear Custom Uploaded Image (Returns to Empty Upload Dropzone)
+    function clearCustomImageState() {
+        currentCustomImage = null;
+        currentCustomImageFileName = '';
+        currentCustomImageFileSize = '';
+
         const urlInput = document.getElementById('courseImageUrl');
         const previewBox = document.getElementById('courseImagePreviewBox');
         const dropzone = document.getElementById('courseImageDropzone');
         const fileInput = document.getElementById('courseImageFile');
+        const customBadge = document.getElementById('customCoverStatusBadge');
+        const feedback = document.getElementById('courseImageFeedback');
 
-        if (urlInput) urlInput.value = DEFAULT_COURSE_THUMBNAIL;
+        if (urlInput) urlInput.value = '';
         if (fileInput) fileInput.value = '';
         if (previewBox) {
             previewBox.classList.add('d-none');
@@ -433,8 +505,54 @@
         if (dropzone) {
             dropzone.classList.remove('d-none');
         }
+        if (customBadge) {
+            customBadge.textContent = 'None uploaded';
+            customBadge.className = 'badge bg-light text-muted border text-xs';
+        }
+        if (feedback) {
+            feedback.classList.add('d-none');
+            feedback.textContent = '';
+        }
     }
 
+    // Update Default Cover Fallback Card UI
+    function updateDefaultCoverUI() {
+        const checkEl = document.getElementById('useDefaultCoverCheck');
+        const helperEl = document.getElementById('useDefaultCoverHelper');
+        const fallbackBadge = document.getElementById('fallbackCoverStatusBadge');
+        const isChecked = checkEl ? checkEl.checked : true;
+
+        if (fallbackBadge) {
+            if (isChecked) {
+                fallbackBadge.textContent = 'Default';
+                fallbackBadge.className = 'badge bg-light text-secondary border text-xs';
+            } else {
+                fallbackBadge.textContent = 'Disabled';
+                fallbackBadge.className = 'badge bg-light text-muted border text-xs';
+            }
+        }
+        if (helperEl) {
+            if (isChecked) {
+                helperEl.textContent = 'Used when no custom course cover is uploaded.';
+            } else {
+                helperEl.textContent = 'No fallback cover. Course will have no cover image if no custom image is uploaded.';
+            }
+        }
+    }
+
+    // Compute final effective course cover URL for payload
+    function getEffectiveCourseCover() {
+        if (currentCustomImage) {
+            return currentCustomImage;
+        }
+        const useDefault = document.getElementById('useDefaultCoverCheck')?.checked;
+        if (useDefault) {
+            return DEFAULT_COURSE_THUMBNAIL;
+        }
+        return '';
+    }
+
+    // Handle File Upload (JPG, PNG, WebP up to 5MB)
     function handleCourseImageFile(file) {
         const feedback = document.getElementById('courseImageFeedback');
         if (feedback) {
@@ -469,8 +587,12 @@
 
         const reader = new FileReader();
         reader.onload = function (e) {
-            const sizeStr = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            setCourseImagePreview(e.target.result, file.name, sizeStr);
+            const sizeStr = formatFileSize(file.size);
+            setCustomImageState(e.target.result, file.name, sizeStr);
+            showCourseToast('success', 'Image Uploaded', `Custom cover "${file.name}" loaded successfully.`);
+        };
+        reader.onerror = function () {
+            showCourseToast('error', 'File Read Error', 'Failed to read the selected image file.');
         };
         reader.readAsDataURL(file);
     }
@@ -615,7 +737,7 @@
         const price = parseFloat(document.getElementById('coursePrice')?.value) || 0;
         const fullDesc = document.getElementById('courseFullDesc')?.value.trim() || '';
         const isFeatured = document.getElementById('courseFeaturedToggle')?.checked ? 1 : 0;
-        const imageUrl = document.getElementById('courseImageUrl')?.value.trim() || DEFAULT_COURSE_THUMBNAIL;
+        const imageUrl = getEffectiveCourseCover();
         const statusVal = document.getElementById('courseStatus')?.value || (isPublished ? 'Published' : 'Draft');
 
         const payload = {
@@ -655,7 +777,7 @@
             price,
             descriptionLength: fullDesc.length,
             isFeatured,
-            hasImage: Boolean(imageUrl && imageUrl !== DEFAULT_COURSE_THUMBNAIL),
+            hasImage: Boolean(imageUrl),
             isPublished
         });
         console.log('[COURSE_CREATE] Validation: PASS');
@@ -847,7 +969,15 @@
 
         if (removeBtn) {
             removeBtn.addEventListener('click', function () {
-                resetCourseImage();
+                clearCustomImageState();
+                showCourseToast('info', 'Image Removed', 'Custom cover image removed.');
+            });
+        }
+
+        const defaultCheck = document.getElementById('useDefaultCoverCheck');
+        if (defaultCheck) {
+            defaultCheck.addEventListener('change', function () {
+                updateDefaultCoverUI();
             });
         }
 
@@ -947,7 +1077,10 @@
             featLabel.className = 'form-check-label text-xs fw-bold text-muted';
         }
 
-        resetCourseImage();
+        clearCustomImageState();
+        const createDefaultCheck = document.getElementById('useDefaultCoverCheck');
+        if (createDefaultCheck) createDefaultCheck.checked = true;
+        updateDefaultCoverUI();
         clearCourseValidation();
 
         courseLearningObjectives = [];
@@ -1023,13 +1156,36 @@
             featLabel.className = `form-check-label text-xs fw-bold ${isFeat ? 'text-primary' : 'text-muted'}`;
         }
 
-        // Image Preview
-        if (course.thumbnail_url) {
-            const fileName = course.thumbnail_url.split('/').pop() || 'cover.jpg';
-            setCourseImagePreview(course.thumbnail_url, fileName, 'Saved cover image');
+        // Image & Fallback Configuration
+        clearCustomImageState();
+        const editDefaultCheck = document.getElementById('useDefaultCoverCheck');
+        const rawThumb = course.thumbnail_url ? String(course.thumbnail_url).trim() : '';
+
+        const isDefaultImage = !rawThumb || 
+                               rawThumb === DEFAULT_COURSE_THUMBNAIL || 
+                               rawThumb === '../../' + DEFAULT_COURSE_THUMBNAIL ||
+                               rawThumb.endsWith('course_webdev.jpg');
+
+        if (rawThumb && !isDefaultImage) {
+            // Custom uploaded image exists
+            const fileName = rawThumb.startsWith('data:') 
+                ? 'custom-cover.png' 
+                : (rawThumb.split('/').pop() || 'custom-cover.jpg');
+            const fileSize = rawThumb.startsWith('data:') 
+                ? 'Custom uploaded image' 
+                : 'Saved cover image';
+            setCustomImageState(rawThumb, fileName, fileSize);
+            if (editDefaultCheck) editDefaultCheck.checked = true;
+        } else if (rawThumb && isDefaultImage) {
+            // Course uses system default banner
+            clearCustomImageState();
+            if (editDefaultCheck) editDefaultCheck.checked = true;
         } else {
-            resetCourseImage();
+            // Course has no image
+            clearCustomImageState();
+            if (editDefaultCheck) editDefaultCheck.checked = false;
         }
+        updateDefaultCoverUI();
 
         // Objectives
         if (course.learning_outcomes) {

@@ -129,7 +129,33 @@
         }
 
         // Listen to shared course saved event across admin pages
-        window.addEventListener('course:saved', function () {
+        window.addEventListener('course:saved', function (e) {
+            if (e && e.detail && e.detail.course) {
+                const newCourse = e.detail.course;
+                // If filters are active, clear search and category filters so the new course is visible
+                const searchInput = document.getElementById('courseSearchInput');
+                if (searchInput) searchInput.value = '';
+                const catFilter = document.getElementById('courseCategoryFilter');
+                if (catFilter) catFilter.value = 'all';
+                const diffFilter = document.getElementById('courseDifficultyFilter');
+                if (diffFilter) diffFilter.value = 'all';
+
+                // Ensure tab matches course status
+                if (newCourse.is_archived === 1) {
+                    currentStatusTab = 'Archived';
+                } else if (newCourse.is_published === 1) {
+                    if (currentStatusTab !== 'all' && currentStatusTab !== 'Published') {
+                        currentStatusTab = 'Published';
+                    }
+                } else {
+                    if (currentStatusTab !== 'all' && currentStatusTab !== 'Draft') {
+                        currentStatusTab = 'Draft';
+                    }
+                }
+                document.querySelectorAll('.course-segment-tab').forEach(t => {
+                    t.classList.toggle('active', t.getAttribute('data-status-filter') === currentStatusTab);
+                });
+            }
             loadStoreData();
         });
 
@@ -226,7 +252,7 @@
         };
     }
 
-    function loadStoreData() {
+    async function loadStoreData() {
         const store = getStore();
         allCourses = store.getCourses() || [];
         allCategories = store.getCategories() || [];
@@ -235,6 +261,20 @@
         populateFilterDropdowns();
         updateKpiCounters();
         filterAndRenderCourses();
+
+        // Background sync if academicService is present and online
+        if (window.academicService && typeof window.academicService.getCourses === 'function') {
+            try {
+                const apiCourses = await window.academicService.getCourses();
+                if (Array.isArray(apiCourses) && apiCourses.length > 0) {
+                    allCourses = store.getCourses() || apiCourses;
+                    allCategories = store.getCategories() || [];
+                    allInstructors = store.getInstructors() || [];
+                    updateKpiCounters();
+                    filterAndRenderCourses();
+                }
+            } catch (err) {}
+        }
     }
 
     function populateFilterDropdowns() {
@@ -413,6 +453,25 @@
             const durationText = c.duration || '12 Weeks';
             const ratingText = c.rating || 4.9;
 
+            let catName = c.category_name;
+            if (!catName && c.category_id && allCategories.length > 0) {
+                const foundCat = allCategories.find(k => Number(k.id) === Number(c.category_id));
+                if (foundCat) catName = foundCat.name;
+            }
+            catName = catName || 'Software Engineering';
+
+            let insName = c.instructor_name;
+            let insAvatar = c.instructor_avatar;
+            if ((!insName || !insAvatar) && c.instructor_id && allInstructors.length > 0) {
+                const foundIns = allInstructors.find(i => Number(i.id) === Number(c.instructor_id));
+                if (foundIns) {
+                    if (!insName) insName = foundIns.name;
+                    if (!insAvatar) insAvatar = foundIns.avatar_url;
+                }
+            }
+            insName = insName || 'Faculty Lead';
+            insAvatar = insAvatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100';
+
             return `
                 <tr>
                     <td>
@@ -434,15 +493,15 @@
                         </div>
                     </td>
                     <td>
-                        <span class="adm-badge-blue">${escapeHtml(c.category_name || 'Software Engineering')}</span>
+                        <span class="adm-badge-blue">${escapeHtml(catName)}</span>
                     </td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
-                            <img src="${escapeHtml(c.instructor_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100')}"
-                                 class="course-instructor-avatar" alt="${escapeHtml(c.instructor_name || 'Instructor')}"
+                            <img src="${escapeHtml(insAvatar)}"
+                                 class="course-instructor-avatar" alt="${escapeHtml(insName)}"
                                  onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100'">
                             <div>
-                                <span class="fw-semibold text-dark d-block" style="font-size:13px;line-height:1.2;">${escapeHtml(c.instructor_name || 'Faculty Lead')}</span>
+                                <span class="fw-semibold text-dark d-block" style="font-size:13px;line-height:1.2;">${escapeHtml(insName)}</span>
                                 <span class="instructor-title-sub">Faculty Lead</span>
                             </div>
                         </div>
@@ -529,7 +588,7 @@
     // ============================================================
     // 3. CREATE & EDIT COURSE (DELEGATED TO SHARED COMPONENT)
     // ============================================================
-    function openCreateCourseModal() {
+    function triggerCreateCourseModal() {
         if (typeof window.openCreateCourseModal === 'function') {
             window.openCreateCourseModal();
         }
@@ -1413,5 +1472,7 @@
 
     // Export global handlers for inline triggers
     window.loadCoursesList = loadStoreData;
-    window.openCreateCourseModal = openCreateCourseModal;
+    window.loadStoreData = loadStoreData;
+    window.loadCourses = loadStoreData;
+    window.applyCourseFilters = filterAndRenderCourses;
 })();

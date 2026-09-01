@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { dbAsync } = require('../db/database');
+const { verifyTeacherCourseAccess } = require('./quizExamController');
 
 // ==========================================
 // 1. DASHBOARD METRICS & STATS (Calculated dynamically)
@@ -307,6 +308,31 @@ exports.getAllCourses = async (req, res) => {
         res.json({ success: true, data: courses });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to fetch courses." });
+    }
+};
+
+exports.getCourseDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const course = await dbAsync.get(`
+            SELECT c.*, cat.name as category_name, inst.name as instructor_name, inst.avatar_url as instructor_avatar
+            FROM courses c
+            LEFT JOIN categories cat ON c.category_id = cat.id
+            LEFT JOIN instructors inst ON c.instructor_id = inst.id
+            WHERE c.id = ?
+        `, [id]);
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+        // Attach modules and embedded lessons
+        const modules = await dbAsync.all(`SELECT * FROM modules WHERE course_id = ? ORDER BY order_num ASC, id ASC`, [id]);
+        for (const mod of modules) {
+            mod.lessons = await dbAsync.all(`SELECT * FROM lessons WHERE module_id = ? ORDER BY order_num ASC, id ASC`, [mod.id]);
+        }
+        course.modules = modules;
+
+        res.json({ success: true, data: course });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to fetch course details.' });
     }
 };
 

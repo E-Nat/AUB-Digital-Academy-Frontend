@@ -205,6 +205,10 @@
                 try {
                     const res = await this.client.get('/admin/courses');
                     if (res && res.success && Array.isArray(res.data)) {
+                        // Synchronize real database data into local store
+                        if (global.AdminStore && typeof global.AdminStore.saveCourses === 'function') {
+                            try { global.AdminStore.saveCourses(res.data); } catch (e) {}
+                        }
                         return res.data;
                     }
                 } catch (err) {

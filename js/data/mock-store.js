@@ -1217,6 +1217,13 @@
             }
         }
 
+        saveCourses(courses) {
+            if (Array.isArray(courses)) {
+                this.state.courses = [...courses];
+                this.saveState();
+            }
+        }
+
         createProgram(programData) {
             if (!programData || typeof programData !== 'object') {
                 throw new Error('Invalid program data.');
@@ -1662,12 +1669,17 @@
                 is_archived: 0,
                 order_num: Number(courseData.order_num) || 1,
                 description: desc,
-                thumbnail_url: courseData.thumbnail_url || 'assets/images/course_webdev.jpg',
+                thumbnail_url: courseData.thumbnail_url !== undefined ? courseData.thumbnail_url : 'assets/images/course_webdev.jpg',
                 is_published: isPub,
                 status: statusVal
             };
 
-            this.state.courses.unshift(newCourse);
+            const existingIdx = this.state.courses.findIndex(c => Number(c.id) === Number(nextId));
+            if (existingIdx !== -1) {
+                this.state.courses[existingIdx] = newCourse;
+            } else {
+                this.state.courses.unshift(newCourse);
+            }
 
             // If modules array was passed
             if (Array.isArray(courseData.modules) && courseData.modules.length > 0) {

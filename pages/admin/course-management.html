@@ -200,7 +200,7 @@
                             Create your first academic course to start building your AUB Digital Academy catalog.
                         </p>
                         <div>
-                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="emptyAddCourseBtn" onclick="openCreateCourseModal()" type="button">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="emptyAddCourseBtn" onclick="if(typeof window.openCreateCourseModal==='function')window.openCreateCourseModal()" type="button">
                                 <i class="bi bi-plus-lg"></i> Add New Course
                             </button>
                             <button class="adm-btn adm-btn-outline adm-btn-sm" id="emptyClearBtn" type="button" style="display:none;">
@@ -513,9 +513,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Shared Course Modal Container -->
-    <div id="sharedCourseModalContainer"></div>
 
     <!-- Toast Notifications Container -->
     <div id="admToastContainer" class="adm-toast-container"></div>
