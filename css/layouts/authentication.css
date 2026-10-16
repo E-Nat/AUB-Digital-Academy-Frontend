@@ -465,66 +465,6 @@
     transform: translateY(0);
 }
 
-/* Quick Demo Accounts Drawer */
-.auth-demo-box {
-    margin-top: 24px;
-    padding: 14px;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-}
-
-.auth-demo-header {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #64748B;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.auth-demo-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-
-.auth-demo-btn {
-    padding: 8px 6px;
-    background: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: #334155;
-    text-align: center;
-    transition: all 0.15s ease;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.auth-demo-btn:hover {
-    border-color: #2563EB;
-    background: #EFF6FF;
-    color: #2563EB;
-    transform: translateY(-1px);
-}
-
-.auth-demo-btn i {
-    font-size: 1rem;
-    margin-bottom: 1px;
-}
-
-.auth-demo-btn.admin i { color: #F59E0B; }
-.auth-demo-btn.teacher i { color: #06B6D4; }
-.auth-demo-btn.student i { color: #2563EB; }
-
 /* Security Footer */
 .auth-security-footer {
     margin-top: 28px;

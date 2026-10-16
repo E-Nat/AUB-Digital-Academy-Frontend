@@ -54,31 +54,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 3. Google SSO Simulation
+    // 3. Google SSO
     const googleSsoBtn = document.getElementById('googleSsoBtn');
     if (googleSsoBtn) {
         googleSsoBtn.addEventListener('click', function () {
-            // Immediately fill student credentials and authenticate directly
-            fillCredentials('sreyneang@aub.edu.kh', 'student123', true);
+            showError('University Google SSO is not configured for this environment. Please sign in with your credentials.');
         });
     }
-
-    // 4. Quick Demo Account Autofill
-    window.fillCredentials = function (loginId, password, autoSubmit = true) {
-        const idInput = document.getElementById('loginId');
-        const passInput = document.getElementById('password');
-        if (idInput) idInput.value = loginId;
-        if (passInput) passInput.value = password;
-
-        hideError();
-
-        if (autoSubmit) {
-            const form = document.getElementById('loginForm');
-            if (form) {
-                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-            }
-        }
-    };
 
     // 5. Fallback Demo Accounts Store
     const fallbackAccounts = [
